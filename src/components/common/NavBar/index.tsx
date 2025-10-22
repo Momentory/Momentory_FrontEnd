@@ -8,7 +8,7 @@ import Community from '../../../assets/icons/nav-community.svg?react';
 const Navbar = () => {
 
   return (
-    <nav className="fixed bottom-0 w-full max-w-[480px] flex justify-between px-10 pt-5 z-100 bg-white shadow-[0px_-4px_4px_0px_rgba(0,0,0,0.15)] pb-13">
+    <nav className="fixed bottom-0 w-full max-w-[480px] flex justify-between px-10 py-5 z-100 bg-white shadow-[0px_-4px_4px_0px_rgba(0,0,0,0.15)]">
       <Navlink to="/" Icon={Home} alt="홈" />
       <Navlink to="/upload" Icon={Upload} alt="사진 업로드" />
       <Navlink to="/character" Icon={Character} alt="캐릭터 성장" />
