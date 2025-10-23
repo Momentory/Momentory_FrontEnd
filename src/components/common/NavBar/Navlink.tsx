@@ -12,7 +12,7 @@ const Navlink = ({ to, Icon }: NavLinkProps) => {
     <RR_NavLink to={to} className="flex flex-col items-center w-8 relative">
       <div className="relative">
         <Icon
-          className="w-8 h-8"
+          className="w-6 h-6"
         />
       </div>
     </RR_NavLink>
