@@ -54,7 +54,7 @@ const DropdownHeader = ({
             }`}
             onClick={hasDropdown ? toggleDropdown : undefined}
           >
-            <span className="text-base font-extrabold text-[#444444]">
+            <span className="text-xl font-extrabold text-[#444444]">
               {selectedTitle}
             </span>
             {hasDropdown && (
