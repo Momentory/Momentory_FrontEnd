@@ -8,15 +8,15 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 // 페이지 import
 import SplashPage from "./pages/Auth/SplashPage";
 import LoginScreen from "./pages/Auth/LoginScreen"
+import LoginPage from "./pages/Auth/LoginPage";
 import SigninScreen from "./pages/Auth/SigninScreen";
-import CreateAccountPage from "./pages/Auth/CreateAccountPage";
 
 const router = createBrowserRouter([
   
   { path: "/", element: <SplashPage /> },
   { path: "/login", element: <LoginScreen /> },
+  { path: "/login", element: <LoginPage /> },
   { path: "/signinscreen", element: <SigninScreen /> },
-  { path: "/signup", element: <CreateAccountPage /> },
 ]);
 
 const queryClient = new QueryClient();

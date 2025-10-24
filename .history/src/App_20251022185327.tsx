@@ -9,14 +9,14 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import SplashPage from "./pages/Auth/SplashPage";
 import LoginScreen from "./pages/Auth/LoginScreen"
 import SigninScreen from "./pages/Auth/SigninScreen";
-import CreateAccountPage from "./pages/Auth/CreateAccountPage";
+import CreateAccountPage from "./pages/CreateAccountPage";
 
 const router = createBrowserRouter([
   
   { path: "/", element: <SplashPage /> },
   { path: "/login", element: <LoginScreen /> },
   { path: "/signinscreen", element: <SigninScreen /> },
-  { path: "/signup", element: <CreateAccountPage /> },
+  { path: "/signup", element: <SCreateAccountPage /> },
 ]);
 
 const queryClient = new QueryClient();
