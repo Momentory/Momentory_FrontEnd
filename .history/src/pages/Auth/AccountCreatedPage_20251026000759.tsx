@@ -15,7 +15,13 @@ export default function AccountCreatedPage() {
 
       {/*  메시지 영역 */}
       <div className="flex flex-col items-center text-center mt-[-150px]">
-       
+        {/*  아이콘 or 이미지 */}
+        <img
+          src="/images/checkmark.png" // 예: 체크 표시 아이콘 (선택사항)
+          alt="가입 완료"
+          className="w-[100px] h-[100px] mb-6"
+        />
+
         <h1 className="text-[26px] font-bold text-[#FF7070] mb-2">
           계정이 생성되었습니다!
         </h1>

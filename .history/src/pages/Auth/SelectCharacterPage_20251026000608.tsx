@@ -18,7 +18,7 @@ export default function SelectCharacterPage() {
       return;
     }
     alert(`${characters.find((c) => c.id === selected)?.name} 캐릭터가 선택되었습니다!`);
-    navigate("/account"); // 회원가입 완료 페이지로 이동 
+    navigate("/account-created"); // 회원가입 완료 페이지로 이동 (원하는 경로로 변경 가능)
   };
 
   return (

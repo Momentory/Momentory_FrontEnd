@@ -71,7 +71,7 @@ export default function LoginPage() {
               loading ? "bg-gray-400" : "bg-[#FF7070]"
             } transition active:scale-95`}
           >
-            {loading ? "로그인중..." : "로그인"}
+            {loading ? "Signing in..." : "Sign in"}
           </button>
         </form>
 

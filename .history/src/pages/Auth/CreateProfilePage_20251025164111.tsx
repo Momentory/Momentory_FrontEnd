@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { checkNickname } from "../../api/auth";
+import { checkNickname } from "../../api/auth"; // ✅ 추가
 
 export default function CreateProfilePage() {
   const navigate = useNavigate();
@@ -11,7 +11,7 @@ export default function CreateProfilePage() {
   const [checkingNickname, setCheckingNickname] = useState(false);
   const maxIntroLength = 100;
 
-  // 닉네임 변경 시 자동 중복확인 (디바운스 0.5초)
+  // ✅ 닉네임 변경 시 자동 중복확인
   useEffect(() => {
     if (!nickname.trim()) {
       setNicknameAvailable(null);
@@ -29,12 +29,12 @@ export default function CreateProfilePage() {
       } finally {
         setCheckingNickname(false);
       }
-    }, 500);
+    }, 500); // 입력 후 0.5초 뒤에 검사 실행 (디바운스)
 
     return () => clearTimeout(timeout);
   }, [nickname]);
 
-  // 회원가입(프로필 저장) 클릭 시
+  // ✅ 회원가입(프로필 저장) 클릭 시
   const handleSubmit = () => {
     if (!nickname.trim()) return alert("닉네임을 입력해주세요.");
     if (nicknameAvailable === false)
@@ -42,7 +42,7 @@ export default function CreateProfilePage() {
     if (nicknameAvailable === null)
       return alert("닉네임 중복 확인 중입니다. 잠시만 기다려주세요.");
 
-    alert("프로필이 저장되었습니다!");
+    // 닉네임 사용 가능 시 다음 단계로 이동
     navigate("/select");
   };
 
@@ -97,16 +97,16 @@ export default function CreateProfilePage() {
           />
         </div>
 
-        {/* 닉네임 중복 상태 메시지 */}
+        {/* ✅ 닉네임 중복 상태 메시지 */}
         {checkingNickname ? (
           <p className="text-gray-400 text-[13px] mt-1">확인 중...</p>
         ) : nicknameAvailable === true ? (
           <p className="text-green-500 text-[13px] mt-1">
-            사용 가능한 닉네임입니다 
+            사용 가능한 닉네임입니다 ✅
           </p>
         ) : nicknameAvailable === false ? (
           <p className="text-red-500 text-[13px] mt-1">
-            이미 사용 중인 닉네임입니다 
+            이미 사용 중인 닉네임입니다 ❌
           </p>
         ) : null}
       </div>
@@ -118,9 +118,7 @@ export default function CreateProfilePage() {
           <textarea
             placeholder="자기 소개를 써주세요."
             value={introduction}
-            onChange={(e) =>
-              setIntroduction(e.target.value.slice(0, maxIntroLength))
-            }
+            onChange={(e) => setIntroduction(e.target.value.slice(0, maxIntroLength))}
             className="w-full h-[90px] rounded-[10px] border border-gray-300 px-10 py-2 text-[15px] placeholder-gray-400 resize-none"
           />
           <img
@@ -140,7 +138,7 @@ export default function CreateProfilePage() {
         <div className="relative">
           <input
             type="text"
-            placeholder="예: https://instagram.com/..."
+            placeholder="외부 링크"
             value={link}
             onChange={(e) => setLink(e.target.value)}
             className="w-full h-[50px] rounded-[10px] border border-gray-300 px-10 text-[15px] placeholder-gray-400"
@@ -163,16 +161,7 @@ export default function CreateProfilePage() {
             : "bg-gray-300 cursor-not-allowed"
         }`}
       >
-        회원가입 완료
-      </button>
-
-      {/* 임시 이동 버튼 */}
-      <button
-        type="button"
-        onClick={() => navigate("/select")}
-        className="w-[329px] h-[60px] bg-[#FF7070] text-white text-[18px] font-semibold rounded-[20px] mt-4 active:scale-95 transition"
-      >
-        (임시) 다음으로 →
+        회원가입
       </button>
     </div>
   );

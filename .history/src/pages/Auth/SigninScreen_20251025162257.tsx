@@ -45,19 +45,19 @@ export default function LoginPage() {
 
       {/* 로그인 박스 */}
       <div className="w-[330px] border border-gray-300 rounded-[10px] p-6 text-center">
-        <h1 className="text-[28px] font-bold text-black mb-6">로그인</h1>
+        <h1 className="text-[28px] font-bold text-black mb-6">Sign in</h1>
 
         <form onSubmit={handleSubmit} className="flex flex-col space-y-4">
           <input
             type="email"
-            placeholder="abc@naver.com"
+            placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             className="w-full h-[50px] rounded-[12px] border border-gray-300 px-4 text-[15px] placeholder-gray-400"
           />
           <input
             type="password"
-            placeholder="비밀번호"
+            placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className="w-full h-[50px] rounded-[12px] border border-gray-300 px-4 text-[15px] placeholder-gray-400"
@@ -71,7 +71,7 @@ export default function LoginPage() {
               loading ? "bg-gray-400" : "bg-[#FF7070]"
             } transition active:scale-95`}
           >
-            {loading ? "로그인중..." : "로그인"}
+            {loading ? "Signing in..." : "Sign in"}
           </button>
         </form>
 

@@ -5,7 +5,7 @@ export default function AccountCreatedPage() {
 
   return (
     <div className="relative flex flex-col items-center justify-center h-screen bg-white px-[30px]">
-      {/*  뒤로가기 버튼 */}
+      {/* 🔙 뒤로가기 버튼 */}
       <img
         src="/images/109618.png"
         alt="뒤로가기"
@@ -13,25 +13,31 @@ export default function AccountCreatedPage() {
         onClick={() => navigate(-1)}
       />
 
-      {/*  메시지 영역 */}
+      {/* 🧡 메시지 영역 */}
       <div className="flex flex-col items-center text-center mt-[-150px]">
-       
+        {/* 🎉 아이콘 or 이미지 */}
+        <img
+          src="/images/checkmark.png" // ✅ 예: 체크 표시 아이콘 (선택사항)
+          alt="가입 완료"
+          className="w-[100px] h-[100px] mb-6"
+        />
+
         <h1 className="text-[26px] font-bold text-[#FF7070] mb-2">
           계정이 생성되었습니다!
         </h1>
         <p className="text-gray-500 text-[15px] mb-10">
-          Momentory에 오신 걸 진심으로 환영합니다 
+          Momentory에 오신 걸 진심으로 환영합니다 🌷
         </p>
 
-        {/* 홈 이동 버튼 */}
+        {/* ✅ 홈 이동 버튼 */}
         <button
-          onClick={() => navigate("/home")} // 나중에 홈 페이지 경로로 변경
+          onClick={() => navigate("/home")} // 🔹 나중에 홈 페이지 경로로 변경
           className="w-[320px] h-[60px] bg-[#FF7070] text-white text-[18px] font-semibold rounded-[25px] active:scale-95 transition"
         >
           Momentory 시작하기
         </button>
 
-        {/* (임시) 로그인으로 이동 버튼 */}
+        {/* ⚙️ (임시) 로그인으로 이동 버튼 */}
         <button
           onClick={() => navigate("/login")}
           className="w-[320px] h-[60px] border border-gray-300 text-gray-600 text-[16px] font-medium rounded-[25px] mt-4 active:scale-95 transition"

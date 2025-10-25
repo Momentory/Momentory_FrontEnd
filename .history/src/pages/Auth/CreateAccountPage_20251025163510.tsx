@@ -5,6 +5,7 @@ import {
   sendEmail,
   checkEmailVerified,
   signup,
+  checkNickname,
 } from "../../api/auth";
 
 export default function CreateAccountPage() {
@@ -19,55 +20,14 @@ export default function CreateAccountPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
-  const [passwordMessage, setPasswordMessage] = useState("");
-  const [confirmMessage, setConfirmMessage] = useState("");
-  const [isPasswordValid, setIsPasswordValid] = useState(false);
-  const [isPasswordMatch, setIsPasswordMatch] = useState(false);
-
   const [agree, setAgree] = useState(false);
+
   const [emailSent, setEmailSent] = useState(false);
   const [emailVerified, setEmailVerified] = useState(false);
-
-  // 비밀번호 유효성 검사
-  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setPassword(value);
-
-    // 규칙: 8자 이상 + 영문 + 숫자 포함
-    const regex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d!@#$%^&*()_+]{8,}$/;
-    if (!regex.test(value)) {
-      setIsPasswordValid(false);
-      setPasswordMessage("8자 이상, 영문과 숫자를 모두 포함해야 합니다.");
-    } else {
-      setIsPasswordValid(true);
-      setPasswordMessage("사용 가능한 비밀번호입니다.");
-    }
-
-    // 동시에 일치 여부도 갱신
-    if (passwordConfirm) {
-      if (value === passwordConfirm) {
-        setIsPasswordMatch(true);
-        setConfirmMessage("비밀번호가 일치합니다.");
-      } else {
-        setIsPasswordMatch(false);
-        setConfirmMessage("비밀번호가 일치하지 않습니다.");
-      }
-    }
-  };
-
-  // 비밀번호 확인 입력
-  const handlePasswordConfirm = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setPasswordConfirm(value);
-
-    if (password === value) {
-      setIsPasswordMatch(true);
-      setConfirmMessage("비밀번호가 일치합니다.");
-    } else {
-      setIsPasswordMatch(false);
-      setConfirmMessage("비밀번호가 일치하지 않습니다.");
-    }
-  };
+  const [nicknameAvailable, setNicknameAvailable] = useState<
+    boolean | null
+  >(null);
+  const [checkingNickname, setCheckingNickname] = useState(false);
 
   // 이메일 인증 요청
   const handleEmailClick = async () => {
@@ -100,10 +60,9 @@ export default function CreateAccountPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (!nicknameAvailable) return alert("닉네임 중복 확인이 필요합니다.");
     if (!agree) return alert("약관에 동의해야 가입할 수 있습니다.");
-    if (!isPasswordValid)
-      return alert("비밀번호 형식이 올바르지 않습니다.");
-    if (!isPasswordMatch)
+    if (password !== passwordConfirm)
       return alert("비밀번호가 일치하지 않습니다.");
     if (!emailVerified) return alert("이메일 인증을 완료해주세요.");
 
@@ -125,6 +84,28 @@ export default function CreateAccountPage() {
 
   return (
     <div className="flex flex-col items-center justify-start min-h-screen bg-white px-[28px] pt-[120px]">
+       <div className="w-full mb-4">
+        <label className="text-[15px] font-semibold mb-1 block">닉네임</label>
+        <input
+          type="text"
+          placeholder="닉네임을 입력하세요"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          className="w-full h-[50px] rounded-[10px] border border-gray-300 px-4 text-[15px] placeholder-gray-400"
+        />
+        {checkingNickname ? (
+          <p className="text-gray-400 text-[13px] mt-1">확인 중...</p>
+        ) : nicknameAvailable === true ? (
+          <p className="text-green-500 text-[13px] mt-1">
+            사용 가능한 닉네임입니다 
+          </p>
+        ) : nicknameAvailable === false ? (
+          <p className="text-red-500 text-[13px] mt-1">
+            이미 사용 중인 닉네임입니다 
+          </p>
+        ) : null}
+      </div>
+
       {/* 뒤로가기 */}
       <div className="relative w-full mb-8">
         <img
@@ -133,7 +114,7 @@ export default function CreateAccountPage() {
           className="absolute top-[-80px] left-[2px] w-[35px] h-[35px] cursor-pointer"
           onClick={() => navigate(-1)}
         />
-        <h1 className="text-[24px] font-semibold text-black ml-10">
+        <h1 className="text-[24px] font-semibold text-black mb-2">
           회원가입
         </h1>
       </div>
@@ -242,40 +223,16 @@ export default function CreateAccountPage() {
             type="password"
             placeholder="비밀번호"
             value={password}
-            onChange={handlePasswordChange}
-            className="w-full h-[50px] rounded-[10px] border border-gray-300 px-4 text-[15px] placeholder-gray-400 mb-1"
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full h-[50px] rounded-[10px] border border-gray-300 px-4 text-[15px] placeholder-gray-400 mb-2"
           />
-
-          {/* 유효성 메시지 */}
-          {password && (
-            <p
-              className={`text-[13px] mt-1 ${
-                isPasswordValid ? "text-green-500" : "text-red-500"
-              }`}
-            >
-              {passwordMessage}
-            </p>
-          )}
-
-          {/* 비밀번호 확인 */}
           <input
             type="password"
             placeholder="비밀번호 확인"
             value={passwordConfirm}
-            onChange={handlePasswordConfirm}
-            className="w-full h-[50px] rounded-[10px] border border-gray-300 px-4 text-[15px] placeholder-gray-400 mt-2"
+            onChange={(e) => setPasswordConfirm(e.target.value)}
+            className="w-full h-[50px] rounded-[10px] border border-gray-300 px-4 text-[15px] placeholder-gray-400"
           />
-
-          {/* 일치 여부 메시지 */}
-          {passwordConfirm && (
-            <p
-              className={`text-[13px] mt-1 ${
-                isPasswordMatch ? "text-green-500" : "text-red-500"
-              }`}
-            >
-              {confirmMessage}
-            </p>
-          )}
         </div>
 
         {/* 약관 동의 */}
@@ -304,15 +261,6 @@ export default function CreateAccountPage() {
           }`}
         >
           다음
-        </button>
-
-        {/* 임시 이동 버튼 (테스트용) */}
-        <button
-          type="button"
-          onClick={() => navigate("/create-profile")}
-          className="w-[332px] h-[70px] bg-[#FF7070] text-white rounded-[25px] font-semibold text-[18px]"
-        >
-          (임시) 다음으로
         </button>
       </form>
     </div>

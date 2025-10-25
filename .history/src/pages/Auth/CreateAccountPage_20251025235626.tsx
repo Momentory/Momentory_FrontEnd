@@ -5,6 +5,7 @@ import {
   sendEmail,
   checkEmailVerified,
   signup,
+  // validatePassword,  // ⚠️ 백엔드 연동 시 이걸 활성화
 } from "../../api/auth";
 
 export default function CreateAccountPage() {
@@ -20,21 +21,20 @@ export default function CreateAccountPage() {
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
   const [passwordMessage, setPasswordMessage] = useState("");
-  const [confirmMessage, setConfirmMessage] = useState("");
   const [isPasswordValid, setIsPasswordValid] = useState(false);
-  const [isPasswordMatch, setIsPasswordMatch] = useState(false);
 
   const [agree, setAgree] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
   const [emailVerified, setEmailVerified] = useState(false);
 
-  // 비밀번호 유효성 검사
+  // ✅ 비밀번호 유효성 검사 함수
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setPassword(value);
 
-    // 규칙: 8자 이상 + 영문 + 숫자 포함
+    // --- 로컬 규칙 검사 (8자 이상, 영문+숫자 조합) ---
     const regex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d!@#$%^&*()_+]{8,}$/;
+
     if (!regex.test(value)) {
       setIsPasswordValid(false);
       setPasswordMessage("8자 이상, 영문과 숫자를 모두 포함해야 합니다.");
@@ -43,30 +43,17 @@ export default function CreateAccountPage() {
       setPasswordMessage("사용 가능한 비밀번호입니다.");
     }
 
-    // 동시에 일치 여부도 갱신
-    if (passwordConfirm) {
-      if (value === passwordConfirm) {
-        setIsPasswordMatch(true);
-        setConfirmMessage("비밀번호가 일치합니다.");
-      } else {
-        setIsPasswordMatch(false);
-        setConfirmMessage("비밀번호가 일치하지 않습니다.");
-      }
+    // 백엔드 validatePassword API를 쓰려면 아래 주석 해제
+    /*
+    try {
+      const { valid, message } = await validatePassword(value);
+      setIsPasswordValid(valid);
+      setPasswordMessage(message || "사용 가능한 비밀번호입니다.");
+    } catch {
+      setIsPasswordValid(true);
+      setPasswordMessage("사용 가능한 비밀번호입니다.");
     }
-  };
-
-  // 비밀번호 확인 입력
-  const handlePasswordConfirm = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setPasswordConfirm(value);
-
-    if (password === value) {
-      setIsPasswordMatch(true);
-      setConfirmMessage("비밀번호가 일치합니다.");
-    } else {
-      setIsPasswordMatch(false);
-      setConfirmMessage("비밀번호가 일치하지 않습니다.");
-    }
+    */
   };
 
   // 이메일 인증 요청
@@ -103,7 +90,7 @@ export default function CreateAccountPage() {
     if (!agree) return alert("약관에 동의해야 가입할 수 있습니다.");
     if (!isPasswordValid)
       return alert("비밀번호 형식이 올바르지 않습니다.");
-    if (!isPasswordMatch)
+    if (password !== passwordConfirm)
       return alert("비밀번호가 일치하지 않습니다.");
     if (!emailVerified) return alert("이메일 인증을 완료해주세요.");
 
@@ -242,11 +229,11 @@ export default function CreateAccountPage() {
             type="password"
             placeholder="비밀번호"
             value={password}
-            onChange={handlePasswordChange}
+            onChange={handlePasswordChange} // ✅ 여기 수정됨
             className="w-full h-[50px] rounded-[10px] border border-gray-300 px-4 text-[15px] placeholder-gray-400 mb-1"
           />
 
-          {/* 유효성 메시지 */}
+          {/* ✅ 유효성 메시지 표시 */}
           {password && (
             <p
               className={`text-[13px] mt-1 ${
@@ -257,25 +244,13 @@ export default function CreateAccountPage() {
             </p>
           )}
 
-          {/* 비밀번호 확인 */}
           <input
             type="password"
             placeholder="비밀번호 확인"
             value={passwordConfirm}
-            onChange={handlePasswordConfirm}
-            className="w-full h-[50px] rounded-[10px] border border-gray-300 px-4 text-[15px] placeholder-gray-400 mt-2"
+            onChange={(e) => setPasswordConfirm(e.target.value)}
+            className="w-full h-[50px] rounded-[10px] border border-gray-300 px-4 text-[15px] placeholder-gray-400"
           />
-
-          {/* 일치 여부 메시지 */}
-          {passwordConfirm && (
-            <p
-              className={`text-[13px] mt-1 ${
-                isPasswordMatch ? "text-green-500" : "text-red-500"
-              }`}
-            >
-              {confirmMessage}
-            </p>
-          )}
         </div>
 
         {/* 약관 동의 */}

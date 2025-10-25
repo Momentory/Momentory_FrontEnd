@@ -19,55 +19,10 @@ export default function CreateAccountPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
-  const [passwordMessage, setPasswordMessage] = useState("");
-  const [confirmMessage, setConfirmMessage] = useState("");
-  const [isPasswordValid, setIsPasswordValid] = useState(false);
-  const [isPasswordMatch, setIsPasswordMatch] = useState(false);
-
   const [agree, setAgree] = useState(false);
+
   const [emailSent, setEmailSent] = useState(false);
   const [emailVerified, setEmailVerified] = useState(false);
-
-  // 비밀번호 유효성 검사
-  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setPassword(value);
-
-    // 규칙: 8자 이상 + 영문 + 숫자 포함
-    const regex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d!@#$%^&*()_+]{8,}$/;
-    if (!regex.test(value)) {
-      setIsPasswordValid(false);
-      setPasswordMessage("8자 이상, 영문과 숫자를 모두 포함해야 합니다.");
-    } else {
-      setIsPasswordValid(true);
-      setPasswordMessage("사용 가능한 비밀번호입니다.");
-    }
-
-    // 동시에 일치 여부도 갱신
-    if (passwordConfirm) {
-      if (value === passwordConfirm) {
-        setIsPasswordMatch(true);
-        setConfirmMessage("비밀번호가 일치합니다.");
-      } else {
-        setIsPasswordMatch(false);
-        setConfirmMessage("비밀번호가 일치하지 않습니다.");
-      }
-    }
-  };
-
-  // 비밀번호 확인 입력
-  const handlePasswordConfirm = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setPasswordConfirm(value);
-
-    if (password === value) {
-      setIsPasswordMatch(true);
-      setConfirmMessage("비밀번호가 일치합니다.");
-    } else {
-      setIsPasswordMatch(false);
-      setConfirmMessage("비밀번호가 일치하지 않습니다.");
-    }
-  };
 
   // 이메일 인증 요청
   const handleEmailClick = async () => {
@@ -101,9 +56,7 @@ export default function CreateAccountPage() {
     e.preventDefault();
 
     if (!agree) return alert("약관에 동의해야 가입할 수 있습니다.");
-    if (!isPasswordValid)
-      return alert("비밀번호 형식이 올바르지 않습니다.");
-    if (!isPasswordMatch)
+    if (password !== passwordConfirm)
       return alert("비밀번호가 일치하지 않습니다.");
     if (!emailVerified) return alert("이메일 인증을 완료해주세요.");
 
@@ -133,8 +86,8 @@ export default function CreateAccountPage() {
           className="absolute top-[-80px] left-[2px] w-[35px] h-[35px] cursor-pointer"
           onClick={() => navigate(-1)}
         />
-        <h1 className="text-[24px] font-semibold text-black ml-10">
-          회원가입
+        <h1 className="text-[24px] font-semibold text-black mb-2">
+          Create account
         </h1>
       </div>
 
@@ -145,10 +98,10 @@ export default function CreateAccountPage() {
       >
         {/* 이름 */}
         <div>
-          <label className="text-[15px] font-semibold mb-1 block">이름</label>
+          <label className="text-[15px] font-semibold mb-1 block">Name</label>
           <input
             type="text"
-            placeholder="이름"
+            placeholder="Your Name"
             value={name}
             onChange={(e) => setName(e.target.value)}
             className="w-full h-[50px] rounded-[10px] border border-gray-300 px-4 text-[15px] placeholder-gray-400"
@@ -158,7 +111,7 @@ export default function CreateAccountPage() {
         {/* 전화번호 */}
         <div>
           <label className="text-[15px] font-semibold mb-1 block">
-            전화 번호
+            Phone number
           </label>
           <input
             type="tel"
@@ -172,7 +125,7 @@ export default function CreateAccountPage() {
         {/* 생년월일 */}
         <div>
           <label className="text-[15px] font-semibold mb-1 block">
-            생년월일
+            Birthday
           </label>
           <div className="flex space-x-2">
             <select
@@ -208,11 +161,11 @@ export default function CreateAccountPage() {
 
         {/* 이메일 */}
         <div>
-          <label className="text-[15px] font-semibold mb-1 block">이메일</label>
+          <label className="text-[15px] font-semibold mb-1 block">Email</label>
           <div className="flex space-x-2">
             <input
               type="email"
-              placeholder="abc@naver.com"
+              placeholder="Your Email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="flex-1 h-[50px] rounded-[10px] border border-gray-300 px-4 text-[15px] placeholder-gray-400"
@@ -236,46 +189,22 @@ export default function CreateAccountPage() {
         {/* 비밀번호 */}
         <div>
           <label className="text-[15px] font-semibold mb-1 block">
-            비밀번호
+            Password
           </label>
           <input
             type="password"
-            placeholder="비밀번호"
+            placeholder="Password"
             value={password}
-            onChange={handlePasswordChange}
-            className="w-full h-[50px] rounded-[10px] border border-gray-300 px-4 text-[15px] placeholder-gray-400 mb-1"
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full h-[50px] rounded-[10px] border border-gray-300 px-4 text-[15px] placeholder-gray-400 mb-2"
           />
-
-          {/* 유효성 메시지 */}
-          {password && (
-            <p
-              className={`text-[13px] mt-1 ${
-                isPasswordValid ? "text-green-500" : "text-red-500"
-              }`}
-            >
-              {passwordMessage}
-            </p>
-          )}
-
-          {/* 비밀번호 확인 */}
           <input
             type="password"
-            placeholder="비밀번호 확인"
+            placeholder="Confirm Password"
             value={passwordConfirm}
-            onChange={handlePasswordConfirm}
-            className="w-full h-[50px] rounded-[10px] border border-gray-300 px-4 text-[15px] placeholder-gray-400 mt-2"
+            onChange={(e) => setPasswordConfirm(e.target.value)}
+            className="w-full h-[50px] rounded-[10px] border border-gray-300 px-4 text-[15px] placeholder-gray-400"
           />
-
-          {/* 일치 여부 메시지 */}
-          {passwordConfirm && (
-            <p
-              className={`text-[13px] mt-1 ${
-                isPasswordMatch ? "text-green-500" : "text-red-500"
-              }`}
-            >
-              {confirmMessage}
-            </p>
-          )}
         </div>
 
         {/* 약관 동의 */}
@@ -288,9 +217,9 @@ export default function CreateAccountPage() {
             className="w-[18px] h-[18px] accent-[#FF7070]"
           />
           <label htmlFor="agree" className="text-[14px] text-gray-600">
-            약관에 동의하고 가입{" "}
+            I agree to the{" "}
             <Link to="/terms" className="text-blue-600 hover:underline">
-              서비스 약관
+              Terms of Service
             </Link>
           </label>
         </div>
@@ -303,16 +232,7 @@ export default function CreateAccountPage() {
             agree ? "bg-[#FF7070]" : "bg-gray-300"
           }`}
         >
-          다음
-        </button>
-
-        {/* 임시 이동 버튼 (테스트용) */}
-        <button
-          type="button"
-          onClick={() => navigate("/create-profile")}
-          className="w-[332px] h-[70px] bg-[#FF7070] text-white rounded-[25px] font-semibold text-[18px]"
-        >
-          (임시) 다음으로
+          Next
         </button>
       </form>
     </div>
