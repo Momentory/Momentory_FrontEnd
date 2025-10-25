@@ -289,7 +289,7 @@ export default function CreateAccountPage() {
           />
           <label htmlFor="agree" className="text-[14px] text-gray-600">
             약관에 동의하고 가입{" "}
-            <Link to="/terms" className="text-blue-600 hover:underline">
+            <Link to="/auth/terms" className="text-blue-600 hover:underline">
               서비스 약관
             </Link>
           </label>
