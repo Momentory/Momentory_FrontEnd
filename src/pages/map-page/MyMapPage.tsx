@@ -1,218 +1,63 @@
-import React, { useState } from 'react';
-
-// 1. assets 폴더에서 SVG 파일들을 import
-import mapBack from '../../assets/map-back.svg';
-import map from '../../assets/map.svg';
-import shareButton from '../../assets/share-button.svg';
-
-// 2. 새로 추가한 마커 SVG 파일 3개 임포트
-import marker1 from '../../assets/map-marker1.svg';
-import marker2 from '../../assets/map-marker2.svg';
-import marker3 from '../../assets/map-marker3.svg';
-
-// 3. DropdownHeader 컴포넌트와 아이콘들 임포트
+import { useState, useRef } from 'react';
+import MapView from '../../components/map/MapView';
+import BottomSheet from '../../components/map/BottomSheet';
 import DropdownHeader from '../../components/common/DropdownHeader';
 import MapPinIcon from '../../assets/map-pin.svg?react';
 import LockIcon from '../../assets/lock-icon.svg?react';
+import shareButton from '../../assets/share-button.svg';
 
-// 4. markersData - 확대 전 마커 데이터
-const markersData = [
-  { id: 1, type: 'basic', top: '20%', left: '15%', image: marker1 },
-  { id: 2, type: 'basic', top: '35%', right: '20%', image: marker2 },
-  { id: 3, type: 'basic', top: '70%', left: '40%', image: marker3 },
-];
-
-// 5. 확대 후 이미지 매핑 데이터
-const imageMappingData = [
-  {
-    id: 1,
-    top: '20%',
-    left: '15%',
-    imageUrl:
-      'https://images.unsplash.com/photo-1519904981063-b0cf448d479e?w=150&h=150&fit=crop',
-    albumTitle: '1 나의 앨범 페이지로 이동',
-    badgeNumber: 1,
-  },
-  {
-    id: 2,
-    top: '35%',
-    right: '20%',
-    imageUrl:
-      'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=150&h=150&fit=crop',
-    albumTitle: '2 나의 앨범 페이지로 이동',
-    badgeNumber: 2,
-  },
-  {
-    id: 3,
-    top: '70%',
-    left: '40%',
-    imageUrl:
-      'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=150&h=150&fit=crop',
-    albumTitle: '3 나의 앨범 페이지로 이동',
-    badgeNumber: 3,
-  },
-];
-
-// 6. DropdownHeader에 전달할 드롭다운 아이템들
-const DROPDOWN_ITEMS = [
+const dropdownItems = [
   { label: '전체 지도', icon: <MapPinIcon />, path: '/publicMap' },
   { label: '내 지도', icon: <LockIcon />, path: '/myMap' },
 ];
 
-function MyMapPage() {
-  // 지도 확대 상태 관리
-  const [isMapZoomed, setIsMapZoomed] = useState(false);
-  // 선택된 마커 ID 관리 (null이면 확대 안됨)
-  const [selectedMarkerId, setSelectedMarkerId] = useState<number | null>(null);
+export default function MyMapPage() {
+  // 지도 확대/축소 상태
+  const [zoomed, setZoomed] = useState(false);
+  const [activeMarkerId, setActiveMarkerId] = useState<number | null>(null);
 
-  const handleShareClick = () => {
-    console.log('공유 버튼 클릭');
-    // TODO: 하단 패널(Bottom Sheet) 열기 로직 구현
-  };
+  // 하단 시트 상태
+  const [bottomSheetHeight, setBottomSheetHeight] = useState(90);
+  const [isExpanded, setIsExpanded] = useState(false);
 
-  const handleMapZoom = () => {
-    // 지도 확대/축소 토글
-    setIsMapZoomed(!isMapZoomed);
-    // 확대 해제시 선택된 마커도 초기화
-    if (isMapZoomed) {
-      setSelectedMarkerId(null);
-    }
-  };
+  // 마커 클릭 시 transformOrigin
+  const originPosRef = useRef<{ top: string; left: string } | null>(null);
 
-  const handleMarkerClick = (markerId: number) => {
-    // 지도가 확대된 상태에서만 핀 클릭 가능
-    if (isMapZoomed) {
-      setSelectedMarkerId(markerId);
-    }
-  };
-
-  const handleImageClick = (albumTitle: string) => {
-    console.log(`${albumTitle} 클릭 - 앨범 페이지로 이동`);
-    // TODO: 앨범 페이지로 이동 로직 구현
-  };
-
-  const handleMapClick = () => {
-    // 지도 빈 공간 클릭시 선택된 마커만 닫기 (지도 확대는 유지)
-    setSelectedMarkerId(null);
-  };
+  const share = () => console.log('공유 클릭');
 
   return (
-    // 전체 페이지 컨테이너
-    <div className="relative h-full font-Pretendard flex justify-center items-center bg-gray-50">
-      {/* 실제 앱 화면 컨테이너 (max-w-[390px]) */}
-      <div className="relative w-full max-w-[390px] h-full bg-white shadow-lg overflow-hidden flex flex-col">
-        {/* DropdownHeader 컴포넌트 */}
+    <div className="relative h-full flex justify-center items-center bg-gray-50 font-Pretendard">
+      <div className="relative max-w-[480px] w-full h-full bg-white shadow-lg overflow-hidden flex flex-col">
         <DropdownHeader
           title="내 지도"
-          hasDropdown={true}
-          dropdownItems={DROPDOWN_ITEMS}
+          hasDropdown
+          dropdownItems={dropdownItems}
         />
 
-        {/* 지도 영역(main)에 mb-20을 추가하여 하단 패널 높이만큼 마진을 줍니다. */}
-        <main
-          className="flex-1 w-full relative flex items-center justify-center mb-20 cursor-pointer overflow-hidden"
-          style={{
-            backgroundImage: `url(${mapBack})`,
-            backgroundSize: isMapZoomed ? '150%' : 'cover',
-            backgroundPosition: isMapZoomed ? 'center' : 'center',
-            backgroundRepeat: 'no-repeat',
-            transition: 'background-size 0.3s ease-in-out',
-          }}
-          onClick={handleMapZoom}
-        >
-          {/* 지도 외곽선 SVG */}
-          <img
-            src={map}
-            alt="지도"
-            className={`absolute inset-0 w-full h-full object-contain z-0 transition-transform duration-300 ${
-              isMapZoomed ? 'scale-150' : 'scale-100'
-            }`}
-            style={{
-              transformOrigin: 'center center',
-            }}
-          />
+        <MapView
+          zoomed={zoomed}
+          setZoomed={setZoomed}
+          activeMarkerId={activeMarkerId}
+          setActiveMarkerId={setActiveMarkerId}
+          originPosRef={originPosRef}
+        />
 
-          {/* 마커/이미지 렌더링 */}
-          {markersData.map((marker) => {
-            const isSelected = selectedMarkerId === marker.id;
-            const imageData = imageMappingData.find(
-              (img) => img.id === marker.id
-            );
-
-            return (
-              <div
-                key={marker.id}
-                className="absolute transform -translate-x-1/2 -translate-y-1/2 z-10"
-                style={{
-                  top: marker.top,
-                  left: marker.left,
-                  right: marker.right,
-                }}
-              >
-                {isMapZoomed && isSelected && imageData ? (
-                  // 지도 확대 + 선택된 마커: 이미지 매핑 표시
-                  <div className="relative">
-                    <img
-                      src={imageData.imageUrl}
-                      alt="앨범 이미지"
-                      className="w-16 h-16 rounded-lg object-cover cursor-pointer"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleImageClick(imageData.albumTitle);
-                      }}
-                    />
-                    {/* 번호 배지 */}
-                    <div className="absolute -top-1 -right-1 w-5 h-5 bg-red-600 text-white text-xs font-bold rounded-full flex items-center justify-center">
-                      {imageData.badgeNumber}
-                    </div>
-                    {/* 앨범 제목 */}
-                    <div className="mt-2 text-center">
-                      <p className="text-xs text-gray-600 font-medium whitespace-nowrap">
-                        {imageData.albumTitle}
-                      </p>
-                    </div>
-                  </div>
-                ) : (
-                  // 지도 확대 안됨 또는 선택되지 않은 마커: 핀 표시
-                  <div
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleMarkerClick(marker.id);
-                    }}
-                    className="cursor-pointer"
-                  >
-                    {marker.type === 'basic' && (
-                      <img
-                        src={marker.image}
-                        alt="맵 마커"
-                        className="w-8 h-8"
-                      />
-                    )}
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </main>
-
-        {/* 플로팅 버튼 (FAB) */}
         <button
-          onClick={handleShareClick}
-          className="absolute bottom-28 right-1 w-14 h-14 shadow-lg z-20"
+          onClick={share}
+          className="absolute right-4 w-14 h-14 shadow-lg z-20 transition-all duration-300"
+          style={{ bottom: `${bottomSheetHeight + 16}px` }}
         >
-          <img src={shareButton} alt="공유하기" className="w-full h-full" />
-          <span className="absolute -top-1 -left-1 w-[23px] h-[23px] bg-red-800 text-white text-sm font-bold rounded-full flex items-center justify-center">
-            {imageMappingData.length}
-          </span>
+          <img src={shareButton} />
         </button>
 
-        {/* 하단 패널 (Bottom Sheet) - 내 지도에서는 표시하지 않음 */}
-        <div className="absolute bottom-0 w-full h-20 bg-white rounded-t-2xl flex justify-center pt-3 shadow-lg z-30">
-          <div className="w-12 h-1 bg-gray-300 rounded-full" />
-        </div>
+        <BottomSheet
+          height={bottomSheetHeight}
+          setHeight={setBottomSheetHeight}
+          isExpanded={isExpanded}
+          setIsExpanded={setIsExpanded}
+        />
       </div>
     </div>
   );
 }
 
-export default MyMapPage;
