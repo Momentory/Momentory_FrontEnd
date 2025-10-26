@@ -47,10 +47,14 @@ export default function LoginScreen() {
       <div className="w-[330px] h-[1px] bg-gray-300 mb-6"></div>
 
       <div className="flex justify-center space-x-5">
+        {/* 카카오 로그인 이동 추가 */}
         <img
-           src="/images/kakao-logo.png"
-           alt="카카오 로그인"
-           onClick={() => (window.location.href = "https://momentory.site/oauth2/authorization/kakao")}
+          src="/images/kakao-logo.png"
+          alt="카카오 로그인"
+          onClick={() =>
+            (window.location.href =
+              "https://momentory.store/oauth2/authorization/kakao")
+          }
           className="w-10 h-10 rounded-full hover:scale-110 transition cursor-pointer"
         />
 
@@ -59,6 +63,7 @@ export default function LoginScreen() {
           alt="네이버 로그인"
           className="w-10 h-10 rounded-full hover:scale-110 transition"
         />
+
         <img
           src="/images/google-logo.png"
           alt="구글 로그인"
