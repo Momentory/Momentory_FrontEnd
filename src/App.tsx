@@ -8,16 +8,6 @@ import MyAlbumPage from './pages/myAlbum-page';
 import UploadPage from './pages/photo-upload-page';
 import CommunityPage from './pages/community-page';
 
-import SplashPage from "./pages/Auth/SplashPage";
-import LoginScreen from "./pages/Auth/LoginScreen";
-import SigninScreen from "./pages/Auth/SigninScreen";
-import CreateAccountPage from "./pages/Auth/CreateAccountPage";
-import TermsOfServicePage from "./pages/Auth/TermsOfServicePage";
-import CreateProfilePage from "./pages/Auth/CreateProfilePage";
-import SelectCharacterPage from './pages/Auth/SelectCharacterPage';
-import AccountCreatedPage from "./pages/Auth/AccountCreatedPage";
-
-
 
 const queryClient = new QueryClient();
 
@@ -25,16 +15,10 @@ const publicRoutes: RouteObject[] = [
   {
     path: '/',
     element: <PublicLayout />,
-   children: [
-      { index: true, element: <SplashPage /> }, 
-      { path: 'login', element: <LoginScreen /> },
-      { path: 'signinscreen', element: <SigninScreen /> },
-      { path: 'signup', element: <CreateAccountPage /> },
-      { path: 'terms', element: <TermsOfServicePage /> },
-      { path: 'create-profile', element: <CreateProfilePage /> },
-      { path: 'select', element: <SelectCharacterPage /> },
-      { path: 'account', element: <AccountCreatedPage /> },
-    ],
+    // children:[
+    //   {path:'login', element:<LoginPage />}
+    //   {path:'signup', element:<SignUpPage />}
+    // ]
   },
 ];
 
@@ -52,9 +36,6 @@ const protectedRoutes: RouteObject[] = [
     
   },
 ];
-
-
-
 
 const router = createBrowserRouter([...publicRoutes, ...protectedRoutes]);
 
