@@ -1,0 +1,8 @@
+{
+  "previewUrl": "/images/map-preview.png",
+  "markers": [
+    { "id": 1, "name": "파주", "top": 35, "left": 25, "color": "#a855f7" },
+    { "id": 2, "name": "의정부", "top": 10, "left": 115, "color": "#f87171" },
+    { "id": 3, "name": "수원", "top": 145, "left": 100, "color": "#facc15" }
+  ]
+}
