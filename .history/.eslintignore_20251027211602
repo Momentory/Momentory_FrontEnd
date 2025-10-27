@@ -1,5 +1,0 @@
-# 무시할 폴더 및 파일
-node_modules
-.history/
-dist
-build

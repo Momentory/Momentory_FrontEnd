@@ -22,12 +22,7 @@ export default tseslint.config(
       'react-refresh/only-export-components': [
         'warn',
         { allowConstantExport: true },
-        
       ],
-
-      '@typescript-eslint/no-explicit-any': 'off',   // any 허용
-      '@typescript-eslint/no-unused-vars': 'off',    // 안 쓰는 변수 허용
-      '@typescript-eslint/no-empty-object-type': 'off',
     },
   },
 )
