@@ -1,6 +1,13 @@
-// 확대 시 이미지 팝업
+// 마커와 이미지 팝업 UI
+import type { Marker, Album } from '../../types/map/map';
 
-import React from 'react';
+interface Props {
+  marker: Marker;
+  active: boolean;
+  album?: Album;
+  zoomed: boolean;
+  zoomIn: (marker: Marker) => void;
+}
 
 export default function MarkerPopup({
   marker,
@@ -8,13 +15,7 @@ export default function MarkerPopup({
   album,
   zoomed,
   zoomIn,
-}: {
-  marker: { id: number; top: string; left: string; image: string };
-  active: boolean;
-  album?: { id: number; imageUrl: string; title: string };
-  zoomed: boolean;
-  zoomIn: (marker: { id: number; top: string; left: string; image: string }) => void;
-}) {
+}: Props) {
   const rightSide = parseFloat(marker.left) > 70;
 
   return (
@@ -36,9 +37,7 @@ export default function MarkerPopup({
       {zoomed && active && album && (
         <div
           className="absolute top-1/2 -translate-y-1/2 flex items-center"
-          style={{
-            left: rightSide ? 'calc(-112px)' : 'calc(100% + 12px)',
-          }}
+          style={{ left: rightSide ? 'calc(-112px)' : 'calc(100% + 12px)' }}
           onClick={(e) => e.stopPropagation()}
         >
           <div className="relative">
@@ -46,13 +45,14 @@ export default function MarkerPopup({
             <img
               src={album.imageUrl}
               className="w-[100px] h-[62px] rounded-lg shadow-md cursor-pointer relative z-10 border-2 border-white"
-              onClick={() => console.log(`${album.title} 클릭 → 앨범으로 이동`)}
             />
             <div className="mt-1 flex items-center gap-1">
               <span className="w-4 h-4 bg-[#732727] text-white text-xs font-bold rounded-full flex items-center justify-center">
                 {album.id}
               </span>
-              <p className="text-sm font-bold whitespace-nowrap">나의 앨범 페이지로 이동</p>
+              <p className="text-sm font-bold whitespace-nowrap">
+                나의 앨범 페이지로 이동
+              </p>
             </div>
           </div>
         </div>

@@ -1,5 +1,4 @@
-// 하단시트(드래그/토글)
-
+// 하단시트(드래그/토글) UI
 import React from 'react';
 
 export default function BottomSheet({
@@ -22,15 +21,15 @@ export default function BottomSheet({
     const onMove = (e: MouseEvent) => {
       e.preventDefault();
       const deltaY = startY - e.clientY;
-      setHeight(Math.max(90, Math.min(460, startHeight + deltaY)));
+      setHeight(Math.max(100, Math.min(460, startHeight + deltaY)));
     };
 
     const onUp = (e: MouseEvent) => {
       e.preventDefault();
       const deltaY = startY - e.clientY;
       if (deltaY > 30) (setHeight(460), setIsExpanded(true));
-      else if (deltaY < -30) (setHeight(90), setIsExpanded(false));
-      else setHeight(startExpanded ? 460 : 90);
+      else if (deltaY < -30) (setHeight(100), setIsExpanded(false));
+      else setHeight(startExpanded ? 460 : 100);
 
       document.removeEventListener('mousemove', onMove);
       document.removeEventListener('mouseup', onUp);
@@ -41,7 +40,7 @@ export default function BottomSheet({
   };
 
   const handleClick = () => {
-    if (isExpanded) (setHeight(90), setIsExpanded(false));
+    if (isExpanded) (setHeight(100), setIsExpanded(false));
     else (setHeight(460), setIsExpanded(true));
   };
 
@@ -56,10 +55,10 @@ export default function BottomSheet({
         onClick={handleClick}
       />
       <div className="p-6">
-        <h2 className="text-[30px] font-bold mb-1">경기도 고양시</h2>
+        <h2 className="text-[25px] font-bold mb-1">경기도 고양시</h2>
         <p className="text-sm text-[#A3A3A3] mb-8">최근 방문 2025-10-15</p>
 
-        <h3 className="text-[22px] font-semibold mb-3">나의 사진</h3>
+        <h3 className="text-[18px] font-semibold mb-3">나의 사진</h3>
         <div className="grid grid-cols-3 gap-2">
           {[1, 2, 3, 4, 5].map((i) => (
             <div key={i} className="h-[106px] bg-[#EDE2E2]" />
