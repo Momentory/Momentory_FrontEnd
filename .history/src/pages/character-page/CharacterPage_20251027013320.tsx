@@ -9,7 +9,7 @@ export default function CharacterPage() {
   // 상태 관리
   const [level, setLevel] = useState(35);
   const [exp, setExp] = useState(70); // %
-  const [points, _setPoints] = useState(1500);
+  const [points, setPoints] = useState(1500);
   const [leveledUp, setLeveledUp] = useState(false); // 레벨업 효과 상태
 
   // 경험치 100% 도달 시 자동 레벨업
