@@ -1,28 +1,47 @@
 import axios, { AxiosError } from "axios";
 import type {
   AxiosResponse,
-  InternalAxiosRequestConfig
+  InternalAxiosRequestConfig,
 } from "axios";
 import { tokenStore } from "../lib/token";
 
-// ✅ 1. Axios 인스턴스 생성
+// Axios 인스턴스 생성
 export const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL, // .env에서 불러오기
-  withCredentials: false, // 쿠키 기반이면 true로 변경
+  baseURL: "https://www.momentory.store", // 환경변수 기반으로 바꿔도 무방
+  withCredentials: true,
   headers: { "Content-Type": "application/json" },
 });
 
-// ✅ 2. 요청 인터셉터: AccessToken 자동 첨부
+// 요청 인터셉터: AccessToken 자동 첨부 (비로그인용 API 예외 처리 포함)
 api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   const access = tokenStore.getAccess();
-  if (access) {
+
+  // 토큰을 첨부하지 않을 엔드포인트 목록
+  const noAuthUrls = [
+  "/api/auth/check-email",
+  "/api/auth/check-nickname",
+  "/api/auth/send-email",
+  "/api/auth/check-email-verified",
+  "/api/auth/validate-password",
+  "/api/auth/userSignup",
+  "/api/auth/login",
+  "/api/auth/reissue",
+];
+
+
+  // 요청 URL이 예외 목록에 포함되어 있는지 확인
+  const isNoAuth = noAuthUrls.some((url) => config.url?.includes(url));
+
+  // 비로그인용 API가 아닐 경우에만 토큰 추가
+  if (access && !isNoAuth) {
     config.headers = config.headers ?? {};
     (config.headers as any).Authorization = `Bearer ${access}`;
   }
+
   return config;
 });
 
-// ✅ 3. 토큰 재발급 관련 상태 관리
+// 토큰 재발급 상태 관리
 let isRefreshing = false;
 let requestQueue: Array<(token: string) => void> = [];
 
@@ -31,7 +50,7 @@ const processQueue = (newAccess: string) => {
   requestQueue = [];
 };
 
-// ✅ 4. 응답 인터셉터: 401 처리 → RefreshToken 재발급 → 원요청 재시도
+// 응답 인터셉터: 401 → RefreshToken 재발급 후 재시도
 api.interceptors.response.use(
   (response: AxiosResponse<any>) => response,
   async (error: AxiosError) => {
@@ -63,8 +82,9 @@ api.interceptors.response.use(
           throw error;
         }
 
+        // RefreshToken으로 재발급 요청
         const { data } = await axios.post(
-          `${import.meta.env.VITE_API_BASE_URL}/api/auth/reissue`,
+          "https://www.momentory.store/api/auth/reissue",
           { refreshToken },
           { headers: { "Content-Type": "application/json" } }
         );
