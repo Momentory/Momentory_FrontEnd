@@ -21,6 +21,7 @@ import SelectCharacterPage from './pages/Auth/SelectCharacterPage';
 import AccountCreatedPage from "./pages/Auth/AccountCreatedPage";
 import CreateAlbumPage from './pages/album-page/create-album-page';
 import AlbumDetailPage from './pages/album-page/album-detail-page';
+import EditAlbumPage from './pages/album-page/edit-album-page';
 
 const queryClient = new QueryClient();
 
@@ -53,6 +54,7 @@ const protectedRoutes: RouteObject[] = [
       { path: 'community', element: <CommunityPage /> },
       { path: 'create-album', element: <CreateAlbumPage /> },
       { path: 'album/:albumId', element: <AlbumDetailPage /> },
+      { path: 'edit/:id', element: <EditAlbumPage /> },
     ],
   },
 ];

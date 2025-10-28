@@ -1,5 +1,13 @@
 @import 'tailwindcss';
 
+@font-face {
+  font-family: 'Inter';
+  src: url('/fonts/Inter-VariableFont.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* Light (300) */
 @font-face {
   font-family: 'NanumSquareRound';
