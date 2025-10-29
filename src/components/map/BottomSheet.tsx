@@ -29,9 +29,17 @@ export default function BottomSheet({
     const onUp = (e: MouseEvent) => {
       e.preventDefault();
       const deltaY = startY - e.clientY;
-      if (deltaY > 30) (setHeight(460), setIsExpanded(true));
-      else if (deltaY < -30) (setHeight(100), setIsExpanded(false));
-      else setHeight(startExpanded ? 460 : 100);
+
+      // [수정] (func1(), func2()) -> { func1(); func2(); }
+      if (deltaY > 30) {
+        setHeight(460);
+        setIsExpanded(true);
+      } else if (deltaY < -30) {
+        setHeight(100);
+        setIsExpanded(false);
+      } else {
+        setHeight(startExpanded ? 460 : 100);
+      }
 
       document.removeEventListener('mousemove', onMove);
       document.removeEventListener('mouseup', onUp);
@@ -42,8 +50,14 @@ export default function BottomSheet({
   };
 
   const handleClick = () => {
-    if (isExpanded) (setHeight(100), setIsExpanded(false));
-    else (setHeight(460), setIsExpanded(true));
+    // [수정] (func1(), func2()) -> { func1(); func2(); }
+    if (isExpanded) {
+      setHeight(100);
+      setIsExpanded(false);
+    } else {
+      setHeight(460);
+      setIsExpanded(true);
+    }
   };
 
   const handlePhotoFrameClick = (e: React.MouseEvent) => {

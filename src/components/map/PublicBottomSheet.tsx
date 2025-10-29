@@ -76,7 +76,7 @@ export default function PublicBottomSheet({
       document.removeEventListener('touchmove', handleMove);
       document.removeEventListener('touchend', handleEnd);
     };
-  }, [isDragging, dragStart, height, maxHeight, setHeight]);
+  }, [isDragging, dragStart, height, maxHeight, setHeight, setIsExpanded]);
 
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
