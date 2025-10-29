@@ -1,8 +1,10 @@
+import { useState } from "react";
 import { Outlet, useLocation } from 'react-router-dom';
 import Header from '../components/common/Header';
 import Navbar from '../components/common/NavBar';
-
-const PublicLayout = () => {
+import UploadModal from "../components/common/UploadModal";
+const ProtectedLayout = () => {
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false); 
   const location = useLocation();
   const isEditPage = location.pathname.startsWith('/edit/');
 
@@ -11,10 +13,14 @@ const PublicLayout = () => {
       <div className="w-full max-w-[480px] min-h-screen bg-white">
         <Header />
         <Outlet />
-        {!isEditPage && <Navbar />}
+        {!isEditPage &&<Navbar onUploadClick={() => setIsUploadModalOpen(true)} />}
       </div>
+      
+      {isUploadModalOpen && (
+        <UploadModal onClose={() => setIsUploadModalOpen(false)} />
+      )}
     </div>
   );
 };
 
-export default PublicLayout;
+export default ProtectedLayout;

@@ -41,7 +41,6 @@ export const checkEmail = (email: string) =>
 export const checkNickname = async (nickname: string) => {
   const { data } = await api.get("/api/auth/check-nickname", {
     params: { nickname },
-    headers: { Authorization: "" },
   });
   return data; 
 };

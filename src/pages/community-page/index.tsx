@@ -1,4 +1,2 @@
-const CommunityPage = () => {
-  return <div>Community Page</div>;
-}   
-export default CommunityPage;
+export { default as CommunityPage } from "./CommunityPage";
+export { default as CommunityUploadPage } from "./CommunityUploadPage";

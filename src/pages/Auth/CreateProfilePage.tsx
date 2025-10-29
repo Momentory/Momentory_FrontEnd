@@ -58,7 +58,7 @@ export default function CreateProfilePage() {
 
       {/* 타이틀 */}
       <h1 className="text-[22px] font-semibold mb-6 text-center">
-        Create Your Profile
+        프로필을 생성하세요
       </h1>
 
       {/* 프로필 이미지 */}
