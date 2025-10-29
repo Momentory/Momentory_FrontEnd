@@ -21,14 +21,12 @@ export default function PublicMapPage() {
   const handleMarkerClick = (markerId: number) => {
     setSelectedMarkerId(markerId);
     setIsExpanded(true);
-    setHeight(460); // 처음에 460px로 시작
+    setHeight(460);
   };
 
-  // 하단시트가 끝까지 올라갔을 때만 공유 버튼 숨기기
   const maxHeight =
     typeof window !== 'undefined' ? window.innerHeight * 0.9 : 600;
-  // 바텀시트가 최대 크기(거의 maxHeight)일 때는 공유 버튼 숨김
-  const isAtMaxHeight = height >= maxHeight - 10; // 약간의 여유를 둠
+  const isAtMaxHeight = height >= maxHeight - 10;
   const showShareButton = !isAtMaxHeight;
 
   return (
@@ -53,7 +51,7 @@ export default function PublicMapPage() {
           </button>
         )}
 
-        {/* ✅ 변경된 하단 시트 */}
+        {/* 하단 시트 */}
         <PublicBottomSheet
           height={height}
           setHeight={setHeight}

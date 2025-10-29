@@ -32,7 +32,8 @@ export default function MapView({
 }: MapViewProps) {
   return (
     <main
-      className="flex-1 relative mb-20 cursor-pointer overflow-hidden"
+      id="map-container"
+      className="flex-1 relative mb-20 cursor-pointer"
       style={{
         backgroundImage: `url(${mapBack})`,
         backgroundSize: 'cover',

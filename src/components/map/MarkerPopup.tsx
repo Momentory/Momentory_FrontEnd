@@ -1,5 +1,6 @@
 // 마커와 이미지 팝업 UI
 import type { Marker, Album } from '../../types/map/map';
+import { useNavigate } from 'react-router-dom';
 
 interface Props {
   marker: Marker;
@@ -16,7 +17,13 @@ export default function MarkerPopup({
   zoomed,
   zoomIn,
 }: Props) {
+  const navigate = useNavigate();
   const rightSide = parseFloat(marker.left) > 70;
+
+  const handleImageClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigate('/album');
+  };
 
   return (
     <div
@@ -45,8 +52,11 @@ export default function MarkerPopup({
             <img
               src={album.imageUrl}
               className="w-[100px] h-[62px] rounded-lg shadow-md cursor-pointer relative z-10 border-2 border-white"
+              onClick={handleImageClick}
             />
-            <div className="mt-1 flex items-center gap-1">
+
+            {/* div를 삭제하면 이미지 팝업이 잘리는 문제 발생 -> 'invisible' 클래스 추가해서 숨김*/}
+            <div className="mt-1 flex items-center gap-1 invisible">
               <span className="w-4 h-4 bg-[#732727] text-white text-xs font-bold rounded-full flex items-center justify-center">
                 {album.id}
               </span>

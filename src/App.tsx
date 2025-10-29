@@ -26,8 +26,9 @@ import CreateAlbumPage from './pages/album-page/create-album-page';
 import AlbumDetailPage from './pages/album-page/album-detail-page';
 import EditAlbumPage from './pages/album-page/edit-album-page';
 
-import MyMapPage from './pages/map-page/MyMapPage';
-import PublicMapPage from './pages/map-page/PublicMapPage';
+import MyMapPage from './pages/map-page/my-map-page';
+import PublicMapPage from './pages/map-page/public-map-page';
+import SharePage from './pages/share-page';
 
 const queryClient = new QueryClient();
 
@@ -68,6 +69,7 @@ const protectedRoutes: RouteObject[] = [
 
       { path: 'myMap', element: <MyMapPage /> },
       { path: 'publicMap', element: <PublicMapPage /> },
+      { path: 'share', element: <SharePage /> },
     ],
   },
 ];

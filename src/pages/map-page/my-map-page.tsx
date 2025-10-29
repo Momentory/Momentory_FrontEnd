@@ -1,3 +1,5 @@
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import DropdownHeader from '../../components/common/DropdownHeader';
 import MapView from '../../components/map/MapView';
 import BottomSheet from '../../components/map/BottomSheet';
@@ -8,6 +10,7 @@ import shareButton from '../../assets/share-button.svg';
 
 import useMapZoom from '../../hooks/map/useMapZoom';
 import useBottomSheet from '../../hooks/map/useBottomSheet';
+import { captureMap } from '../../utils/screenshot';
 
 const dropdownItems = [
   { label: '전체 지도', icon: <MapPinIcon />, path: '/publicMap' },
@@ -15,6 +18,9 @@ const dropdownItems = [
 ];
 
 export default function MyMapPage() {
+  const navigate = useNavigate();
+  const [isCapturing, setIsCapturing] = useState(false);
+
   const {
     zoomed,
     activeMarkerId,
@@ -24,6 +30,27 @@ export default function MyMapPage() {
   } = useMapZoom();
 
   const { height, isExpanded, setHeight, setIsExpanded } = useBottomSheet();
+
+  const handleShareClick = async () => {
+    try {
+      setIsCapturing(true);
+
+      // 지도 캡처
+      const imageDataUrl = await captureMap('map-container');
+
+      navigate('/share', {
+        state: {
+          imageUrl: imageDataUrl,
+          type: 'captured',
+        },
+      });
+    } catch (error) {
+      console.error('지도 캡처 실패:', error);
+      alert('지도 캡처에 실패했습니다. 다시 시도해주세요.');
+    } finally {
+      setIsCapturing(false);
+    }
+  };
 
   return (
     <div className="relative h-full flex justify-center items-center bg-gray-50 font-Pretendard">
@@ -43,11 +70,14 @@ export default function MyMapPage() {
         />
 
         <button
-          onClick={() => console.log('공유 클릭')}
-          className="absolute right-4 w-14 h-14 shadow-lg z-20 transition-all duration-300"
+          onClick={handleShareClick}
+          disabled={isCapturing}
+          className={`absolute right-4 w-14 h-14 shadow-lg z-20 transition-all duration-300 ${
+            isCapturing ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105'
+          }`}
           style={{ bottom: `${height + 16}px` }}
         >
-          <img src={shareButton} />
+          <img src={shareButton} alt="공유" />
         </button>
 
         <BottomSheet
