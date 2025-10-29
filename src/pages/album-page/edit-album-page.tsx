@@ -2,83 +2,85 @@ import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import DropdownHeader from '../../components/common/DropdownHeader';
 import Modal from '../../components/common/Modal';
-import TitleTemplate1 from '../../components/MyAlbum/Templetes/TitleTemplate1';
-import TitleTemplate2 from '../../components/MyAlbum/Templetes/TitleTemplate2';
-import TitleTemplate3 from '../../components/MyAlbum/Templetes/TitleTemplate3';
-import TitleTemplate4 from '../../components/MyAlbum/Templetes/TitleTemplate4';
-import pageTemplate1 from '../../assets/icons/pageTemplete1.svg';
-import pageTemplate2 from '../../assets/icons/pageTemplete2.svg';
-import pageTemplate3 from '../../assets/icons/pageTemplete3.svg';
-import pageTemplate4 from '../../assets/icons/pageTemplete4.svg';
-import type { TitleTemplateProps } from '../../types/Templates';
+import TitleTemplate1 from '../../components/MyAlbum/Templetes/title/TitleTemplate1';
+import TitleTemplate2 from '../../components/MyAlbum/Templetes/title/TitleTemplate2';
+import TitleTemplate3 from '../../components/MyAlbum/Templetes/title/TitleTemplate3';
+import TitleTemplate4 from '../../components/MyAlbum/Templetes/title/TitleTemplate4';
+import PageTemplate1 from '../../components/MyAlbum/Templetes/page/PageTemplate1';
+import PageTemplate2 from '../../components/MyAlbum/Templetes/page/PageTemplate2';
+import PageTemplate3 from '../../components/MyAlbum/Templetes/page/PageTemplate3';
+import PageTemplate4 from '../../components/MyAlbum/Templetes/page/PageTemplate4';
+import pageTemplate1Icon from '../../assets/icons/pageTemplete1.svg';
+import pageTemplate2Icon from '../../assets/icons/pageTemplete2.svg';
+import pageTemplate3Icon from '../../assets/icons/pageTemplete3.svg';
+import pageTemplate4Icon from '../../assets/icons/pageTemplete4.svg';
+import type { PageData, TemplateProps } from '../../types/Templates';
 
-const titleTemplateMap: Record<number, React.FC<TitleTemplateProps>> = {
+const templateMap: Record<number, React.FC<TemplateProps>> = {
   1: TitleTemplate1,
   2: TitleTemplate2,
   3: TitleTemplate3,
   4: TitleTemplate4,
+  11: PageTemplate1,
+  12: PageTemplate2,
+  13: PageTemplate3,
+  14: PageTemplate4,
 };
 
-type PageData = {
-  templateId: number;
-  title: string;
-  subTitle: string;
-  image: string | null;
-};
+const createEmptyPageData = (templateId: number): PageData => ({
+  templateId,
+  title: '',
+  subTitle: '',
+  image: null,
+  image1: null,
+  image2: null,
+  image3: null,
+  bodyText: '',
+  bodyText1: '',
+  bodyText2: '',
+  subTitle2: '',
+});
 
 const EditAlbumPage = () => {
   const { id } = useParams();
   const initialTemplateId = Number(id) || 1;
 
-  const [pages, setPages] = useState<PageData[]>([
-    { templateId: initialTemplateId, title: '', subTitle: '', image: null },
-  ]);
+  const [pages, setPages] = useState<PageData[]>([createEmptyPageData(initialTemplateId)]);
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const [showModal, setShowModal] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<number | null>(null);
 
   const currentPage = pages[currentPageIndex];
-  const Template = titleTemplateMap[currentPage.templateId];
+  const Template = templateMap[currentPage.templateId];
 
-  const updatePage = (index: number, changes: Partial<PageData>) => {
+  const updatePageData = (index: number, changes: Partial<PageData>) => {
     const newPages = [...pages];
     newPages[index] = { ...newPages[index], ...changes };
     setPages(newPages);
   };
 
   const addPage = (templateId: number) => {
-    setPages([...pages, { templateId, title: '', subTitle: '', image: null }]);
+    setPages([...pages, createEmptyPageData(templateId)]);
     setCurrentPageIndex(pages.length);
     setShowModal(false);
     setSelectedTemplate(null);
   };
 
-  const templates = [
-    { id: 1, image: pageTemplate1 },
-    { id: 2, image: pageTemplate2 },
-    { id: 3, image: pageTemplate3 },
-    { id: 4, image: pageTemplate4 },
+  const pageTemplatesForModal = [
+    { id: 11, image: pageTemplate1Icon },
+    { id: 12, image: pageTemplate2Icon },
+    { id: 13, image: pageTemplate3Icon },
+    { id: 14, image: pageTemplate4Icon },
   ];
 
   return (
     <div>
       <DropdownHeader title="앨범 편집" />
-
       <div className="flex flex-col items-center">
         {Template && (
           <Template
-            title={currentPage.title}
-            setTitle={(newTitle) =>
-              updatePage(currentPageIndex, { title: newTitle })
-            }
-            subTitle={currentPage.subTitle}
-            setSubTitle={(newSub) =>
-              updatePage(currentPageIndex, { subTitle: newSub })
-            }
-            image={currentPage.image}
-            setImage={(newImg) =>
-              updatePage(currentPageIndex, { image: newImg })
-            }
+            data={currentPage}
+            updateData={(changes) => updatePageData(currentPageIndex, changes)}
           />
         )}
       </div>
@@ -89,7 +91,7 @@ const EditAlbumPage = () => {
           disabled={currentPageIndex === 0}
           onClick={() => setCurrentPageIndex(currentPageIndex - 1)}
         >
-          이전 페이지
+          이전
         </button>
         <button
           className="px-4 py-2 bg-[#FF7070] text-white rounded"
@@ -102,7 +104,7 @@ const EditAlbumPage = () => {
           disabled={currentPageIndex === pages.length - 1}
           onClick={() => setCurrentPageIndex(currentPageIndex + 1)}
         >
-          다음 페이지
+          다음
         </button>
       </div>
 
@@ -110,29 +112,25 @@ const EditAlbumPage = () => {
         {pages.map((_, idx) => (
           <span
             key={idx}
-            className={`w-3 h-3 rounded-full ${idx === currentPageIndex ? 'bg-[#FF7070]' : 'bg-gray-300'}`}
+            className={`w-3 h-3 rounded-full cursor-pointer ${
+              idx === currentPageIndex ? 'bg-[#FF7070]' : 'bg-gray-300'
+            }`}
+            onClick={() => setCurrentPageIndex(idx)}
           />
         ))}
       </div>
-
       {showModal && (
         <Modal title="템플릿 선택" onClose={() => setShowModal(false)}>
           <div className="grid grid-cols-2 gap-4 px-4">
-            {templates.map((template) => (
+            {pageTemplatesForModal.map((template) => (
               <div key={template.id} className="relative">
                 <button
                   onClick={() => setSelectedTemplate(template.id)}
                   className={`w-full overflow-hidden border ${
-                    selectedTemplate === template.id
-                      ? 'border-[#FF7070]'
-                      : 'border-[#8B8B8B]'
+                    selectedTemplate === template.id ? 'border-2 border-[#3C3C3C]' : 'border-[#4F4F4F]'
                   }`}
                 >
-                  <img
-                    src={template.image}
-                    alt={`Template ${template.id}`}
-                    className="w-full object-cover"
-                  />
+                  <img src={template.image} alt={`Template ${template.id}`} className="w-full object-cover" />
                 </button>
               </div>
             ))}
