@@ -6,7 +6,6 @@ export default function useBottomSheet(initialHeight = 100) {
   const [isExpanded, setIsExpanded] = useState(false);
 
   const handleDrag = (
-    startY: number,
     startHeight: number,
     startExpanded: boolean,
     deltaY: number
