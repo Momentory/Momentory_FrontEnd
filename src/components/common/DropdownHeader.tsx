@@ -37,8 +37,8 @@ const DropdownHeader = ({
   };
 
   return (
-    <div className="relative">
-      <div className="relative bg-white shadow-[0px_6px_8px_0px_rgba(0,0,0,0.25)] z-10 pt-[57px]">
+    <div className="fixed top-[56px] left-1/2 -translate-x-1/2 w-full max-w-[480px] z-40">
+      <div className="relative bg-white shadow-[0px_6px_8px_0px_rgba(0,0,0,0.25)] z-10">
         <div className="flex items-center justify-between py-4 px-4">
           <button
             type="button"
