@@ -2,6 +2,9 @@ import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import DropdownHeader from '../../components/common/DropdownHeader';
 import Modal from '../../components/common/Modal';
+import Popover from '../../components/common/Popover';
+import MemoStickerModal from '../../components/MyAlbum/MemoStickerModal';
+import TemplateEditModal from '../../components/MyAlbum/TemplateEditModal';
 import TitleTemplate1 from '../../components/MyAlbum/Templetes/title/TitleTemplate1';
 import TitleTemplate2 from '../../components/MyAlbum/Templetes/title/TitleTemplate2';
 import TitleTemplate3 from '../../components/MyAlbum/Templetes/title/TitleTemplate3';
@@ -49,6 +52,9 @@ const EditAlbumPage = () => {
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const [showModal, setShowModal] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<number | null>(null);
+  const [popoverPosition, setPopoverPosition] = useState<{ x: number; y: number } | null>(null);
+  const [showMemoStickerModal, setShowMemoStickerModal] = useState(false);
+  const [showTemplateEditModal, setShowTemplateEditModal] = useState(false);
 
   const currentPage = pages[currentPageIndex];
   const Template = templateMap[currentPage.templateId];
@@ -66,6 +72,25 @@ const EditAlbumPage = () => {
     setSelectedTemplate(null);
   };
 
+  const handleEmptyAreaClick = (position: { x: number; y: number }) => {
+    setPopoverPosition(position);
+  };
+
+  const handlePopoverSelect = (option: 'memo' | 'template') => {
+    if (option === 'memo') {
+      setShowMemoStickerModal(true);
+    } else if (option === 'template') {
+      setShowTemplateEditModal(true);
+    }
+    setPopoverPosition(null);
+  };
+
+  const handleTemplateChange = (newTemplateId: number) => {
+    const newPages = [...pages];
+    newPages[currentPageIndex] = { ...newPages[currentPageIndex], templateId: newTemplateId };
+    setPages(newPages);
+  };
+
   const pageTemplatesForModal = [
     { id: 11, image: pageTemplate1Icon },
     { id: 12, image: pageTemplate2Icon },
@@ -76,11 +101,19 @@ const EditAlbumPage = () => {
   return (
     <div>
       <DropdownHeader title="앨범 편집" />
-      <div className="flex flex-col items-center">
+      <div className="flex flex-col items-center relative">
         {Template && (
           <Template
             data={currentPage}
             updateData={(changes) => updatePageData(currentPageIndex, changes)}
+            onEmptyAreaClick={handleEmptyAreaClick}
+          />
+        )}
+        {popoverPosition && (
+          <Popover
+            position={popoverPosition}
+            onClose={() => setPopoverPosition(null)}
+            onSelect={handlePopoverSelect}
           />
         )}
       </div>
@@ -127,7 +160,7 @@ const EditAlbumPage = () => {
                 <button
                   onClick={() => setSelectedTemplate(template.id)}
                   className={`w-full overflow-hidden border ${
-                    selectedTemplate === template.id ? 'border-2 border-[#3C3C3C]' : 'border-[#4F4F4F]'
+                    selectedTemplate === template.id ? 'border-2 border-[#FF7070]' : 'border-[#4F4F4F]'
                   }`}
                 >
                   <img src={template.image} alt={`Template ${template.id}`} className="w-full object-cover" />
@@ -148,6 +181,16 @@ const EditAlbumPage = () => {
           </button>
         </Modal>
       )}
+      <MemoStickerModal
+        isOpen={showMemoStickerModal}
+        onClose={() => setShowMemoStickerModal(false)}
+      />
+      <TemplateEditModal
+        isOpen={showTemplateEditModal}
+        onClose={() => setShowTemplateEditModal(false)}
+        currentTemplateId={currentPage.templateId}
+        onSelectTemplate={handleTemplateChange}
+      />
     </div>
   );
 };
