@@ -19,6 +19,7 @@ import AccountCreatedPage from "./pages/Auth/AccountCreatedPage";
 import CreateAlbumPage from './pages/album-page/create-album-page';
 import AlbumDetailPage from './pages/album-page/album-detail-page';
 import EditAlbumPage from './pages/album-page/edit-album-page';
+import AlbumReadPage from './pages/album-page/album-read-page';
 
 const queryClient = new QueryClient();
 
@@ -54,6 +55,7 @@ const protectedRoutes: RouteObject[] = [
       { path: 'travel', element: <TravelPage /> },
       { path: 'create-album', element: <CreateAlbumPage /> },
       { path: 'album/:albumId', element: <AlbumDetailPage /> },
+      { path: 'album/:albumId/read', element: <AlbumReadPage /> },
       { path: 'edit/:id', element: <EditAlbumPage /> },
     ],
   },
