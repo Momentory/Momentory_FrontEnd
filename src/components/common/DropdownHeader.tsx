@@ -1,7 +1,7 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import ChevronDown from "../../assets/icons/dropdown.svg?react";
-import BackIcon from "../../assets/icons/BackIcon.svg?react";
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import ChevronDown from '../../assets/icons/dropdown.svg?react';
+import BackIcon from '../../assets/icons/BackIcon.svg?react';
 
 interface DropdownItem {
   label: string;
@@ -16,7 +16,7 @@ interface DropdownHeaderProps {
 }
 
 const DropdownHeader = ({
-  title = "",
+  title = '',
   hasDropdown = false,
   dropdownItems = [],
 }: DropdownHeaderProps) => {
@@ -50,7 +50,7 @@ const DropdownHeader = ({
 
           <div
             className={`flex items-center justify-center ${
-              hasDropdown ? "cursor-pointer" : ""
+              hasDropdown ? 'cursor-pointer' : ''
             }`}
             onClick={hasDropdown ? toggleDropdown : undefined}
           >
@@ -60,7 +60,7 @@ const DropdownHeader = ({
             {hasDropdown && (
               <ChevronDown
                 className={`ml-2.5 transition-transform duration-300 ${
-                  isOpen ? "rotate-180" : "rotate-0"
+                  isOpen ? 'rotate-180' : 'rotate-0'
                 }`}
               />
             )}
@@ -72,10 +72,10 @@ const DropdownHeader = ({
       <div
         className={`absolute left-0 top-full w-full bg-white rounded-2xl
         shadow-[0px_4px_12px_0px_rgba(0,0,0,0.1)]
-        overflow-hidden transition-all duration-300 z-0 ${
+        overflow-hidden transition-all duration-300 z-20 ${
           isOpen
-            ? "opacity-100 translate-y-0"
-            : "opacity-0 -translate-y-2 pointer-events-none"
+            ? 'opacity-100 translate-y-0'
+            : 'opacity-0 -translate-y-2 pointer-events-none'
         }`}
       >
         <ul className="text-[#808080]">
