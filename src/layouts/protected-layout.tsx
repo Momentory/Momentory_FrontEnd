@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useState } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import Header from '../components/common/Header';
 import Navbar from '../components/common/NavBar';
-import UploadModal from "../components/common/UploadModal";
+import UploadModal from '../components/common/UploadModal';
 const ProtectedLayout = () => {
-  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false); 
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const location = useLocation();
   const isEditPage = location.pathname.startsWith('/edit/');
   const isShopPage = location.pathname.startsWith('/shop');
@@ -15,6 +15,9 @@ const ProtectedLayout = () => {
     '/album',
     '/create-album',
     '/edit',
+    '/myMap',
+    '/publicMap',
+    '/share',
     '/shop',
     '/closet'
   ].some(path => location.pathname.startsWith(path));
@@ -28,7 +31,7 @@ const ProtectedLayout = () => {
         </div>
         {!isShopPage && !isClosetPage && !isEditPage &&<Navbar onUploadClick={() => setIsUploadModalOpen(true)} />}
       </div>
-      
+
       {isUploadModalOpen && (
         <UploadModal onClose={() => setIsUploadModalOpen(false)} />
       )}
