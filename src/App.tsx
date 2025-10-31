@@ -19,6 +19,8 @@ import AccountCreatedPage from "./pages/Auth/AccountCreatedPage";
 import CreateAlbumPage from './pages/album-page/create-album-page';
 import AlbumDetailPage from './pages/album-page/album-detail-page';
 import EditAlbumPage from './pages/album-page/edit-album-page';
+import MyClosetPage from './pages/shop-page/MyClosetPage';
+import ShopPage from './pages/shop-page';
 
 const queryClient = new QueryClient();
 
@@ -55,6 +57,8 @@ const protectedRoutes: RouteObject[] = [
       { path: 'create-album', element: <CreateAlbumPage /> },
       { path: 'album/:albumId', element: <AlbumDetailPage /> },
       { path: 'edit/:id', element: <EditAlbumPage /> },
+      { path: 'shop', element: <ShopPage/> },
+      { path: 'closet', element: <MyClosetPage/> },
     ],
   },
 ];

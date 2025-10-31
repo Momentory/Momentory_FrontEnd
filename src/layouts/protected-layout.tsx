@@ -12,6 +12,8 @@ const ProtectedLayout = () => {
     '/album',
     '/create-album',
     '/edit',
+    '/shop',
+    '/my-closet'
   ].some(path => location.pathname.startsWith(path));
 
   return (
