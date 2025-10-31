@@ -30,6 +30,8 @@ import RegionPhotosPage from './pages/photo-upload-page/region-photos-page';
 import CreateAlbumPage from './pages/album-page/create-album-page';
 import AlbumDetailPage from './pages/album-page/album-detail-page';
 import EditAlbumPage from './pages/album-page/edit-album-page';
+import MyClosetPage from './pages/shop-page/MyClosetPage';
+import ShopPage from './pages/shop-page/ShopPage';
 
 const queryClient = new QueryClient();
 
@@ -76,6 +78,8 @@ const protectedRoutes: RouteObject[] = [
       { path: 'myMap', element: <MyMapPage /> },
       { path: 'publicMap', element: <PublicMapPage /> },
       { path: 'share', element: <SharePage /> },
+      { path: 'shop', element: <ShopPage/> },
+      { path: 'closet', element: <MyClosetPage/> },
     ],
   },
 ];
