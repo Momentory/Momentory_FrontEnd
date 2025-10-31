@@ -13,27 +13,30 @@ import TravelPage from './pages/travel-page';
 import MyAlbumPage from './pages/album-page';
 import UploadPage from './pages/photo-upload-page/UploadPage';
 
-import { CommunityPage, CommunityUploadPage, CommunityDetailPage } from "./pages/community-page";
-import SplashPage from "./pages/Auth/SplashPage";
-import LoginScreen from "./pages/Auth/LoginScreen";
-import SigninScreen from "./pages/Auth/SigninScreen";
-import CreateAccountPage from "./pages/Auth/CreateAccountPage";
-import TermsOfServicePage from "./pages/Auth/TermsOfServicePage";
-import CreateProfilePage from "./pages/Auth/CreateProfilePage";
+import {
+  CommunityPage,
+  CommunityUploadPage,
+  CommunityDetailPage,
+} from './pages/community-page';
+import SplashPage from './pages/Auth/SplashPage';
+import LoginScreen from './pages/Auth/LoginScreen';
+import SigninScreen from './pages/Auth/SigninScreen';
+import CreateAccountPage from './pages/Auth/CreateAccountPage';
+import TermsOfServicePage from './pages/Auth/TermsOfServicePage';
+import CreateProfilePage from './pages/Auth/CreateProfilePage';
 import SelectCharacterPage from './pages/Auth/SelectCharacterPage';
-import AccountCreatedPage from "./pages/Auth/AccountCreatedPage";
-import KakaoCallback from "./pages/Auth/KakaoCallback";
+import AccountCreatedPage from './pages/Auth/AccountCreatedPage';
+import KakaoCallback from './pages/Auth/KakaoCallback';
 
-import SettingsHomePage from "./pages/settings-page/SettingHomepage";
-import ProfileEditPage from "./pages/settings-page/ProfileEditpage";
-import NotificationSettingsPage from "./pages/settings-page/NotificationSettingsPage";
-import PrivacyDataPage from "./pages/settings-page/PrivacyDataPage";
-import ServicePage from "./pages/settings-page/ServicePage"
-import PrivacyPolicyPage from "./pages/settings-page/PrivacyPolicyPage";
-import SecurityPage from "./pages/settings-page/SecurityPage";
-import WithdrawPage from "./pages/settings-page/WithdrawPage";
-import ChangePasswordPage from "./pages/settings-page/ChangePasswordPage";
-
+import SettingsHomePage from './pages/settings-page/SettingHomepage';
+import ProfileEditPage from './pages/settings-page/ProfileEditpage';
+import NotificationSettingsPage from './pages/settings-page/NotificationSettingsPage';
+import PrivacyDataPage from './pages/settings-page/PrivacyDataPage';
+import ServicePage from './pages/settings-page/ServicePage';
+import PrivacyPolicyPage from './pages/settings-page/PrivacyPolicyPage';
+import SecurityPage from './pages/settings-page/SecurityPage';
+import WithdrawPage from './pages/settings-page/WithdrawPage';
+import ChangePasswordPage from './pages/settings-page/ChangePasswordPage';
 
 import MyMapPage from './pages/map-page/my-map-page';
 import PublicMapPage from './pages/map-page/public-map-page';
@@ -46,6 +49,8 @@ import EditAlbumPage from './pages/album-page/edit-album-page';
 import AlbumReadPage from './pages/album-page/album-read-page';
 import MyClosetPage from './pages/shop-page/MyClosetPage';
 import ShopPage from './pages/shop-page/ShopPage';
+
+import PhotoEditPage from './pages/photo-edit-page';
 
 const queryClient = new QueryClient();
 
@@ -78,20 +83,25 @@ const protectedRoutes: RouteObject[] = [
       { path: 'upload', element: <UploadPage /> },
       { path: 'album', element: <MyAlbumPage /> },
       { path: 'community', element: <CommunityPage /> },
-      { path: "community/upload", element: <CommunityUploadPage /> },
-      { path: "community/:postId", element: <CommunityDetailPage /> },
+      { path: 'community/upload', element: <CommunityUploadPage /> },
+      { path: 'community/:postId', element: <CommunityDetailPage /> },
 
       { path: 'settings', element: <SettingsHomePage /> },
       { path: '/settings/profile-edit', element: <ProfileEditPage /> },
-      { path: '/settings/notifications', element: <NotificationSettingsPage /> },
+      {
+        path: '/settings/notifications',
+        element: <NotificationSettingsPage />,
+      },
       { path: '/settings/privacy-data', element: <PrivacyDataPage /> },
       { path: '/settings/terms-of-service', element: <ServicePage /> },
       { path: '/settings/privacy-policy', element: <PrivacyPolicyPage /> },
       { path: '/settings/security', element: <SecurityPage /> },
-      { path: '/settings/withdraw', element: <WithdrawPage/> },
-      { path: '/settings/security/change-password', element: <ChangePasswordPage/> },
-      
- 
+      { path: '/settings/withdraw', element: <WithdrawPage /> },
+      {
+        path: '/settings/security/change-password',
+        element: <ChangePasswordPage />,
+      },
+
       { path: 'travel', element: <TravelPage /> },
 
       { path: 'myMap', element: <MyMapPage /> },
@@ -107,8 +117,11 @@ const protectedRoutes: RouteObject[] = [
       { path: 'myMap', element: <MyMapPage /> },
       { path: 'publicMap', element: <PublicMapPage /> },
       { path: 'share', element: <SharePage /> },
-      { path: 'shop', element: <ShopPage/> },
-      { path: 'closet', element: <MyClosetPage/> },
+
+      { path: 'shop', element: <ShopPage /> },
+      { path: 'closet', element: <MyClosetPage /> },
+
+      { path: 'photo-edit', element: <PhotoEditPage /> },
     ],
   },
 ];
