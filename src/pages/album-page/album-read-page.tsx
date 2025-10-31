@@ -5,7 +5,7 @@ import ExampleImg from '../../assets/icons/exampleAlbum.svg';
 
 export default function AlbumReadPage() {
   const navigate = useNavigate();
-  const { _albumId } = useParams();
+  const { albumId: _albumId } = useParams();
   const bookRef = useRef<any>(null);
   const [current, setCurrent] = useState(0);
   const [viewport, setViewport] = useState<{ width: number; height: number }>({ width: 0, height: 0 });
