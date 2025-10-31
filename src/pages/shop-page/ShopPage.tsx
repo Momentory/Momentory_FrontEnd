@@ -22,7 +22,7 @@ interface ShopAccessory {
 const ShopPage = () => {
   const [level] = useState(35);
   const [point, setPoint] = useState(1500);
-  const [gem, setGem]= useState(2000);
+  const [gem] = useState(2000);
   const [selectedCategory] = useState('장식');
   const { height, isExpanded, setHeight, setIsExpanded } = useBottomSheet();
   const [equippedAccessories, setEquippedAccessories] = useState<number[]>([]);
