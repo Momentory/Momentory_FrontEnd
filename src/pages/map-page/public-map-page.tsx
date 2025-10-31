@@ -18,16 +18,13 @@ export default function PublicMapPage() {
   const { height, isExpanded, setHeight, setIsExpanded } = useBottomSheet();
   const [selectedRegion, setSelectedRegion] = useState<string>('고양시');
 
-  // BottomSheet가 헤더를 덮지 않도록 최대 높이 계산 (헤더 112px + 여백 20px)
   const totalHeaderHeight = 112;
   const topGap = 20;
   const maxHeight = window.innerHeight - totalHeaderHeight - topGap;
 
-  // 최대 높이에 도달하면 공유 버튼 숨김 (약간의 오차 범위 -10)
   const isAtMaxHeight = height >= maxHeight - 10;
   const showShareButton = !isAtMaxHeight;
 
-  // 지도 컴포넌트 높이 계산 (헤더 112px + 네비 56px = 172px)
   const mapHeightClass = 'h-[calc(100vh-172px)]';
 
   return (
@@ -41,7 +38,7 @@ export default function PublicMapPage() {
 
         <PublicMapView
           className={mapHeightClass}
-          onMarkerClick={(markerId, location) => {
+          onMarkerClick={(_markerId, location) => {
             setIsExpanded(false);
             setHeight(516);
             if (location) {

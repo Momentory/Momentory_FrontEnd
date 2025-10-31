@@ -19,7 +19,6 @@ export default function BottomSheet({
 }) {
   const navigate = useNavigate();
 
-  // 💡 [수정 1] 최대 높이를 516px로 변경
   const MAX_HEIGHT = 516;
   const MIN_HEIGHT = 100;
 
@@ -32,7 +31,6 @@ export default function BottomSheet({
     const onMove = (e: MouseEvent) => {
       e.preventDefault();
       const deltaY = startY - e.clientY;
-      // 💡 [수정 2] 최대/최소 높이 변수 적용
       setHeight(
         Math.max(MIN_HEIGHT, Math.min(MAX_HEIGHT, startHeight + deltaY))
       );
@@ -43,13 +41,13 @@ export default function BottomSheet({
       const deltaY = startY - e.clientY;
 
       if (deltaY > 30) {
-        setHeight(MAX_HEIGHT); // 💡 [수정 3]
+        setHeight(MAX_HEIGHT);
         setIsExpanded(true);
       } else if (deltaY < -30) {
-        setHeight(MIN_HEIGHT); // 💡 [수정 4]
+        setHeight(MIN_HEIGHT);
         setIsExpanded(false);
       } else {
-        setHeight(startExpanded ? MAX_HEIGHT : MIN_HEIGHT); // 💡 [수정 5]
+        setHeight(startExpanded ? MAX_HEIGHT : MIN_HEIGHT);
       }
 
       document.removeEventListener('mousemove', onMove);
@@ -62,10 +60,10 @@ export default function BottomSheet({
 
   const handleClick = () => {
     if (isExpanded) {
-      setHeight(MIN_HEIGHT); // 💡 [수정 6]
+      setHeight(MIN_HEIGHT);
       setIsExpanded(false);
     } else {
-      setHeight(MAX_HEIGHT); // 💡 [수정 7]
+      setHeight(MAX_HEIGHT);
       setIsExpanded(true);
     }
   };
@@ -89,7 +87,6 @@ export default function BottomSheet({
         onClick={handleClick}
       />
 
-      {/* p-6에 pb-14 (56px) 추가된 상태 */}
       <div className="p-6 pb-14">
         <h2 className="text-[25px] font-bold mb-1">경기도 {regionName}</h2>
         <p className="text-sm text-[#A3A3A3] mb-8">최근 방문 2025-10-15</p>

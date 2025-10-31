@@ -31,12 +31,10 @@ export default function PublicBottomSheet({
   const [dragStart, setDragStart] = useState({ y: 0, height: 0 });
   const bottomSheetRef = useRef<HTMLDivElement>(null);
 
-  // 헤더(112px) + 여백(20px)
   const totalHeaderHeight = 112;
   const topGap = 20;
   const maxHeight = window.innerHeight - totalHeaderHeight - topGap;
 
-  // '내 지도'와 동일한 중간 높이 (콘텐츠 + pb-14)
   const midHeight = 516;
 
   const handleMouseDown = (e: React.MouseEvent | React.TouchEvent) => {
@@ -53,7 +51,6 @@ export default function PublicBottomSheet({
       const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
       const deltaY = dragStart.y - clientY;
 
-      // midHeight(516)부터 maxHeight 사이에서만 드래그
       const newHeight = Math.min(
         Math.max(midHeight, dragStart.height + deltaY),
         maxHeight
@@ -142,7 +139,7 @@ export default function PublicBottomSheet({
       ref={bottomSheetRef}
       data-bottom-sheet
       className={`absolute bottom-0 left-1/2 -translate-x-1/2 w-[450px] bg-white rounded-t-2xl shadow-lg z-30 overflow-hidden ${
-        isExpanded ? 'flex flex-col' : '' // 최대 높이일 때만 flex
+        isExpanded ? 'flex flex-col' : ''
       } ${!isDragging ? 'transition-all duration-300' : ''}`}
       style={{ height: `${height}px` }}
     >
@@ -153,9 +150,6 @@ export default function PublicBottomSheet({
         onClick={handleClick}
       />
 
-      {/* 중간 높이(516px)일 때: pb-14가 적용되지만, 516px가 넉넉해서 스크롤 안 생김 (overflow-y-hidden)
-        최대 높이(maxHeight)일 때: pb-14가 적용되고, isExpanded가 true가 되어 flex-1, overflow-y-auto 활성화
-      */}
       <div
         className={`p-6 pb-14 ${
           isExpanded ? 'flex-1 overflow-y-auto' : 'overflow-y-hidden'

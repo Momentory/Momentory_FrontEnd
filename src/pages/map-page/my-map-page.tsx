@@ -52,11 +52,9 @@ export default function MyMapPage() {
     }
   };
 
-  // 💡 [수정 1] 헤더(56+60) + 네비(56) = 172px
   const mapHeightClass = 'h-[calc(100vh-172px)]';
 
   return (
-    // 💡 [수정 2] h-full 클래스 제거
     <div className="relative flex justify-center items-center bg-gray-50 font-Pretendard">
       <div className="relative max-w-[480px] w-full bg-white shadow-lg overflow-hidden flex flex-col">
         <DropdownHeader
@@ -65,7 +63,6 @@ export default function MyMapPage() {
           dropdownItems={dropdownItems}
         />
 
-        {/* 💡 [수정 3] 계산된 높이 클래스 전달 */}
         <MapView
           className={mapHeightClass}
           zoomed={zoomed}
@@ -75,8 +72,7 @@ export default function MyMapPage() {
           zoomOutMarker={zoomOutMarker}
           setZoomed={setZoomed}
           setActiveMarkerId={setActiveMarkerId}
-          onMarkerClick={(markerId, location) => {
-            // 마커 클릭 시 바텀시트를 중간 높이로 열기
+          onMarkerClick={(_markerId, location) => {
             setIsExpanded(false);
             setHeight(516);
             if (location) {

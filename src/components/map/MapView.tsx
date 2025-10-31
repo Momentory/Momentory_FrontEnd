@@ -50,7 +50,6 @@ const markerAlbums: Album[] = [
   { id: 3, imageUrl: p4, title: '3 나의 앨범 페이지로 이동' },
 ];
 
-// 💡 [수정 1] 타입에 className?: string 추가
 export default function MapView({
   zoomed,
   activeMarkerId,
@@ -59,7 +58,7 @@ export default function MapView({
   setZoomed,
   setActiveMarkerId,
   onMarkerClick,
-  className, // 💡 [수정 2] props로 className 받기
+  className,
 }: MapViewProps & { className?: string }) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const pinchStartDistRef = useRef<number | null>(null);
@@ -152,11 +151,10 @@ export default function MapView({
   };
 
   const handleWheel = (e: React.WheelEvent) => {
-    // 트랙패드 핀치 → ctrlKey 가 true인 wheel 이벤트로 전달됨
+    // 트랙패드 핀치
     if (!e.ctrlKey) return;
     e.preventDefault();
 
-    // 마우스 위치를 기준으로 transform-origin 설정
     const container = containerRef.current;
     if (container) {
       const rect = container.getBoundingClientRect();
@@ -165,7 +163,6 @@ export default function MapView({
       originPosRef.current = { top: `${topPct}%`, left: `${leftPct}%` };
     }
 
-    // 연속 스케일 적용: 자연스러운 곡선으로 감쇠
     const factor = Math.exp(-e.deltaY * 0.002);
     const next = Math.max(1, Math.min(2, scaleRef.current * factor));
     updateZoomState(next);
@@ -176,7 +173,6 @@ export default function MapView({
     const mapElement = document.querySelector('#map-container img[alt="지도"]');
     if (!mapElement) return;
 
-    // SVG를 직접 로드해서 DOM에 삽입
     fetch(map)
       .then((res) => res.text())
       .then((svgText) => {
@@ -185,7 +181,6 @@ export default function MapView({
         const svgElement = svgDoc.querySelector('svg');
 
         if (svgElement && mapElement.parentElement) {
-          // 기존 img를 SVG로 교체
           svgElement.setAttribute('class', mapElement.className);
           svgElement.setAttribute(
             'style',
@@ -193,7 +188,6 @@ export default function MapView({
           );
           mapElement.replaceWith(svgElement);
 
-          // 마커가 있는 지역에 selected 클래스 추가
           markers.forEach((marker) => {
             if (marker.location) {
               // 시/군 이름으로 시작하는 모든 path를 찾아서 칠함 (구 포함)
@@ -214,7 +208,6 @@ export default function MapView({
     <main
       id="map-container"
       ref={containerRef}
-      // 💡 [수정 3] 'flex-1'을 지우고 전달받은 className으로 교체
       className={`relative mb-20 cursor-pointer ${className || ''}`}
       style={{
         backgroundImage: `url(${mapBack})`,

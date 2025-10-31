@@ -154,10 +154,11 @@ export default function PublicMapView({
 
   // 마커가 있는 지역을 지도에 표시
   useEffect(() => {
-    const mapElement = document.querySelector('#public-map-container img[alt="지도"]');
+    const mapElement = document.querySelector(
+      '#public-map-container img[alt="지도"]'
+    );
     if (!mapElement) return;
 
-    // SVG를 직접 로드해서 DOM에 삽입
     fetch(map)
       .then((res) => res.text())
       .then((svgText) => {
@@ -166,7 +167,6 @@ export default function PublicMapView({
         const svgElement = svgDoc.querySelector('svg');
 
         if (svgElement && mapElement.parentElement) {
-          // 기존 img를 SVG로 교체
           svgElement.setAttribute('class', mapElement.className);
           svgElement.setAttribute(
             'style',
@@ -174,10 +174,8 @@ export default function PublicMapView({
           );
           mapElement.replaceWith(svgElement);
 
-          // 마커가 있는 지역에 selected 클래스 추가
           markers.forEach((marker) => {
             if (marker.location) {
-              // 시/군 이름으로 시작하는 모든 path를 찾아서 칠함 (구 포함)
               const pathElements = svgElement.querySelectorAll(
                 `path[id^="${marker.location}"]`
               );
