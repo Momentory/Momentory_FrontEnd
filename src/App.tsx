@@ -31,6 +31,8 @@ import CreateAlbumPage from './pages/album-page/create-album-page';
 import AlbumDetailPage from './pages/album-page/album-detail-page';
 import EditAlbumPage from './pages/album-page/edit-album-page';
 
+import PhotoEditPage from './pages/photo-edit-page';
+
 const queryClient = new QueryClient();
 
 const publicRoutes: RouteObject[] = [
@@ -76,6 +78,8 @@ const protectedRoutes: RouteObject[] = [
       { path: 'myMap', element: <MyMapPage /> },
       { path: 'publicMap', element: <PublicMapPage /> },
       { path: 'share', element: <SharePage /> },
+
+      { path: 'photo-edit', element: <PhotoEditPage /> },
     ],
   },
 ];
