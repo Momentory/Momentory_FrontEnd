@@ -7,13 +7,22 @@ export default function BottomSheet({
   setHeight,
   isExpanded,
   setIsExpanded,
+  isPublic = false,
+  regionName = '고양시',
 }: {
   height: number;
   setHeight: (v: number) => void;
   isExpanded: boolean;
   setIsExpanded: (v: boolean) => void;
+  isPublic?: boolean;
+  regionName?: string;
 }) {
   const navigate = useNavigate();
+
+  // 💡 [수정 1] 최대 높이를 516px로 변경
+  const MAX_HEIGHT = 516;
+  const MIN_HEIGHT = 100;
+
   const handleDrag = (e: React.MouseEvent) => {
     e.preventDefault();
     const startY = e.clientY;
@@ -23,22 +32,24 @@ export default function BottomSheet({
     const onMove = (e: MouseEvent) => {
       e.preventDefault();
       const deltaY = startY - e.clientY;
-      setHeight(Math.max(100, Math.min(460, startHeight + deltaY)));
+      // 💡 [수정 2] 최대/최소 높이 변수 적용
+      setHeight(
+        Math.max(MIN_HEIGHT, Math.min(MAX_HEIGHT, startHeight + deltaY))
+      );
     };
 
     const onUp = (e: MouseEvent) => {
       e.preventDefault();
       const deltaY = startY - e.clientY;
 
-      // [수정] (func1(), func2()) -> { func1(); func2(); }
       if (deltaY > 30) {
-        setHeight(460);
+        setHeight(MAX_HEIGHT); // 💡 [수정 3]
         setIsExpanded(true);
       } else if (deltaY < -30) {
-        setHeight(100);
+        setHeight(MIN_HEIGHT); // 💡 [수정 4]
         setIsExpanded(false);
       } else {
-        setHeight(startExpanded ? 460 : 100);
+        setHeight(startExpanded ? MAX_HEIGHT : MIN_HEIGHT); // 💡 [수정 5]
       }
 
       document.removeEventListener('mousemove', onMove);
@@ -50,19 +61,21 @@ export default function BottomSheet({
   };
 
   const handleClick = () => {
-    // [수정] (func1(), func2()) -> { func1(); func2(); }
     if (isExpanded) {
-      setHeight(100);
+      setHeight(MIN_HEIGHT); // 💡 [수정 6]
       setIsExpanded(false);
     } else {
-      setHeight(460);
+      setHeight(MAX_HEIGHT); // 💡 [수정 7]
       setIsExpanded(true);
     }
   };
 
   const handlePhotoFrameClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    navigate('/upload');
+    // 지역별 사진 페이지로 이동
+    navigate(`/region-photos/${encodeURIComponent(regionName)}`, {
+      state: { isPublic },
+    });
   };
 
   return (
@@ -75,11 +88,15 @@ export default function BottomSheet({
         onMouseDown={handleDrag}
         onClick={handleClick}
       />
-      <div className="p-6">
-        <h2 className="text-[25px] font-bold mb-1">경기도 고양시</h2>
+
+      {/* p-6에 pb-14 (56px) 추가된 상태 */}
+      <div className="p-6 pb-14">
+        <h2 className="text-[25px] font-bold mb-1">경기도 {regionName}</h2>
         <p className="text-sm text-[#A3A3A3] mb-8">최근 방문 2025-10-15</p>
 
-        <h3 className="text-[18px] font-semibold mb-3">나의 사진</h3>
+        <h3 className="text-[18px] font-semibold mb-3">
+          {isPublic ? '공개된 전체 사진' : '공개 중인 전체 사진'}
+        </h3>
         <div className="grid grid-cols-3 gap-2">
           {[1, 2, 3, 4, 5].map((i) => (
             <div

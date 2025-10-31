@@ -1,3 +1,13 @@
+/**
+ * @deprecated
+ * 현재 사용되지 않음 (BottomSheet.tsx로 통합됨)
+ * 추후 전체 지도에 지역별 앨범 기능이 다시 필요할 경우를 대비해 보관
+ *
+ * 사용 이력:
+ * - 이전: PublicMapPage에서 지역별 앨범 표시용으로 사용
+ * - 현재: BottomSheet.tsx 사용 (내 지도와 동일)
+ */
+
 import { useState, useEffect, useRef } from 'react';
 import leftMap from '../../assets/left-map.svg';
 import rightMap from '../../assets/right-map.svg';
@@ -21,7 +31,13 @@ export default function PublicBottomSheet({
   const [dragStart, setDragStart] = useState({ y: 0, height: 0 });
   const bottomSheetRef = useRef<HTMLDivElement>(null);
 
-  const maxHeight = window.innerHeight * 0.9;
+  // 헤더(112px) + 여백(20px)
+  const totalHeaderHeight = 112;
+  const topGap = 20;
+  const maxHeight = window.innerHeight - totalHeaderHeight - topGap;
+
+  // '내 지도'와 동일한 중간 높이 (콘텐츠 + pb-14)
+  const midHeight = 516;
 
   const handleMouseDown = (e: React.MouseEvent | React.TouchEvent) => {
     e.preventDefault();
@@ -37,15 +53,16 @@ export default function PublicBottomSheet({
       const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
       const deltaY = dragStart.y - clientY;
 
+      // midHeight(516)부터 maxHeight 사이에서만 드래그
       const newHeight = Math.min(
-        Math.max(460, dragStart.height + deltaY),
+        Math.max(midHeight, dragStart.height + deltaY),
         maxHeight
       );
       setHeight(newHeight);
 
       if (newHeight >= maxHeight - 50) {
         setIsExpanded(true);
-      } else if (newHeight <= 460) {
+      } else if (newHeight <= midHeight) {
         setIsExpanded(false);
       }
     };
@@ -56,11 +73,11 @@ export default function PublicBottomSheet({
       if (height >= maxHeight - 50) {
         setHeight(Math.floor(maxHeight));
         setIsExpanded(true);
-      } else if (height > 460 + 100) {
+      } else if (height > midHeight + 100) {
         setHeight(Math.floor(maxHeight));
         setIsExpanded(true);
       } else {
-        setHeight(460);
+        setHeight(midHeight);
         setIsExpanded(false);
       }
     };
@@ -76,20 +93,25 @@ export default function PublicBottomSheet({
       document.removeEventListener('touchmove', handleMove);
       document.removeEventListener('touchend', handleEnd);
     };
-  }, [isDragging, dragStart, height, maxHeight, setHeight, setIsExpanded]);
+  }, [
+    isDragging,
+    dragStart,
+    height,
+    maxHeight,
+    midHeight,
+    setHeight,
+    setIsExpanded,
+  ]);
 
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (height === 100) {
-      // 초기 높이 → 460px
-      setHeight(460);
+      setHeight(midHeight);
       setIsExpanded(false);
-    } else if (height === 460) {
-      // 460px → 최대 높이
+    } else if (height === midHeight) {
       setHeight(Math.floor(maxHeight));
       setIsExpanded(true);
     } else if (height >= maxHeight - 50) {
-      // 최대 높이 → 초기 높이(100px)
       setHeight(100);
       setIsExpanded(false);
     }
@@ -97,7 +119,7 @@ export default function PublicBottomSheet({
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (height === 460 && selectedMarkerId) {
+      if (height === midHeight && selectedMarkerId) {
         const target = e.target as HTMLElement;
         if (!bottomSheetRef.current?.contains(target)) {
           setHeight(100);
@@ -106,38 +128,47 @@ export default function PublicBottomSheet({
       }
     };
 
-    if (height === 460) {
+    if (height === midHeight) {
       document.addEventListener('click', handleClickOutside);
     }
 
     return () => {
       document.removeEventListener('click', handleClickOutside);
     };
-  }, [height, selectedMarkerId, setHeight, setIsExpanded]);
+  }, [height, midHeight, selectedMarkerId, setHeight, setIsExpanded]);
 
   return (
     <div
       ref={bottomSheetRef}
       data-bottom-sheet
       className={`absolute bottom-0 left-1/2 -translate-x-1/2 w-[450px] bg-white rounded-t-2xl shadow-lg z-30 overflow-hidden ${
-        !isDragging ? 'transition-all duration-300' : ''
-      }`}
+        isExpanded ? 'flex flex-col' : '' // 최대 높이일 때만 flex
+      } ${!isDragging ? 'transition-all duration-300' : ''}`}
       style={{ height: `${height}px` }}
     >
       <div
-        className="w-20 h-1 bg-[#E2E2E2] rounded-full mx-auto mt-4 cursor-pointer"
+        className="w-20 h-1 bg-[#E2E2E2] rounded-full mx-auto mt-4 cursor-pointer flex-shrink-0"
         onMouseDown={handleMouseDown}
         onTouchStart={handleMouseDown}
         onClick={handleClick}
       />
 
-      <div className="p-6">
+      {/* 중간 높이(516px)일 때: pb-14가 적용되지만, 516px가 넉넉해서 스크롤 안 생김 (overflow-y-hidden)
+        최대 높이(maxHeight)일 때: pb-14가 적용되고, isExpanded가 true가 되어 flex-1, overflow-y-auto 활성화
+      */}
+      <div
+        className={`p-6 pb-14 ${
+          isExpanded ? 'flex-1 overflow-y-auto' : 'overflow-y-hidden'
+        }`}
+      >
         {selectedMarkerId ? (
           <>
             <h2 className="text-[25px] font-bold mb-1">경기도 고양시</h2>
             <p className="text-sm text-[#A3A3A3] mb-8">최근 방문 2025-10-15</p>
 
-            <h3 className="text-[18px] font-semibold mb-3">나의 사진</h3>
+            <h3 className="text-[18px] font-semibold mb-3">
+              공개 중인 전체 사진
+            </h3>
             <div className="grid grid-cols-3 gap-2">
               {[1, 2, 3, 4, 5].map((i) => (
                 <div key={i} className="h-[106px] bg-[#EDE2E2]" />

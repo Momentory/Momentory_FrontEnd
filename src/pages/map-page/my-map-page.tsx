@@ -20,6 +20,7 @@ const dropdownItems = [
 export default function MyMapPage() {
   const navigate = useNavigate();
   const [isCapturing, setIsCapturing] = useState(false);
+  const [selectedRegion, setSelectedRegion] = useState<string>('고양시');
 
   const {
     zoomed,
@@ -27,6 +28,8 @@ export default function MyMapPage() {
     originPosRef,
     zoomIn: zoomInMarker, // alias 사용
     zoomOut: zoomOutMarker, // alias 사용
+    setZoomed,
+    setActiveMarkerId,
   } = useMapZoom();
 
   const { height, isExpanded, setHeight, setIsExpanded } = useBottomSheet();
@@ -34,10 +37,7 @@ export default function MyMapPage() {
   const handleShareClick = async () => {
     try {
       setIsCapturing(true);
-
-      // 지도 캡처
       const imageDataUrl = await captureMap('map-container');
-
       navigate('/share', {
         state: {
           imageUrl: imageDataUrl,
@@ -52,21 +52,37 @@ export default function MyMapPage() {
     }
   };
 
+  // 💡 [수정 1] 헤더(56+60) + 네비(56) = 172px
+  const mapHeightClass = 'h-[calc(100vh-172px)]';
+
   return (
-    <div className="relative h-full flex justify-center items-center bg-gray-50 font-Pretendard">
-      <div className="relative max-w-[480px] w-full h-full bg-white shadow-lg overflow-hidden flex flex-col">
+    // 💡 [수정 2] h-full 클래스 제거
+    <div className="relative flex justify-center items-center bg-gray-50 font-Pretendard">
+      <div className="relative max-w-[480px] w-full bg-white shadow-lg overflow-hidden flex flex-col">
         <DropdownHeader
           title="내 지도"
           hasDropdown
           dropdownItems={dropdownItems}
         />
 
+        {/* 💡 [수정 3] 계산된 높이 클래스 전달 */}
         <MapView
+          className={mapHeightClass}
           zoomed={zoomed}
           activeMarkerId={activeMarkerId}
           originPosRef={originPosRef}
           zoomInMarker={zoomInMarker}
           zoomOutMarker={zoomOutMarker}
+          setZoomed={setZoomed}
+          setActiveMarkerId={setActiveMarkerId}
+          onMarkerClick={(markerId, location) => {
+            // 마커 클릭 시 바텀시트를 중간 높이로 열기
+            setIsExpanded(false);
+            setHeight(516);
+            if (location) {
+              setSelectedRegion(location);
+            }
+          }}
         />
 
         <button
@@ -85,6 +101,8 @@ export default function MyMapPage() {
           setHeight={setHeight}
           isExpanded={isExpanded}
           setIsExpanded={setIsExpanded}
+          isPublic={false}
+          regionName={selectedRegion}
         />
       </div>
     </div>

@@ -7,7 +7,9 @@ interface Props {
   active: boolean;
   album?: Album;
   zoomed: boolean;
-  zoomIn: (marker: Marker) => void;
+  onMarkerClick?: (markerId: number, location?: string) => void;
+  style?: React.CSSProperties;
+  isPublic?: boolean; // 전체 지도인지 여부
 }
 
 export default function MarkerPopup({
@@ -15,20 +17,22 @@ export default function MarkerPopup({
   active,
   album,
   zoomed,
-  zoomIn,
+  onMarkerClick,
+  style,
+  isPublic = false,
 }: Props) {
   const navigate = useNavigate();
   const rightSide = parseFloat(marker.left) > 70;
 
   const handleImageClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    navigate('/album');
+    // 이미지 팝업 클릭 시 아무 동작 안 함
   };
 
   return (
     <div
       className="absolute -translate-x-1/2 -translate-y-1/2"
-      style={{ top: marker.top, left: marker.left }}
+      style={{ top: marker.top, left: marker.left, ...style }}
     >
       {(!zoomed || active) && (
         <img
@@ -36,7 +40,7 @@ export default function MarkerPopup({
           className="w-8 h-8 cursor-pointer"
           onClick={(e) => {
             e.stopPropagation();
-            zoomIn(marker);
+            onMarkerClick && onMarkerClick(marker.id, marker.location);
           }}
         />
       )}

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import DropdownHeader from '../../components/common/DropdownHeader';
 import PublicMapView from '../../components/map/PublicMapView';
-import PublicBottomSheet from '../../components/map/PublicBottomSheet';
+import BottomSheet from '../../components/map/BottomSheet';
 
 import MapPinIcon from '../../assets/map-pin.svg?react';
 import LockIcon from '../../assets/lock-icon.svg?react';
@@ -16,31 +16,40 @@ const dropdownItems = [
 
 export default function PublicMapPage() {
   const { height, isExpanded, setHeight, setIsExpanded } = useBottomSheet();
-  const [selectedMarkerId, setSelectedMarkerId] = useState<number | null>(null);
+  const [selectedRegion, setSelectedRegion] = useState<string>('고양시');
 
-  const handleMarkerClick = (markerId: number) => {
-    setSelectedMarkerId(markerId);
-    setIsExpanded(true);
-    setHeight(460);
-  };
+  // BottomSheet가 헤더를 덮지 않도록 최대 높이 계산 (헤더 112px + 여백 20px)
+  const totalHeaderHeight = 112;
+  const topGap = 20;
+  const maxHeight = window.innerHeight - totalHeaderHeight - topGap;
 
-  const maxHeight =
-    typeof window !== 'undefined' ? window.innerHeight * 0.9 : 600;
+  // 최대 높이에 도달하면 공유 버튼 숨김 (약간의 오차 범위 -10)
   const isAtMaxHeight = height >= maxHeight - 10;
   const showShareButton = !isAtMaxHeight;
 
+  // 지도 컴포넌트 높이 계산 (헤더 112px + 네비 56px = 172px)
+  const mapHeightClass = 'h-[calc(100vh-172px)]';
+
   return (
-    <div className="relative h-full flex justify-center items-center bg-gray-50 font-Pretendard">
-      <div className="relative max-w-[480px] w-full h-full bg-white shadow-lg overflow-hidden flex flex-col">
+    <div className="relative flex justify-center items-center bg-gray-50 font-Pretendard">
+      <div className="relative max-w-[480px] w-full bg-white shadow-lg overflow-hidden flex flex-col">
         <DropdownHeader
           title="전체 지도"
           hasDropdown
           dropdownItems={dropdownItems}
         />
 
-        <PublicMapView onMarkerClick={handleMarkerClick} />
+        <PublicMapView
+          className={mapHeightClass}
+          onMarkerClick={(markerId, location) => {
+            setIsExpanded(false);
+            setHeight(516);
+            if (location) {
+              setSelectedRegion(location);
+            }
+          }}
+        />
 
-        {/* 공유 버튼: 하단시트가 끝까지 올라갔을 때만 숨김 */}
         {showShareButton && (
           <button
             onClick={() => console.log('공유 클릭')}
@@ -51,13 +60,13 @@ export default function PublicMapPage() {
           </button>
         )}
 
-        {/* 하단 시트 */}
-        <PublicBottomSheet
+        <BottomSheet
           height={height}
           setHeight={setHeight}
           isExpanded={isExpanded}
           setIsExpanded={setIsExpanded}
-          selectedMarkerId={selectedMarkerId}
+          isPublic={true}
+          regionName={selectedRegion}
         />
       </div>
     </div>

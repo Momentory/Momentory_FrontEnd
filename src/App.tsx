@@ -22,13 +22,14 @@ import CreateProfilePage from './pages/Auth/CreateProfilePage';
 import SelectCharacterPage from './pages/Auth/SelectCharacterPage';
 import AccountCreatedPage from './pages/Auth/AccountCreatedPage';
 
-import CreateAlbumPage from './pages/album-page/create-album-page';
-import AlbumDetailPage from './pages/album-page/album-detail-page';
-import EditAlbumPage from './pages/album-page/edit-album-page';
-
 import MyMapPage from './pages/map-page/my-map-page';
 import PublicMapPage from './pages/map-page/public-map-page';
 import SharePage from './pages/share-page';
+import RegionPhotosPage from './pages/photo-upload-page/region-photos-page';
+
+import CreateAlbumPage from './pages/album-page/create-album-page';
+import AlbumDetailPage from './pages/album-page/album-detail-page';
+import EditAlbumPage from './pages/album-page/edit-album-page';
 
 const queryClient = new QueryClient();
 
@@ -62,6 +63,11 @@ const protectedRoutes: RouteObject[] = [
       { path: 'community', element: <CommunityPage /> },
       { path: 'community/upload', element: <CommunityUploadPage /> },
       { path: 'travel', element: <TravelPage /> },
+
+      { path: 'myMap', element: <MyMapPage /> },
+      { path: 'publicMap', element: <PublicMapPage /> },
+      { path: 'share', element: <SharePage /> },
+      { path: 'region-photos/:region', element: <RegionPhotosPage /> },
 
       { path: 'create-album', element: <CreateAlbumPage /> },
       { path: 'album/:albumId', element: <AlbumDetailPage /> },
