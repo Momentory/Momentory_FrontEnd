@@ -20,7 +20,7 @@ import CreateAlbumPage from './pages/album-page/create-album-page';
 import AlbumDetailPage from './pages/album-page/album-detail-page';
 import EditAlbumPage from './pages/album-page/edit-album-page';
 import MyClosetPage from './pages/shop-page/MyClosetPage';
-import ShopPage from './pages/shop-page';
+import ShopPage from './pages/shop-page/ShopPage';
 
 const queryClient = new QueryClient();
 
