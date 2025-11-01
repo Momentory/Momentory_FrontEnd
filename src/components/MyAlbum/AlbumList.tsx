@@ -13,13 +13,14 @@ interface AlbumListProps {
 
 const AlbumList = ({ albums }: AlbumListProps) => {
   return (
-    <div className="grid grid-cols-3 gap-5">
+    <div className="flex gap-5 overflow-x-auto pb-4">
       {albums.map(album => (
-        <AlbumCard 
-          key={album.id} 
-          imgSrc={album.imgSrc} 
-          date={album.date} 
-          location={album.location} 
+        <AlbumCard
+          key={album.id}
+          id={album.id}
+          imgSrc={album.imgSrc}
+          date={album.date}
+          location={album.location}
         />
       ))}
     </div>

@@ -1,12 +1,18 @@
-import { createBrowserRouter, RouterProvider, Navigate, type RouteObject } from "react-router-dom";
+import {
+  createBrowserRouter,
+  RouterProvider,
+  Navigate,
+  type RouteObject,
+} from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import PublicLayout from './layouts/public-layout';
 import ProtectedLayout from './layouts/protected-layout';
 import CharacterPage from './pages/character-page';
 import HomePage from './pages/home-page';
 import TravelPage from './pages/travel-page';
-import MyAlbumPage from './pages/myAlbum-page';
+import MyAlbumPage from './pages/album-page';
 import UploadPage from './pages/photo-upload-page/UploadPage';
+
 import { CommunityPage, CommunityUploadPage, CommunityDetailPage } from "./pages/community-page";
 import SplashPage from "./pages/Auth/SplashPage";
 import LoginScreen from "./pages/Auth/LoginScreen";
@@ -18,7 +24,16 @@ import SelectCharacterPage from './pages/Auth/SelectCharacterPage';
 import AccountCreatedPage from "./pages/Auth/AccountCreatedPage";
 import KakaoCallback from "./pages/Auth/KakaoCallback";
 
+import MyMapPage from './pages/map-page/my-map-page';
+import PublicMapPage from './pages/map-page/public-map-page';
+import SharePage from './pages/share-page';
+import RegionPhotosPage from './pages/photo-upload-page/region-photos-page';
 
+import CreateAlbumPage from './pages/album-page/create-album-page';
+import AlbumDetailPage from './pages/album-page/album-detail-page';
+import EditAlbumPage from './pages/album-page/edit-album-page';
+import MyClosetPage from './pages/shop-page/MyClosetPage';
+import ShopPage from './pages/shop-page/ShopPage';
 
 const queryClient = new QueryClient();
 
@@ -53,15 +68,28 @@ const protectedRoutes: RouteObject[] = [
       { path: 'community', element: <CommunityPage /> },
       { path: "community/upload", element: <CommunityUploadPage /> },
       { path: "community/:postId", element: <CommunityDetailPage /> },
+ 
       { path: 'travel', element: <TravelPage /> },
+
+      { path: 'myMap', element: <MyMapPage /> },
+      { path: 'publicMap', element: <PublicMapPage /> },
+      { path: 'share', element: <SharePage /> },
+      { path: 'region-photos/:region', element: <RegionPhotosPage /> },
+
+      { path: 'create-album', element: <CreateAlbumPage /> },
+      { path: 'album/:albumId', element: <AlbumDetailPage /> },
+      { path: 'edit/:id', element: <EditAlbumPage /> },
+
+      { path: 'myMap', element: <MyMapPage /> },
+      { path: 'publicMap', element: <PublicMapPage /> },
+      { path: 'share', element: <SharePage /> },
+      { path: 'shop', element: <ShopPage/> },
+      { path: 'closet', element: <MyClosetPage/> },
     ],
   },
 ];
 
-
-
-
-const router = createBrowserRouter([...publicRoutes,...protectedRoutes]);
+const router = createBrowserRouter([...publicRoutes, ...protectedRoutes]);
 
 function App() {
   return (

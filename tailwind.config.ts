@@ -5,7 +5,8 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        Pretendard: ['Pretendard', 'sans-serif'],
+        inter: ['Inter', 'sans-serif'],
+        nanum: ['NanumSquareRound', 'sans-serif'],
       },       
     },
   },

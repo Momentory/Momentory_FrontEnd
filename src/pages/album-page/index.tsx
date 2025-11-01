@@ -2,8 +2,8 @@ import { useNavigate } from "react-router-dom";
 import DropdownHeader from "../../components/common/DropdownHeader";
 import CreateAlbumIcon from "../../assets/icons/addAlbum.svg?react";
 import ShopIcon from "../../assets/icons/shopIcon.svg?react";
-import SeedIcon from "../../assets/icons/seedIcon.svg?react";
-import RouletteIcon from "../../assets/icons/starIcon.svg?react";
+import ClosetIcon from "../../assets/icons/closetIcon.svg?react";
+import GalleryIcon from "../../assets/icons/galleryIcon.svg?react";
 import ExampleAlbum from "../../assets/icons/exampleAlbum.svg";
 import AlbumList from "../../components/MyAlbum/AlbumList";
 
@@ -40,18 +40,18 @@ const MyAlbumPage = () => {
 
           <button
             className="bg-white rounded-[20px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] border border-[#DDDDDD] flex flex-col justify-center items-center p-4 cursor-pointer"
-            onClick={() => navigate("/growth-diary")}
+            onClick={() => navigate("/closet")}
           >
-            <SeedIcon className="w-16 h-16" />
-            <p className="text-center mt-2.5 text-[#9c9c9c] font-bold text-base">성장 일기</p>
+            <ClosetIcon className="w-16 h-16" />
+            <p className="text-center mt-2.5 text-[#9c9c9c] font-bold text-base">캐릭터 옷장</p>
           </button>
 
           <button
             className="bg-[#FF7070] rounded-[20px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] flex flex-col justify-center items-center p-4 cursor-pointer"
-            onClick={() => navigate("/roulette")}
+            onClick={() => navigate("/gallery")}
           >
-            <RouletteIcon className="w-16 h-16" />
-            <p className="text-center mt-2.5 text-white font-bold text-base">룰렛</p>
+            <GalleryIcon className="w-16 h-16" />
+            <p className="text-center mt-2.5 text-white font-bold text-base">사진 기록</p>
           </button>
         </div>
 
