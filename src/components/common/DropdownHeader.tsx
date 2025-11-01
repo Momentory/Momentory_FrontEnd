@@ -13,12 +13,14 @@ interface DropdownHeaderProps {
   title?: string;
   hasDropdown?: boolean;
   dropdownItems?: DropdownItem[];
+  rightItem?: React.ReactNode;
 }
 
 const DropdownHeader = ({
   title = '',
   hasDropdown = false,
   dropdownItems = [],
+  rightItem = false,
 }: DropdownHeaderProps) => {
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
@@ -65,8 +67,9 @@ const DropdownHeader = ({
               />
             )}
           </div>
-
-          <div className="w-6 h-6" />
+          <div className="flex items-center justify-center w-8 h-8">
+            {rightItem && rightItem}
+          </div>
         </div>
       </div>
       <div
