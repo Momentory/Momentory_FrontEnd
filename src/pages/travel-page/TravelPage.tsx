@@ -97,7 +97,7 @@ export default function TravelPage() {
         </div>
       )}
 
-      {/* 여행지 목록 (이미지 포함 카드) */}
+      {/* 여행지 목록 */}
       <div className="p-4 grid grid-cols-2 gap-4">
         {filteredPlaces.map((place) => (
           <div

@@ -31,7 +31,7 @@ const Sidebar = ({ isOpen, onClose, userName = "Username", userEmail = "example@
       ></div>
 
       <aside
-        className={`absolute top-0 left-0 h-full w-[82vw] max-w-[480px] bg-white shadow-lg z-200 transition-transform duration-300 ease-in-out overflow-y-auto 
+        className={`absolute top-0 left-0 h-full w-[75vw] sm:w-[320px] bg-white shadow-lg z-200 transition-transform duration-300 ease-in-out overflow-y-auto 
         ${
           isOpen ? "translate-x-0" : "-translate-x-full"
         }`}

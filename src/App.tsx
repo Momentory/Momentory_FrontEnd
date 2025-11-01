@@ -7,7 +7,7 @@ import HomePage from './pages/home-page';
 import TravelPage from './pages/travel-page';
 import MyAlbumPage from './pages/myAlbum-page';
 import UploadPage from './pages/photo-upload-page/UploadPage';
-import { CommunityPage, CommunityUploadPage } from "./pages/community-page";
+import { CommunityPage, CommunityUploadPage, CommunityDetailPage } from "./pages/community-page";
 import SplashPage from "./pages/Auth/SplashPage";
 import LoginScreen from "./pages/Auth/LoginScreen";
 import SigninScreen from "./pages/Auth/SigninScreen";
@@ -16,6 +16,7 @@ import TermsOfServicePage from "./pages/Auth/TermsOfServicePage";
 import CreateProfilePage from "./pages/Auth/CreateProfilePage";
 import SelectCharacterPage from './pages/Auth/SelectCharacterPage';
 import AccountCreatedPage from "./pages/Auth/AccountCreatedPage";
+import KakaoCallback from "./pages/Auth/KakaoCallback";
 
 
 
@@ -30,6 +31,7 @@ const publicRoutes: RouteObject[] = [
       { path: 'login', element: <LoginScreen /> },
       { path: 'signinscreen', element: <SigninScreen /> },
       { path: 'signup', element: <CreateAccountPage /> },
+      { path: 'auth/kakao/callback', element: <KakaoCallback /> },
       { path: 'terms', element: <TermsOfServicePage /> },
       { path: 'create-profile', element: <CreateProfilePage /> },
       { path: 'select', element: <SelectCharacterPage /> },
@@ -50,6 +52,7 @@ const protectedRoutes: RouteObject[] = [
       { path: 'album', element: <MyAlbumPage /> },
       { path: 'community', element: <CommunityPage /> },
       { path: "community/upload", element: <CommunityUploadPage /> },
+      { path: "community/:postId", element: <CommunityDetailPage /> },
       { path: 'travel', element: <TravelPage /> },
     ],
   },

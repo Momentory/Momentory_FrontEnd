@@ -133,18 +133,30 @@ export default function HomePage() {
         <img
           src="/images/char1.png"
           alt="캐릭터"
-          className="absolute left-1/2 -translate-x-1/2"
+          className="absolute left-1/2 -translate-x-1/4 z-1"
           style={{
-            width: "227px",
-            height: "257px",
-            bottom: "25px",
+            width: "380px",
+            height: "430px",
+            bottom: "-40px",
+          }}
+        />
+
+        <img
+          src="/images/ribon.png"
+          alt="리본"
+          className="absolute -translate-x-1/4 z-1"
+          style={{
+            width: "76px",
+            height: "48px",
+            bottom: "138px",
+            left:"47%"
           }}
         />
 
         <img
           src="/images/ground.png"
           alt="ground"
-          className="absolute bottom-0 left-0 w-full h-[100px] object-left object-cover"
+          className="absolute bottom-0 left-0 w-full h-[100px] object-left object-cover z-0"
         />
       </div>
 
@@ -212,7 +224,7 @@ export default function HomePage() {
         )}
         {isError && (
           <div className="text-center text-gray-500 py-6">
-            데이터를 불러오지 못했습니다
+            {/* 데이터를 불러오지 못했습니다 */}
           </div>
         )}
 
@@ -350,7 +362,7 @@ export default function HomePage() {
           </div>
         </div>
       )}
-     
+
       {/* 업로드 모달 */}
       {isUploadModalOpen && (
         <div
