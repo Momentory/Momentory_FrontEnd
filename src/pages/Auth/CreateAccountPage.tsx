@@ -72,14 +72,17 @@ export default function CreateAccountPage() {
   // 이메일 인증 요청
   const handleEmailClick = async () => {
     try {
+
       await checkEmail(email);
       await sendEmail(email);
+
       setEmailSent(true);
       alert("인증 메일이 발송되었습니다. 메일함을 확인해주세요.");
     } catch {
       alert("이미 존재하는 이메일이거나 발송 중 오류가 발생했습니다.");
     }
   };
+
 
   // 이메일 인증 확인
   const handleVerifyClick = async () => {
@@ -220,13 +223,12 @@ export default function CreateAccountPage() {
             <button
               type="button"
               onClick={emailSent ? handleVerifyClick : handleEmailClick}
-              className={`w-[90px] h-[50px] rounded-[10px] text-white text-[14px] font-medium ${
-                emailVerified
+              className={`w-[90px] h-[50px] rounded-[10px] text-white text-[14px] font-medium ${emailVerified
                   ? "bg-green-400"
                   : emailSent
-                  ? "bg-gray-400"
-                  : "bg-[#FF7070]"
-              }`}
+                    ? "bg-gray-400"
+                    : "bg-[#FF7070]"
+                }`}
             >
               {emailVerified ? "완료" : emailSent ? "인증" : "링크발송"}
             </button>
@@ -249,9 +251,8 @@ export default function CreateAccountPage() {
           {/* 유효성 메시지 */}
           {password && (
             <p
-              className={`text-[13px] mt-1 ${
-                isPasswordValid ? "text-green-500" : "text-red-500"
-              }`}
+              className={`text-[13px] mt-1 ${isPasswordValid ? "text-green-500" : "text-red-500"
+                }`}
             >
               {passwordMessage}
             </p>
@@ -269,9 +270,8 @@ export default function CreateAccountPage() {
           {/* 일치 여부 메시지 */}
           {passwordConfirm && (
             <p
-              className={`text-[13px] mt-1 ${
-                isPasswordMatch ? "text-green-500" : "text-red-500"
-              }`}
+              className={`text-[13px] mt-1 ${isPasswordMatch ? "text-green-500" : "text-red-500"
+                }`}
             >
               {confirmMessage}
             </p>
@@ -299,9 +299,8 @@ export default function CreateAccountPage() {
         <button
           disabled={!agree}
           type="submit"
-          className={`w-[332px] h-[70px] text-white text-[18px] font-semibold rounded-[25px] mt-8 transition active:scale-95 ${
-            agree ? "bg-[#FF7070]" : "bg-gray-300"
-          }`}
+          className={`w-[332px] h-[70px] text-white text-[18px] font-semibold rounded-[25px] mt-8 transition active:scale-95 ${agree ? "bg-[#FF7070]" : "bg-gray-300"
+            }`}
         >
           다음
         </button>
