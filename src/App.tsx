@@ -34,6 +34,8 @@ import AlbumDetailPage from './pages/album-page/album-detail-page';
 import EditAlbumPage from './pages/album-page/edit-album-page';
 import MyClosetPage from './pages/shop-page/MyClosetPage';
 import ShopPage from './pages/shop-page/ShopPage';
+import NewItemPage from './pages/shop-page/NewItemPage';
+import EventPage from './pages/shop-page/EventPage';
 
 const queryClient = new QueryClient();
 
@@ -84,6 +86,8 @@ const protectedRoutes: RouteObject[] = [
       { path: 'publicMap', element: <PublicMapPage /> },
       { path: 'share', element: <SharePage /> },
       { path: 'shop', element: <ShopPage/> },
+      { path: 'shop/new', element: <NewItemPage />},
+      { path: 'shop/event', element: <EventPage />},
       { path: 'closet', element: <MyClosetPage/> },
     ],
   },
