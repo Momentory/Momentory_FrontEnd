@@ -27,7 +27,7 @@ const AlbumDetailPage = () => {
         <div className="relative max-w-sm mx-auto">
           <button
             className="w-full rounded-3xl bg-[#FF7070] py-3.5 text-lg font-bold text-white shadow-md transition hover:bg-[#E56363] cursor-pointer"
-            onClick={() => navigate(`/myalbum/${albumId}`)}
+            onClick={() => navigate(`/album/${albumId}/read`)}
           >
             읽기
           </button>
