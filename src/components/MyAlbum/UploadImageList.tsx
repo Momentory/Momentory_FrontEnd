@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import CheckIcon from "../../assets/icons/CheckIcon.svg?react";
+import CheckIcon from "../../assets/icons/checkIcon.svg?react";
 
 interface UploadImageSelectorProps {
   images: string[];
