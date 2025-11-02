@@ -11,13 +11,22 @@ import CharacterPage from './pages/character-page';
 import HomePage from './pages/home-page';
 import TravelPage from './pages/travel-page';
 import MyAlbumPage from './pages/album-page';
-import UploadPage from './pages/photo-upload-page/UploadPage';
 
 import {
   CommunityPage,
   CommunityUploadPage,
   CommunityDetailPage,
 } from './pages/community-page';
+
+import PhotoUploadPage from './pages/photo-upload-page';
+import PhotoUploadProgressPage from './pages/photo-upload-page/upload-progress';
+import PhotoUploadSuccessPage from './pages/photo-upload-page/upload-success';
+import StampAcquisitionPage from './pages/photo-upload-page/stamp-acquisition';
+import QuestionPage from './pages/photo-upload-page/question';
+import AuthenticationPage from './pages/photo-upload-page/authentication';
+import RecommendedPlacesPage from './pages/photo-upload-page/recommended-places';
+import PhotoEditPage from './pages/photo-edit-page';
+
 import SplashPage from './pages/Auth/SplashPage';
 import LoginScreen from './pages/Auth/LoginScreen';
 import SigninScreen from './pages/Auth/SigninScreen';
@@ -41,7 +50,7 @@ import ChangePasswordPage from './pages/settings-page/ChangePasswordPage';
 import MyMapPage from './pages/map-page/my-map-page';
 import PublicMapPage from './pages/map-page/public-map-page';
 import SharePage from './pages/share-page';
-import RegionPhotosPage from './pages/photo-upload-page/region-photos-page';
+import RegionPhotosPage from './pages/photo-upload-page/region-photos';
 
 import CreateAlbumPage from './pages/album-page/create-album-page';
 import AlbumDetailPage from './pages/album-page/album-detail-page';
@@ -49,8 +58,6 @@ import EditAlbumPage from './pages/album-page/edit-album-page';
 import AlbumReadPage from './pages/album-page/album-read-page';
 import MyClosetPage from './pages/shop-page/MyClosetPage';
 import ShopPage from './pages/shop-page/ShopPage';
-
-import PhotoEditPage from './pages/photo-edit-page';
 
 const queryClient = new QueryClient();
 
@@ -80,7 +87,6 @@ const protectedRoutes: RouteObject[] = [
       { index: true, element: <Navigate to="/home" replace /> },
       { path: 'home', element: <HomePage /> },
       { path: 'character', element: <CharacterPage /> },
-      { path: 'upload', element: <UploadPage /> },
       { path: 'album', element: <MyAlbumPage /> },
       { path: 'community', element: <CommunityPage /> },
       { path: 'community/upload', element: <CommunityUploadPage /> },
@@ -121,7 +127,15 @@ const protectedRoutes: RouteObject[] = [
       { path: 'shop', element: <ShopPage /> },
       { path: 'closet', element: <MyClosetPage /> },
 
+      { path: 'upload', element: <PhotoUploadPage /> },
+
       { path: 'photo-edit', element: <PhotoEditPage /> },
+      { path: 'photo-upload-progress', element: <PhotoUploadProgressPage /> },
+      { path: 'photo-upload-success', element: <PhotoUploadSuccessPage /> },
+      { path: 'stamp-acquisition', element: <StampAcquisitionPage /> },
+      { path: 'question', element: <QuestionPage /> },
+      { path: 'authentication', element: <AuthenticationPage /> },
+      { path: 'recommended-places', element: <RecommendedPlacesPage /> },
     ],
   },
 ];
