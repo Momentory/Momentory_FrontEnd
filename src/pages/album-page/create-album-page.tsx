@@ -32,8 +32,8 @@ const CreateAlbumPage = () => {
 
   return (
     <>
-      <DropdownHeader title="나의 사진첩" />
-      <div className="p-7.5 pb-32">
+      <DropdownHeader title="새로 만들기" />
+      <div className="p-8 pb-32">
         <div className="grid grid-cols-2 gap-4">
           {templates.map((template) => (
             <div key={template.id} className="relative">
@@ -63,7 +63,7 @@ const CreateAlbumPage = () => {
           ))}
         </div>
 
-        <div className="sticky bottom-0 flex flex-col gap-4 mt-8 z-10 pb-4.5">
+        <div className="bottom-0 flex flex-col gap-4 mt-6 z-10 pb-4.5">
           <button
             className="w-full rounded-3xl bg-[#FF7070] py-4 text-lg font-bold text-white transition hover:bg-[#E56363] cursor-pointer"
             onClick={handleNext}
@@ -71,13 +71,10 @@ const CreateAlbumPage = () => {
             다음
           </button>
           <button
-            className={`w-full rounded-3xl py-4 text-lg font-bold transition cursor-pointer
-              ${selectedTemplate ? 'bg-[#FF7070] text-white hover:bg-[#E56363]' : 'bg-[#EAEAEA] text-[#8D8D8D] cursor-not-allowed'}
-            `}
-            onClick={handleNext}
-            disabled={!selectedTemplate}
+            className={`w-full rounded-3xl py-4 text-lg font-bold transition cursor-pointer bg-[#EAEAEA] text-[#8D8D8D]`}
+            onClick={()=>navigate(-1)}
           >
-            템플릿 보기
+            취소
           </button>
         </div>
       </div>
