@@ -2,24 +2,11 @@ import type { TemplateProps } from '../../../../types/Templates';
 import React from 'react';
 import PlusIcon from '../../../../assets/icons/plusIcon.svg?react';
 
-const TitleTemplate1: React.FC<TemplateProps> = ({ data, updateData, onEmptyAreaClick }) => {
+const TitleTemplate1: React.FC<TemplateProps> = ({ data, updateData, onEmptyAreaClick, onImageClick }) => {
   const today = new Date();
   const month = String(today.getMonth() + 1).padStart(2, '0');
   const day = String(today.getDate()).padStart(2, '0');
   const year = today.getFullYear();
-
-  const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      if (typeof reader.result === 'string') {
-        updateData({ image: reader.result });
-      }
-    };
-    reader.readAsDataURL(file);
-  };
 
   const handleEmptyClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget && onEmptyAreaClick) {
@@ -53,19 +40,14 @@ const TitleTemplate1: React.FC<TemplateProps> = ({ data, updateData, onEmptyArea
             className="w-full h-full object-cover"
           />
         )}
-        <label
+        <div
           className={`absolute inset-0 flex items-center justify-center cursor-pointer transition-colors ${
             !data.image ? 'bg-[#D8D8D8]' : 'bg-transparent hover:bg-black/30'
           }`}
+          onClick={() => onImageClick?.('image')}
         >
-          <input
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={handleUpload}
-          />
           {!data.image && <PlusIcon className="w-9 h-9" />}
-        </label>
+        </div>
       </div>
     </div>
   );

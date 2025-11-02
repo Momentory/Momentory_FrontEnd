@@ -42,28 +42,30 @@ const TemplateEditModal: React.FC<TemplateEditModalProps> = ({
 
   return (
     <Modal title="템플릿 수정" onClose={onClose}>
-      <div className="w-full px-4">
-        <div className="grid grid-cols-2 gap-4">
-          {templates.map((template) => (
-            <button
-              key={template.id}
-              onClick={() => {
-                onSelectTemplate(template.id);
-                onClose();
-              }}
-              className={`w-full rounded-lg overflow-hidden border-2 transition ${
-                currentTemplateId === template.id
-                  ? 'border-[#FF7070]'
-                  : 'border-gray-300 hover:border-gray-400'
-              }`}
-            >
-              <img
-                src={template.image}
-                alt={`Template ${template.id}`}
-                className="w-full object-cover"
-              />
-            </button>
-          ))}
+      <div className="flex flex-col w-full h-full max-h-[100vh]">
+        <div className="flex-1 overflow-y-auto -mx-4 px-4">
+          <div className="grid grid-cols-2 gap-4 pb-4">
+            {templates.map((template) => (
+              <button
+                key={template.id}
+                onClick={() => {
+                  onSelectTemplate(template.id);
+                  onClose();
+                }}
+                className={`w-full rounded-3xl overflow-hidden border-2 transition ${
+                  currentTemplateId === template.id
+                    ? 'border-[#FF7070]'
+                    : 'border-gray-300 hover:border-gray-400'
+                }`}
+              >
+                <img
+                  src={template.image}
+                  alt={`Template ${template.id}`}
+                  className="w-full object-cover"
+                />
+              </button>
+            ))}
+          </div>
         </div>
       </div>
     </Modal>

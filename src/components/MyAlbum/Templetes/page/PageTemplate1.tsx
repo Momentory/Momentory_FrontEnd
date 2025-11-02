@@ -2,23 +2,7 @@ import type { TemplateProps } from '../../../../types/Templates';
 import React from 'react';
 import PlusIcon from '../../../../assets/icons/plusIcon.svg?react';
 
-const PageTemplate1: React.FC<TemplateProps> = ({ data, updateData, onEmptyAreaClick }) => {
-  const handleUpload = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    imageKey: 'image1' | 'image2' | 'image3',
-  ) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      if (typeof reader.result === 'string') {
-        updateData({ [imageKey]: reader.result });
-      }
-    };
-    reader.readAsDataURL(file);
-  };
-
+const PageTemplate1: React.FC<TemplateProps> = ({ data, updateData, onEmptyAreaClick, onImageClick }) => {
   const handleEmptyClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget && onEmptyAreaClick) {
       onEmptyAreaClick({
@@ -33,41 +17,32 @@ const PageTemplate1: React.FC<TemplateProps> = ({ data, updateData, onEmptyAreaC
       <div className="flex justify-between items-start h-[35%] mb-[40px]">
         <div className="w-[30%] h-full relative bg-gray-100 overflow-hidden">
           {data.image1 && <img src={data.image1} alt="Image 1" className="w-full h-full object-cover" />}
-          <label className={`absolute inset-0 flex items-center justify-center cursor-pointer transition-colors ${!data.image1 ? 'bg-[#D8D8D8]' : 'bg-transparent hover:bg-black/30'}`}>
-            <input
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={(e) => handleUpload(e, 'image1')}
-            />
+          <div 
+            className={`absolute inset-0 flex items-center justify-center cursor-pointer transition-colors ${!data.image1 ? 'bg-[#D8D8D8]' : 'bg-transparent hover:bg-black/30'}`}
+            onClick={() => onImageClick?.('image1')}
+          >
             {!data.image1 && <PlusIcon className="w-8 h-8 text-gray-400" />}
-          </label>
+          </div>
         </div>
 
         <div className="w-[30%] h-full relative bg-gray-100 overflow-hidden mt-[40px]">
           {data.image2 && <img src={data.image2} alt="Image 2" className="w-full h-full object-cover" />}
-          <label className={`absolute inset-0 flex items-center justify-center cursor-pointer transition-colors ${!data.image2 ? 'bg-[#D8D8D8]' : 'bg-transparent hover:bg-black/30'}`}>
-            <input
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={(e) => handleUpload(e, 'image2')}
-            />
+          <div 
+            className={`absolute inset-0 flex items-center justify-center cursor-pointer transition-colors ${!data.image2 ? 'bg-[#D8D8D8]' : 'bg-transparent hover:bg-black/30'}`}
+            onClick={() => onImageClick?.('image2')}
+          >
             {!data.image2 && <PlusIcon className="w-8 h-8 text-gray-400" />}
-          </label>
+          </div>
         </div>
 
         <div className="w-[30%] h-full relative bg-gray-100 overflow-hidden">
           {data.image3 && <img src={data.image3} alt="Image 3" className="w-full h-full object-cover" />}
-          <label className={`absolute inset-0 flex items-center justify-center cursor-pointer transition-colors ${!data.image3 ? 'bg-[#D8D8D8]' : 'bg-transparent hover:bg-black/30'}`}>
-            <input
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={(e) => handleUpload(e, 'image3')}
-            />
+          <div 
+            className={`absolute inset-0 flex items-center justify-center cursor-pointer transition-colors ${!data.image3 ? 'bg-[#D8D8D8]' : 'bg-transparent hover:bg-black/30'}`}
+            onClick={() => onImageClick?.('image3')}
+          >
             {!data.image3 && <PlusIcon className="w-8 h-8 text-gray-400" />}
-          </label>
+          </div>
         </div>
       </div>
 

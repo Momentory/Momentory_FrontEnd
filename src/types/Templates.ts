@@ -16,4 +16,5 @@ export interface TemplateProps {
   data: PageData;
   updateData: (changes: Partial<PageData>) => void;
   onEmptyAreaClick?: (position: { x: number; y: number }) => void;
+  onImageClick?: (fieldName: string) => void;
 }

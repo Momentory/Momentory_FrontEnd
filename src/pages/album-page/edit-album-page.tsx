@@ -5,6 +5,7 @@ import Modal from '../../components/common/Modal';
 import Popover from '../../components/common/Popover';
 import MemoStickerModal from '../../components/MyAlbum/MemoStickerModal';
 import TemplateEditModal from '../../components/MyAlbum/TemplateEditModal';
+import UploadImageSelector from '../../components/MyAlbum/UploadImageList';
 import TitleTemplate1 from '../../components/MyAlbum/Templetes/title/TitleTemplate1';
 import TitleTemplate2 from '../../components/MyAlbum/Templetes/title/TitleTemplate2';
 import TitleTemplate3 from '../../components/MyAlbum/Templetes/title/TitleTemplate3';
@@ -55,6 +56,16 @@ const EditAlbumPage = () => {
   const [popoverPosition, setPopoverPosition] = useState<{ x: number; y: number } | null>(null);
   const [showMemoStickerModal, setShowMemoStickerModal] = useState(false);
   const [showTemplateEditModal, setShowTemplateEditModal] = useState(false);
+  const [showImageSelector, setShowImageSelector] = useState(false);
+  const [currentImageField, setCurrentImageField] = useState<string>('');
+  
+  // 업로드된 이미지 목록 (API 연결로 변경 필요)
+  const [uploadedImages] = useState<string[]>([
+    '/images/everland.jpg',
+    '/images/event1.png',
+    '/images/event2.png',
+    '/images/event3.png',
+  ]);
 
   const currentPage = pages[currentPageIndex];
   const Template = templateMap[currentPage.templateId];
@@ -66,8 +77,9 @@ const EditAlbumPage = () => {
   };
 
   const addPage = (templateId: number) => {
-    setPages([...pages, createEmptyPageData(templateId)]);
-    setCurrentPageIndex(pages.length);
+    const newPage = createEmptyPageData(templateId);
+    setPages((prevPages) => [...prevPages, newPage]);
+    setCurrentPageIndex(pages.length); // 새로 추가된 페이지의 인덱스
     setShowModal(false);
     setSelectedTemplate(null);
   };
@@ -91,6 +103,62 @@ const EditAlbumPage = () => {
     setPages(newPages);
   };
 
+  const getMaxSelectionForCurrentTemplate = () => {
+    const currentTemplateId = currentPage.templateId;
+    
+    // PageTemplate1: 3개 이미지
+    if (currentTemplateId === 11) return 3;
+    // PageTemplate3: 2개 이미지
+    if (currentTemplateId === 13) return 2;
+    // 나머지는 단일 이미지
+    return 1;
+  };
+
+  const handleImageFieldClick = (fieldName: string) => {
+    setCurrentImageField(fieldName);
+    setShowImageSelector(true);
+  };
+
+  const handleImageSelect = (images: string[]) => {
+    if (!currentImageField) return;
+    
+    const currentTemplateId = currentPage.templateId;
+    const isPageTemplate = currentTemplateId >= 11;
+    
+    if (isPageTemplate && currentTemplateId === 11) {
+      const fields = ['image1', 'image2', 'image3'] as const;
+      const startIndex = fields.indexOf(currentImageField as 'image1' | 'image2' | 'image3');
+      if (startIndex !== -1) {
+        const updates: Partial<PageData> = {};
+        images.forEach((img, idx) => {
+          if (startIndex + idx < fields.length) {
+            const field = fields[startIndex + idx];
+            (updates as any)[field] = img;
+          }
+        });
+        updatePageData(currentPageIndex, updates);
+      }
+    } else if (isPageTemplate && currentTemplateId === 13) {
+      const fields = ['image1', 'image2'] as const;
+      const startIndex = fields.indexOf(currentImageField as 'image1' | 'image2');
+      if (startIndex !== -1) {
+        const updates: Partial<PageData> = {};
+        images.forEach((img, idx) => {
+          if (startIndex + idx < fields.length) {
+            const field = fields[startIndex + idx];
+            (updates as any)[field] = img;
+          }
+        });
+        updatePageData(currentPageIndex, updates);
+      }
+    } else {
+      updatePageData(currentPageIndex, { [currentImageField]: images[0] });
+    }
+    
+    setShowImageSelector(false);
+    setCurrentImageField('');
+  };
+
   const pageTemplatesForModal = [
     { id: 11, image: pageTemplate1Icon },
     { id: 12, image: pageTemplate2Icon },
@@ -100,13 +168,24 @@ const EditAlbumPage = () => {
 
   return (
     <div>
-      <DropdownHeader title="앨범 편집" />
+      <DropdownHeader 
+        title={`${currentPageIndex + 1} / ${pages.length}`}
+        rightItem={
+          <button
+            className="flex items-center justify-center font-bold text-[#5D9CCF] transition"
+            onClick={() => setShowModal(true)}
+          >
+            추가
+          </button>
+        }
+      />
       <div className="flex flex-col items-center relative">
         {Template && (
           <Template
             data={currentPage}
             updateData={(changes) => updatePageData(currentPageIndex, changes)}
             onEmptyAreaClick={handleEmptyAreaClick}
+            onImageClick={handleImageFieldClick}
           />
         )}
         {popoverPosition && (
@@ -127,12 +206,6 @@ const EditAlbumPage = () => {
           이전
         </button>
         <button
-          className="px-4 py-2 bg-[#FF7070] text-white rounded"
-          onClick={() => setShowModal(true)}
-        >
-          새 페이지 추가
-        </button>
-        <button
           className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
           disabled={currentPageIndex === pages.length - 1}
           onClick={() => setCurrentPageIndex(currentPageIndex + 1)}
@@ -140,45 +213,39 @@ const EditAlbumPage = () => {
           다음
         </button>
       </div>
-
-      <div className="flex justify-center gap-2 mt-4">
-        {pages.map((_, idx) => (
-          <span
-            key={idx}
-            className={`w-3 h-3 rounded-full cursor-pointer ${
-              idx === currentPageIndex ? 'bg-[#FF7070]' : 'bg-gray-300'
-            }`}
-            onClick={() => setCurrentPageIndex(idx)}
-          />
-        ))}
-      </div>
       {showModal && (
         <Modal title="템플릿 선택" onClose={() => setShowModal(false)}>
-          <div className="grid grid-cols-2 gap-4 px-4">
-            {pageTemplatesForModal.map((template) => (
-              <div key={template.id} className="relative">
-                <button
-                  onClick={() => setSelectedTemplate(template.id)}
-                  className={`w-full overflow-hidden border ${
-                    selectedTemplate === template.id ? 'border-2 border-[#FF7070]' : 'border-[#4F4F4F]'
-                  }`}
-                >
-                  <img src={template.image} alt={`Template ${template.id}`} className="w-full object-cover" />
-                </button>
+          <div className="flex flex-col w-full h-full max-h-[60vh]">
+            <div className="flex-1 overflow-y-auto -mx-4 px-4">
+              <div className="grid grid-cols-2 gap-4 pb-4">
+                {pageTemplatesForModal.map((template) => (
+                  <div key={template.id} className="relative">
+                    <button
+                      onClick={() => setSelectedTemplate(template.id)}
+                      className={`w-full overflow-hidden border ${
+                        selectedTemplate === template.id ? 'border-2 border-[#FF7070]' : 'border-[#4F4F4F]'
+                      }`}
+                    >
+                      <img src={template.image} alt={`Template ${template.id}`} className="w-full object-cover" />
+                    </button>
+                  </div>
+                ))}
               </div>
-            ))}
+            </div>
+            <div className="pt-4 -mx-4 px-4 border-t border-gray-200 mt-2">
+              <button
+                className={`w-full rounded-3xl py-4 text-lg font-bold transition ${
+                  selectedTemplate
+                    ? 'bg-[#FF7070] text-white hover:bg-[#E56363]'
+                    : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                }`}
+                disabled={!selectedTemplate}
+                onClick={() => selectedTemplate && addPage(selectedTemplate)}
+              >
+                선택
+              </button>
+            </div>
           </div>
-          <button
-            className={`mt-4 w-full rounded-3xl py-4 text-lg font-bold transition ${
-              selectedTemplate
-                ? 'bg-[#FF7070] text-white hover:bg-[#E56363]'
-                : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-            }`}
-            disabled={!selectedTemplate}
-            onClick={() => selectedTemplate && addPage(selectedTemplate)}
-          >
-            선택
-          </button>
         </Modal>
       )}
       <MemoStickerModal
@@ -191,6 +258,15 @@ const EditAlbumPage = () => {
         currentTemplateId={currentPage.templateId}
         onSelectTemplate={handleTemplateChange}
       />
+      {showImageSelector && (
+        <Modal title="이미지 선택" onClose={() => setShowImageSelector(false)}>
+          <UploadImageSelector
+            images={uploadedImages}
+            onSelect={handleImageSelect}
+            maxSelection={getMaxSelectionForCurrentTemplate()}
+          />
+        </Modal>
+      )}
     </div>
   );
 };

@@ -8,9 +8,8 @@ const ProtectedLayout = () => {
   const location = useLocation();
   const isEditPage = location.pathname.startsWith('/edit/');
   const isAlbumPage = location.pathname.startsWith('/album/');
-  const isCreateAlbumPage = location.pathname.startsWith('/create-album/');
+  const isCreateAlbumPage = location.pathname.startsWith('/create-album');
   const isAlbumReadPage = location.pathname.includes('/read');
-
   const isShopPage = location.pathname.startsWith('/shop');
   const isClosetPage = location.pathname.startsWith('/closet');
   

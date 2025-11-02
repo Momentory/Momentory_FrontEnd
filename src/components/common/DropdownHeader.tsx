@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ChevronDown from '../../assets/icons/dropdown.svg?react';
 import BackIcon from '../../assets/icons/BackIcon.svg?react';
@@ -25,6 +25,13 @@ const DropdownHeader = ({
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const [selectedTitle, setSelectedTitle] = useState(title);
+
+  // title prop이 변경되면 selectedTitle도 업데이트
+  useEffect(() => {
+    if (!hasDropdown) {
+      setSelectedTitle(title);
+    }
+  }, [title, hasDropdown]);
 
   const toggleDropdown = () => setIsOpen((prev) => !prev);
 
