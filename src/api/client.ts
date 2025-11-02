@@ -7,7 +7,7 @@ import { tokenStore } from "../lib/token";
 
 // Axios 인스턴스 생성
 export const api = axios.create({
-  baseURL: "https://www.momentory.store", // 환경변수 기반으로 바꿔도 무방
+  baseURL: "/api", // 환경변수 기반으로 바꿔도 무방
   withCredentials: true,
   headers: { "Content-Type": "application/json" },
 });

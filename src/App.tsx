@@ -12,15 +12,17 @@ import HomePage from './pages/home-page';
 import TravelPage from './pages/travel-page';
 import MyAlbumPage from './pages/album-page';
 import UploadPage from './pages/photo-upload-page/UploadPage';
-import { CommunityPage, CommunityUploadPage } from './pages/community-page';
-import SplashPage from './pages/Auth/SplashPage';
-import LoginScreen from './pages/Auth/LoginScreen';
-import SigninScreen from './pages/Auth/SigninScreen';
-import CreateAccountPage from './pages/Auth/CreateAccountPage';
-import TermsOfServicePage from './pages/Auth/TermsOfServicePage';
-import CreateProfilePage from './pages/Auth/CreateProfilePage';
+
+import { CommunityPage, CommunityUploadPage, CommunityDetailPage } from "./pages/community-page";
+import SplashPage from "./pages/Auth/SplashPage";
+import LoginScreen from "./pages/Auth/LoginScreen";
+import SigninScreen from "./pages/Auth/SigninScreen";
+import CreateAccountPage from "./pages/Auth/CreateAccountPage";
+import TermsOfServicePage from "./pages/Auth/TermsOfServicePage";
+import CreateProfilePage from "./pages/Auth/CreateProfilePage";
 import SelectCharacterPage from './pages/Auth/SelectCharacterPage';
-import AccountCreatedPage from './pages/Auth/AccountCreatedPage';
+import AccountCreatedPage from "./pages/Auth/AccountCreatedPage";
+import KakaoCallback from "./pages/Auth/KakaoCallback";
 
 import MyMapPage from './pages/map-page/my-map-page';
 import PublicMapPage from './pages/map-page/public-map-page';
@@ -45,6 +47,7 @@ const publicRoutes: RouteObject[] = [
       { path: 'login', element: <LoginScreen /> },
       { path: 'signinscreen', element: <SigninScreen /> },
       { path: 'signup', element: <CreateAccountPage /> },
+      { path: 'auth/kakao/callback', element: <KakaoCallback /> },
       { path: 'terms', element: <TermsOfServicePage /> },
       { path: 'create-profile', element: <CreateProfilePage /> },
       { path: 'select', element: <SelectCharacterPage /> },
@@ -64,7 +67,9 @@ const protectedRoutes: RouteObject[] = [
       { path: 'upload', element: <UploadPage /> },
       { path: 'album', element: <MyAlbumPage /> },
       { path: 'community', element: <CommunityPage /> },
-      { path: 'community/upload', element: <CommunityUploadPage /> },
+      { path: "community/upload", element: <CommunityUploadPage /> },
+      { path: "community/:postId", element: <CommunityDetailPage /> },
+ 
       { path: 'travel', element: <TravelPage /> },
 
       { path: 'myMap', element: <MyMapPage /> },

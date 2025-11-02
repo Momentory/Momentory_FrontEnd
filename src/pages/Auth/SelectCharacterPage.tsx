@@ -5,79 +5,144 @@ export default function SelectCharacterPage() {
   const navigate = useNavigate();
   const [selected, setSelected] = useState<string | null>(null);
 
-  // 캐릭터 리스트
   const characters = [
     { id: "1", name: "Cat", img: "/images/char1.png" },
     { id: "2", name: "Dog", img: "/images/char2.png" },
   ];
 
-  // 캐릭터 선택 후 다음 단계 이동
   const handleNext = () => {
     if (!selected) {
       alert("캐릭터를 선택해주세요!");
       return;
     }
-    alert(`${characters.find((c) => c.id === selected)?.name} 캐릭터가 선택되었습니다!`);
-    navigate("/account"); // 회원가입 완료 페이지로 이동 
+    const chosen = characters.find((c) => c.id === selected);
+    alert(`${chosen?.name} 캐릭터가 선택되었습니다!`);
+    navigate("/account");
   };
 
   return (
-    <div className="flex flex-col items-center justify-between min-h-screen bg-white px-[20px] pt-[100px] pb-[40px] relative">
-      {/*  뒤로가기 버튼 */}
+    <div className="relative flex flex-col items-center justify-start w-[390px] h-[844px] mx-auto bg-white overflow-hidden">
+      {/* 뒤로가기 */}
       <img
         src="/images/109618.png"
         alt="뒤로가기"
-        className="absolute top-[25px] left-[25px] w-[35px] h-[35px] cursor-pointer"
+        className="absolute top-[25px] left-[10px] w-[35px] h-[35px] cursor-pointer"
         onClick={() => navigate(-1)}
       />
 
-      {/*  타이틀 */}
-      <div className="flex flex-col items-center mb-8">
-        <h1 className="text-[24px] font-semibold mb-2 text-center">
-          캐릭터를 선택하세요
-        </h1>
-        <p className="text-gray-500 text-[14px]">
-          나만의 대표 캐릭터를 골라주세요!
-        </p>
-      </div>
+      {/* 타이틀 */}
+      <h1 className="text-[22px] font-semibold text-black mt-[60px] mb-[40px]">
+        당신의 캐릭터를 선택하세요
+      </h1>
 
-      {/* 캐릭터 선택 영역 */}
-      <div className="flex justify-center items-center gap-[10px] mb-12">
-        {characters.map((char) => (
-          <div
-            key={char.id}
-            onClick={() => setSelected(char.id)}
-            className={`relative w-[200px] h-[200px] rounded-[30px] flex items-center justify-center cursor-pointer transition-all duration-300 ${
-              selected === char.id
-                ? "scale-105 border-4 border-[#FF7070] shadow-[0_0_20px_rgba(255,112,112,0.4)]"
-                : "border border-gray-200 hover:scale-105"
-            }`}
-          >
-            <img
-              src={char.img}
-              alt={char.name}
-              className="w-[160px] h-[160px] object-contain"
+      {/* 캐릭터 영역 */}
+      <div className="relative flex justify-center items-end mt-[40px] mb-[40px]">
+        {/* 왼쪽 캐릭터 */}
+        <div
+          onClick={() => setSelected("1")}
+          className="relative flex flex-col items-center cursor-pointer transition-all duration-300 -mr-[150px]"
+          style={{
+            width: "320px",
+            height: "360px",
+            justifyContent: "flex-end",
+          }}
+        >
+          {/* 화살표 */}
+          {selected === "1" && (
+            <div
+              className="absolute"
+              style={{
+                top: "40px",
+                left: "20%",
+                transform: "translateX(-50%) rotate(180deg)",
+                width: 0,
+                height: 0,
+                borderLeft: "22px solid transparent",
+                borderRight: "22px solid transparent",
+                borderBottom: "32px solid #FF7070",
+              }}
             />
-          </div>
-        ))}
+          )}
+          {/* 이미지 */}
+          <img
+            src={characters[0].img}
+            alt="Cat"
+            className={`transition-all duration-300 ${selected === "1"
+                ? "opacity-100 scale-110"
+                : "opacity-30 scale-95"
+              }`}
+            style={{
+              width: "320px",
+              height: "360px",
+              objectFit: "contain",
+            }}
+          />
+        </div>
+
+        {/* 오른쪽 캐릭터 */}
+        <div
+          onClick={() => setSelected("2")}
+          className="relative flex flex-col items-center cursor-pointer transition-all duration-300 -ml-[120px]"
+          style={{
+            width: "320px",
+            height: "340px",
+            justifyContent: "flex-end",
+          }}
+        >
+          {/* 화살표 */}
+          {selected === "2" && (
+            <div
+              className="absolute"
+              style={{
+                top: "20px",
+                left: "70%",
+                transform: "translateX(-50%) rotate(180deg)",
+                width: 0,
+                height: 0,
+                borderLeft: "22px solid transparent",
+                borderRight: "22px solid transparent",
+                borderBottom: "32px solid #FF7070",
+              }}
+            />
+          )}
+          {/* 이미지 */}
+          <img
+            src={characters[1].img}
+            alt="Dog"
+            className={`transition-all duration-300 ${selected === "2"
+                ? "opacity-100 scale-110"
+                : "opacity-30 scale-95"
+              }`}
+            style={{
+              width: "300px",
+              height: "340px",
+              objectFit: "contain",
+            }}
+          />
+        </div>
+      </div>
+      {/* 하단 바 */}
+      <div className="relative w-[300px] h-[7px] bg-gray-200 rounded-full mb-[50px] -mt-[120px]">
+        <div
+          className={`absolute top-0 left-0 h-full bg-[#FF7070] rounded-full transition-all duration-500 ${selected === "1"
+              ? "w-1/2"
+              : selected === "2"
+                ? "w-1/2 left-1/2"
+                : "w-0"
+            }`}
+        ></div>
       </div>
 
-      {/* 선택된 캐릭터 이름 표시 */}
-      {selected && (
-        <p className="text-[18px] font-semibold text-[#FF7070] mb-4">
-          {characters.find((c) => c.id === selected)?.name} 선택됨 
-        </p>
-      )}
 
       {/* 버튼 */}
       <button
         disabled={!selected}
         onClick={handleNext}
-        className={`w-[330px] h-[70px] text-white text-[18px] font-semibold rounded-[25px] transition active:scale-95 ${
-          selected ? "bg-[#FF7070]" : "bg-gray-300 cursor-not-allowed"
-        }`}
+        className={`w-[330px] h-[70px] rounded-[25px] text-white text-[17px] font-semibold transition active:scale-95 ${selected ? "bg-[#FF7070]" : "bg-gray-300 cursor-not-allowed"
+          }`}
+        style={{ position: "absolute", bottom: "80px" }}
       >
-        캐릭터 생성
+        캐릭터 선택 완료
       </button>
     </div>
   );

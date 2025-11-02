@@ -22,9 +22,18 @@ export default function CreateProfilePage() {
       setCheckingNickname(true);
       try {
         const res = await checkNickname(nickname);
-        // 백엔드 응답이 { available: true/false } 라고 가정
-        setNicknameAvailable(res.available);
-      } catch {
+        console.log("닉네임 중복확인 응답:", res);
+
+        // 응답 구조 안전 처리
+        const available =
+          res?.available ??
+          res?.data?.available ??
+          (res && res.code === 200) ??
+          false;
+
+        setNicknameAvailable(available);
+      } catch (error) {
+        console.error("닉네임 중복확인 실패:", error);
         setNicknameAvailable(null);
       } finally {
         setCheckingNickname(false);
@@ -34,13 +43,11 @@ export default function CreateProfilePage() {
     return () => clearTimeout(timeout);
   }, [nickname]);
 
-  // 회원가입(프로필 저장) 클릭 시
+  // 회원가입 버튼 클릭
   const handleSubmit = () => {
     if (!nickname.trim()) return alert("닉네임을 입력해주세요.");
-    if (nicknameAvailable === false)
-      return alert("이미 사용 중인 닉네임입니다.");
-    if (nicknameAvailable === null)
-      return alert("닉네임 중복 확인 중입니다. 잠시만 기다려주세요.");
+    if (checkingNickname) return alert("닉네임 중복 확인 중입니다. 잠시만 기다려주세요.");
+    if (nicknameAvailable === false) return alert("이미 사용 중인 닉네임입니다.");
 
     alert("프로필이 저장되었습니다!");
     navigate("/select");
@@ -65,9 +72,9 @@ export default function CreateProfilePage() {
       <div className="relative w-[120px] h-[120px] mb-4">
         <div className="w-full h-full bg-[#EADCDC] rounded-full flex items-center justify-center">
           <img
-            src="/images/profile-default.png"
+            src="/images/profile.png"
             alt="프로필"
-            className="w-[70px] h-[70px] opacity-70"
+            className="w-[120px] h-[120px] opacity-70"
           />
         </div>
         <div className="absolute bottom-0 right-0 bg-white w-[30px] h-[30px] rounded-full shadow flex items-center justify-center">
@@ -97,17 +104,13 @@ export default function CreateProfilePage() {
           />
         </div>
 
-        {/* 닉네임 중복 상태 메시지 */}
+        {/* 닉네임 상태 메시지 */}
         {checkingNickname ? (
-          <p className="text-gray-400 text-[13px] mt-1">확인 중...</p>
+          <p className="text-gray-400 text-[13px] mt-1 animate-pulse">닉네임 중복 확인 중...</p>
         ) : nicknameAvailable === true ? (
-          <p className="text-green-500 text-[13px] mt-1">
-            사용 가능한 닉네임입니다 
-          </p>
+          <p className="text-green-500 text-[13px] mt-1">사용 가능한 닉네임입니다 ✅</p>
         ) : nicknameAvailable === false ? (
-          <p className="text-red-500 text-[13px] mt-1">
-            이미 사용 중인 닉네임입니다 
-          </p>
+          <p className="text-red-500 text-[13px] mt-1">이미 사용 중인 닉네임입니다 ❌</p>
         ) : null}
       </div>
 
@@ -155,15 +158,15 @@ export default function CreateProfilePage() {
 
       {/* 회원가입 버튼 */}
       <button
-        disabled={nicknameAvailable === false || checkingNickname}
+        disabled={!nicknameAvailable || checkingNickname}
         onClick={handleSubmit}
         className={`w-[329px] h-[60px] text-white text-[18px] font-semibold rounded-[20px] mt-8 active:scale-95 transition ${
-          nicknameAvailable === true
+          nicknameAvailable && !checkingNickname
             ? "bg-[#FF7070]"
             : "bg-gray-300 cursor-not-allowed"
         }`}
       >
-        회원가입 완료
+        {checkingNickname ? "확인 중..." : nicknameAvailable ? "회원가입 완료" : "회원가입 불가"}
       </button>
 
       {/* 임시 이동 버튼 */}

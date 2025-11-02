@@ -33,23 +33,37 @@ export const reissue = async () => {
 };
 
 
-
 // 검증/중복확인/이메일 관련
 export const checkEmail = (email: string) =>
-  api.get("/api/auth/check-email", { params: { email } });
+  api.get("/auth/check-email", { params: { email} });
 
+// 닉네임 중복 확인
 export const checkNickname = async (nickname: string) => {
-  const { data } = await api.get("/api/auth/check-nickname", {
-    params: { nickname },
-  });
-  return data; 
+  try {
+    const res = await api.get("/api/auth/check-nickname", {
+      params: { nickname },
+    });
+    console.log("서버 응답 전체:", res);
+
+    //백엔드가 data 없이 200만 주는 경우 true로 처리
+    if (res.status === 200 && !res.data) {
+      return { available: true };
+    }
+
+    // axios 구조에서는 res.data가 실제 body
+    return res.data; // body만 리턴
+  } catch (error) {
+    console.error("닉네임 중복확인 실패:", error);
+    throw error;
+  }
 };
 
+
 export const sendEmail = (email: string) =>
-  api.post("/api/auth/send-email", { email });
+  api.post("/auth/send-email", { email });
 
 export const checkEmailVerified = (email: string) =>
-  api.get("/api/auth/check-email-verified", { params: { email } });
+  api.get("/auth/check-email-verified", { params: { email } });
 
 // 비밀번호 유효성 검사
 export const validatePassword = async (
