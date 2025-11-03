@@ -117,16 +117,17 @@ export default function HomePage() {
       <div
         className="relative w-full h-[380px] flex flex-col justify-start items-start px-6 pt-6"
         style={{
-          backgroundImage: `linear-gradient(to bottom, rgba(141,204,255,0.7), rgba(254,255,234,0.7)), url("/images/bg.png")`,
+          backgroundImage: `url("/images/bgImage.png")`,
           backgroundSize: "cover",
           backgroundPosition: "center",
         }}
       >
-        <div className="text-left z-10">
-          <p className="text-[15px] text-black-800 mt+5">
-            안녕하세요 <span className="font-semibold">{userName}</span>님
+
+        <div className="absolute inset-x-0 top-0 h-[86px] bg-black/35 z-[2] flex flex-col justify-center px-[20px]">
+          <p className="text-[15px] text-white font-medium">
+            안녕하세요 <span className="font-bold">{userName}</span>님
           </p>
-          <p className="text-[14px] text-gray-700 mt-1">
+          <p className="text-[14px] text-white mt-1 opacity-90">
             오늘은 어떤 사진을 찍어볼까요?
           </p>
         </div>
@@ -137,7 +138,7 @@ export default function HomePage() {
           style={{
             width: "380px",
             height: "430px",
-            bottom: "-40px",
+            bottom: "-60px",
           }}
         />
 
@@ -148,74 +149,86 @@ export default function HomePage() {
           style={{
             width: "76px",
             height: "48px",
-            bottom: "138px",
-            left:"47%"
+            bottom: "118px",
+            left: "47%"
           }}
-        />
-
-        <img
-          src="/images/ground.png"
-          alt="ground"
-          className="absolute bottom-0 left-0 w-full h-[100px] object-left object-cover z-0"
         />
       </div>
 
       {/* 진행중인 이벤트 */}
       <section className="px-6 mt-8">
+        {/* 제목 + 더보기 */}
         <div className="flex justify-between items-center mb-3">
-          <h2 className="text-[17px] font-semibold">진행중인 이벤트</h2>
+          <h2 className="text-[23px] font-extrabold text-gray-900">진행중인 이벤트</h2>
           <button className="text-[13px] text-gray-500 hover:text-[#FF7070]">
             모두 보기 &gt;
           </button>
         </div>
-        <div className="flex gap-3 overflow-x-auto scrollbar-hide">
-          {[1, 2, 3].map((i) => (
-            <img
-              key={i}
-              src={`/images/event${i}.png`}
-              alt={`event${i}`}
-              className="w-[180px] h-[120px] rounded-[12px] shadow-md object-cover"
-            />
-          ))}
+
+        <div className="relative">
+          <div className="grid grid-cols-3 gap-3 pb-3">
+            {[1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className="relative w-full h-[146px] rounded-[12px] overflow-hidden shadow-md bg-white"
+              >
+                <img
+                  src={`/images/event${i}.png`}
+                  alt={`event${i}`}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            ))}
+          </div>
+
+          <div className="flex justify-center items-center mt-2 gap-[6px]">
+            {[1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className={`w-[7px] h-[7px] rounded-full ${i === 1 ? "bg-[#FF7070]" : "bg-gray-300"
+                  }`}
+              />
+            ))}
+          </div>
         </div>
       </section>
 
       {/* 카테고리 */}
       <section className="px-6 mt-10">
-        <h2 className="text-[17px] font-semibold mb-3">카테고리</h2>
         <div
-          className="rounded-[20px] p-4 flex justify-around text-white shadow-md"
+          className="rounded-[20px] px-5 py-4 shadow-md text-white"
           style={{
             backgroundImage: `linear-gradient(to bottom, rgba(255,112,112,0.95), rgba(255,150,150,0.9))`,
           }}
         >
-          {[
-            { img: "/images/sprout.png", label: "성장현황", link: "/character" },
-            {
-              img: "/images/location-pin.png",
-              label: "나의지도",
-              onClick: () => setIsMapModalOpen(true),
-            },
-            { img: "/images/photo-gallery.png", label: "최근사진", link: "/album" },
-            { img: "/images/star.png", label: "추천여행", link: "/travel" },
-          ].map((item) => (
-            <div
-              key={item.label}
-              className="flex flex-col items-center cursor-pointer active:scale-95 transition"
-              onClick={item.onClick ?? (() => navigate(item.link ?? ""))}
-            >
-              <div className="w-[50px] h-[50px] bg-white/30 rounded-full flex items-center justify-center mb-1">
-                <img src={item.img} alt={item.label} className="w-[32px] h-auto" />
+          <h2 className="text-[23px] font-extrabold mb-3">카테고리</h2>
+
+          <div className="flex justify-around">
+            {[
+              { img: "/images/sprout.png", label: "성장현황", link: "/character" },
+              { img: "/images/location-pin.png", label: "나의지도", onClick: () => setIsMapModalOpen(true) },
+              { img: "/images/roulette.png", label: "여행지 추천", link: "/album" },
+              { img: "/images/star.png", label: "스탬프", link: "/travel" },
+            ].map((item) => (
+              <div
+                key={item.label}
+                className="flex flex-col items-center cursor-pointer active:scale-95 transition"
+                onClick={item.onClick ?? (() => navigate(item.link ?? ""))}
+              >
+                <div className="w-[58px] h-[58px] bg-white rounded-full flex items-center justify-center mb-2 shadow-md">
+                  <img src={item.img} alt={item.label} className="w-[28px] h-auto" />
+                </div>
+                <p className="text-[13px] text-white font-semibold">{item.label}</p>
               </div>
-              <p className="text-[13px]">{item.label}</p>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </section>
 
+
       {/* 추천 여행지 섹션 */}
       <section className="px-6 mt-10 mb-24">
-        <h2 className="text-[17px] font-semibold mb-3">이번 주 추천 장소</h2>
+        <h2 className="text-[23px] font-semibold mb-3">이번 주 추천 장소</h2>
 
         {isLoading && (
           <div className="text-center text-gray-500 py-6">
