@@ -43,6 +43,7 @@ import RegionPhotosPage from './pages/photo-upload-page/region-photos-page';
 import CreateAlbumPage from './pages/album-page/create-album-page';
 import AlbumDetailPage from './pages/album-page/album-detail-page';
 import EditAlbumPage from './pages/album-page/edit-album-page';
+import AlbumReadPage from './pages/album-page/album-read-page';
 import MyClosetPage from './pages/shop-page/MyClosetPage';
 import ShopPage from './pages/shop-page/ShopPage';
 
@@ -100,6 +101,7 @@ const protectedRoutes: RouteObject[] = [
 
       { path: 'create-album', element: <CreateAlbumPage /> },
       { path: 'album/:albumId', element: <AlbumDetailPage /> },
+      { path: 'album/:albumId/read', element: <AlbumReadPage /> },
       { path: 'edit/:id', element: <EditAlbumPage /> },
 
       { path: 'myMap', element: <MyMapPage /> },
