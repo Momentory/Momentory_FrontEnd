@@ -21,9 +21,11 @@ import {
 import PhotoUploadPage from './pages/photo-upload-page';
 import PhotoUploadProgressPage from './pages/photo-upload-page/upload-progress';
 import PhotoUploadSuccessPage from './pages/photo-upload-page/upload-success';
+import PhotoUploadCompletePage from './pages/photo-upload-page/upload-complete';
 import StampAcquisitionPage from './pages/photo-upload-page/stamp-acquisition';
 import QuestionPage from './pages/photo-upload-page/question';
 import AuthenticationPage from './pages/photo-upload-page/authentication';
+import AuthErrorResolutionPage from './pages/photo-upload-page/auth-error-resolution';
 import RecommendedPlacesPage from './pages/photo-upload-page/recommended-places';
 import PhotoEditPage from './pages/photo-edit-page';
 
@@ -132,9 +134,11 @@ const protectedRoutes: RouteObject[] = [
       { path: 'photo-edit', element: <PhotoEditPage /> },
       { path: 'photo-upload-progress', element: <PhotoUploadProgressPage /> },
       { path: 'photo-upload-success', element: <PhotoUploadSuccessPage /> },
+      { path: 'photo-upload-complete', element: <PhotoUploadCompletePage /> },
       { path: 'stamp-acquisition', element: <StampAcquisitionPage /> },
       { path: 'question', element: <QuestionPage /> },
       { path: 'authentication', element: <AuthenticationPage /> },
+      { path: 'auth-error-resolution', element: <AuthErrorResolutionPage /> },
       { path: 'recommended-places', element: <RecommendedPlacesPage /> },
     ],
   },

@@ -7,7 +7,6 @@ export default function PhotoUploadProgressPage() {
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
-    // 진행률 애니메이션
     const interval = setInterval(() => {
       setProgress((prev) => {
         if (prev >= 100) {
@@ -18,7 +17,6 @@ export default function PhotoUploadProgressPage() {
       });
     }, 50);
 
-    // 100% 도달 후 약간의 딜레이를 두고 다음 화면으로
     const timer = setTimeout(() => {
       navigate('/photo-upload-success', {
         state: location.state,
@@ -31,7 +29,6 @@ export default function PhotoUploadProgressPage() {
     };
   }, [navigate, location.state]);
 
-  // SVG 원형 진행 바
   const radius = 60;
   const circumference = 2 * Math.PI * radius;
   const offset = circumference - (progress / 100) * circumference;
@@ -40,7 +37,6 @@ export default function PhotoUploadProgressPage() {
     <div className="flex flex-col items-center justify-center min-h-screen bg-white">
       <div className="relative">
         <svg className="w-40 h-40 transform -rotate-90">
-          {/* 배경 원 */}
           <circle
             cx="80"
             cy="80"
@@ -49,7 +45,6 @@ export default function PhotoUploadProgressPage() {
             stroke="#E5E7EB"
             strokeWidth="12"
           />
-          {/* 진행 원 */}
           <circle
             cx="80"
             cy="80"
@@ -71,4 +66,3 @@ export default function PhotoUploadProgressPage() {
     </div>
   );
 }
-

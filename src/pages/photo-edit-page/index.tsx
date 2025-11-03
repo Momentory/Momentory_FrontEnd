@@ -1,6 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import CloseIcon from '../../assets/icons/closeIcon.svg?react';
 import DropletIcon from '../../assets/droplet.svg?react';
 import MaximizeIcon from '../../assets/maximize.svg?react';
 import DropdownHeader from '../../components/common/DropdownHeader';
@@ -337,7 +336,6 @@ export default function PhotoEditPage() {
       <DropdownHeader
         title="Edit Photo"
         hasDropdown={false}
-        leftIcon={<CloseIcon className="w-5 h-5" />}
         rightAction={
           <button
             onClick={handleNext}

@@ -161,9 +161,7 @@ export default function PhotoUploadPage() {
               address = koreanMatch[1].trim();
             }
           }
-        } catch (error) {
-          // 주소 변환 실패 시 GPS 좌표만 사용
-        }
+        } catch (error) {}
 
         setMarkerLocation({
           address,
@@ -194,7 +192,6 @@ export default function PhotoUploadPage() {
     }
 
     handleCameraOpen();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.key, location.state?.cameraStream]);
 
   useEffect(() => {

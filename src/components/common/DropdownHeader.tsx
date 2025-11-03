@@ -57,7 +57,7 @@ const DropdownHeader = ({
           </button>
 
           <div
-            className={`flex items-center justify-center ${
+            className={`absolute left-1/2 -translate-x-1/2 flex items-center justify-center ${
               hasDropdown ? 'cursor-pointer' : ''
             }`}
             onClick={hasDropdown ? toggleDropdown : undefined}

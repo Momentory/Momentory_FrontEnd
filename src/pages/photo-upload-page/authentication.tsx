@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Modal from '../../components/common/Modal';
 import LoaderIcon from '../../assets/loader.svg?react';
+import AuthFailIcon from '../../assets/authfail.svg?react';
+import WarningIcon from '../../assets/icons/warningIcon.svg?react';
 
 export default function AuthenticationPage() {
   const navigate = useNavigate();
@@ -11,7 +13,6 @@ export default function AuthenticationPage() {
     'loading' | 'success' | 'error' | null
   >(null);
 
-  // TODO: 실제 API에서 질문 정보 가져오기
   const question = '해당 위치 방문을 인증할까요?';
   const questionImage =
     location.state?.questionImage || location.state?.selectedImage;
@@ -41,7 +42,7 @@ export default function AuthenticationPage() {
     setAuthStatus('loading');
 
     setTimeout(() => {
-      const success = Math.random() > 0.3;
+      const success = Math.random() > 0.5;
       setAuthStatus(success ? 'success' : 'error');
     }, 2000);
   };
@@ -61,18 +62,12 @@ export default function AuthenticationPage() {
           points: 50,
         },
       });
+    } else if (authStatus === 'error') {
+      setShowModal(false);
     } else {
       setShowModal(false);
       setAuthStatus(null);
     }
-  };
-
-  const handleRetry = () => {
-    setAuthStatus('loading');
-    setTimeout(() => {
-      const success = Math.random() > 0.3;
-      setAuthStatus(success ? 'success' : 'error');
-    }, 2000);
   };
 
   return (
@@ -88,20 +83,18 @@ export default function AuthenticationPage() {
           )}
         </h2>
 
-        {/* 질문 이미지 */}
         {questionImage && (
           <div className="mb-20 flex justify-center">
-            <div className="w-60 h-60 bg-white border border-[#B3B3B3] overflow-hidden shadow-lg p-5">
+            <div className="w-60 h-60 bg-white border-2 border-[#B3B3B3] overflow-hidden shadow-xl p-5">
               <img
                 src={questionImage}
                 alt="Question"
-                className="w-full aspect-[194/166] object-cover"
+                className="w-full aspect-194/166 object-cover"
               />
             </div>
           </div>
         )}
 
-        {/* 버튼들 */}
         <div className="space-y-3">
           <button
             onClick={handleYes}
@@ -116,9 +109,20 @@ export default function AuthenticationPage() {
             다음에 할게요
           </button>
         </div>
+
+        {authStatus === 'error' && !showModal && (
+          <div
+            className="mt-4 flex items-center justify-center gap-1 cursor-pointer"
+            onClick={() => navigate('/auth-error-resolution')}
+          >
+            <WarningIcon className="w-4 h-4" />
+            <span className="text-[#B0B0B0] text-sm">
+              인증하는 데 문제가 발생하나요?
+            </span>
+          </div>
+        )}
       </div>
 
-      {/* 모달 */}
       {showModal && (
         <Modal
           title={
@@ -161,31 +165,12 @@ export default function AuthenticationPage() {
 
           {authStatus === 'error' && (
             <div className="flex flex-col items-center pb-6">
-              <div className="w-20 h-20 bg-red-500 rounded-full flex items-center justify-center mb-4">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="40"
-                  height="40"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="white"
-                  strokeWidth="3"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <line x1="18" y1="6" x2="6" y2="18"></line>
-                  <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
+              <div className="flex items-center justify-center mb-4">
+                <AuthFailIcon className="w-16 h-16" />
               </div>
-              <p className="text-gray-600 text-center mb-4">
+              <p className="text-[#7C7C7C] text-center mb-4">
                 인증을 완료하지 못했어요.
               </p>
-              <button
-                onClick={handleRetry}
-                className="w-full py-3 px-6 rounded-[25px] bg-[#FF7070] text-white font-semibold hover:bg-[#ff6060] transition-colors"
-              >
-                다시 시도
-              </button>
             </div>
           )}
         </Modal>

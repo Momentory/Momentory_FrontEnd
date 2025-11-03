@@ -1,13 +1,17 @@
 import { useNavigate, useLocation } from 'react-router-dom';
+import defaultImage from '../../assets/p-4.svg';
 
 export default function QuestionPage() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // TODO: 실제 API에서 질문 정보 가져오기
   const question = location.state?.question || '경기 아트센터를 방문하셨나요?';
   const questionImage =
-    location.state?.questionImage || location.state?.selectedImage;
+    location.state?.questionImage ||
+    location.state?.selectedImage ||
+    location.state?.imageUrl ||
+    location.state?.uploadedImage ||
+    defaultImage;
 
   const parseQuestion = (q: string) => {
     const match = q.match(
@@ -56,17 +60,15 @@ export default function QuestionPage() {
           )}
         </h2>
 
-        {questionImage && (
-          <div className="mb-20 flex justify-center">
-            <div className="w-60 h-60 bg-white border border-[#B3B3B3] overflow-hidden shadow-lg p-5">
-              <img
-                src={questionImage}
-                alt="Question"
-                className="w-full aspect-[194/166] object-cover"
-              />
-            </div>
+        <div className="mb-20 flex justify-center">
+          <div className="w-60 h-60 bg-white border-2 border-[#B3B3B3] overflow-hidden shadow-xl p-5">
+            <img
+              src={questionImage}
+              alt="Question"
+              className="w-full aspect-194/166 object-cover"
+            />
           </div>
-        )}
+        </div>
 
         <div className="space-y-3">
           <button
@@ -82,6 +84,19 @@ export default function QuestionPage() {
             아니오, 방문하지 않았어요
           </button>
         </div>
+
+        {/* 인증 실패 안내 텍스트 */}
+        {location.state?.authFailed && (
+          <div
+            className="mt-4 text-center cursor-pointer"
+            onClick={() => navigate('/auth-error-resolution')}
+          >
+            <span className="text-gray-400 text-sm">
+              인증하는 데 문제가 발생하나요?
+            </span>
+            <span className="ml-1 text-gray-400">⚠️</span>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import Modal from '../common/Modal';
+import CloseIcon from '../../assets/icons/closeIcon.svg?react';
 import './ColorPickerModal.css';
 
 interface ColorPickerModalProps {
@@ -143,56 +143,73 @@ export default function ColorPickerModal({
   };
 
   return (
-    <Modal title={selectedColor.toUpperCase()} onClose={onClose}>
-      <div className="w-full">
-        {/* 현재 선택된 색상 미리보기 */}
-        <div
-          className="w-full h-32 rounded-lg mb-4 border border-gray-200"
-          style={{ backgroundColor: selectedColor }}
-        />
-
-        {/* 무지개 색상 슬라이더 (Hue) */}
-        <div className="mb-4">
-          <input
-            type="range"
-            min="0"
-            max="359"
-            value={isNaN(hue) ? 0 : Math.max(0, Math.min(359, hue))}
-            onChange={handleHueChange}
-            className="w-full rounded-full appearance-none cursor-pointer slider-hue"
-            style={{
-              background:
-                'linear-gradient(to right, #FF3C3C 0%, #FFCF4C 22.6%, #9EFF4A 46.15%, #4BC3FF 66.35%, #D23DDF 86.06%)',
-            }}
-          />
+    <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-500 px-5">
+      <div className="w-64 relative bg-white rounded-2xl shadow-lg px-4 py-3 flex flex-col">
+        {/* 헤더 */}
+        <div className="relative flex items-center justify-center w-full mb-3">
+          <button
+            onClick={onClose}
+            aria-label="닫기"
+            className="absolute left-0 cursor-pointer"
+          >
+            <CloseIcon className="w-5 h-5" />
+          </button>
+          <h1 className="text-lg font-bold text-center">
+            {selectedColor.toUpperCase()}
+          </h1>
         </div>
 
-        {/* 명도/채도 슬라이더 (Lightness) */}
-        <div className="mb-4">
-          <input
-            type="range"
-            min="0"
-            max="100"
-            value={
-              isNaN(lightness) ? 50 : Math.max(0, Math.min(100, lightness))
-            }
-            onChange={handleSaturationLightnessChange}
-            className="w-full rounded-full appearance-none cursor-pointer slider-lightness"
-            style={{
-              background:
-                'linear-gradient(to right, #F5F5F5 0%, #E0E0E0 25%, #B0B0B0 50%, #808080 75%, #000000 100%)',
-            }}
+        {/* 컨텐츠 */}
+        <div className="w-full">
+          {/* 현재 선택된 색상 미리보기 */}
+          <div
+            className="w-full h-20 rounded-lg mb-3 border border-gray-200"
+            style={{ backgroundColor: selectedColor }}
           />
-        </div>
 
-        {/* 확인 버튼 */}
-        <button
-          onClick={handleConfirm}
-          className="w-full bg-red-500 text-white py-3 rounded-lg font-medium hover:bg-red-600 transition-colors"
-        >
-          확인
-        </button>
+          {/* 무지개 색상 슬라이더 (Hue) */}
+          <div className="mb-3">
+            <input
+              type="range"
+              min="0"
+              max="359"
+              value={isNaN(hue) ? 0 : Math.max(0, Math.min(359, hue))}
+              onChange={handleHueChange}
+              className="w-full rounded-full appearance-none cursor-pointer slider-hue"
+              style={{
+                background:
+                  'linear-gradient(to right, #FF3C3C 0%, #FFCF4C 22.6%, #9EFF4A 46.15%, #4BC3FF 66.35%, #D23DDF 86.06%)',
+              }}
+            />
+          </div>
+
+          {/* 명도/채도 슬라이더 (Lightness) */}
+          <div className="mb-3">
+            <input
+              type="range"
+              min="0"
+              max="100"
+              value={
+                isNaN(lightness) ? 50 : Math.max(0, Math.min(100, lightness))
+              }
+              onChange={handleSaturationLightnessChange}
+              className="w-full rounded-full appearance-none cursor-pointer slider-lightness"
+              style={{
+                background:
+                  'linear-gradient(to right, #F5F5F5 0%, #E0E0E0 25%, #B0B0B0 50%, #808080 75%, #000000 100%)',
+              }}
+            />
+          </div>
+
+          {/* 확인 버튼 */}
+          <button
+            onClick={handleConfirm}
+            className="w-full bg-[#FF7070] text-white py-2.5 rounded-lg font-medium hover:bg-[#ff6060] transition-colors"
+          >
+            확인
+          </button>
+        </div>
       </div>
-    </Modal>
+    </div>
   );
 }

@@ -4,7 +4,6 @@ import DropdownHeader from '../../components/common/DropdownHeader';
 export default function RecommendedPlacesPage() {
   const location = useLocation();
 
-  // TODO: 실제 API에서 추천 장소 정보 가져오기
   const recentStamps = location.state?.recentStamps || [
     { name: '고양 꽃 축제', image: '/stamps/고양시.svg' },
     { name: '광명동굴', image: '/cultural-stamps/광명동굴.svg' },
@@ -42,42 +41,64 @@ export default function RecommendedPlacesPage() {
     <div className="flex flex-col min-h-screen bg-white max-w-[480px] mx-auto relative overflow-hidden">
       <DropdownHeader title="추천 여행지" />
 
-      {/* 배경 곡선 모형 */}
-      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden max-w-[480px] mx-auto">
-        {/* 첫 번째 - 왼쪽 상단 */}
-        <div className="absolute top-[80px] left-[-100px] w-[400px] h-[400px] bg-[#FFEFE0] rounded-full opacity-30"></div>
-        {/* 두 번째 - 오른쪽 중간 (스탬프 섹션 위치) */}
-        <div className="absolute top-[280px] right-[-80px] w-[320px] h-[320px] bg-[#FFE5E0] rounded-full opacity-25"></div>
-        {/* 세 번째 - 왼쪽 하단 */}
-        <div className="absolute top-[550px] left-[-70px] w-[250px] h-[250px] bg-[#F4ECE4] rounded-full opacity-20"></div>
+      <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
+        <div className="absolute top-[35px] right-[-150px] w-[440px] h-[440px] overflow-hidden">
+          <div
+            className="w-full h-full rounded-full"
+            style={{
+              background: '#FFEFE0',
+              opacity: 0.6,
+            }}
+          />
+        </div>
+
+        <div className="absolute top-[400px] left-[-90px] w-[320px] h-[320px] overflow-hidden">
+          <div
+            className="w-full h-full rounded-full"
+            style={{
+              background: '#FFE5E0',
+              opacity: 0.6,
+            }}
+          />
+        </div>
+
+        <div className="absolute top-[670px] right-[-80px] w-[250px] h-[250px] overflow-hidden">
+          <div
+            className="w-full h-full rounded-full"
+            style={{
+              background: '#F4ECE4',
+              opacity: 0.6,
+            }}
+          />
+        </div>
       </div>
 
-      {/* 스탬프 요약 */}
-      <div className="px-6 py-8 bg-white relative z-10">
+      <div className="px-6 py-8 bg-transparent relative z-10">
         <p className="text-[22px] text-[#444444] text-left font-bold">
           지금까지 <span className="text-[#BD4141]">문화</span> 스탬프 5개,{' '}
           <br />
           <span className="text-[#BD4141]">지역</span> 스탬프 3개를 모으셨어요!
         </p>
 
-        {/* 최근에 얻은 스탬프 */}
         <div className="mt-6 p-5 bg-[#FF7070] rounded-xl">
           <h2 className="text-base font-bold text-white mb-4">
             최근에 얻은 스탬프
           </h2>
           <div className="flex gap-3 justify-center">
-            {recentStamps.slice(0, 3).map((stamp: any, index: number) => (
-              <div
-                key={index}
-                className="w-30 h-30 bg-white rounded-lg flex items-center justify-center overflow-hidden shadow-md"
-              >
-                <img
-                  src={stamp.image}
-                  alt={stamp.name}
-                  className="w-full h-full object-contain p-2"
-                />
-              </div>
-            ))}
+            {recentStamps
+              .slice(0, 3)
+              .map((stamp: { name: string; image: string }, index: number) => (
+                <div
+                  key={index}
+                  className="w-30 h-30 bg-white rounded-lg flex items-center justify-center overflow-hidden shadow-md"
+                >
+                  <img
+                    src={stamp.image}
+                    alt={stamp.name}
+                    className="w-full h-full object-contain p-2"
+                  />
+                </div>
+              ))}
           </div>
           <div className="flex justify-end mt-3">
             <button className="text-sm text-white font-medium">
@@ -87,8 +108,7 @@ export default function RecommendedPlacesPage() {
         </div>
       </div>
 
-      {/* 주변 추천 관광지 */}
-      <div className="flex-1 px-6 py-6 relative z-10">
+      <div className="flex-1 px-6 py-6 pb-24 relative z-10">
         <h2 className="text-lg font-bold text-gray-800 mb-4">
           주변 추천 관광지
         </h2>
@@ -98,24 +118,19 @@ export default function RecommendedPlacesPage() {
             <div
               key={place.id}
               className="flex gap-5 p-3 bg-white rounded-xl hover:bg-gray-100 transition cursor-pointer shadow-md"
-              onClick={() => {
-                // TODO: 장소 상세 페이지로 이동
-              }}
+              onClick={() => {}}
             >
-              {/* 썸네일 */}
               <img
                 src={place.image}
                 alt={place.name}
                 className="w-35 h-20 rounded-lg object-cover"
               />
 
-              {/* 정보 */}
               <div className="flex-1">
                 <h3 className="text-base font-semibold text-gray-800 mb-1">
                   {place.name}
                 </h3>
 
-                {/* 태그 */}
                 <div className="flex gap-1 mb-2">
                   {place.tags.map((tag, index) => (
                     <span
@@ -127,7 +142,6 @@ export default function RecommendedPlacesPage() {
                   ))}
                 </div>
 
-                {/* 거리 & 평점 */}
                 <div className="flex items-center gap-3 text-sm text-[#A8A8A8]">
                   <span className="flex items-center gap-1">
                     <svg

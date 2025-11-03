@@ -59,9 +59,11 @@ const ProtectedLayout = () => {
   const isUploadFlow = [
     '/photo-upload-progress',
     '/photo-upload-success',
+    '/photo-upload-complete',
     '/stamp-acquisition',
     '/question',
     '/authentication',
+    '/auth-error-resolution',
   ].some((path) => location.pathname.startsWith(path));
 
   const isCameraMode = location.state?.cameraStream === true;

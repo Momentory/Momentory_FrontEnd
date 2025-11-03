@@ -7,7 +7,6 @@ export default function PhotoUploadSuccessPage() {
   const location = useLocation();
 
   useEffect(() => {
-    // 약간의 딜레이 후 다음 화면으로 이동
     const timer = setTimeout(() => {
       navigate('/stamp-acquisition', {
         state: location.state,
@@ -26,4 +25,3 @@ export default function PhotoUploadSuccessPage() {
     </div>
   );
 }
-
