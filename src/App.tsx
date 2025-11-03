@@ -24,6 +24,17 @@ import SelectCharacterPage from './pages/Auth/SelectCharacterPage';
 import AccountCreatedPage from "./pages/Auth/AccountCreatedPage";
 import KakaoCallback from "./pages/Auth/KakaoCallback";
 
+import SettingsHomePage from "./pages/settings-page/SettingHomepage";
+import ProfileEditPage from "./pages/settings-page/ProfileEditpage";
+import NotificationSettingsPage from "./pages/settings-page/NotificationSettingsPage";
+import PrivacyDataPage from "./pages/settings-page/PrivacyDataPage";
+import ServicePage from "./pages/settings-page/ServicePage"
+import PrivacyPolicyPage from "./pages/settings-page/PrivacyPolicyPage";
+import SecurityPage from "./pages/settings-page/SecurityPage";
+import WithdrawPage from "./pages/settings-page/WithdrawPage";
+import ChangePasswordPage from "./pages/settings-page/ChangePasswordPage";
+
+
 import MyMapPage from './pages/map-page/my-map-page';
 import PublicMapPage from './pages/map-page/public-map-page';
 import SharePage from './pages/share-page';
@@ -69,6 +80,17 @@ const protectedRoutes: RouteObject[] = [
       { path: 'community', element: <CommunityPage /> },
       { path: "community/upload", element: <CommunityUploadPage /> },
       { path: "community/:postId", element: <CommunityDetailPage /> },
+
+      { path: 'settings', element: <SettingsHomePage /> },
+      { path: '/settings/profile-edit', element: <ProfileEditPage /> },
+      { path: '/settings/notifications', element: <NotificationSettingsPage /> },
+      { path: '/settings/privacy-data', element: <PrivacyDataPage /> },
+      { path: '/settings/terms-of-service', element: <ServicePage /> },
+      { path: '/settings/privacy-policy', element: <PrivacyPolicyPage /> },
+      { path: '/settings/security', element: <SecurityPage /> },
+      { path: '/settings/withdraw', element: <WithdrawPage/> },
+      { path: '/settings/security/change-password', element: <ChangePasswordPage/> },
+      
  
       { path: 'travel', element: <TravelPage /> },
 
