@@ -140,6 +140,8 @@ const protectedRoutes: RouteObject[] = [
       { path: 'authentication', element: <AuthenticationPage /> },
       { path: 'auth-error-resolution', element: <AuthErrorResolutionPage /> },
       { path: 'recommended-places', element: <RecommendedPlacesPage /> },
+
+      { path: 'photo-edit', element: <PhotoEditPage /> },
     ],
   },
 ];
