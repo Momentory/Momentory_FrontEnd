@@ -21,7 +21,7 @@ export default function FilterTab({
   const filters = [
     {
       name: '원본',
-      style: (intensity: number) => 'none',
+      style: (_intensity: number) => 'none',
     },
     {
       name: '선명하게',
@@ -54,7 +54,8 @@ export default function FilterTab({
     },
     {
       name: '흑백',
-      style: (intensity: number) => `grayscale(100%) contrast(${100 + (intensity / 100) * 20}%)`,
+      style: (intensity: number) =>
+        `grayscale(100%) contrast(${100 + (intensity / 100) * 20}%)`,
     },
   ];
 
@@ -83,11 +84,11 @@ export default function FilterTab({
             WebkitOverflowScrolling: 'touch',
           }}
         >
-          {filters.map((filter, index) => (
+          {filters.map((filter, _index) => (
             <button
               key={filter.name}
               onClick={() => onFilterChange(filter.name)}
-              className="flex-shrink-0 flex flex-col items-center min-w-[80px]"
+              className="flex flex-col items-center min-w-[80px]"
               style={{ scrollSnapAlign: 'start' }}
             >
               <div

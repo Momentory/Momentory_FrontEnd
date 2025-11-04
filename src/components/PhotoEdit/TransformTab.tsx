@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { Crop, Move, RotateCw } from 'lucide-react';
-import Slider from '../common/Slider';
 
 interface TransformTabProps {
   rotation: number;
@@ -14,16 +13,16 @@ interface TransformTabProps {
 
 export default function TransformTab({
   rotation,
-  position,
+
   onRotationChange,
-  onPositionChange,
+
   onActiveModeChange,
   onCropConfirm,
   onCropCancel,
 }: TransformTabProps) {
-  const [activeMode, setActiveMode] = useState<'crop' | 'move' | 'rotate' | null>(
-    null
-  );
+  const [activeMode, setActiveMode] = useState<
+    'crop' | 'move' | 'rotate' | null
+  >(null);
 
   // 회전 기능 (90도씩, 같은 방향으로 계속 회전 가능)
   const handleRotate = () => {
@@ -60,9 +59,7 @@ export default function TransformTab({
         <button
           onClick={handleCrop}
           className={`flex-1 flex flex-col items-center justify-center py-6 transition-colors cursor-pointer ${
-            activeMode === 'crop'
-              ? 'text-[#FF7070]'
-              : 'text-gray-700'
+            activeMode === 'crop' ? 'text-[#FF7070]' : 'text-gray-700'
           }`}
         >
           <div className="w-12 h-12 flex items-center justify-center mb-2">
@@ -75,9 +72,7 @@ export default function TransformTab({
         <button
           onClick={handleMove}
           className={`flex-1 flex flex-col items-center justify-center py-6 transition-colors cursor-pointer ${
-            activeMode === 'move'
-              ? 'text-[#FF7070]'
-              : 'text-gray-700'
+            activeMode === 'move' ? 'text-[#FF7070]' : 'text-gray-700'
           }`}
         >
           <div className="w-12 h-12 flex items-center justify-center mb-2">
@@ -90,9 +85,7 @@ export default function TransformTab({
         <button
           onClick={handleRotateClick}
           className={`flex-1 flex flex-col items-center justify-center py-6 transition-colors cursor-pointer ${
-            activeMode === 'rotate'
-              ? 'text-[#FF7070]'
-              : 'text-gray-700'
+            activeMode === 'rotate' ? 'text-[#FF7070]' : 'text-gray-700'
           }`}
         >
           <div className="w-12 h-12 flex items-center justify-center mb-2">

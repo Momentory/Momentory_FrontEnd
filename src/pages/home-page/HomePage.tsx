@@ -20,11 +20,11 @@ export default function HomePage() {
   const [points] = useState(1500);
 
   // 상태
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isDropdownOpen, _setIsDropdownOpen] = useState(false);
   const [isMapModalOpen, setIsMapModalOpen] = useState(false);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [isError, setIsError] = useState(false);
+  const [_isError, setIsError] = useState(false);
 
   // API 데이터
   const [topPlaces, setTopPlaces] = useState<any[]>([]);
