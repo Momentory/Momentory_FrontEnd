@@ -13,16 +13,20 @@ import TravelPage from './pages/travel-page';
 import MyAlbumPage from './pages/album-page';
 import UploadPage from './pages/photo-upload-page/UploadPage';
 
-import { CommunityPage, CommunityUploadPage, CommunityDetailPage } from "./pages/community-page";
-import SplashPage from "./pages/Auth/SplashPage";
-import LoginScreen from "./pages/Auth/LoginScreen";
-import SigninScreen from "./pages/Auth/SigninScreen";
-import CreateAccountPage from "./pages/Auth/CreateAccountPage";
-import TermsOfServicePage from "./pages/Auth/TermsOfServicePage";
-import CreateProfilePage from "./pages/Auth/CreateProfilePage";
+import {
+  CommunityPage,
+  CommunityUploadPage,
+  CommunityDetailPage,
+} from './pages/community-page';
+import SplashPage from './pages/Auth/SplashPage';
+import LoginScreen from './pages/Auth/LoginScreen';
+import SigninScreen from './pages/Auth/SigninScreen';
+import CreateAccountPage from './pages/Auth/CreateAccountPage';
+import TermsOfServicePage from './pages/Auth/TermsOfServicePage';
+import CreateProfilePage from './pages/Auth/CreateProfilePage';
 import SelectCharacterPage from './pages/Auth/SelectCharacterPage';
-import AccountCreatedPage from "./pages/Auth/AccountCreatedPage";
-import KakaoCallback from "./pages/Auth/KakaoCallback";
+import AccountCreatedPage from './pages/Auth/AccountCreatedPage';
+import KakaoCallback from './pages/Auth/KakaoCallback';
 
 import MyMapPage from './pages/map-page/my-map-page';
 import PublicMapPage from './pages/map-page/public-map-page';
@@ -37,6 +41,7 @@ import MyClosetPage from './pages/shop-page/MyClosetPage';
 import ShopPage from './pages/shop-page/ShopPage';
 import NewItemPage from './pages/shop-page/NewItemPage';
 import EventPage from './pages/shop-page/EventPage';
+import RoulettePage from './pages/roulette-page';
 
 const queryClient = new QueryClient();
 
@@ -69,9 +74,9 @@ const protectedRoutes: RouteObject[] = [
       { path: 'upload', element: <UploadPage /> },
       { path: 'album', element: <MyAlbumPage /> },
       { path: 'community', element: <CommunityPage /> },
-      { path: "community/upload", element: <CommunityUploadPage /> },
-      { path: "community/:postId", element: <CommunityDetailPage /> },
- 
+      { path: 'community/upload', element: <CommunityUploadPage /> },
+      { path: 'community/:postId', element: <CommunityDetailPage /> },
+
       { path: 'travel', element: <TravelPage /> },
 
       { path: 'myMap', element: <MyMapPage /> },
@@ -87,10 +92,11 @@ const protectedRoutes: RouteObject[] = [
       { path: 'myMap', element: <MyMapPage /> },
       { path: 'publicMap', element: <PublicMapPage /> },
       { path: 'share', element: <SharePage /> },
-      { path: 'shop', element: <ShopPage/> },
-      { path: 'shop/new', element: <NewItemPage />},
-      { path: 'shop/event', element: <EventPage />},
-      { path: 'closet', element: <MyClosetPage/> },
+      { path: 'shop', element: <ShopPage /> },
+      { path: 'shop/new', element: <NewItemPage /> },
+      { path: 'shop/event', element: <EventPage /> },
+      { path: 'closet', element: <MyClosetPage /> },
+      { path: 'roulette', element: <RoulettePage /> },
     ],
   },
 ];

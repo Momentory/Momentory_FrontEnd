@@ -12,7 +12,7 @@ const ProtectedLayout = () => {
   const isAlbumReadPage = location.pathname.includes('/read');
   const isShopPage = location.pathname.startsWith('/shop');
   const isClosetPage = location.pathname.startsWith('/closet');
-  
+  const isRoulettePage = location.pathname.startsWith('/roulette');
   
   const hasDropdownHeader = [
     '/album',
@@ -32,7 +32,7 @@ const ProtectedLayout = () => {
         <div className={hasDropdownHeader ? 'pt-[112px]' : ''}>
           <Outlet />
         </div>
-        {!isShopPage && !isClosetPage && !isEditPage && !isAlbumPage && !isCreateAlbumPage && <Navbar onUploadClick={() => setIsUploadModalOpen(true)} />}
+        {!isShopPage && !isClosetPage && !isEditPage && !isAlbumPage && !isCreateAlbumPage && !isRoulettePage && <Navbar onUploadClick={() => setIsUploadModalOpen(true)} />}
       </div>
 
       {isUploadModalOpen && (
