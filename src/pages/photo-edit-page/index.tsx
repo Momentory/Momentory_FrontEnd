@@ -250,7 +250,7 @@ export default function PhotoEditPage() {
         } else if (isCropResizing && cropDragStart) {
           const deltaX = e.clientX - cropDragStart.x;
           const deltaY = e.clientY - cropDragStart.y;
-          let newCropArea = { ...cropArea };
+          const newCropArea = { ...cropArea };
 
           if (isCropResizing === 'se') {
             newCropArea.width = Math.min(

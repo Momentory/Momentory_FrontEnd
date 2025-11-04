@@ -161,7 +161,9 @@ export default function PhotoUploadPage() {
               address = koreanMatch[1].trim();
             }
           }
-        } catch (error) {}
+        } catch (error) {
+          console.error(error);
+        }
 
         setMarkerLocation({
           address,
@@ -221,12 +223,12 @@ export default function PhotoUploadPage() {
           className="flex-1 w-full h-full object-cover"
         />
         <div className="absolute bottom-0 left-0 right-0 p-6 pb-24 flex justify-center items-center gap-4 z-[101]">
-        <button
+          <button
             onClick={handleCameraClose}
             className="px-6 py-3 bg-gray-600 text-white rounded-full font-medium shadow-lg"
-        >
+          >
             취소
-        </button>
+          </button>
           <button
             onClick={handleCapture}
             className="w-20 h-20 bg-white rounded-full border-4 border-gray-300 active:scale-95 transition shadow-lg"
@@ -250,12 +252,12 @@ export default function PhotoUploadPage() {
         title="Photo Upload"
         hasDropdown={false}
         rightAction={
-        <button
-          onClick={handleNext}
+          <button
+            onClick={handleNext}
             className="text-blue-500 font-semibold text-[15px]"
-        >
-          Next
-        </button>
+          >
+            Next
+          </button>
         }
       />
 
@@ -265,11 +267,11 @@ export default function PhotoUploadPage() {
             className="w-[340px] bg-gray-100"
             style={{ aspectRatio: '340/290' }}
           >
-          <img
+            <img
               src={displayImage ?? undefined}
-            alt="Selected"
+              alt="Selected"
               className="w-full h-full object-cover rounded-lg"
-          />
+            />
           </div>
         </div>
 
