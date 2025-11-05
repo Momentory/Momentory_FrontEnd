@@ -60,6 +60,8 @@ import EditAlbumPage from './pages/album-page/edit-album-page';
 import AlbumReadPage from './pages/album-page/album-read-page';
 import MyClosetPage from './pages/shop-page/MyClosetPage';
 import ShopPage from './pages/shop-page/ShopPage';
+import NewItemPage from './pages/shop-page/NewItemPage';
+import EventPage from './pages/shop-page/EventPage';
 
 const queryClient = new QueryClient();
 
@@ -140,7 +142,8 @@ const protectedRoutes: RouteObject[] = [
       { path: 'authentication', element: <AuthenticationPage /> },
       { path: 'auth-error-resolution', element: <AuthErrorResolutionPage /> },
       { path: 'recommended-places', element: <RecommendedPlacesPage /> },
-
+      { path: 'shop/new', element: <NewItemPage />},
+      { path: 'shop/event', element: <EventPage />},
       { path: 'photo-edit', element: <PhotoEditPage /> },
     ],
   },
