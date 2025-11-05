@@ -1,22 +1,53 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import HTMLFlipBook from 'react-pageflip';
-import ExampleImg from '../../assets/icons/exampleAlbum.svg';
+import { album } from '../../api/album';
 
-export default function AlbumReadPage() {
+const AlbumReadPage=()=> {
   const navigate = useNavigate();
-  const { albumId: _albumId } = useParams();
+  const { albumId } = useParams();
   const bookRef = useRef<any>(null);
   const [current, setCurrent] = useState(0);
-  const [viewport, setViewport] = useState<{ width: number; height: number }>({ width: 0, height: 0 });
+  const [viewport, setViewport] = useState<{ width: number; height: number }>({ 
+    width: 0, 
+    height: 0 
+  });
+  const [imageUrls, setImageUrls] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const FlipBook = HTMLFlipBook as unknown as any;
 
-  // TODO: 실제 앨범 이미지 배열로 교체
-  const pages = useMemo<number[]>(() => [0, 1, 2, 3, 4], []);
+  useEffect(() => {
+    if (!albumId) return;
+
+    const fetchAlbumImages = async () => {
+      setIsLoading(true);
+      try {
+        const response = await album.getAlbumDetail(Number(albumId));
+        
+        if (response.isSuccess && response.result) {
+          const { images } = response.result;
+          const sortedImages = images
+            .sort((a, b) => a.index - b.index)
+            .map(img => img.imageUrl);
+          setImageUrls(sortedImages);
+        }
+      } catch (err) {
+        console.error('앨범 이미지 불러오기 실패:', err);
+        alert('앨범을 불러오는데 실패했습니다.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchAlbumImages();
+  }, [albumId]);
+
+  const pages = useMemo(() => imageUrls, [imageUrls]);
 
   const handlePrev = () => {
     bookRef.current?.pageFlip()?.flipPrev();
   };
+  
   const handleNext = () => {
     bookRef.current?.pageFlip()?.flipNext();
   };
@@ -30,6 +61,30 @@ export default function AlbumReadPage() {
     return () => window.removeEventListener('resize', update);
   }, []);
 
+  if (isLoading) {
+    return (
+      <div className="fixed inset-0 bg-gray-100 flex items-center justify-center">
+        <p className="text-gray-600">앨범을 불러오는 중...</p>
+      </div>
+    );
+  }
+
+  if (pages.length === 0) {
+    return (
+      <div className="fixed inset-0 bg-gray-100 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-gray-600 mb-4">표시할 이미지가 없습니다.</p>
+          <button
+            className="px-4 py-2 bg-[#FF7070] text-white rounded-lg"
+            onClick={() => navigate(-1)}
+          >
+            돌아가기
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="fixed inset-0 bg-gray-100">
       <div className="absolute inset-0 flex items-center justify-center">
@@ -40,27 +95,30 @@ export default function AlbumReadPage() {
           const width = Math.min(maxWidth, Math.max(minWidth, viewport.width));
           const idealHeight = Math.round(width * ratio);
           const height = Math.min(viewport.height, idealHeight);
+          
           return (
             <FlipBook
               width={width}
               height={height}
               size="fixed"
               showCover
-              // drawShadow={false}
               className="overflow-hidden bg-white"
               ref={bookRef}
               onFlip={(e: any) => setCurrent(e.data)}
             >
-              {pages.map((_, idx) => (
+              {pages.map((url, idx) => (
                 <div key={idx} className="w-full h-full">
-                  <img src={ExampleImg} alt={`page-${idx + 1}`} className="w-full h-full object-cover" />
+                  <img 
+                    src={url} 
+                    alt={`page-${idx + 1}`} 
+                    className="w-full h-full object-cover" 
+                  />
                 </div>
               ))}
             </FlipBook>
           );
         })()}
 
-        {/* 화면 가장자리 터치 영역 */}
         <button
           aria-label="prev"
           className="absolute inset-y-0 left-0 w-1/3 cursor-pointer"
@@ -73,7 +131,6 @@ export default function AlbumReadPage() {
         />
       </div>
 
-      {/* 상단 좌측 뒤로 버튼 */}
       <div className="absolute top-0 left-0 p-3">
         <button
           className="px-3 py-1.5 rounded border border-[#e5e5e5] bg-white text-[#333] text-sm active:bg-[#f7f7f7]"
@@ -83,7 +140,6 @@ export default function AlbumReadPage() {
         </button>
       </div>
 
-      {/* 하단 페이지 표시 */}
       <div className="absolute bottom-3 left-1/2 -translate-x-1/2 text-[#333] text-sm">
         <span className="px-3 py-1 rounded-full bg-black/5">
           {current + 1} / {pages.length}
@@ -92,5 +148,4 @@ export default function AlbumReadPage() {
     </div>
   );
 }
-
-
+export default AlbumReadPage;

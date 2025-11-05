@@ -46,8 +46,8 @@ const DropdownHeader = ({
 
   return (
     <div className="fixed top-[56px] left-1/2 -translate-x-1/2 w-full max-w-[480px] z-40">
-      <div className="relative bg-white shadow-[0px_6px_8px_0px_rgba(0,0,0,0.25)] z-10">
-        <div className="relative flex items-center justify-center py-4 px-4">
+      <div className="relative bg-white shadow-[0px_6px_8px_0px_rgba(0,0,0,0.25)] overflow-visible">
+        <div className="flex items-center justify-center py-4 px-4 relative">
           <button
             type="button"
             onClick={handleClickBack}
@@ -55,9 +55,8 @@ const DropdownHeader = ({
           >
             {LeftIcon}
           </button>
-
           <div
-            className={`absolute left-1/2 -translate-x-1/2 flex items-center justify-center ${
+            className={`flex items-center justify-center ${
               hasDropdown ? 'cursor-pointer' : ''
             }`}
             onClick={hasDropdown ? toggleDropdown : undefined}
@@ -73,39 +72,36 @@ const DropdownHeader = ({
               />
             )}
           </div>
-
           <div className="absolute right-4 flex items-center space-x-2">
             {rightItem}
             {rightAction}
           </div>
         </div>
-      </div>
-
-      <div
-        className={`absolute left-0 top-full w-full bg-white rounded-2xl
-        shadow-[0px_4px_12px_0px_rgba(0,0,0,0.1)]
-        overflow-hidden transition-all duration-300 z-20 ${
-          isOpen
-            ? 'opacity-100 translate-y-0'
-            : 'opacity-0 -translate-y-2 pointer-events-none'
-        }`}
-      >
-        <ul className="text-[#808080]">
-          {dropdownItems.map((item, index) => (
-            <div key={item.path}>
-              <li
-                onClick={() => handleSelect(item)}
-                className="flex items-center px-8 py-5 text-base font-bold hover:bg-gray-100 cursor-pointer"
-              >
-                {item.icon && <span className="mr-2">{item.icon}</span>}
-                {item.label}
-              </li>
-              {index < dropdownItems.length - 1 && (
-                <hr className="mx-4 text-[#E8DBDB]" />
-              )}
-            </div>
-          ))}
-        </ul>
+        <div
+          className={`absolute left-0 top-full mt-2 w-full bg-white rounded-2xl shadow-[0px_4px_12px_0px_rgba(0,0,0,0.1)]
+          overflow-hidden transition-all duration-300 z-20 ${
+            isOpen
+              ? 'opacity-100 translate-y-0'
+              : 'opacity-0 -translate-y-2 pointer-events-none'
+          }`}
+        >
+          <ul className="text-[#808080]">
+            {dropdownItems.map((item, index) => (
+              <div key={item.path}>
+                <li
+                  onClick={() => handleSelect(item)}
+                  className="flex items-center px-8 py-5 text-base font-bold hover:bg-gray-100 cursor-pointer"
+                >
+                  {item.icon && <span className="mr-2">{item.icon}</span>}
+                  {item.label}
+                </li>
+                {index < dropdownItems.length - 1 && (
+                  <hr className="mx-4 border-t-[1px] border-[#E8DBDB]" />
+                )}
+              </div>
+            ))}
+          </ul>
+        </div>
       </div>
     </div>
   );
