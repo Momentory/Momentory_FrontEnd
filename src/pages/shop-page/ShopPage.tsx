@@ -1,7 +1,9 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import DropdownHeader from '../../components/common/DropdownHeader';
 import StarIcon from '../../assets/icons/starIcon.svg?react';
-import ShareIcon from '../../assets/icons/albumShare.svg?react';
+import EventIcon from '../../assets/icons/eventIcon.svg?react';
+import RecentIcon from '../../assets/icons/recentAddItem.svg?react';
 import RoseIcon from '../../assets/accessories/장미.svg';
 import RibbonIcon from '../../assets/accessories/리본.svg';
 import FeatherIcon from '../../assets/accessories/깃털.svg';
@@ -9,6 +11,8 @@ import HatIcon from '../../assets/accessories/모자.svg';
 import ShopBottomSheet from '../../components/Shop/ShopBottomSheet';
 import CharacterDisplay from '../../components/Shop/CharacterDisplay';
 import useBottomSheet from '../../hooks/shop/useBottomSheet';
+import Modal from '../../components/common/Modal';
+import PointIcon from '../../assets/icons/pointIcon.svg';
 
 interface ShopAccessory {
   id: number;
@@ -20,80 +24,84 @@ interface ShopAccessory {
 }
 
 const ShopPage = () => {
+  const navigate = useNavigate();
   const [level] = useState(35);
   const [point, setPoint] = useState(1500);
   const [gem] = useState(2000);
   const [selectedCategory] = useState('장식');
   const { height, isExpanded, setHeight, setIsExpanded } = useBottomSheet();
-  const [equippedAccessories, setEquippedAccessories] = useState<number[]>([]);
-  const [ownedAccessories, setOwnedAccessories] = useState<number[]>([1, 2]); // 이미 보유한 액세서리
+  const [equippedAccessories] = useState<number[]>([]);
+  const [ownedAccessories, setOwnedAccessories] = useState<number[]>([1, 2]);
+  const [selectedItem, setSelectedItem] = useState<ShopAccessory | null>(null);
+  const [toastMessage, setToastMessage] = useState('');
 
-  // 상점 액세서리
   const shopAccessories: ShopAccessory[] = [
-    { id: 1, name: '장미', icon: RoseIcon, locked: false, type: 'head', price: 100 },
-    { id: 2, name: '리본', icon: RibbonIcon, locked: false, type: 'head', price: 150 },
-    { id: 3, name: '깃털', icon: FeatherIcon, locked: false, type: 'body', price: 200 },
-    { id: 4, name: '모자', icon: HatIcon, locked: false, type: 'head', price: 300 },
-    { id: 5, name: '잠금1', icon: '', locked: true, type: 'head', price: 500 },
+    {
+      id: 1,
+      name: '장미',
+      icon: RoseIcon,
+      locked: false,
+      type: '장식',
+      price: 100,
+    },
+    {
+      id: 2,
+      name: '리본',
+      icon: RibbonIcon,
+      locked: false,
+      type: '장식',
+      price: 150,
+    },
+    {
+      id: 3,
+      name: '깃털',
+      icon: FeatherIcon,
+      locked: false,
+      type: 'body',
+      price: 200,
+    },
+    {
+      id: 4,
+      name: '모자',
+      icon: HatIcon,
+      locked: false,
+      type: '장식',
+      price: 300,
+    },
+    { id: 5, name: '잠금1', icon: '', locked: true, type: '장식', price: 500 },
     { id: 6, name: '잠금2', icon: '', locked: true, type: 'body', price: 800 },
   ];
 
-  // 액세서리 클릭 - 미리보기 착용/해제
+  // 액세서리 클릭
   const handleAccessoryClick = (id: number) => {
     const accessory = shopAccessories.find((acc) => acc.id === id);
     if (!accessory || accessory.locked) return;
 
-    // 이미 보유한 액세서리는 클릭 불가
     if (ownedAccessories.includes(id)) {
       return;
     }
 
-    // 미리보기 착용/해제
-    if (equippedAccessories.includes(id)) {
-      setEquippedAccessories(equippedAccessories.filter((accId) => accId !== id));
-    } else {
-      // 같은 타입 액세서리는 하나만 착용
-      const newEquipped = equippedAccessories.filter(
-        (accId) => shopAccessories.find((acc) => acc.id === accId)?.type !== accessory.type
-      );
-      setEquippedAccessories([...newEquipped, id]);
-    }
+    // 구매 확인 모달 띄우기
+    setSelectedItem(accessory);
   };
 
-  // 다운로드 버튼 - 착용된 액세서리 구매
-  const handlePurchase = () => {
-    // 착용된 액세서리 중 미보유 액세서리만 필터링
-    const itemsToPurchase = equippedAccessories.filter(
-      (id) => !ownedAccessories.includes(id)
-    );
+  // 모달 내 "구매" 버튼 클릭
+  const handleConfirmPurchase = () => {
+    if (!selectedItem) return;
 
-    if (itemsToPurchase.length === 0) {
-      alert('구매할 장식을 착용해주세요!');
+    if (point < selectedItem.price) {
+      setToastMessage('포인트가 부족합니다!');
+      setSelectedItem(null);
+      setTimeout(() => setToastMessage(''), 2000);
       return;
     }
 
-    // 총 가격 계산
-    const totalPrice = itemsToPurchase.reduce((sum, id) => {
-      const accessory = shopAccessories.find((acc) => acc.id === id);
-      return sum + (accessory?.price || 0);
-    }, 0);
-
-    // 포인트 부족 확인
-    if (point < totalPrice) {
-      alert(`포인트가 부족합니다! (필요: ${totalPrice}, 보유: ${point})`);
-      return;
-    }
-
-    // 구매 확인
-    const itemNames = itemsToPurchase
-      .map((id) => shopAccessories.find((acc) => acc.id === id)?.name)
-      .join(', ');
-
-    if (window.confirm(`${itemNames}을(를) ${totalPrice} 포인트에 구매하시겠습니까?`)) {
-      setPoint(point - totalPrice);
-      setOwnedAccessories([...ownedAccessories, ...itemsToPurchase]);
-      alert('구매 완료!');
-    }
+    // 구매 성공
+    setPoint(point - selectedItem.price);
+    setOwnedAccessories([...ownedAccessories, selectedItem.id]);
+    setToastMessage('구매가 성공적으로 완료되었습니다!');
+    setSelectedItem(null);
+    setTimeout(() => setToastMessage(''), 2000);
   };
 
   const displayAccessories = shopAccessories.map((acc) => ({
@@ -116,6 +124,7 @@ const ShopPage = () => {
         accessories={displayAccessories}
       />
 
+      {/* 하단 버튼들 */}
       <div
         className="fixed max-w-[480px] mx-auto px-4 left-0 right-0 flex justify-between items-center gap-4 z-[100] pointer-events-auto transition-all duration-300"
         style={{ bottom: `${height + 16}px` }}
@@ -124,33 +133,22 @@ const ShopPage = () => {
           <StarIcon className="w-6 h-6 text-white" />
         </button>
         <div className="flex flex-row gap-4">
-        <button 
-          className="w-12 h-12 rounded-full bg-[#FF7070] flex items-center justify-center shadow-lg cursor-pointer transition-colors hover:bg-[#FF5555]"
-          onClick={handlePurchase}
-        >
-          <svg
-            className="text-white w-6 h-6"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
+          <button
+            className="w-12 h-12 rounded-full bg-[#FF7070] flex items-center justify-center shadow-lg cursor-pointer transition-colors hover:bg-[#FF5555]"
+            onClick={() => navigate('new')}
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-            />
-          </svg>
-        </button>
+            <RecentIcon className="w-6 h-6" />
+          </button>
           <button
             className="flex h-12 w-12 items-center justify-center rounded-full border border-gray-200 bg-white shadow-md transition cursor-pointer"
-            onClick={() => alert('공유 기능 추후 구현.')}
+            onClick={() => navigate('event')}
           >
-            <ShareIcon className="h-6 w-6 text-gray-700" />
+            <EventIcon className="h-6 w-6" />
           </button>
         </div>
       </div>
 
+      {/* 하단 시트 */}
       <ShopBottomSheet
         height={height}
         setHeight={setHeight}
@@ -163,9 +161,53 @@ const ShopPage = () => {
         onAccessoryClick={handleAccessoryClick}
         userPoints={point}
       />
+
+      {selectedItem && (
+        <Modal title="아이템 구입" onClose={() => setSelectedItem(null)}>
+          <div className="flex flex-col items-center text-center px-3.5">
+            <img
+              src={selectedItem.icon}
+              alt={selectedItem.name}
+              className="w-20 h-20 mb-4 rounded-xl border border-gray-200"
+            />
+            <p className="text-gray-700 mb-6 flex justify-center items-center flex-wrap px-4 text-center">
+              <span className="whitespace-nowrap">
+                <span className="text-[#FF7070] font-semibold">
+                  [{selectedItem.name}]
+                </span>{' '}
+                {selectedItem.type}을(를)
+              </span>
+              <span className="w-1.5"></span>
+              <span className="whitespace-nowrap inline-flex items-center">
+                <img src={PointIcon} alt="포인트" className="w-4 h-4 mr-1" />
+                {selectedItem.price}
+                <span className="ml-1">에 구입할까요?</span>
+              </span>
+            </p>
+
+            <div className="flex w-full gap-4 justify-between">
+              <button
+                onClick={handleConfirmPurchase}
+                className="flex-1 whitespace-nowrap px-6 py-2 bg-[#FF7070] text-white rounded-lg font-semibold">
+                구입하기
+              </button>
+              <button
+                onClick={() => setSelectedItem(null)}
+                className="whitespace-nowrap px-6 py-2 bg-[#EAEAEA] text-[#8D8D8D] rounded-lg font-semibold">
+                취소
+              </button>
+            </div>
+          </div>
+        </Modal>
+      )}
+
+      {toastMessage && (
+        <div className="fixed bottom-10 left-5 right-5 rounded-3xl bg-black/50 px-4 py-2 text-center text-base font-bold text-white animate-fade-in z-[1000]">
+          {toastMessage}
+        </div>
+      )}
     </div>
   );
 };
 
 export default ShopPage;
-

@@ -26,17 +26,18 @@ export default function SelectCharacterPage() {
       <img
         src="/images/109618.png"
         alt="뒤로가기"
-        className="absolute top-[25px] left-[10px] w-[35px] h-[35px] cursor-pointer"
+        className="absolute top-[25px] left-[20px] w-[35px] h-[35px] cursor-pointer"
         onClick={() => navigate(-1)}
       />
 
-      {/* 타이틀 */}
-      <h1 className="text-[22px] font-semibold text-black mt-[60px] mb-[40px]">
-        당신의 캐릭터를 선택하세요
+      <h1
+        className="absolute left-[30px] top-[110px] text-[22px] font-semibold text-black leading-tight whitespace-pre-line text-left"
+      >
+        {"캐릭터를\n선택하세요"}
       </h1>
 
       {/* 캐릭터 영역 */}
-      <div className="relative flex justify-center items-end mt-[40px] mb-[40px]">
+      <div className="relative flex justify-center items-end mt-[280px] mb-[40px]">
         {/* 왼쪽 캐릭터 */}
         <div
           onClick={() => setSelected("1")}
@@ -67,10 +68,9 @@ export default function SelectCharacterPage() {
           <img
             src={characters[0].img}
             alt="Cat"
-            className={`transition-all duration-300 ${selected === "1"
-                ? "opacity-100 scale-110"
-                : "opacity-30 scale-95"
-              }`}
+            className={`transition-all duration-300 ${
+              selected === "1" ? "opacity-100 scale-110" : "opacity-30 scale-95"
+            }`}
             style={{
               width: "320px",
               height: "360px",
@@ -109,10 +109,9 @@ export default function SelectCharacterPage() {
           <img
             src={characters[1].img}
             alt="Dog"
-            className={`transition-all duration-300 ${selected === "2"
-                ? "opacity-100 scale-110"
-                : "opacity-30 scale-95"
-              }`}
+            className={`transition-all duration-300 ${
+              selected === "2" ? "opacity-100 scale-110" : "opacity-30 scale-95"
+            }`}
             style={{
               width: "300px",
               height: "340px",
@@ -121,26 +120,28 @@ export default function SelectCharacterPage() {
           />
         </div>
       </div>
+
       {/* 하단 바 */}
       <div className="relative w-[300px] h-[7px] bg-gray-200 rounded-full mb-[50px] -mt-[120px]">
         <div
-          className={`absolute top-0 left-0 h-full bg-[#FF7070] rounded-full transition-all duration-500 ${selected === "1"
+          className={`absolute top-0 left-0 h-full bg-[#FF7070] rounded-full transition-all duration-500 ${
+            selected === "1"
               ? "w-1/2"
               : selected === "2"
-                ? "w-1/2 left-1/2"
-                : "w-0"
-            }`}
+              ? "w-1/2 left-1/2"
+              : "w-0"
+          }`}
         ></div>
       </div>
-
 
       {/* 버튼 */}
       <button
         disabled={!selected}
         onClick={handleNext}
-        className={`w-[330px] h-[70px] rounded-[25px] text-white text-[17px] font-semibold transition active:scale-95 ${selected ? "bg-[#FF7070]" : "bg-gray-300 cursor-not-allowed"
-          }`}
-        style={{ position: "absolute", bottom: "80px" }}
+        className={`w-[330px] h-[70px] rounded-[25px] text-white text-[22px] font-semibold transition active:scale-95 ${
+          selected ? "bg-[#FF7070]" : "bg-gray-300 cursor-not-allowed"
+        }`} 
+        style={{ position: "absolute", bottom: "20px" }}
       >
         캐릭터 선택 완료
       </button>
