@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+// import { getCommunityPosts } from "../../api/community";
 import { ArrowLeft, Heart, MessageCircle, Plus } from "lucide-react";
 import { motion } from "framer-motion";
 

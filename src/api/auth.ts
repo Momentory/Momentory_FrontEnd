@@ -12,11 +12,20 @@ export const signup = (payload: {
 }) => api.post("/api/auth/userSignup", payload);
 
 export const login = async (payload: { email: string; password: string }) => {
-  const { data }: { data: { accessToken: string; refreshToken: string } } =
-    await api.post("/api/auth/login", payload);
-  tokenStore.set({ accessToken: data.accessToken, refreshToken: data.refreshToken });
-  return data;
+  const { data }: { data: { result: { accessToken: string; refreshToken: string } } } =
+    await api.post("/auth/login", payload);
+
+  const { accessToken, refreshToken } = data.result;
+
+  // 토큰 저장
+  tokenStore.set({ accessToken, refreshToken });
+
+  // Axios 인스턴스에도 즉시 반영
+  api.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
+
+  return data.result;
 };
+
 
 export const logout = async () => {
   await api.delete("/api/auth/logout");
@@ -24,12 +33,12 @@ export const logout = async () => {
 };
 
 export const reissue = async () => {
-  const { data }: { data: { accessToken: string; refreshToken: string } } =
+  const { data }: { data: { result: { accessToken: string; refreshToken: string } } } =
     await api.post("/api/auth/reissue", {
       refreshToken: tokenStore.getRefresh(),
     });
-  tokenStore.set({ accessToken: data.accessToken, refreshToken: data.refreshToken });
-  return data;
+  tokenStore.set({ accessToken: data.result.accessToken, refreshToken: data.result.refreshToken });
+  return data.result;
 };
 
 

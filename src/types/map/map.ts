@@ -7,6 +7,7 @@ export interface Marker {
   location?: string; // 지역명 (ex: '성남시 분당구')
   lat?: number; // 위도 (임시 GPS 좌표)
   lng?: number; // 경도 (임시 GPS 좌표)
+  color?: string; // 마커 색상 (HEX)
 }
 
 export interface Album {

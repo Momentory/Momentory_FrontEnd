@@ -15,7 +15,7 @@
   font-weight: 300;
   font-style: normal;
   font-display: swap;
-} 
+}
 
 /* Regular (400) */
 @font-face {
@@ -44,7 +44,8 @@
   font-display: swap;
 }
 
-html, body {
+html,
+body {
   font-family: 'NanumSquareRound', sans-serif;
   line-height: 1.5;
 }
@@ -58,6 +59,16 @@ h2 {
 .small-text {
   font-weight: 300;
 }
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
 
 @keyframes fade-in {
   0% { opacity: 0; transform: translateY(10px); }

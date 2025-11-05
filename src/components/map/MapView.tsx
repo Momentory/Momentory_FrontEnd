@@ -1,6 +1,6 @@
 // 지도 UI 및 마커 렌더링
 import type { MapViewProps, Marker, Album } from '../../types/map/map';
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect, useMemo } from 'react';
 import mapBack from '../../assets/map-back.svg';
 import map from '../../assets/map.svg';
 
@@ -11,10 +11,12 @@ import marker3 from '../../assets/map-marker3.svg';
 import p4 from '../../assets/p-4.svg';
 
 import MarkerPopup from './MarkerPopup';
+import { useMarkerStore } from '../../stores/markerStore';
 
 const BASE_MAP_SCALE = 0.85; // 바텀시트 영향 없이 지도만 기본 축소
 
-const markers: Marker[] = [
+// 기본 마커 (기존 데이터)
+const defaultMarkers: Marker[] = [
   {
     id: 1,
     top: '30%',
@@ -60,6 +62,25 @@ export default function MapView({
   onMarkerClick,
   className,
 }: MapViewProps & { className?: string }) {
+  const storeMarkers = useMarkerStore((state) => state.markers);
+  const svgElementRef = useRef<SVGElement | null>(null);
+
+  // store의 마커와 기본 마커를 병합 (같은 location이면 store 마커 우선)
+  const markers = useMemo(() => {
+    const merged = [...defaultMarkers];
+    storeMarkers.forEach((storeMarker) => {
+      const existingIndex = merged.findIndex(
+        (m) => m.location === storeMarker.location
+      );
+      if (existingIndex >= 0) {
+        merged[existingIndex] = { ...merged[existingIndex], ...storeMarker };
+      } else {
+        merged.push(storeMarker);
+      }
+    });
+    return merged;
+  }, [storeMarkers]);
+
   const containerRef = useRef<HTMLDivElement | null>(null);
   const pinchStartDistRef = useRef<number | null>(null);
   const isPinchingRef = useRef(false);
@@ -168,11 +189,46 @@ export default function MapView({
     updateZoomState(next);
   };
 
-  // 마커가 있는 지역을 지도에 표시
+  // 마커가 있는 지역을 지도에 표시 (마커 색상으로 강조)
   useEffect(() => {
     const mapElement = document.querySelector('#map-container img[alt="지도"]');
     if (!mapElement) return;
 
+    // SVG가 이미 로드되었으면 색상만 업데이트
+    if (svgElementRef.current) {
+      // 모든 path를 원래 색상으로 초기화 (이전 색상 제거)
+      const allPaths = svgElementRef.current.querySelectorAll('path');
+      allPaths.forEach((path) => {
+        const originalFill = path.getAttribute('data-original-fill');
+        if (originalFill) {
+          path.setAttribute('fill', originalFill);
+          path.removeAttribute('opacity');
+        }
+      });
+
+      // 마커 색상 적용
+      markers.forEach((marker) => {
+        if (marker.location && marker.color) {
+          const pathElements = svgElementRef.current!.querySelectorAll(
+            `path[id^="${marker.location}"]`
+          );
+          pathElements.forEach((pathElement) => {
+            const originalFill = pathElement.getAttribute('fill');
+            if (originalFill && originalFill !== 'none') {
+              // 원본 색상 저장 (없을 경우에만)
+              if (!pathElement.getAttribute('data-original-fill')) {
+                pathElement.setAttribute('data-original-fill', originalFill);
+              }
+              pathElement.setAttribute('fill', marker.color!);
+              pathElement.setAttribute('opacity', '0.5');
+            }
+          });
+        }
+      });
+      return;
+    }
+
+    // 첫 로드 시 SVG 파싱 및 적용
     fetch(map)
       .then((res) => res.text())
       .then((svgText) => {
@@ -187,6 +243,7 @@ export default function MapView({
             mapElement.getAttribute('style') || ''
           );
           mapElement.replaceWith(svgElement);
+          svgElementRef.current = svgElement;
 
           markers.forEach((marker) => {
             if (marker.location) {
@@ -196,13 +253,23 @@ export default function MapView({
               );
               pathElements.forEach((pathElement) => {
                 pathElement.classList.add('selected');
+                // 원본 색상 저장
+                const originalFill = pathElement.getAttribute('fill');
+                if (originalFill && originalFill !== 'none') {
+                  pathElement.setAttribute('data-original-fill', originalFill);
+                  // 마커 색상이 있으면 적용
+                  if (marker.color) {
+                    pathElement.setAttribute('fill', marker.color);
+                    pathElement.setAttribute('opacity', '0.5');
+                  }
+                }
               });
             }
           });
         }
       })
       .catch((err) => console.error('SVG 로드 실패:', err));
-  }, []);
+  }, [markers]);
 
   return (
     <main

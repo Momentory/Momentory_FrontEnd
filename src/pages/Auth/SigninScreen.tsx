@@ -25,9 +25,13 @@ export default function LoginPage() {
       });
       alert("로그인 성공!");
       navigate("/splash"); // 로그인 성공 시 이동할 페이지
-    } catch (err) {
-      console.error(err);
-      alert("이메일 또는 비밀번호가 올바르지 않습니다.");
+    } catch (err: any) {
+      console.error("로그인 에러 전체:", err);
+      console.error("응답 데이터:", err.response?.data);
+      console.error("상태 코드:", err.response?.status);
+
+      const errorMessage = err.response?.data?.message || "이메일 또는 비밀번호가 올바르지 않습니다.";
+      alert(errorMessage);
     } finally {
       setLoading(false);
     }

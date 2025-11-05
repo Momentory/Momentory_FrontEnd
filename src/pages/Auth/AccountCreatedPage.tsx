@@ -4,37 +4,45 @@ export default function AccountCreatedPage() {
   const navigate = useNavigate();
 
   return (
-    <div className="relative flex flex-col items-center justify-center h-screen bg-white px-[30px]">
+    <div className="relative flex flex-col items-center justify-between h-screen bg-white px-[30px] overflow-hidden">
       {/* 뒤로가기 버튼 */}
       <img
         src="/images/109618.png"
         alt="뒤로가기"
-        className="absolute top-[25px] left-[25px] w-[35px] h-[35px] cursor-pointer"
+        className="absolute top-[25px] left-[25px] w-[30px] h-[30px] cursor-pointer"
         onClick={() => navigate(-1)}
       />
 
       {/* 상단 텍스트 */}
-      <div className="flex flex-col items-center text-center mt-[-80px] mb-[30px]">
-        <h1 className="text-[26px] font-bold text-[#FF7070] mb-2">
-          계정이 생성되었습니다!
+      <div className="flex flex-col items-start text-left mt-[120px] w-full">
+        <h1 className="text-[30px] font-semibold text-black leading-none mb-[8px]">
+          계정 생성 완료!
         </h1>
-        <p className="text-gray-500 text-[15px]">
-          Momentory에 오신 걸 진심으로 환영합니다
+        <p className="text-[14px] text-gray-400 leading-none">
+          Momentory에 오신 것을 환영합니다
         </p>
       </div>
 
-      {/* 캐릭터 이미지 + 체크 아이콘 */}
-      <div className="relative flex flex-col items-center mb-[-10px]">
-        {/* 캐릭터 하나만 */}
+      {/* 중간 콘텐츠 (체크 + 캐릭터) */}
+      <div className="relative flex flex-col items-center justify-center mt-[100px]">
+        {/* 체크 아이콘 */}
         <img
-          src="/images/account.png" // 첫 번째 첨부 캐릭터 이미지
+          src="/images/check.png"
+          alt="체크"
+          className="w-[113px] h-[113px] object-contain mb-[-60px] z-10"
+        />
+
+        {/* 캐릭터 이미지 (하나) */}
+        <img
+          src="/images/account.png"
           alt="캐릭터"
-          className="w-[260px] h-[280px] object-contain"
+          className="w-[358px] h-[188px] object-contain mt-[60px]"
         />
       </div>
 
-      {/* 버튼 영역 */}
-      <div className="flex flex-col items-center gap-4">
+      {/* 하단 버튼 영역 */}
+      <div className="flex flex-col items-center gap-3 mb-[80px]">
+        {/* Momentory 시작하기 */}
         <button
           onClick={() => navigate("/home")}
           className="w-[320px] h-[60px] bg-[#FF7070] text-white text-[18px] font-semibold rounded-[25px] active:scale-95 transition"
@@ -42,9 +50,10 @@ export default function AccountCreatedPage() {
           Momentory 시작하기
         </button>
 
+        {/* 로그인으로 이동 */}
         <button
           onClick={() => navigate("/login")}
-          className="w-[320px] h-[60px] border border-gray-300 text-gray-600 text-[16px] font-medium rounded-[25px] active:scale-95 transition"
+          className="w-[320px] h-[60px] bg-[#EDEDED] text-gray-400 text-[18px] font-medium rounded-[25px] active:scale-95 transition"
         >
           로그인으로 이동
         </button>
