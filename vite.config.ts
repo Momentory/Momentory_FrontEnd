@@ -11,8 +11,8 @@ export default defineConfig({
     global: 'globalThis',
   },
   server: {
-    host: true, // 외부(모바일) 접속 허용
-    https: true, // HTTPS 활성화 (Web Share API 필수)
+    host: true,
+    //https: true, // HTTPS 활성화 (Web Share API 필수)
     proxy: {
       '/api': {
         target: 'https://www.momentory.store',

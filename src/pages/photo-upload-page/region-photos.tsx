@@ -56,7 +56,7 @@ export default function RegionPhotosPage() {
   const location = useLocation();
   const navigate = useNavigate();
   const isPublic = location.state?.isPublic || false;
-  const [selectedPhoto, setSelectedPhoto] = useState<number | null>(null);
+  const [_selectedPhoto, setSelectedPhoto] = useState<number | null>(null);
 
   // TODO: API 연동 - 지역별 사진 목록 가져오기
   // isPublic ? 공개된 사진만 : 내 모든 사진 (공개/비공개 무관)

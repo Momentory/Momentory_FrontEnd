@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import map from '../../assets/gyeonggi-map.svg';
 import { gpsToMapPosition, extractCityName } from '../../utils/mapCoordinates';
 
@@ -18,7 +18,7 @@ export default function MapMarkerSection({
   onMarkerClick,
 }: MapMarkerSectionProps) {
   const [mapPosition, setMapPosition] = useState({ top: '50%', left: '50%' });
-  const [cityName, setCityName] = useState<string | null>(null);
+  const [_cityName, setCityName] = useState<string | null>(null);
 
   useEffect(() => {
     const position = gpsToMapPosition(markerLocation.lat, markerLocation.lng);
