@@ -1,8 +1,8 @@
-import { api } from "./client";
+import { api } from './client';
 
 // 게시글 목록 불러오기
 export const getCommunityPosts = async () => {
-  const res = await api.get("/api/community");
+  const res = await api.get('/api/community');
   return res.data;
 };
 
@@ -14,8 +14,8 @@ export const getCommunityPostDetail = async (postId: number) => {
 
 // 게시글 작성 (이미지 포함)
 export const postCommunity = async (formData: FormData) => {
-  const res = await api.post("/api/community", formData, {
-    headers: { "Content-Type": "multipart/form-data" },
+  const res = await api.post('/api/community', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
   });
   return res.data;
 };
@@ -55,3 +55,5 @@ export const unfollowUser = async (userId: number) => {
   const res = await api.delete(`/api/community/follow/${userId}`);
   return res.data;
 };
+
+

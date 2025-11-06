@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import type { Marker } from '../types/map/map';
+import type { Marker } from '../types/map';
 
 interface MarkerStore {
   markers: Marker[];
@@ -33,7 +33,8 @@ export const useMarkerStore = create<MarkerStore>()(
           set({ markers: updated });
         } else {
           // 새 마커 추가
-          const newId = markers.length > 0 ? Math.max(...markers.map((m) => m.id)) + 1 : 1;
+          const newId =
+            markers.length > 0 ? Math.max(...markers.map((m) => m.id)) + 1 : 1;
           set({
             markers: [
               ...markers,
@@ -68,4 +69,3 @@ export const useMarkerStore = create<MarkerStore>()(
     }
   )
 );
-

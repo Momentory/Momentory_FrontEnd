@@ -2,46 +2,11 @@ import { useState, useRef, useCallback, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import DropletIcon from '../../assets/droplet.svg?react';
 import MaximizeIcon from '../../assets/maximize.svg?react';
+import SliderIcon from '../../assets/sliders.svg?react';
 import DropdownHeader from '../../components/common/DropdownHeader';
 import AdjustTab from '../../components/PhotoEdit/AdjustTab';
 import FilterTab from '../../components/PhotoEdit/FilterTab';
 import TransformTab from '../../components/PhotoEdit/TransformTab';
-
-const SliderIcon = ({ className }: { className?: string }) => (
-  <svg
-    className={className}
-    width="36"
-    height="36"
-    viewBox="0 0 36 36"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    xmlnsXlink="http://www.w3.org/1999/xlink"
-  >
-    <rect
-      width="36"
-      height="36"
-      fill="url(#pattern0_267_282)"
-      fillOpacity="0.6"
-    />
-    <defs>
-      <pattern
-        id="pattern0_267_282"
-        patternContentUnits="objectBoundingBox"
-        width="1"
-        height="1"
-      >
-        <use xlinkHref="#image0_267_282" transform="scale(0.00520833)" />
-      </pattern>
-      <image
-        id="image0_267_282"
-        width="192"
-        height="192"
-        preserveAspectRatio="none"
-        xlinkHref="data:image/png;base64,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"
-      />
-    </defs>
-  </svg>
-);
 
 type TabType = 'adjust' | 'filter' | 'transform';
 
@@ -66,6 +31,7 @@ export default function PhotoEditPage() {
   >(null);
 
   const imageContainerRef = useRef<HTMLDivElement>(null);
+  const imageRef = useRef<HTMLImageElement>(null);
   const dragStartRef = useRef<{ x: number; y: number } | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [cropArea, setCropArea] = useState<{
@@ -93,21 +59,96 @@ export default function PhotoEditPage() {
     },
   ];
 
-  const handleNext = () => {
-    navigate('/photo-upload-progress', {
-      state: {
-        selectedImage,
-        brightness,
-        contrast,
-        saturation,
-        filterIntensity,
-        selectedFilter,
-        rotation,
-        position,
-        markerColor: location.state?.markerColor,
-        markerLocation: location.state?.markerLocation,
-      },
-    });
+  const handleNext = async () => {
+    // 공통 state 객체를 미리 생성
+    const baseState = {
+      brightness,
+      contrast,
+      saturation,
+      filterIntensity,
+      selectedFilter,
+      rotation,
+      position,
+      markerColor: location.state?.markerColor,
+      markerLocation: location.state?.markerLocation,
+    };
+
+    if (!imageContainerRef.current || !imageRef.current) {
+      navigate('/photo-upload-progress', {
+        state: {
+          selectedImage,
+          ...baseState,
+        },
+      });
+      return;
+    }
+
+    try {
+      // 원본 이미지 로드
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+
+      await new Promise((resolve, reject) => {
+        img.onload = resolve;
+        img.onerror = reject;
+        img.src = selectedImage;
+      });
+
+      // 화면에 표시되는 크기로 canvas 생성 (340x290)
+      const displayWidth = 340;
+      const displayHeight = 290;
+      const canvas = document.createElement('canvas');
+      canvas.width = displayWidth;
+      canvas.height = displayHeight;
+      const ctx = canvas.getContext('2d');
+
+      if (!ctx) {
+        navigate('/photo-upload-progress', {
+          state: {
+            selectedImage,
+            ...baseState,
+          },
+        });
+        return;
+      }
+
+      // 배경색 설정
+      ctx.fillStyle = '#f3f4f6';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // 필터 스타일을 canvas filter로 적용 (밝기/대비/채도 포함)
+      const filterStyle = getFilterStyle();
+      ctx.filter = filterStyle;
+
+      // 회전 및 위치 변환 적용
+      ctx.save();
+      ctx.translate(displayWidth / 2, displayHeight / 2);
+      ctx.rotate((rotation * Math.PI) / 180);
+      ctx.translate(-displayWidth / 2, -displayHeight / 2);
+
+      // 이미지 그리기 (화면에 맞게 스케일링)
+      ctx.drawImage(img, position.x, position.y, displayWidth, displayHeight);
+      ctx.restore();
+
+      // 보정된 이미지를 dataURL로 변환
+      const editedImageUrl = canvas.toDataURL('image/jpeg', 0.9);
+
+      navigate('/photo-upload-progress', {
+        state: {
+          selectedImage: editedImageUrl,
+          ...baseState,
+        },
+      });
+    } catch (error) {
+      console.error('이미지 처리 실패:', error);
+      // 실패 시 원본 이미지 전달
+      navigate('/photo-upload-progress', {
+        state: {
+          selectedImage,
+          ...baseState,
+        },
+      });
+    }
   };
 
   const getFilterStyle = () => {
@@ -334,14 +375,14 @@ export default function PhotoEditPage() {
   return (
     <div className="flex flex-col min-h-screen bg-white">
       <DropdownHeader
-        title="Edit Photo"
+        title="사진 보정"
         hasDropdown={false}
         rightAction={
           <button
             onClick={handleNext}
             className="text-blue-500 font-semibold text-[15px]"
           >
-            Next
+            다음
           </button>
         }
       />
@@ -355,8 +396,9 @@ export default function PhotoEditPage() {
           {selectedImage ? (
             <>
               <img
+                ref={imageRef}
                 src={selectedImage}
-                alt="Selected"
+                alt="선택된 사진"
                 className={`w-full h-full rounded-lg transition-transform duration-200 ${
                   activeTransformMode === 'move' ? 'cursor-move' : ''
                 }`}
@@ -433,7 +475,7 @@ export default function PhotoEditPage() {
             </>
           ) : (
             <div className="w-full h-full flex items-center justify-center text-gray-400">
-              No image selected
+              선택된 사진이 없습니다
             </div>
           )}
         </div>
@@ -466,79 +508,83 @@ export default function PhotoEditPage() {
         ))}
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4">
-        {activeTab === 'adjust' && (
-          <AdjustTab
-            brightness={brightness}
-            contrast={contrast}
-            saturation={saturation}
-            onBrightnessChange={setBrightness}
-            onContrastChange={setContrast}
-            onSaturationChange={setSaturation}
-          />
-        )}
-        {activeTab === 'filter' && (
-          <FilterTab
-            intensity={filterIntensity}
-            selectedFilter={selectedFilter}
-            onIntensityChange={setFilterIntensity}
-            onFilterChange={setSelectedFilter}
-            previewImage={selectedImage}
-          />
-        )}
-        {activeTab === 'transform' && (
-          <TransformTab
-            rotation={rotation}
-            position={position}
-            onRotationChange={setRotation}
-            onPositionChange={setPosition}
-            onActiveModeChange={setActiveTransformMode}
-            onCropConfirm={async () => {
-              if (!cropArea || !selectedImage || !imageContainerRef.current)
-                return;
+      <div className="flex-1 overflow-y-auto">
+        <div className="flex justify-center px-6 py-4">
+          <div className="w-full max-w-[400px]">
+            {activeTab === 'adjust' && (
+              <AdjustTab
+                brightness={brightness}
+                contrast={contrast}
+                saturation={saturation}
+                onBrightnessChange={setBrightness}
+                onContrastChange={setContrast}
+                onSaturationChange={setSaturation}
+              />
+            )}
+            {activeTab === 'filter' && (
+              <FilterTab
+                intensity={filterIntensity}
+                selectedFilter={selectedFilter}
+                onIntensityChange={setFilterIntensity}
+                onFilterChange={setSelectedFilter}
+                previewImage={selectedImage}
+              />
+            )}
+            {activeTab === 'transform' && (
+              <TransformTab
+                rotation={rotation}
+                position={position}
+                onRotationChange={setRotation}
+                onPositionChange={setPosition}
+                onActiveModeChange={setActiveTransformMode}
+                onCropConfirm={async () => {
+                  if (!cropArea || !selectedImage || !imageContainerRef.current)
+                    return;
 
-              const img = new Image();
-              img.src = selectedImage;
+                  const img = new Image();
+                  img.src = selectedImage;
 
-              await new Promise((resolve) => {
-                img.onload = resolve;
-              });
+                  await new Promise((resolve) => {
+                    img.onload = resolve;
+                  });
 
-              const container = imageContainerRef.current;
-              const scaleX = img.width / container.offsetWidth;
-              const scaleY = img.height / container.offsetHeight;
+                  const container = imageContainerRef.current;
+                  const scaleX = img.width / container.offsetWidth;
+                  const scaleY = img.height / container.offsetHeight;
 
-              const canvas = document.createElement('canvas');
-              canvas.width = cropArea.width * scaleX;
-              canvas.height = cropArea.height * scaleY;
-              const ctx = canvas.getContext('2d');
+                  const canvas = document.createElement('canvas');
+                  canvas.width = cropArea.width * scaleX;
+                  canvas.height = cropArea.height * scaleY;
+                  const ctx = canvas.getContext('2d');
 
-              if (ctx) {
-                ctx.drawImage(
-                  img,
-                  cropArea.x * scaleX,
-                  cropArea.y * scaleY,
-                  cropArea.width * scaleX,
-                  cropArea.height * scaleY,
-                  0,
-                  0,
-                  canvas.width,
-                  canvas.height
-                );
+                  if (ctx) {
+                    ctx.drawImage(
+                      img,
+                      cropArea.x * scaleX,
+                      cropArea.y * scaleY,
+                      cropArea.width * scaleX,
+                      cropArea.height * scaleY,
+                      0,
+                      0,
+                      canvas.width,
+                      canvas.height
+                    );
 
-                const croppedImageUrl = canvas.toDataURL('image/png');
-                setSelectedImage(croppedImageUrl);
-                setPosition({ x: 0, y: 0 });
-                setRotation(0);
-              }
+                    const croppedImageUrl = canvas.toDataURL('image/png');
+                    setSelectedImage(croppedImageUrl);
+                    setPosition({ x: 0, y: 0 });
+                    setRotation(0);
+                  }
 
-              setCropArea(null);
-            }}
-            onCropCancel={() => {
-              setCropArea(null);
-            }}
-          />
-        )}
+                  setCropArea(null);
+                }}
+                onCropCancel={() => {
+                  setCropArea(null);
+                }}
+              />
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );

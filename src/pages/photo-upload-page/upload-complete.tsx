@@ -8,6 +8,7 @@ import InstaIcon from '../../assets/insta.svg?react';
 import HeartIcon from '../../assets/heart.svg?react';
 import FacebookIcon from '../../assets/facebook.svg?react';
 import Modal from '../../components/common/Modal';
+import { getImageBlob, downloadBlob } from '../../utils/image';
 
 export default function PhotoUploadCompletePage() {
   const location = useLocation();
@@ -31,28 +32,9 @@ export default function PhotoUploadCompletePage() {
 
   const handleSave = async () => {
     try {
-      let blob: Blob;
-
-      if (uploadedImage.startsWith('data:')) {
-        const response = await fetch(uploadedImage);
-        blob = await response.blob();
-      } else {
-        const response = await fetch(uploadedImage, { mode: 'cors' });
-        if (!response.ok) {
-          throw new Error('이미지 다운로드 실패');
-        }
-        blob = await response.blob();
-      }
-
-      const blobUrl = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.download = `momentory-photo-${new Date().toISOString().split('T')[0]}.png`;
-      link.href = blobUrl;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(blobUrl);
-
+      const blob = await getImageBlob(uploadedImage);
+      const filename = `momentory-photo-${new Date().toISOString().split('T')[0]}.png`;
+      downloadBlob(blob, filename);
       alert('사진이 저장되었습니다!');
     } catch (error) {
       console.error('이미지 저장 실패:', error);
@@ -61,24 +43,19 @@ export default function PhotoUploadCompletePage() {
   };
 
   const handleShareClick = async () => {
+    // Web Share API는 모바일 환경에서만 지원되는 경우가 많음
     if (
       navigator.share &&
       /Mobile|Android|iPhone|iPad/.test(navigator.userAgent)
     ) {
       try {
-        let file: File;
-
-        if (uploadedImage.startsWith('data:')) {
-          const response = await fetch(uploadedImage);
-          const blob = await response.blob();
-          file = new File([blob], 'momentory-photo.png', { type: 'image/png' });
-        } else {
-          const response = await fetch(uploadedImage, { mode: 'cors' });
-          const blob = await response.blob();
-          file = new File([blob], 'momentory-photo.png', { type: 'image/png' });
-        }
+        const blob = await getImageBlob(uploadedImage);
+        const file = new File([blob], 'momentory-photo.png', {
+          type: 'image/png',
+        });
 
         if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          // 네이티브 공유 UI 호출
           await navigator.share({
             title: 'Momentory 사진 공유',
             text: '나의 순간을 공유합니다!',
@@ -87,6 +64,7 @@ export default function PhotoUploadCompletePage() {
           return;
         }
       } catch (error) {
+        // 사용자가 공유를 취소한 경우(AbortError)는 에러로 간주하지 않음
         if (error instanceof Error && error.name !== 'AbortError') {
           console.error('공유 실패:', error);
         }
@@ -96,10 +74,12 @@ export default function PhotoUploadCompletePage() {
 
   const handleCopyLink = async () => {
     try {
+      // 최신 Clipboard API 시도
       await navigator.clipboard.writeText(window.location.href);
       alert('링크가 클립보드에 복사되었습니다!');
     } catch (error) {
       console.error('링크 복사 실패:', error);
+      // 구형 방식 (execCommand)으로 폴백
       const textArea = document.createElement('textarea');
       textArea.value = window.location.href;
       textArea.style.position = 'fixed';
@@ -116,38 +96,40 @@ export default function PhotoUploadCompletePage() {
     }
   };
 
-  const handleShare = (platform: string) => {
+  const handleShare = async (platform: string) => {
     const shareUrl = window.location.href;
-    const shareText = '나의 순간을 Momentory에서 확인해보세요!';
 
     switch (platform) {
       case 'kakaotalk': {
-        if (
-          typeof window !== 'undefined' &&
-          'Kakao' in window &&
-          (
-            window as unknown as { Kakao: { isInitialized: () => boolean } }
-          ).Kakao.isInitialized()
-        ) {
-          (
-            window as unknown as {
-              Kakao: { Share: { sendDefault: (params: unknown) => void } };
-            }
-          ).Kakao.Share.sendDefault({
-            objectType: 'feed',
-            content: {
-              title: 'Momentory',
-              description: shareText,
-              imageUrl: uploadedImage,
-              link: {
-                mobileWebUrl: shareUrl,
-                webUrl: shareUrl,
-              },
-            },
-          });
-        } else {
-          const kakaoLink = `https://story.kakao.com/share?url=${encodeURIComponent(shareUrl)}`;
-          window.open(kakaoLink, '_blank');
+        try {
+          // 카카오톡은 이미지 직접 공유 API를 제공하지 않아,
+          // 기기에 다운로드 후 앱 실행을 유도하여 사용자가 직접 공유하도록 함
+          const blob = await getImageBlob(uploadedImage);
+          const filename = `momentory-photo-${new Date().toISOString().split('T')[0]}.jpg`;
+          downloadBlob(blob, filename);
+
+          // 모바일 환경 확인
+          const isMobile =
+            /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+              navigator.userAgent
+            );
+
+          if (isMobile) {
+            // 모바일: 카카오톡 앱 열기 시도
+            setTimeout(() => {
+              window.location.href = 'kakaotalk://';
+              alert(
+                '사진이 다운로드되었습니다. 카카오톡 앱에서 다운로드한 사진을 공유해주세요.'
+              );
+            }, 500);
+          } else {
+            alert(
+              '사진이 다운로드되었습니다. 카카오톡 앱에서 다운로드한 사진을 공유해주세요.'
+            );
+          }
+        } catch (error) {
+          console.error('카카오톡 공유 실패:', error);
+          alert('카카오톡 공유에 실패했습니다. 다시 시도해주세요.');
         }
         break;
       }
@@ -159,15 +141,77 @@ export default function PhotoUploadCompletePage() {
       }
 
       case 'instagram': {
-        alert(
-          '인스타그램 앱에서 "링크 복사"로 복사한 링크를 공유하거나, 저장한 사진을 직접 업로드해주세요.'
-        );
+        try {
+          // 모바일에서는 Web Share API (스토리 등)를 우선 시도하고,
+          // 실패하거나 PC 환경일 경우 다운로드로 폴백
+          const blob = await getImageBlob(uploadedImage);
+
+          const isMobile =
+            /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+              navigator.userAgent
+            );
+
+          // Web Share API 지원 여부 확인 (모바일, HTTPS 환경)
+          if (isMobile && navigator.share) {
+            const file = new File(
+              [blob],
+              `momentory-photo-${new Date().toISOString().split('T')[0]}.jpg`,
+              {
+                type: 'image/jpeg',
+              }
+            );
+
+            const canShareFiles =
+              navigator.canShare && navigator.canShare({ files: [file] });
+
+            if (canShareFiles) {
+              // Web Share API (네이티브 공유) 시도
+              try {
+                await navigator.share({
+                  title: 'Momentory',
+                  text: '나의 순간을 Momentory에서 확인해보세요!',
+                  files: [file],
+                });
+                // 공유 성공 시 여기서 종료
+                return;
+              } catch (shareError) {
+                // 사용자가 공유를 취소한(AbortError) 경우 무시
+                if (
+                  shareError instanceof Error &&
+                  shareError.name === 'AbortError'
+                ) {
+                  return;
+                }
+                // 다른 에러 발생 시, 폴백 로직으로 넘어가도록 함
+              }
+            }
+          }
+
+          // Web Share API를 지원하지 않거나 실패한 경우 (폴백 로직)
+          const filename = `momentory-photo-${new Date().toISOString().split('T')[0]}.jpg`;
+          downloadBlob(blob, filename);
+
+          if (isMobile) {
+            alert(
+              '사진이 다운로드되었습니다. 인스타그램 앱에서 다운로드한 사진을 선택하여 업로드해주세요.'
+            );
+          } else {
+            alert(
+              '사진이 다운로드되었습니다. 인스타그램 웹사이트에서 다운로드한 사진을 업로드해주세요.'
+            );
+          }
+        } catch (error) {
+          if (error instanceof Error && error.name !== 'AbortError') {
+            console.error('인스타그램 공유 실패:', error);
+            alert('인스타그램 공유에 실패했습니다. 다시 시도해주세요.');
+          }
+        }
         break;
       }
 
       case 'tistory': {
-        const tistoryUrl = `https://www.tistory.com/m/posting/?url=${encodeURIComponent(shareUrl)}&title=${encodeURIComponent('Momentory 사진')}`;
-        window.open(tistoryUrl, '_blank');
+        // 티스토리는 URL 공유 외 별도 API가 없으므로 메인 페이지로 이동
+        window.open('https://www.tistory.com/', '_blank');
         break;
       }
     }
@@ -330,11 +374,7 @@ export default function PhotoUploadCompletePage() {
         </div>
         <div className="flex flex-wrap justify-center gap-5">
           {recommendedPlaces.map((place) => (
-            <div
-              key={place.id}
-              className="bg-white overflow-hidden cursor-pointer hover:opacity-80 transition-opacity w-[90px]"
-              onClick={() => {}}
-            >
+            <div key={place.id} className="bg-white overflow-hidden w-[90px]">
               <div className="aspect-square bg-gray-200 border border-[#812D2D] rounded-lg overflow-hidden">
                 <img
                   src={place.image}

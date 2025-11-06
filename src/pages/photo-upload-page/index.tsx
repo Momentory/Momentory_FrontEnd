@@ -249,14 +249,14 @@ export default function PhotoUploadPage() {
   return (
     <div className="flex flex-col min-h-screen bg-white">
       <DropdownHeader
-        title="Photo Upload"
+        title="사진 업로드"
         hasDropdown={false}
         rightAction={
           <button
             onClick={handleNext}
             className="text-blue-500 font-semibold text-[15px]"
           >
-            Next
+            다음
           </button>
         }
       />
@@ -269,56 +269,86 @@ export default function PhotoUploadPage() {
           >
             <img
               src={displayImage ?? undefined}
-              alt="Selected"
+              alt="선택된 사진"
               className="w-full h-full object-cover rounded-lg"
             />
           </div>
         </div>
 
-        <div className="p-4">
-          <h2 className="text-base font-semibold mb-2">Introduction</h2>
-          <textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder="Photo Description..."
-            className="w-full h-24 px-4 py-3 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-[#E6D5D5]"
-            style={{
-              border: '2.5px solid #CECECE',
-            }}
-            onFocus={(e) => {
-              e.target.style.borderColor = '#E6D5D5';
-            }}
-            onBlur={(e) => {
-              e.target.style.borderColor = '#CECECE';
-            }}
-          />
-        </div>
-
-        <div className="px-4 py-3 flex items-center justify-between">
-          <div>
-            <h2 className="text-base font-semibold">Visibility</h2>
-            <p className="text-sm text-gray-600">Set to Private</p>
+        <div className="flex justify-center mb-5">
+          <div className="w-full max-w-[420px]">
+            <div className="border-t-2" style={{ borderColor: '#E6D5D5' }} />
           </div>
-          <button
-            onClick={() => setIsPrivate(!isPrivate)}
-            className="relative w-14 h-7 rounded-full transition-colors"
-            style={{
-              backgroundColor: isPrivate ? '#FF7070' : '#CECECE',
-            }}
-          >
-            <div
-              className={`absolute top-1 left-1 w-5 h-5 bg-white rounded-full transition-transform ${
-                isPrivate ? 'translate-x-7' : 'translate-x-0'
-              }`}
-            />
-          </button>
         </div>
 
-        <MapMarkerSection
-          markerColor={markerColor}
-          markerLocation={markerLocation}
-          onMarkerClick={() => setShowColorPicker(true)}
-        />
+        <div className="flex justify-center px-6">
+          <div className="w-full max-w-[400px]">
+            <div className="mb-4 pt-4">
+              <h2 className="text-[18px] font-semibold mb-2">소개</h2>
+              <textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="사진 설명을 입력하세요..."
+                className="w-full h-24 px-4 py-3 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-[#E6D5D5] placeholder:text-[16px]"
+                style={{
+                  border: '2px solid #CECECE',
+                }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = '#E6D5D5';
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = '#CECECE';
+                }}
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="flex justify-center mb-5">
+          <div className="w-full max-w-[420px]">
+            <div className="border-t-2" style={{ borderColor: '#E6D5D5' }} />
+          </div>
+        </div>
+
+        <div className="flex justify-center px-6">
+          <div className="w-full max-w-[400px]">
+            <div className="py-3 flex items-center justify-between">
+              <div>
+                <h2 className="text-[18px] font-semibold mb-2">공개 설정</h2>
+                <p className="text-sm text-gray-600 pl-2">비공개로 설정</p>
+              </div>
+              <button
+                onClick={() => setIsPrivate(!isPrivate)}
+                className="relative w-14 h-7 rounded-full transition-colors"
+                style={{
+                  backgroundColor: isPrivate ? '#FF7070' : '#CECECE',
+                }}
+              >
+                <div
+                  className={`absolute top-1 left-1 w-5 h-5 bg-white rounded-full transition-transform ${
+                    isPrivate ? 'translate-x-7' : 'translate-x-0'
+                  }`}
+                />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex justify-center mb-5">
+          <div className="w-full max-w-[420px]">
+            <div className="border-t-2" style={{ borderColor: '#E6D5D5' }} />
+          </div>
+        </div>
+
+        <div className="flex justify-center px-6">
+          <div className="w-full max-w-[400px]">
+            <MapMarkerSection
+              markerColor={markerColor}
+              markerLocation={markerLocation}
+              onMarkerClick={() => setShowColorPicker(true)}
+            />
+          </div>
+        </div>
       </div>
 
       {showColorPicker && (

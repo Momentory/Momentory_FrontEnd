@@ -1,41 +1,49 @@
-import axios, { AxiosError } from "axios";
+// 프로젝트 전역에서 사용할 Axios 인스턴스 및 토큰 관리(주입, 재발급) 인터셉터 설정
+
+import axios from 'axios';
+
 import type {
   AxiosResponse,
   InternalAxiosRequestConfig,
-} from "axios";
-import { tokenStore } from "../lib/token";
+  AxiosRequestHeaders,
+} from 'axios';
+import { tokenStore } from '../lib/token';
+
+interface ReissueResponse {
+  accessToken: string;
+  refreshToken?: string;
+}
 
 // Axios 인스턴스 생성
 export const api = axios.create({
-  baseURL: "/api", // 환경변수 기반으로 바꿔도 무방
+  baseURL: '/api',
   withCredentials: true,
-  headers: { "Content-Type": "application/json" },
+  headers: { 'Content-Type': 'application/json' },
 });
 
 // 요청 인터셉터: AccessToken 자동 첨부 (비로그인용 API 예외 처리 포함)
 api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   const access = tokenStore.getAccess();
 
-  // 토큰을 첨부하지 않을 엔드포인트 목록
+  // 토큰을 첨부하지 않을 엔드포인트 목록 (baseURL 제외)
   const noAuthUrls = [
-  "/api/auth/check-email",
-  "/api/auth/check-nickname",
-  "/api/auth/send-email",
-  "/api/auth/check-email-verified",
-  "/api/auth/validate-password",
-  "/api/auth/userSignup",
-  "/api/auth/login",
-  "/api/auth/reissue",
-];
+    '/auth/check-email',
+    '/auth/check-nickname',
+    '/auth/send-email',
+    '/auth/check-email-verified',
+    '/auth/validate-password',
+    '/auth/userSignup',
+    '/auth/login',
+    '/auth/reissue',
+  ];
 
-
-  // 요청 URL이 예외 목록에 포함되어 있는지 확인
+  // config.url은 baseURL이 제외된 형태
   const isNoAuth = noAuthUrls.some((url) => config.url?.includes(url));
 
   // 비로그인용 API가 아닐 경우에만 토큰 추가
   if (access && !isNoAuth) {
     config.headers = config.headers ?? {};
-    (config.headers as any).Authorization = `Bearer ${access}`;
+    (config.headers as AxiosRequestHeaders).Authorization = `Bearer ${access}`;
   }
 
   return config;
@@ -52,8 +60,13 @@ const processQueue = (newAccess: string) => {
 
 // 응답 인터셉터: 401 → RefreshToken 재발급 후 재시도
 api.interceptors.response.use(
-  (response: AxiosResponse<any>) => response,
-  async (error: AxiosError) => {
+  (response: AxiosResponse<unknown>) => response,
+  async (error: unknown) => {
+    if (!axios.isAxiosError(error)) {
+      console.error('Axios 인터셉터 오류 (네트워크 외):', error);
+      throw error;
+    }
+
     const original = error.config as InternalAxiosRequestConfig & {
       _retry?: boolean;
     };
@@ -66,7 +79,8 @@ api.interceptors.response.use(
         return new Promise((resolve) => {
           requestQueue.push((newAccess) => {
             original.headers = original.headers ?? {};
-            (original.headers as any).Authorization = `Bearer ${newAccess}`;
+            (original.headers as AxiosRequestHeaders).Authorization =
+              `Bearer ${newAccess}`;
             resolve(api(original));
           });
         });
@@ -82,15 +96,16 @@ api.interceptors.response.use(
           throw error;
         }
 
-        // RefreshToken으로 재발급 요청
-        const { data } = await axios.post(
-          "https://www.momentory.store/api/auth/reissue",
+        // 상대 경로로 변경
+        // 전역 axios를 사용해 프록시(/api)를 타도록 함
+        const { data } = await axios.post<ReissueResponse>(
+          '/api/auth/reissue',
           { refreshToken },
-          { headers: { "Content-Type": "application/json" } }
+          { headers: { 'Content-Type': 'application/json' } }
         );
 
-        const newAccess = (data as any).accessToken;
-        const newRefresh = (data as any).refreshToken ?? refreshToken;
+        const newAccess = data.accessToken;
+        const newRefresh = data.refreshToken ?? refreshToken;
 
         tokenStore.set({
           accessToken: newAccess,
@@ -100,11 +115,24 @@ api.interceptors.response.use(
         processQueue(newAccess);
 
         original.headers = original.headers ?? {};
-        (original.headers as any).Authorization = `Bearer ${newAccess}`;
+        (original.headers as AxiosRequestHeaders).Authorization =
+          `Bearer ${newAccess}`;
         return api(original);
-      } catch (e) {
+      } catch (reissueError) {
         tokenStore.clear();
-        throw e;
+
+        // 재발급 요청이 실패한 경우
+        if (axios.isAxiosError(reissueError)) {
+          console.error(
+            '토큰 재발급 실패 (Axios Error):',
+            reissueError.response?.data
+          );
+        } else {
+          console.error('토큰 재발급 중 알 수 없는 오류:', reissueError);
+        }
+
+        // 재발급 실패 에러를 throw
+        throw reissueError;
       } finally {
         isRefreshing = false;
       }
