@@ -51,6 +51,7 @@ import ChangePasswordPage from './pages/settings-page/ChangePasswordPage';
 
 import MyMapPage from './pages/map-page/my-map-page';
 import PublicMapPage from './pages/map-page/public-map-page';
+import RoulettePage from './pages/roulette-page/index';
 import SharePage from './pages/share-page';
 import RegionPhotosPage from './pages/photo-upload-page/region-photos';
 
@@ -116,6 +117,7 @@ const protectedRoutes: RouteObject[] = [
 
       { path: 'myMap', element: <MyMapPage /> },
       { path: 'publicMap', element: <PublicMapPage /> },
+      { path: 'roulette', element: <RoulettePage /> },
       { path: 'share', element: <SharePage /> },
       { path: 'region-photos/:region', element: <RegionPhotosPage /> },
 

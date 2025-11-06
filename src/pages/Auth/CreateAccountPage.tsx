@@ -1,26 +1,26 @@
-import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 import {
   checkEmail,
   sendEmail,
   checkEmailVerified,
   signup,
-} from "../../api/auth";
+} from '../../api/auth';
 
 export default function CreateAccountPage() {
   const navigate = useNavigate();
 
   // 상태 관리
-  const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [birthYear, setBirthYear] = useState("2000");
-  const [birthMonth, setBirthMonth] = useState("01");
-  const [birthDay, setBirthDay] = useState("15");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [passwordConfirm, setPasswordConfirm] = useState("");
-  const [passwordMessage, setPasswordMessage] = useState("");
-  const [confirmMessage, setConfirmMessage] = useState("");
+  const [name, setName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [birthYear, setBirthYear] = useState('2000');
+  const [birthMonth, setBirthMonth] = useState('01');
+  const [birthDay, setBirthDay] = useState('15');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [passwordConfirm, setPasswordConfirm] = useState('');
+  const [passwordMessage, setPasswordMessage] = useState('');
+  const [confirmMessage, setConfirmMessage] = useState('');
   const [isPasswordValid, setIsPasswordValid] = useState(false);
   const [isPasswordMatch, setIsPasswordMatch] = useState(false);
 
@@ -37,20 +37,20 @@ export default function CreateAccountPage() {
     const regex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d!@#$%^&*()_+]{8,}$/;
     if (!regex.test(value)) {
       setIsPasswordValid(false);
-      setPasswordMessage("8자 이상, 영문과 숫자를 모두 포함해야 합니다.");
+      setPasswordMessage('8자 이상, 영문과 숫자를 모두 포함해야 합니다.');
     } else {
       setIsPasswordValid(true);
-      setPasswordMessage("사용 가능한 비밀번호입니다.");
+      setPasswordMessage('사용 가능한 비밀번호입니다.');
     }
 
     // 동시에 일치 여부도 갱신
     if (passwordConfirm) {
       if (value === passwordConfirm) {
         setIsPasswordMatch(true);
-        setConfirmMessage("비밀번호가 일치합니다.");
+        setConfirmMessage('비밀번호가 일치합니다.');
       } else {
         setIsPasswordMatch(false);
-        setConfirmMessage("비밀번호가 일치하지 않습니다.");
+        setConfirmMessage('비밀번호가 일치하지 않습니다.');
       }
     }
   };
@@ -62,27 +62,25 @@ export default function CreateAccountPage() {
 
     if (password === value) {
       setIsPasswordMatch(true);
-      setConfirmMessage("비밀번호가 일치합니다.");
+      setConfirmMessage('비밀번호가 일치합니다.');
     } else {
       setIsPasswordMatch(false);
-      setConfirmMessage("비밀번호가 일치하지 않습니다.");
+      setConfirmMessage('비밀번호가 일치하지 않습니다.');
     }
   };
 
   // 이메일 인증 요청
   const handleEmailClick = async () => {
     try {
-
       await checkEmail(email);
       await sendEmail(email);
 
       setEmailSent(true);
-      alert("인증 메일이 발송되었습니다. 메일함을 확인해주세요.");
+      alert('인증 메일이 발송되었습니다. 메일함을 확인해주세요.');
     } catch {
-      alert("이미 존재하는 이메일이거나 발송 중 오류가 발생했습니다.");
+      alert('이미 존재하는 이메일이거나 발송 중 오류가 발생했습니다.');
     }
   };
-
 
   // 이메일 인증 확인
   const handleVerifyClick = async () => {
@@ -90,12 +88,12 @@ export default function CreateAccountPage() {
       const { data } = await checkEmailVerified(email);
       if (data.verified) {
         setEmailVerified(true);
-        alert("이메일 인증이 완료되었습니다.");
+        alert('이메일 인증이 완료되었습니다.');
       } else {
-        alert("이메일 인증이 아직 완료되지 않았습니다.");
+        alert('이메일 인증이 아직 완료되지 않았습니다.');
       }
     } catch {
-      alert("이메일 인증 확인 중 오류가 발생했습니다.");
+      alert('이메일 인증 확인 중 오류가 발생했습니다.');
     }
   };
 
@@ -103,12 +101,10 @@ export default function CreateAccountPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!agree) return alert("약관에 동의해야 가입할 수 있습니다.");
-    if (!isPasswordValid)
-      return alert("비밀번호 형식이 올바르지 않습니다.");
-    if (!isPasswordMatch)
-      return alert("비밀번호가 일치하지 않습니다.");
-    if (!emailVerified) return alert("이메일 인증을 완료해주세요.");
+    if (!agree) return alert('약관에 동의해야 가입할 수 있습니다.');
+    if (!isPasswordValid) return alert('비밀번호 형식이 올바르지 않습니다.');
+    if (!isPasswordMatch) return alert('비밀번호가 일치하지 않습니다.');
+    if (!emailVerified) return alert('이메일 인증을 완료해주세요.');
 
     try {
       await signup({
@@ -119,10 +115,10 @@ export default function CreateAccountPage() {
         phone,
         birth: `${birthYear}-${birthMonth}-${birthDay}`,
       });
-      alert("회원가입이 완료되었습니다!");
-      navigate("/account-created");
+      alert('회원가입이 완료되었습니다!');
+      navigate('/account-created');
     } catch {
-      alert("회원가입 중 오류가 발생했습니다.");
+      alert('회원가입 중 오류가 발생했습니다.');
     }
   };
 
@@ -136,9 +132,7 @@ export default function CreateAccountPage() {
           className="absolute top-[-80px] left-[2px] w-[35px] h-[35px] cursor-pointer"
           onClick={() => navigate(-1)}
         />
-        <h1 className="text-[24px] font-semibold text-black ml-10">
-          회원가입
-        </h1>
+        <h1 className="text-[24px] font-semibold text-black ml-10">회원가입</h1>
       </div>
 
       {/* 폼 */}
@@ -194,7 +188,7 @@ export default function CreateAccountPage() {
               className="w-[100px] h-[50px] rounded-[10px] border border-gray-300 px-2 text-[15px]"
             >
               {[...Array(12)].map((_, i) => (
-                <option key={i}>{String(i + 1).padStart(2, "0")}</option>
+                <option key={i}>{String(i + 1).padStart(2, '0')}</option>
               ))}
             </select>
             <select
@@ -203,7 +197,7 @@ export default function CreateAccountPage() {
               className="w-[100px] h-[50px] rounded-[10px] border border-gray-300 px-2 text-[15px]"
             >
               {[...Array(31)].map((_, i) => (
-                <option key={i}>{String(i + 1).padStart(2, "0")}</option>
+                <option key={i}>{String(i + 1).padStart(2, '0')}</option>
               ))}
             </select>
           </div>
@@ -223,14 +217,15 @@ export default function CreateAccountPage() {
             <button
               type="button"
               onClick={emailSent ? handleVerifyClick : handleEmailClick}
-              className={`w-[90px] h-[50px] rounded-[10px] text-white text-[14px] font-medium ${emailVerified
-                  ? "bg-green-400"
+              className={`w-[90px] h-[50px] rounded-[10px] text-white text-[14px] font-medium ${
+                emailVerified
+                  ? 'bg-green-400'
                   : emailSent
-                    ? "bg-gray-400"
-                    : "bg-[#FF7070]"
-                }`}
+                    ? 'bg-gray-400'
+                    : 'bg-[#FF7070]'
+              }`}
             >
-              {emailVerified ? "완료" : emailSent ? "인증" : "링크발송"}
+              {emailVerified ? '완료' : emailSent ? '인증' : '링크발송'}
             </button>
           </div>
         </div>
@@ -251,8 +246,9 @@ export default function CreateAccountPage() {
           {/* 유효성 메시지 */}
           {password && (
             <p
-              className={`text-[13px] mt-1 ${isPasswordValid ? "text-green-500" : "text-red-500"
-                }`}
+              className={`text-[13px] mt-1 ${
+                isPasswordValid ? 'text-green-500' : 'text-red-500'
+              }`}
             >
               {passwordMessage}
             </p>
@@ -270,8 +266,9 @@ export default function CreateAccountPage() {
           {/* 일치 여부 메시지 */}
           {passwordConfirm && (
             <p
-              className={`text-[13px] mt-1 ${isPasswordMatch ? "text-green-500" : "text-red-500"
-                }`}
+              className={`text-[13px] mt-1 ${
+                isPasswordMatch ? 'text-green-500' : 'text-red-500'
+              }`}
             >
               {confirmMessage}
             </p>
@@ -288,7 +285,7 @@ export default function CreateAccountPage() {
             className="w-[18px] h-[18px] accent-[#FF7070]"
           />
           <label htmlFor="agree" className="text-[14px] text-gray-600">
-            약관에 동의하고 가입{" "}
+            약관에 동의하고 가입{' '}
             <Link to="/terms" className="text-blue-600 hover:underline">
               서비스 약관
             </Link>
@@ -299,8 +296,9 @@ export default function CreateAccountPage() {
         <button
           disabled={!agree}
           type="submit"
-          className={`w-[332px] h-[70px] text-white text-[18px] font-semibold rounded-[25px] mt-8 transition active:scale-95 ${agree ? "bg-[#FF7070]" : "bg-gray-300"
-            }`}
+          className={`w-[332px] h-[70px] text-white text-[18px] font-semibold rounded-[25px] mt-8 transition active:scale-95 ${
+            agree ? 'bg-[#FF7070]' : 'bg-gray-300'
+          }`}
         >
           다음
         </button>
@@ -308,7 +306,7 @@ export default function CreateAccountPage() {
         {/* 임시 이동 버튼 (테스트용) */}
         <button
           type="button"
-          onClick={() => navigate("/create-profile")}
+          onClick={() => navigate('/create-profile')}
           className="w-[332px] h-[70px] bg-[#FF7070] text-white rounded-[25px] font-semibold text-[18px]"
         >
           (임시) 다음으로

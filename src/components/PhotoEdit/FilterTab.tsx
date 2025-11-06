@@ -78,32 +78,39 @@ export default function FilterTab({
         </label>
         <div
           ref={scrollRef}
-          className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide"
+          className="flex gap-2 overflow-x-auto pb-2 pr-1 scrollbar-hide"
           style={{
             scrollSnapType: 'x mandatory',
             WebkitOverflowScrolling: 'touch',
+            paddingLeft:
+              selectedFilter === '원본' ? 'calc(2px + (80px * 0.05))' : '8px',
           }}
         >
-          {filters.map((filter, _index) => (
+          {filters.map((filter, index) => (
             <button
               key={filter.name}
               onClick={() => onFilterChange(filter.name)}
-              className="flex flex-col items-center min-w-[80px]"
+              className="flex flex-col items-center min-w-[80px] py-1"
               style={{ scrollSnapAlign: 'start' }}
             >
               <div
-                className={`relative w-20 h-20 rounded-lg overflow-hidden transition-all ${
+                className={`relative w-20 h-20 rounded-lg transition-all ${
                   selectedFilter === filter.name
                     ? 'ring-2 ring-[#FF7070] scale-105'
                     : 'ring-1 ring-gray-200'
                 }`}
+                style={{
+                  transformOrigin: index === 0 ? 'left center' : 'center',
+                }}
               >
-                <img
-                  src={previewImage}
-                  alt={filter.name}
-                  className="w-full h-full object-cover"
-                  style={{ filter: filter.style(intensity) }}
-                />
+                <div className="w-full h-full rounded-lg overflow-hidden">
+                  <img
+                    src={previewImage}
+                    alt={filter.name}
+                    className="w-full h-full object-cover"
+                    style={{ filter: filter.style(intensity) }}
+                  />
+                </div>
               </div>
               <p
                 className={`text-xs text-center mt-2 transition-colors ${

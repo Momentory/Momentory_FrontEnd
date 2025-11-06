@@ -6,6 +6,7 @@ export default function QuestionPage() {
   const location = useLocation();
 
   const question = location.state?.question || '경기 아트센터를 방문하셨나요?';
+  // upload-complete.tsx에서 전달하는 이미지 우선 확인
   const questionImage =
     location.state?.questionImage ||
     location.state?.selectedImage ||
@@ -64,7 +65,7 @@ export default function QuestionPage() {
           <div className="w-60 h-60 bg-white border-2 border-[#B3B3B3] overflow-hidden shadow-xl p-5">
             <img
               src={questionImage}
-              alt="Question"
+              alt="질문 사진"
               className="w-full aspect-194/166 object-cover"
             />
           </div>

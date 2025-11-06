@@ -1,13 +1,13 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { ArrowLeft, ImagePlus } from "lucide-react";
-import { motion } from "framer-motion";
-import { postCommunity } from "../../api/community"; 
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ArrowLeft, ImagePlus } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { postCommunity } from '../../api/community';
 
 export default function CommunityUploadPage() {
   const navigate = useNavigate();
-  const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
+  const [title, setTitle] = useState('');
+  const [content, setContent] = useState('');
   const [image, setImage] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -24,24 +24,24 @@ export default function CommunityUploadPage() {
   // 게시글 등록 요청
   const handleSubmit = async () => {
     if (!title || !content) {
-      alert("제목과 내용을 입력해주세요!");
+      alert('제목과 내용을 입력해주세요!');
       return;
     }
 
     const formData = new FormData();
-    formData.append("title", title);
-    formData.append("content", content);
-    if (image) formData.append("image", image);
+    formData.append('title', title);
+    formData.append('content', content);
+    if (image) formData.append('image', image);
 
     try {
       setLoading(true);
       const res = await postCommunity(formData);
-      console.log("등록 성공:", res);
-      alert("게시글이 성공적으로 등록되었습니다 🎉");
-      navigate("/community");
+      console.log('등록 성공:', res);
+      alert('게시글이 성공적으로 등록되었습니다 🎉');
+      navigate('/community');
     } catch (err) {
-      console.error("등록 실패:", err);
-      alert("등록 중 오류가 발생했습니다 😢");
+      console.error('등록 실패:', err);
+      alert('등록 중 오류가 발생했습니다 😢');
     } finally {
       setLoading(false);
     }
@@ -114,10 +114,10 @@ export default function CommunityUploadPage() {
           onClick={handleSubmit}
           disabled={loading}
           className={`w-[90%] ${
-            loading ? "bg-gray-400" : "bg-[#FF7070]"
+            loading ? 'bg-gray-400' : 'bg-[#FF7070]'
           } text-white text-[16px] font-semibold py-3 rounded-full shadow hover:bg-[#ff5a5a] transition`}
         >
-          {loading ? "등록 중..." : "등록하기"}
+          {loading ? '등록 중...' : '등록하기'}
         </motion.button>
       </div>
     </motion.div>

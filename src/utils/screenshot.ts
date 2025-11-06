@@ -52,7 +52,6 @@ async function addDateToImage(imageDataUrl: string): Promise<string> {
         return;
       }
 
-      // 원본 이미지 그리기
       ctx.drawImage(img, 0, 0);
 
       // 날짜 텍스트 설정
@@ -62,17 +61,15 @@ async function addDateToImage(imageDataUrl: string): Promise<string> {
         day: '2-digit',
       }).format(new Date());
 
-      const fontSize = Math.floor(img.height * 0.035); // 이미지 높이의 3.5%로 증가
+      const fontSize = Math.floor(img.height * 0.035);
       ctx.font = `bold ${fontSize}px Arial, sans-serif`;
       ctx.textAlign = 'right';
       ctx.textBaseline = 'bottom';
 
-      // 텍스트 위치 (오른쪽 하단 모서리에 더 가깝게)
       const padding = fontSize * 0.5;
       const x = img.width - padding;
       const y = img.height - padding;
 
-      // 4방향 외곽선으로 그림자 효과 (#AAAAAA)
       ctx.fillStyle = '#AAAAAA';
       ctx.lineWidth = 4;
       for (let i = -2; i <= 2; i++) {
@@ -83,7 +80,6 @@ async function addDateToImage(imageDataUrl: string): Promise<string> {
         }
       }
 
-      // 텍스트 채우기 (흰색)
       ctx.fillStyle = '#FFFFFF';
       ctx.fillText(today, x, y);
 
@@ -108,6 +104,5 @@ export async function captureMap(mapElementId: string): Promise<string> {
     scale: 2,
   });
 
-  // 날짜 추가
   return addDateToImage(imageDataUrl);
 }
