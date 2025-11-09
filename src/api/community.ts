@@ -1,10 +1,11 @@
-import { api } from "./client";
+import { api } from './client';
 
 /* ----------------------------- 게시글 관련 ----------------------------- */
 
+// 게시글 목록 조회
 export const getCommunityPosts = async () => {
   const res = await api.get("/api/community/posts");
-  return res.data.result.posts; // ← posts 배열만 반환!
+  return res.data.result.posts; // posts 배열만 반환
 };
 
 // 게시글 상세 조회
@@ -13,12 +14,13 @@ export const getCommunityPostDetail = async (postId: number) => {
   return res.data;
 };
 
-export const postCommunity = (formData: FormData) =>
-  api.post("/api/community", formData, {
+// 게시글 작성 (이미지 포함)
+export const postCommunity = async (formData: FormData) => {
+  const res = await api.post("/api/community", formData, {
     headers: { "Content-Type": "multipart/form-data" },
   });
-
-
+  return res.data;
+};
 
 // 게시글 수정
 export const updateCommunityPost = async (postId: number, payload: any) => {

@@ -25,11 +25,11 @@ export default function HomePage() {
   const [points, setPoints] = useState(0);
 
   // 상태
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const [isDropdownOpen, _setIsDropdownOpen] = useState(false);
   const [isMapModalOpen, setIsMapModalOpen] = useState(false);
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [isError, setIsError] = useState(false);
+  const [_isError, setIsError] = useState(false);
 
   // API 데이터
   const [topPlaces, setTopPlaces] = useState<any[]>([]);
@@ -42,7 +42,7 @@ export default function HomePage() {
       try {
         setIsLoading(true);
 
-        // 4개 API 모두 호출
+        // 병렬로 API 호출
         const [places, photos, charStatus, evts] = await Promise.all([
           getTopPlaces(),
           getRecentPhotos(),
@@ -64,7 +64,7 @@ export default function HomePage() {
         // 이벤트
         setEvents(Array.isArray(evts) ? evts : []);
 
-        // (지도 마커 초기화 유지)
+        // 지도 마커 초기화
         setMarkers([]);
       } catch (e) {
         console.error("홈 데이터 로드 실패:", e);
@@ -73,6 +73,7 @@ export default function HomePage() {
         setIsLoading(false);
       }
     };
+
     fetchHomeData();
   }, []);
 
@@ -84,31 +85,16 @@ export default function HomePage() {
           Level {level}
         </p>
         <div className="relative flex items-center gap-1 text-[14px]">
-          {/* 드롭다운 메뉴 */}
           {isDropdownOpen && (
             <div className="absolute right-0 top-[28px] bg-white border rounded-[10px] shadow-md py-2 w-[120px] z-40">
-              <button
-                onClick={() => {
-                  alert("프로필 수정");
-                  setIsDropdownOpen(false);
-                }}
-                className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-              >
+              <button className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                 프로필 수정
               </button>
-              <button
-                onClick={() => {
-                  alert("로그아웃");
-                  setIsDropdownOpen(false);
-                }}
-                className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-              >
+              <button className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                 로그아웃
               </button>
             </div>
           )}
-
-          {/* 포인트 */}
           <div className="w-[20px] h-[20px] bg-[#FFD966] rounded-full flex items-center justify-center text-[13px] font-bold text-white">
             P
           </div>
@@ -116,7 +102,7 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* 인사말 + 캐릭터 섹션 */}
+      {/* 인사 + 캐릭터 */}
       <div
         className="relative w-full h-[380px] flex flex-col justify-start items-start px-6 pt-6"
         style={{
@@ -138,16 +124,12 @@ export default function HomePage() {
           src="/images/char1.png"
           alt="캐릭터"
           className="absolute left-1/2 -translate-x-1/4 z-1"
-          style={{
-            width: "380px",
-            height: "430px",
-            bottom: "-60px",
-          }}
+          style={{ width: "380px", height: "430px", bottom: "-60px" }}
         />
         <img
           src="/images/ribon.png"
           alt="리본"
-          className="absolute -translate-x-1/4 z-1"
+          className="absolute"
           style={{
             width: "76px",
             height: "48px",
@@ -184,12 +166,14 @@ export default function HomePage() {
             ))}
           </div>
 
+          {/* 인디케이터 */}
           <div className="flex justify-center items-center mt-2 gap-[6px]">
             {[1, 2, 3].map((i) => (
               <div
                 key={i}
-                className={`w-[7px] h-[7px] rounded-full ${i === 1 ? "bg-[#FF7070]" : "bg-gray-300"
-                  }`}
+                className={`w-[7px] h-[7px] rounded-full ${
+                  i === 1 ? "bg-[#FF7070]" : "bg-gray-300"
+                }`}
               />
             ))}
           </div>
@@ -267,7 +251,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 추천 여행지 섹션 */}
+      {/* 추천 여행지 */}
       <section className="px-6 mt-10 mb-24">
         <h2 className="text-[23px] font-semibold mb-3">이번 주 추천 장소</h2>
 
@@ -276,16 +260,10 @@ export default function HomePage() {
             추천 여행지를 불러오는 중이에요...
           </div>
         )}
-        {isError && (
-          <div className="text-center text-gray-500 py-6">
-            {/* 데이터를 불러오지 못했습니다 */}
-          </div>
-        )}
 
-        <div className="grid gap-5">
-          {(topPlaces?.length > 0
-            ? topPlaces
-            : [
+        {(topPlaces.length > 0
+          ? topPlaces
+          : [
               {
                 id: 1,
                 name: "EVERLAND",
@@ -295,80 +273,72 @@ export default function HomePage() {
                 tags: ["#놀이공원", "#야경"],
               },
             ]
-          ).map((place, idx) => (
-            <div
-              key={idx}
-              className="bg-white rounded-2xl shadow-md overflow-hidden border border-gray-100 hover:shadow-lg transition-all duration-300"
-            >
-              {/* 여행지 이미지 */}
-              <img
-                src={place.imageUrl ?? "/images/default.png"}
-                alt={place.name}
-                className="w-full h-[140px] object-cover"
-              />
+        ).map((place, idx) => (
+          <div
+            key={idx}
+            className="bg-white rounded-2xl shadow-md overflow-hidden border border-gray-100 hover:shadow-lg transition-all duration-300 mb-4"
+          >
+            <img
+              src={place.imageUrl ?? "/images/default.png"}
+              alt={place.name}
+              className="w-full h-[140px] object-cover"
+            />
 
-              {/* 여행지 정보 */}
-              <div className="p-4">
-                {/* 이름 + 평점 */}
-                <div className="flex justify-between items-start">
-                  <p className="text-[15px] font-semibold text-gray-800 mt-2">
-                    {place.name}
-                  </p>
-                  {/* 평점 박스 */}
-                  <div
-                    className="flex items-center gap-[4px] text-white text-[11px] font-medium px-[7px] py-[3px] rounded-md"
+            <div className="p-4">
+              <div className="flex justify-between items-start">
+                <p className="text-[15px] font-semibold text-gray-800 mt-2">
+                  {place.name}
+                </p>
+                <div
+                  className="flex items-center gap-[4px] text-white text-[11px] font-medium px-[7px] py-[3px] rounded-md"
+                  style={{
+                    backgroundImage:
+                      "linear-gradient(to bottom, rgba(255,112,112,0.95), rgba(255,150,150,0.9))",
+                  }}
+                >
+                  <img
+                    src="/images/star1.png"
+                    alt="별"
+                    className="w-[10px] h-[10px]"
+                  />
+                  <span>{place.rating?.toFixed(1) ?? "4.0"} / 5.0</span>
+                </div>
+              </div>
+
+              <div className="flex justify-between items-end mt-2">
+                <div className="flex items-center gap-1">
+                  <img
+                    src="/images/pencil.png"
+                    alt="리뷰 아이콘"
+                    className="w-[13px] h-[13px] opacity-80"
+                  />
+                  <span
+                    className="font-bold text-[13px]"
                     style={{
-                      backgroundImage:
-                        "linear-gradient(to bottom, rgba(255,112,112,0.95), rgba(255,150,150,0.9))",
+                      color: "#AE7C7C",
+                      fontFamily: "NanumSquareRound",
                     }}
                   >
-                    <img
-                      src="/images/star1.png"
-                      alt="별"
-                      className="w-[10px] h-[10px]"
-                    />
-                    <span>{place.rating?.toFixed(1) ?? "4.0"} / 5.0</span>
-                  </div>
+                    리뷰 {place.reviewCount?.toLocaleString() ?? 0}개
+                  </span>
                 </div>
 
-                {/* 리뷰 + 태그 */}
-                <div className="flex justify-between items-end mt-2">
-                  {/* 왼쪽: 리뷰 */}
-                  <div className="flex items-center gap-1">
-                    <img
-                      src="/images/pencil.png"
-                      alt="리뷰 아이콘"
-                      className="w-[13px] h-[13px] opacity-80"
-                    />
-                    <span
-                      className="font-bold text-[13px]"
-                      style={{
-                        color: "#AE7C7C",
-                        fontFamily: "NanumSquareRound",
-                      }}
-                    >
-                      리뷰 {place.reviewCount?.toLocaleString() ?? 0}개
-                    </span>
-                  </div>
-
-                  {/* 오른쪽: 태그 */}
-                  <div className="flex flex-wrap justify-end gap-[6px]">
-                    {((place.tags ?? ["#놀이공원", "#야경"]) as string[]).map(
-                      (tag: string, idx: number) => (
-                        <span
-                          key={idx}
-                          className="text-[12px] text-gray-600 font-medium"
-                        >
-                          {tag}
-                        </span>
-                      )
-                    )}
-                  </div>
+                <div className="flex flex-wrap justify-end gap-[6px]">
+                  {((place.tags ?? ["#놀이공원", "#야경"]) as string[]).map(
+                    (tag: string, idx: number) => (
+                      <span
+                        key={idx}
+                        className="text-[12px] text-gray-600 font-medium"
+                      >
+                        {tag}
+                      </span>
+                    )
+                  )}
                 </div>
               </div>
             </div>
-          ))}
-        </div>
+          </div>
+        ))}
       </section>
 
       {/* 지도 모달 */}
@@ -381,7 +351,6 @@ export default function HomePage() {
             onClick={(e) => e.stopPropagation()}
             className="bg-white rounded-2xl shadow-lg w-[90%] max-w-[360px] p-5 relative"
           >
-            {/* 닫기 버튼 */}
             <button
               onClick={() => setIsMapModalOpen(false)}
               className="absolute top-3 left-3 text-gray-600 hover:text-gray-800"
@@ -391,11 +360,11 @@ export default function HomePage() {
             <h3 className="text-[16px] font-semibold text-center mb-4">
               나의 경기지도
             </h3>
+
             {/* 지도 프리뷰 + 마커 표시 */}
             <div className="relative flex justify-center">
               <img
                 src="/images/map-preview.png"
-                alt="경기도 지도"
                 className="w-[220px] h-auto rounded-md"
               />
               {markers.map((m) => (
@@ -407,7 +376,6 @@ export default function HomePage() {
                     left: `${m.left}%`,
                     backgroundColor: m.color,
                     transform: "translate(-50%, -50%)",
-                    zIndex: 20,
                   }}
                 />
               ))}
@@ -416,7 +384,7 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* 업로드 모달 */}
+      {/* 사진 업로드 모달 */}
       {isUploadModalOpen && (
         <div
           onClick={() => setIsUploadModalOpen(false)}
@@ -424,7 +392,7 @@ export default function HomePage() {
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="bg-white rounded-2xl shadow-xl w-[90%] max-w-[320px] mb-[100px] pb-3 animate-[slideUp_0.25s_ease-out]"
+            className="bg-white rounded-2xl shadow-xl w-[90%] max-w-[320px] mb-[100px] pb-3"
           >
             <div className="flex justify-between items-center px-5 py-3 border-b">
               <h3 className="text-[15px] font-semibold text-gray-800">
@@ -437,6 +405,7 @@ export default function HomePage() {
                 <X size={20} />
               </button>
             </div>
+
             <div className="flex flex-col py-2">
               <button
                 onClick={() => {
@@ -454,7 +423,9 @@ export default function HomePage() {
                   카메라
                 </span>
               </button>
+
               <div className="border-t my-1" />
+
               <button
                 onClick={() => {
                   alert("갤러리 업로드 예정");

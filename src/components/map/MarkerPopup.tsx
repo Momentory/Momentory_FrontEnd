@@ -1,5 +1,5 @@
 // 마커와 이미지 팝업 UI
-import type { Marker, Album } from '../../types/map/map';
+import type { Marker, Album } from '../../types/map';
 
 interface Props {
   marker: Marker;
@@ -8,7 +8,6 @@ interface Props {
   zoomed: boolean;
   onMarkerClick?: (markerId: number, location?: string) => void;
   style?: React.CSSProperties;
-  isPublic?: boolean; // 전체 지도인지 여부
 }
 
 export default function MarkerPopup({
@@ -18,7 +17,6 @@ export default function MarkerPopup({
   zoomed,
   onMarkerClick,
   style,
-  // isPublic = false,
 }: Props) {
   const rightSide = parseFloat(marker.left) > 70;
 

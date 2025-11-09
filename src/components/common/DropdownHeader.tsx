@@ -14,51 +14,50 @@ interface DropdownHeaderProps {
   hasDropdown?: boolean;
   dropdownItems?: DropdownItem[];
   rightItem?: React.ReactNode;
+  rightAction?: React.ReactNode;
+  leftIcon?: React.ReactNode;
 }
 
 const DropdownHeader = ({
   title = '',
   hasDropdown = false,
   dropdownItems = [],
-  rightItem = false,
+  rightItem,
+  rightAction,
+  leftIcon,
 }: DropdownHeaderProps) => {
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const [selectedTitle, setSelectedTitle] = useState(title);
 
-  // title prop이 변경되면 selectedTitle도 업데이트
   useEffect(() => {
-    if (!hasDropdown) {
-      setSelectedTitle(title);
-    }
+    if (!hasDropdown) setSelectedTitle(title);
   }, [title, hasDropdown]);
 
   const toggleDropdown = () => setIsOpen((prev) => !prev);
-
   const handleSelect = (item: DropdownItem) => {
     setSelectedTitle(item.label);
     setIsOpen(false);
     navigate(item.path);
   };
 
-  const handleClickBack = () => {
-    navigate(-1);
-  };
+  const handleClickBack = () => navigate(-1);
+  const LeftIcon = leftIcon || <BackIcon className="w-4 h-4" />;
 
   return (
     <div className="fixed top-[56px] left-1/2 -translate-x-1/2 w-full max-w-[480px] z-40">
       <div className="relative bg-white shadow-[0px_6px_8px_0px_rgba(0,0,0,0.25)] z-10">
-        <div className="flex items-center justify-between py-4 px-4">
+        <div className="relative flex items-center justify-center h-[60px] px-4">
           <button
             type="button"
             onClick={handleClickBack}
-            className="flex items-center justify-center w-6 h-6 cursor-pointer"
+            className="absolute left-4 flex items-center justify-center w-6 h-6 cursor-pointer"
           >
-            <BackIcon className="w-4 h-4" />
+            {LeftIcon}
           </button>
 
           <div
-            className={`flex items-center justify-center ${
+            className={`absolute left-1/2 -translate-x-1/2 flex items-center justify-center ${
               hasDropdown ? 'cursor-pointer' : ''
             }`}
             onClick={hasDropdown ? toggleDropdown : undefined}
@@ -74,11 +73,14 @@ const DropdownHeader = ({
               />
             )}
           </div>
-          <div className="flex items-center justify-center w-8 h-8">
-            {rightItem && rightItem}
+
+          <div className="absolute right-4 flex items-center space-x-2">
+            {rightItem}
+            {rightAction}
           </div>
         </div>
       </div>
+
       <div
         className={`absolute left-0 top-full w-full bg-white rounded-2xl
         shadow-[0px_4px_12px_0px_rgba(0,0,0,0.1)]

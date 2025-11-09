@@ -1,7 +1,7 @@
 import { api } from "./client";
 import { tokenStore } from "../lib/token";
 
-// 백엔드 응답 구조 타입 명시
+// ----------------------------- 타입 정의 -----------------------------
 export interface CheckNicknameResponse {
   isSuccess: boolean;
   code: string;
@@ -9,7 +9,7 @@ export interface CheckNicknameResponse {
   result: string; // "중복 없음" | "중복 있음"
 }
 
-/* ----------------------------- 회원가입 / 로그인 ----------------------------- */
+// ----------------------------- 회원가입 / 로그인 -----------------------------
 
 // 회원가입
 export const signup = (payload: {
@@ -33,10 +33,13 @@ export const login = async (payload: { email: string; password: string }) => {
     refreshToken: data.refreshToken,
   });
 
+  // axios 기본 헤더에 accessToken 반영
+  api.defaults.headers.common["Authorization"] = `Bearer ${data.accessToken}`;
+
   return data;
 };
 
-/* ----------------------------- 로그아웃 / 토큰 재발급 ----------------------------- */
+// ----------------------------- 로그아웃 / 토큰 재발급 -----------------------------
 
 // 로그아웃
 export const logout = async () => {
@@ -59,16 +62,19 @@ export const reissue = async () => {
       refreshToken: tokenStore.getRefresh(),
     }
   );
+
   tokenStore.set({
     accessToken: data.accessToken,
     refreshToken: data.refreshToken,
   });
+
+  api.defaults.headers.common["Authorization"] = `Bearer ${data.accessToken}`;
   return data;
 };
 
-/* ----------------------------- 이메일 / 닉네임 / 인증 관련 ----------------------------- */
+// ----------------------------- 이메일 / 닉네임 / 인증 관련 -----------------------------
 
-// 이메일 중복확인 
+// 이메일 중복확인
 export const checkEmail = async (
   email: string
 ): Promise<{ exists: boolean }> => {
@@ -81,7 +87,7 @@ export const sendEmail = async (email: string): Promise<void> => {
   await api.post("/api/auth/send-email", { email });
 };
 
-// 이메일 인증 완료 여부 확인 
+// 이메일 인증 완료 여부 확인
 export const checkEmailVerified = async (
   email: string
 ): Promise<{ verified: boolean }> => {
@@ -91,7 +97,7 @@ export const checkEmailVerified = async (
   return res.data;
 };
 
-// ✅ 닉네임 중복 확인 함수
+// 닉네임 중복 확인
 export const checkNickname = async (
   nickName: string
 ): Promise<{ available: boolean }> => {
@@ -103,7 +109,6 @@ export const checkNickname = async (
 
     console.log("서버 응답:", res.data);
 
-    // "중복 없음"만 true로 반환
     return { available: res.data.result === "중복 없음" };
   } catch (error) {
     console.error("닉네임 중복확인 실패:", error);
@@ -111,9 +116,8 @@ export const checkNickname = async (
   }
 };
 
-/* ----------------------------- 비밀번호 관련 ----------------------------- */
+// ----------------------------- 비밀번호 관련 -----------------------------
 
-// 비밀번호 유효성 검사
 export const validatePassword = async (
   password: string
 ): Promise<{ valid: boolean; message?: string }> => {
@@ -129,8 +133,7 @@ export const changePassword = (payload: {
   newPassword: string;
 }) => api.patch("/api/auth/change-password", payload);
 
-/* ----------------------------- 카카오 프로필 설정 ----------------------------- */
+// ----------------------------- 카카오 프로필 설정 -----------------------------
 
-// (선택) 카카오 프로필 설정 (isProfileComplete 플로우용)
 export const setKakaoProfile = (payload: Record<string, any>) =>
   api.post("/api/auth/kakao/profile", payload);

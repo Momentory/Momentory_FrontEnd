@@ -92,7 +92,7 @@ export default function BottomSheet({
         <p className="text-sm text-[#A3A3A3] mb-8">최근 방문 2025-10-15</p>
 
         <h3 className="text-[18px] font-semibold mb-3">
-          {isPublic ? '공개된 전체 사진' : '공개 중인 전체 사진'}
+          {isPublic ? '공개된 전체 사진' : '나의 사진'}
         </h3>
         <div className="grid grid-cols-3 gap-2">
           {[1, 2, 3, 4, 5].map((i) => (

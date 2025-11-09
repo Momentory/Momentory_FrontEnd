@@ -1,4 +1,4 @@
-import { api } from "./client";
+import { api } from './client';
 
 /* ----------------------------- 홈 화면 API ----------------------------- */
 
@@ -9,7 +9,11 @@ export const getTopPlaces = async () => {
     console.log("[getTopPlaces] response:", res.data);
     return res.data.data;
   } catch (error: any) {
-    console.error("[getTopPlaces] 실패:", error.response?.status, error.response?.data || error);
+    console.error(
+      "[getTopPlaces] 실패:",
+      error.response?.status,
+      error.response?.data || error
+    );
     throw error;
   }
 };
@@ -21,7 +25,11 @@ export const getRecentPhotos = async () => {
     console.log("[getRecentPhotos] response:", res.data);
     return res.data.data;
   } catch (error: any) {
-    console.error("[getRecentPhotos] 실패:", error.response?.status, error.response?.data || error);
+    console.error(
+      "[getRecentPhotos] 실패:",
+      error.response?.status,
+      error.response?.data || error
+    );
     throw error;
   }
 };
@@ -33,7 +41,11 @@ export const getCharacterStatus = async () => {
     console.log("[getCharacterStatus] response:", res.data);
     return res.data.data;
   } catch (error: any) {
-    console.error("[getCharacterStatus] 실패:", error.response?.status, error.response?.data || error);
+    console.error(
+      "[getCharacterStatus] 실패:",
+      error.response?.status,
+      error.response?.data || error
+    );
     throw error;
   }
 };
@@ -45,7 +57,11 @@ export const getEvents = async () => {
     console.log("[getEvents] response:", res.data);
     return res.data.data;
   } catch (error: any) {
-    console.error("[getEvents] 실패:", error.response?.status, error.response?.data || error);
+    console.error(
+      "[getEvents] 실패:",
+      error.response?.status,
+      error.response?.data || error
+    );
     throw error;
   }
 };

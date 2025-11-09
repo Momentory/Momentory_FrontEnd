@@ -8,7 +8,7 @@ export default function TravelPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterVisible, setFilterVisible] = useState(false);
 
-  // 임시 여행지 데이터 
+  // 임시 여행지 데이터
   const [places] = useState([
     {
       id: 1,

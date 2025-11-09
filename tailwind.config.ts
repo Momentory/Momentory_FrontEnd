@@ -7,7 +7,7 @@ const config: Config = {
       fontFamily: {
         inter: ['Inter', 'sans-serif'],
         nanum: ['NanumSquareRound', 'sans-serif'],
-      },       
+      },
     },
   },
   plugins: [],
