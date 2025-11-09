@@ -133,3 +133,4 @@ export const getMyScraps = async () => {
   const res = await api.get(`/api/community/users/me/scraps`);
   return res.data;
 };
+

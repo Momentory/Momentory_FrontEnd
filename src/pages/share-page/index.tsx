@@ -1,23 +1,30 @@
 import { useLocation } from 'react-router-dom';
 import DropdownHeader from '../../components/common/DropdownHeader';
 import defaultMapImage from '../../assets/map-share1.svg';
+import { getImageBlob, downloadBlob } from '../../utils/image';
 
 export default function SharePage() {
   const location = useLocation();
 
   const imageUrl = location.state?.imageUrl || defaultMapImage;
-  const isCaptured = imageUrl !== defaultMapImage;
+  const previewImage = location.state?.previewImage as string | undefined;
+  const displayImage = previewImage || imageUrl;
+  const isCaptured = Boolean(previewImage) || imageUrl !== defaultMapImage;
 
-  const handleSaveImage = () => {
-    if (isCaptured && imageUrl.startsWith('data:')) {
-      const link = document.createElement('a');
-      link.download = `my-map-${new Date().toISOString().split('T')[0]}.png`;
-      link.href = imageUrl;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    } else {
-      console.log('사진 저장 버튼 클릭 (Fallback)');
+  const handleSaveImage = async () => {
+    if (!isCaptured) {
+      return;
+    }
+
+    try {
+      const blobSource = previewImage || imageUrl;
+      const blob = await getImageBlob(blobSource);
+      const filename = `my-map-${new Date().toISOString().split('T')[0]}.png`;
+      downloadBlob(blob, filename);
+      alert('지도 이미지가 저장되었습니다!');
+    } catch (error) {
+      console.error('지도 이미지 저장 실패:', error);
+      alert('이미지를 저장하지 못했습니다. 다시 시도해주세요.');
     }
   };
 
@@ -33,7 +40,7 @@ export default function SharePage() {
 
         <div className="mt-6 p-3 bg-white shadow-lg rounded-lg border border-gray-100 relative max-w-[340px]">
           <img
-            src={imageUrl}
+            src={displayImage}
             alt="생성된 경기 지도"
             className="w-full h-auto rounded"
           />

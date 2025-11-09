@@ -11,6 +11,8 @@ import shareButton from '../../assets/share-button.svg';
 import useMapZoom from '../../hooks/map/useMapZoom';
 import useBottomSheet from '../../hooks/map/useBottomSheet';
 import { captureMap } from '../../utils/screenshot';
+import { dataUrlToFile } from '../../utils/image';
+import { uploadFile } from '../../api/S3';
 import type { Marker } from '../../types/map';
 
 const dropdownItems = [
@@ -43,9 +45,16 @@ export default function PublicMapPage() {
     try {
       setIsCapturing(true);
       const imageDataUrl = await captureMap('public-map-container');
+      const file = await dataUrlToFile(
+        imageDataUrl,
+        `public-map-${Date.now()}.png`
+      );
+      const uploadResponse = await uploadFile(file);
       navigate('/share', {
         state: {
-          imageUrl: imageDataUrl,
+          imageUrl: uploadResponse.result.imageUrl,
+          previewImage: imageDataUrl,
+          imageName: uploadResponse.result.imageName,
           type: 'captured',
         },
       });

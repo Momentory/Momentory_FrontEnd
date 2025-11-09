@@ -271,13 +271,13 @@ export default function PhotoUploadCompletePage() {
           <div className="flex gap-3 w-full">
             <button
               onClick={handleNearbyPlaceYes}
-              className="flex-1 py-4 px-6 rounded-[12px] bg-[#FF7070] text-white font-semibold text-base hover:bg-[#ff6060] transition-colors"
+              className="flex-1 py-4 px-6 rounded-[12px] bg-[#FF7070] text-white font-semibold text-base hover:bg-[#ff6060] transition-colors whitespace-nowrap"
             >
               예, 방문했어요
             </button>
             <button
               onClick={handleNearbyPlaceNo}
-              className="flex-1 py-4 px-6 rounded-[12px] bg-[#EAEAEA] text-[#8D8D8D] font-semibold text-base hover:bg-gray-200 transition-colors"
+              className="flex-1 py-4 px-6 rounded-[12px] bg-[#EAEAEA] text-[#8D8D8D] font-semibold text-base hover:bg-gray-200 transition-colors whitespace-nowrap"
             >
               아니요
             </button>

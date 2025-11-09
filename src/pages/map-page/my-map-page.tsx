@@ -12,6 +12,8 @@ import RouletteIcon from '../../assets/roulette.svg?react';
 import useMapZoom from '../../hooks/map/useMapZoom';
 import useBottomSheet from '../../hooks/map/useBottomSheet';
 import { captureMap } from '../../utils/screenshot';
+import { dataUrlToFile } from '../../utils/image';
+import { uploadFile } from '../../api/S3';
 
 const dropdownItems = [
   { label: '전체 지도', icon: <MapPinIcon />, path: '/publicMap' },
@@ -49,9 +51,16 @@ export default function MyMapPage() {
     try {
       setIsCapturing(true);
       const imageDataUrl = await captureMap('map-container');
+      const file = await dataUrlToFile(
+        imageDataUrl,
+        `my-map-${Date.now()}.png`
+      );
+      const uploadResponse = await uploadFile(file);
       navigate('/share', {
         state: {
-          imageUrl: imageDataUrl,
+          imageUrl: uploadResponse.result.imageUrl,
+          previewImage: imageDataUrl,
+          imageName: uploadResponse.result.imageName,
           type: 'captured',
         },
       });

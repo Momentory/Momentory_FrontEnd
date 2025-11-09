@@ -1,6 +1,15 @@
 import { useLocation } from 'react-router-dom';
 import DropdownHeader from '../../components/common/DropdownHeader';
 
+type NearbyPlace = {
+  id?: number | string;
+  name: string;
+  image: string;
+  tags?: string[];
+  distance?: string;
+  rating?: number;
+};
+
 export default function RecommendedPlacesPage() {
   const location = useLocation();
 
@@ -10,32 +19,8 @@ export default function RecommendedPlacesPage() {
     { name: '남한산성', image: '/stamps/광주시.svg' },
   ];
 
-  const nearbyPlaces = [
-    {
-      id: 1,
-      name: '일산 호수공원',
-      image: '/images/everland.jpg',
-      tags: ['#놀이공원', '#야경'],
-      distance: '0.8 km',
-      rating: 4.0,
-    },
-    {
-      id: 2,
-      name: '일산 호수공원',
-      image: '/images/everland.jpg',
-      tags: ['#놀이공원', '#야경'],
-      distance: '0.8 km',
-      rating: 4.0,
-    },
-    {
-      id: 3,
-      name: '일산 호수공원',
-      image: '/images/everland.jpg',
-      tags: ['#놀이공원', '#야경'],
-      distance: '0.8 km',
-      rating: 4.0,
-    },
-  ];
+  const nearbyPlaces =
+    (location.state?.nearbyPlaces as NearbyPlace[] | undefined) ?? [];
 
   return (
     <div className="flex flex-col min-h-screen bg-white max-w-[480px] mx-auto relative overflow-hidden">
@@ -113,72 +98,82 @@ export default function RecommendedPlacesPage() {
           주변 추천 관광지
         </h2>
 
-        <div className="space-y-4">
-          {nearbyPlaces.map((place) => (
-            <div
-              key={place.id}
-              className="flex gap-5 p-3 bg-white rounded-xl hover:bg-gray-100 transition cursor-pointer shadow-md"
-              onClick={() => {}}
-            >
-              <img
-                src={place.image}
-                alt={place.name}
-                className="w-35 h-20 rounded-lg object-cover"
-              />
+        {nearbyPlaces.length ? (
+          <div className="space-y-4">
+            {nearbyPlaces.map((place, index) => (
+              <div
+                key={place.id ?? index}
+                className="flex gap-5 p-3 bg-white rounded-xl hover:bg-gray-100 transition cursor-pointer shadow-md"
+                onClick={() => {}}
+              >
+                <img
+                  src={place.image}
+                  alt={place.name}
+                  className="w-35 h-20 rounded-lg object-cover"
+                />
 
-              <div className="flex-1">
-                <h3 className="text-base font-semibold text-gray-800 mb-1">
-                  {place.name}
-                </h3>
+                <div className="flex-1">
+                  <h3 className="text-base font-semibold text-gray-800 mb-1">
+                    {place.name}
+                  </h3>
 
-                <div className="flex gap-1 mb-2">
-                  {place.tags.map((tag, index) => (
-                    <span
-                      key={index}
-                      className="text-xs text-[#A74242] font-medium"
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
+                  <div className="flex gap-1 mb-2">
+                    {(place.tags ?? []).map((tag, tagIndex) => (
+                      <span
+                        key={tagIndex}
+                        className="text-xs text-[#A74242] font-medium"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
 
-                <div className="flex items-center gap-3 text-sm text-[#A8A8A8]">
-                  <span className="flex items-center gap-1">
-                    <svg
-                      className="w-4 h-4"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                      />
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                      />
-                    </svg>
-                    {place.distance}
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <svg
-                      className="w-4 h-4 text-yellow-400 fill-current"
-                      viewBox="0 0 20 20"
-                    >
-                      <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
-                    </svg>
-                    {place.rating}
-                  </span>
+                  <div className="flex items-center gap-3 text-sm text-[#A8A8A8]">
+                    {place.distance && (
+                      <span className="flex items-center gap-1">
+                        <svg
+                          className="w-4 h-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                          />
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                          />
+                        </svg>
+                        {place.distance}
+                      </span>
+                    )}
+                    {place.rating !== undefined && (
+                      <span className="flex items-center gap-1">
+                        <svg
+                          className="w-4 h-4 text-yellow-400 fill-current"
+                          viewBox="0 0 20 20"
+                        >
+                          <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
+                        </svg>
+                        {place.rating}
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center text-sm text-[#A3A3A3]">
+            추천 관광지 데이터가 없습니다.
+          </div>
+        )}
       </div>
     </div>
   );
