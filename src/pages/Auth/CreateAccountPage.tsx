@@ -43,7 +43,6 @@ export default function CreateAccountPage() {
       setPasswordMessage('사용 가능한 비밀번호입니다.');
     }
 
-    // 동시에 일치 여부도 갱신
     if (passwordConfirm) {
       if (value === passwordConfirm) {
         setIsPasswordMatch(true);
@@ -71,28 +70,36 @@ export default function CreateAccountPage() {
 
   // 이메일 인증 요청
   const handleEmailClick = async () => {
-    try {
-      await checkEmail(email);
-      await sendEmail(email);
+    if (!email) return alert('이메일을 입력해주세요.');
 
+    try {
+      const res = await checkEmail(email);
+      if (res.exists) {
+        alert('이미 가입된 이메일입니다.');
+        return;
+      }
+
+      await sendEmail(email);
       setEmailSent(true);
       alert('인증 메일이 발송되었습니다. 메일함을 확인해주세요.');
-    } catch {
-      alert('이미 존재하는 이메일이거나 발송 중 오류가 발생했습니다.');
+    } catch (error) {
+      console.error(error);
+      alert('이메일 인증 요청 중 오류가 발생했습니다.');
     }
   };
 
   // 이메일 인증 확인
   const handleVerifyClick = async () => {
     try {
-      const { data } = await checkEmailVerified(email);
-      if (data.verified) {
+      const result = await checkEmailVerified(email);
+      if (result.verified) {
         setEmailVerified(true);
         alert('이메일 인증이 완료되었습니다.');
       } else {
         alert('이메일 인증이 아직 완료되지 않았습니다.');
       }
-    } catch {
+    } catch (error) {
+      console.error(error);
       alert('이메일 인증 확인 중 오류가 발생했습니다.');
     }
   };
@@ -154,9 +161,7 @@ export default function CreateAccountPage() {
 
         {/* 전화번호 */}
         <div>
-          <label className="text-[15px] font-semibold mb-1 block">
-            전화 번호
-          </label>
+          <label className="text-[15px] font-semibold mb-1 block">전화 번호</label>
           <input
             type="tel"
             placeholder="010-1111-2222"
@@ -168,9 +173,7 @@ export default function CreateAccountPage() {
 
         {/* 생년월일 */}
         <div>
-          <label className="text-[15px] font-semibold mb-1 block">
-            생년월일
-          </label>
+          <label className="text-[15px] font-semibold mb-1 block">생년월일</label>
           <div className="flex space-x-2">
             <select
               value={birthYear}
@@ -221,8 +224,8 @@ export default function CreateAccountPage() {
                 emailVerified
                   ? 'bg-green-400'
                   : emailSent
-                    ? 'bg-gray-400'
-                    : 'bg-[#FF7070]'
+                  ? 'bg-gray-400'
+                  : 'bg-[#FF7070]'
               }`}
             >
               {emailVerified ? '완료' : emailSent ? '인증' : '링크발송'}
@@ -232,9 +235,7 @@ export default function CreateAccountPage() {
 
         {/* 비밀번호 */}
         <div>
-          <label className="text-[15px] font-semibold mb-1 block">
-            비밀번호
-          </label>
+          <label className="text-[15px] font-semibold mb-1 block">비밀번호</label>
           <input
             type="password"
             placeholder="비밀번호"
@@ -242,8 +243,6 @@ export default function CreateAccountPage() {
             onChange={handlePasswordChange}
             className="w-full h-[50px] rounded-[10px] border border-gray-300 px-4 text-[15px] placeholder-gray-400 mb-1"
           />
-
-          {/* 유효성 메시지 */}
           {password && (
             <p
               className={`text-[13px] mt-1 ${
@@ -253,8 +252,6 @@ export default function CreateAccountPage() {
               {passwordMessage}
             </p>
           )}
-
-          {/* 비밀번호 확인 */}
           <input
             type="password"
             placeholder="비밀번호 확인"
@@ -262,8 +259,6 @@ export default function CreateAccountPage() {
             onChange={handlePasswordConfirm}
             className="w-full h-[50px] rounded-[10px] border border-gray-300 px-4 text-[15px] placeholder-gray-400 mt-2"
           />
-
-          {/* 일치 여부 메시지 */}
           {passwordConfirm && (
             <p
               className={`text-[13px] mt-1 ${
@@ -303,7 +298,7 @@ export default function CreateAccountPage() {
           다음
         </button>
 
-        {/* 임시 이동 버튼 (테스트용) */}
+        {/* 임시 이동 버튼 */}
         <button
           type="button"
           onClick={() => navigate('/create-profile')}

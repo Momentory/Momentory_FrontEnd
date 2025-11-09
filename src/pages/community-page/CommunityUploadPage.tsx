@@ -37,11 +37,11 @@ export default function CommunityUploadPage() {
       setLoading(true);
       const res = await postCommunity(formData);
       console.log('등록 성공:', res);
-      alert('게시글이 성공적으로 등록되었습니다 🎉');
+      alert('게시글이 성공적으로 등록되었습니다 ');
       navigate('/community');
     } catch (err) {
       console.error('등록 실패:', err);
-      alert('등록 중 오류가 발생했습니다 😢');
+      alert('등록 중 오류가 발생했습니다 ');
     } finally {
       setLoading(false);
     }
