@@ -1,6 +1,11 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getTopPlaces, getRecentPhotos, getMapPreview } from "../../api/home";
+import {
+  getTopPlaces,
+  getRecentPhotos,
+  getCharacterStatus,
+  getEvents,
+} from "../../api/home";
 import { X } from "lucide-react";
 
 interface Marker {
@@ -15,9 +20,9 @@ export default function HomePage() {
   const navigate = useNavigate();
 
   // 유저 기본 데이터
-  const [userName, _setUserName] = useState("Username");
-  const [level, _setLevel] = useState(35);
-  const [points, _setPoints] = useState(1500);
+  const [userName, setUserName] = useState("Username");
+  const [level, setLevel] = useState(0);
+  const [points, setPoints] = useState(0);
 
   // 상태
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -28,25 +33,39 @@ export default function HomePage() {
 
   // API 데이터
   const [topPlaces, setTopPlaces] = useState<any[]>([]);
-  const [_recentPhotos, setRecentPhotos] = useState<any[]>([]);
-  const [_mapPreview, setMapPreview] = useState<string | null>(null);
+  const [recentPhotos, setRecentPhotos] = useState<any[]>([]);
+  const [events, setEvents] = useState<any[]>([]);
   const [markers, setMarkers] = useState<Marker[]>([]);
 
   useEffect(() => {
     const fetchHomeData = async () => {
       try {
         setIsLoading(true);
-        const [places, photos, map] = await Promise.all([
+
+        // 4개 API 모두 호출
+        const [places, photos, charStatus, evts] = await Promise.all([
           getTopPlaces(),
           getRecentPhotos(),
-          getMapPreview(),
+          getCharacterStatus(),
+          getEvents(),
         ]);
 
-        // undefined 방지 (응답 없으면 빈 배열로)
+        // 여행지 / 사진
         setTopPlaces(Array.isArray(places) ? places : []);
         setRecentPhotos(Array.isArray(photos) ? photos : []);
-        setMapPreview(map?.previewUrl ?? null);
-        setMarkers(Array.isArray(map?.markers) ? map.markers : []);
+
+        // 캐릭터 상태
+        if (charStatus) {
+          setUserName(charStatus.nickname ?? "User");
+          setLevel(charStatus.level ?? 0);
+          setPoints(charStatus.points ?? 0);
+        }
+
+        // 이벤트
+        setEvents(Array.isArray(evts) ? evts : []);
+
+        // (지도 마커 초기화 유지)
+        setMarkers([]);
       } catch (e) {
         console.error("홈 데이터 로드 실패:", e);
         setIsError(true);
@@ -57,29 +76,13 @@ export default function HomePage() {
     fetchHomeData();
   }, []);
 
-
-
-  // if (isLoading)
-  //   return (
-  //     <div className="flex flex-col items-center justify-center h-screen text-gray-500">
-  //       <img src="/images/loading.gif" alt="로딩중" className="w-[60px] mb-3" />
-  //       데이터를 불러오는 중이에요...
-  //     </div>
-  //   );
-
-  // if (isError)
-  //   return (
-  //     <div className="flex flex-col items-center justify-center h-screen text-gray-500">
-  //       데이터를 불러오지 못했습니다.
-  //     </div>
-  //   );
-
   return (
     <div className="w-full min-h-screen bg-white overflow-y-auto relative mt-[60px]">
       {/* 상단바 */}
       <div className="w-full bg-white flex justify-between items-center px-6 py-2 border-b border-gray-200 sticky top-0 z-30">
-        <p className="text-[14px] font-semibold text-gray-800">Level {level}</p>
-
+        <p className="text-[14px] font-semibold text-gray-800">
+          Level {level}
+        </p>
         <div className="relative flex items-center gap-1 text-[14px]">
           {/* 드롭다운 메뉴 */}
           {isDropdownOpen && (
@@ -117,12 +120,11 @@ export default function HomePage() {
       <div
         className="relative w-full h-[380px] flex flex-col justify-start items-start px-6 pt-6"
         style={{
-          backgroundImage: `url("/images/bgImage.png")`,
+          backgroundImage: "url('/images/bgImage.png')",
           backgroundSize: "cover",
           backgroundPosition: "center",
         }}
       >
-
         <div className="absolute inset-x-0 top-0 h-[86px] bg-black/35 z-[2] flex flex-col justify-center px-[20px]">
           <p className="text-[15px] text-white font-medium">
             안녕하세요 <span className="font-bold">{userName}</span>님
@@ -131,6 +133,7 @@ export default function HomePage() {
             오늘은 어떤 사진을 찍어볼까요?
           </p>
         </div>
+
         <img
           src="/images/char1.png"
           alt="캐릭터"
@@ -141,7 +144,6 @@ export default function HomePage() {
             bottom: "-60px",
           }}
         />
-
         <img
           src="/images/ribon.png"
           alt="리본"
@@ -150,16 +152,17 @@ export default function HomePage() {
             width: "76px",
             height: "48px",
             bottom: "118px",
-            left: "47%"
+            left: "47%",
           }}
         />
       </div>
 
       {/* 진행중인 이벤트 */}
       <section className="px-6 mt-8">
-        {/* 제목 + 더보기 */}
         <div className="flex justify-between items-center mb-3">
-          <h2 className="text-[23px] font-extrabold text-gray-900">진행중인 이벤트</h2>
+          <h2 className="text-[23px] font-extrabold text-gray-900">
+            진행중인 이벤트
+          </h2>
           <button className="text-[13px] text-gray-500 hover:text-[#FF7070]">
             모두 보기 &gt;
           </button>
@@ -167,14 +170,14 @@ export default function HomePage() {
 
         <div className="relative">
           <div className="grid grid-cols-3 gap-3 pb-3">
-            {[1, 2, 3].map((i) => (
+            {(events.length > 0 ? events : [1, 2, 3]).map((evt: any, i) => (
               <div
                 key={i}
                 className="relative w-full h-[146px] rounded-[12px] overflow-hidden shadow-md bg-white"
               >
                 <img
-                  src={`/images/event${i}.png`}
-                  alt={`event${i}`}
+                  src={evt.imageUrl ?? `/images/event${i + 1}.png`}
+                  alt={evt.title ?? `event${i + 1}`}
                   className="w-full h-full object-cover"
                 />
               </div>
@@ -193,21 +196,54 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* 최신 업로드 사진 */}
+      {recentPhotos.length > 0 && (
+        <section className="px-6 mt-10">
+          <h2 className="text-[23px] font-semibold mb-3">최근 업로드된 사진</h2>
+          <div className="grid grid-cols-3 gap-3">
+            {recentPhotos.slice(0, 3).map((photo: any, idx: number) => (
+              <div
+                key={idx}
+                className="w-full h-[120px] rounded-[12px] overflow-hidden shadow-md bg-gray-100"
+              >
+                <img
+                  src={photo.imageUrl ?? "/images/default.png"}
+                  alt={`photo-${idx}`}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
       {/* 카테고리 */}
       <section className="px-6 mt-10">
         <div
           className="rounded-[20px] px-5 py-4 shadow-md text-white"
           style={{
-            backgroundImage: `linear-gradient(to bottom, rgba(255,112,112,0.95), rgba(255,150,150,0.9))`,
+            backgroundImage:
+              "linear-gradient(to bottom, rgba(255,112,112,0.95), rgba(255,150,150,0.9))",
           }}
         >
           <h2 className="text-[23px] font-extrabold mb-3">카테고리</h2>
-
           <div className="flex justify-around">
             {[
-              { img: "/images/sprout.png", label: "성장현황", link: "/character" },
-              { img: "/images/location-pin.png", label: "나의지도", onClick: () => setIsMapModalOpen(true) },
-              { img: "/images/roulette.png", label: "여행지 추천", link: "/album" },
+              {
+                img: "/images/sprout.png",
+                label: "성장현황",
+                link: "/character",
+              },
+              {
+                img: "/images/location-pin.png",
+                label: "나의지도",
+                onClick: () => setIsMapModalOpen(true),
+              },
+              {
+                img: "/images/roulette.png",
+                label: "여행지 추천",
+                link: "/album",
+              },
               { img: "/images/star.png", label: "스탬프", link: "/travel" },
             ].map((item) => (
               <div
@@ -216,15 +252,20 @@ export default function HomePage() {
                 onClick={item.onClick ?? (() => navigate(item.link ?? ""))}
               >
                 <div className="w-[58px] h-[58px] bg-white rounded-full flex items-center justify-center mb-2 shadow-md">
-                  <img src={item.img} alt={item.label} className="w-[28px] h-auto" />
+                  <img
+                    src={item.img}
+                    alt={item.label}
+                    className="w-[28px] h-auto"
+                  />
                 </div>
-                <p className="text-[13px] text-white font-semibold">{item.label}</p>
+                <p className="text-[13px] text-white font-semibold">
+                  {item.label}
+                </p>
               </div>
             ))}
           </div>
         </div>
       </section>
-
 
       {/* 추천 여행지 섹션 */}
       <section className="px-6 mt-10 mb-24">
@@ -273,7 +314,6 @@ export default function HomePage() {
                   <p className="text-[15px] font-semibold text-gray-800 mt-2">
                     {place.name}
                   </p>
-
                   {/* 평점 박스 */}
                   <div
                     className="flex items-center gap-[4px] text-white text-[11px] font-medium px-[7px] py-[3px] rounded-md"
@@ -302,7 +342,10 @@ export default function HomePage() {
                     />
                     <span
                       className="font-bold text-[13px]"
-                      style={{ color: "#AE7C7C", fontFamily: "NanumSquareRound" }}
+                      style={{
+                        color: "#AE7C7C",
+                        fontFamily: "NanumSquareRound",
+                      }}
                     >
                       리뷰 {place.reviewCount?.toLocaleString() ?? 0}개
                     </span>
@@ -345,11 +388,9 @@ export default function HomePage() {
             >
               <X size={20} />
             </button>
-
             <h3 className="text-[16px] font-semibold text-center mb-4">
               나의 경기지도
             </h3>
-
             {/* 지도 프리뷰 + 마커 표시 */}
             <div className="relative flex justify-center">
               <img
@@ -357,7 +398,6 @@ export default function HomePage() {
                 alt="경기도 지도"
                 className="w-[220px] h-auto rounded-md"
               />
-
               {markers.map((m) => (
                 <div
                   key={m.id}
@@ -387,7 +427,9 @@ export default function HomePage() {
             className="bg-white rounded-2xl shadow-xl w-[90%] max-w-[320px] mb-[100px] pb-3 animate-[slideUp_0.25s_ease-out]"
           >
             <div className="flex justify-between items-center px-5 py-3 border-b">
-              <h3 className="text-[15px] font-semibold text-gray-800">사진 업로드</h3>
+              <h3 className="text-[15px] font-semibold text-gray-800">
+                사진 업로드
+              </h3>
               <button
                 onClick={() => setIsUploadModalOpen(false)}
                 className="text-gray-500 hover:text-gray-700"
@@ -395,7 +437,6 @@ export default function HomePage() {
                 <X size={20} />
               </button>
             </div>
-
             <div className="flex flex-col py-2">
               <button
                 onClick={() => {
@@ -404,12 +445,16 @@ export default function HomePage() {
                 }}
                 className="flex items-center gap-3 px-5 py-3 hover:bg-gray-50 transition"
               >
-                <img src="/images/Camera.png" alt="camera" className="w-6 h-6" />
-                <span className="text-[15px] font-medium text-gray-800">카메라</span>
+                <img
+                  src="/images/Camera.png"
+                  alt="camera"
+                  className="w-6 h-6"
+                />
+                <span className="text-[15px] font-medium text-gray-800">
+                  카메라
+                </span>
               </button>
-
               <div className="border-t my-1" />
-
               <button
                 onClick={() => {
                   alert("갤러리 업로드 예정");
@@ -417,7 +462,11 @@ export default function HomePage() {
                 }}
                 className="flex items-center gap-3 px-5 py-3 hover:bg-gray-50 transition"
               >
-                <img src="/images/image.png" alt="gallery" className="w-6 h-6" />
+                <img
+                  src="/images/image.png"
+                  alt="gallery"
+                  className="w-6 h-6"
+                />
                 <span className="text-[15px] font-medium text-gray-800">
                   갤러리에서 업로드
                 </span>

@@ -2,6 +2,15 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { checkNickname } from "../../api/auth";
 
+
+// ✅ 백엔드 응답 타입 명시
+interface CheckNicknameResponse {
+  isSuccess: boolean;
+  code: string;
+  message: string;
+  result: string; // "중복 없음" | "중복 있음"
+}
+
 export default function CreateProfilePage() {
   const navigate = useNavigate();
   const [nickname, setNickname] = useState("");
@@ -11,7 +20,7 @@ export default function CreateProfilePage() {
   const [checkingNickname, setCheckingNickname] = useState(false);
   const maxIntroLength = 100;
 
-  // 닉네임 변경 시 자동 중복확인 (디바운스 0.5초)
+  // ✅ 닉네임 변경 시 자동 중복 확인 (디바운스 0.5초)
   useEffect(() => {
     if (!nickname.trim()) {
       setNicknameAvailable(null);
@@ -23,19 +32,12 @@ export default function CreateProfilePage() {
       try {
         const res = await checkNickname(nickname);
         console.log("닉네임 중복확인 응답:", res);
-
-        // 응답 구조 안전 처리
-        const available =
-          res?.available ??
-          res?.data?.available ??
-          (res && res.code === 200) ??
-          false;
-
-        setNicknameAvailable(available);
+        setNicknameAvailable(res.available);
       } catch (error) {
         console.error("닉네임 중복확인 실패:", error);
         setNicknameAvailable(null);
       } finally {
+        // ✅ 여기 반드시 필요!
         setCheckingNickname(false);
       }
     }, 500);
@@ -43,7 +45,8 @@ export default function CreateProfilePage() {
     return () => clearTimeout(timeout);
   }, [nickname]);
 
-  // 회원가입 버튼 클릭
+
+  // ✅ 회원가입 버튼 클릭
   const handleSubmit = () => {
     if (!nickname.trim()) return alert("닉네임을 입력해주세요.");
     if (checkingNickname) return alert("닉네임 중복 확인 중입니다. 잠시만 기다려주세요.");
@@ -106,11 +109,17 @@ export default function CreateProfilePage() {
 
         {/* 닉네임 상태 메시지 */}
         {checkingNickname ? (
-          <p className="text-gray-400 text-[13px] mt-1 animate-pulse">닉네임 중복 확인 중...</p>
+          <p className="text-gray-400 text-[13px] mt-1 animate-pulse">
+            닉네임 중복 확인 중...
+          </p>
         ) : nicknameAvailable === true ? (
-          <p className="text-green-500 text-[13px] mt-1">사용 가능한 닉네임입니다 ✅</p>
+          <p className="text-green-500 text-[13px] mt-1">
+            사용 가능한 닉네임입니다 ✅
+          </p>
         ) : nicknameAvailable === false ? (
-          <p className="text-red-500 text-[13px] mt-1">이미 사용 중인 닉네임입니다 ❌</p>
+          <p className="text-red-500 text-[13px] mt-1">
+            이미 사용 중인 닉네임입니다 ❌
+          </p>
         ) : null}
       </div>
 
@@ -160,13 +169,16 @@ export default function CreateProfilePage() {
       <button
         disabled={!nicknameAvailable || checkingNickname}
         onClick={handleSubmit}
-        className={`w-[329px] h-[60px] text-white text-[18px] font-semibold rounded-[20px] mt-8 active:scale-95 transition ${
-          nicknameAvailable && !checkingNickname
-            ? "bg-[#FF7070]"
-            : "bg-gray-300 cursor-not-allowed"
-        }`}
+        className={`w-[329px] h-[60px] text-white text-[18px] font-semibold rounded-[20px] mt-8 active:scale-95 transition ${nicknameAvailable && !checkingNickname
+          ? "bg-[#FF7070]"
+          : "bg-gray-300 cursor-not-allowed"
+          }`}
       >
-        {checkingNickname ? "확인 중..." : nicknameAvailable ? "회원가입 완료" : "회원가입 불가"}
+        {checkingNickname
+          ? "확인 중..."
+          : nicknameAvailable
+            ? "회원가입 완료"
+            : "회원가입 불가"}
       </button>
 
       {/* 임시 이동 버튼 */}

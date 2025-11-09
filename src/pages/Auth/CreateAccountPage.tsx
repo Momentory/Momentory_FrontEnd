@@ -69,35 +69,40 @@ export default function CreateAccountPage() {
     }
   };
 
-  // 이메일 인증 요청
   const handleEmailClick = async () => {
+    if (!email) return alert("이메일을 입력해주세요.");
+
     try {
+      const res = await checkEmail(email); 
+      if (res.exists) {
+        alert("이미 가입된 이메일입니다.");
+        return;
+      }
 
-      await checkEmail(email);
       await sendEmail(email);
-
       setEmailSent(true);
       alert("인증 메일이 발송되었습니다. 메일함을 확인해주세요.");
-    } catch {
-      alert("이미 존재하는 이메일이거나 발송 중 오류가 발생했습니다.");
+    } catch (error) {
+      console.error(error);
+      alert("이메일 인증 요청 중 오류가 발생했습니다.");
     }
   };
 
-
-  // 이메일 인증 확인
-  const handleVerifyClick = async () => {
+   const handleVerifyClick = async () => {
     try {
-      const { data } = await checkEmailVerified(email);
-      if (data.verified) {
+      const result = await checkEmailVerified(email);
+      if (result.verified) {
         setEmailVerified(true);
         alert("이메일 인증이 완료되었습니다.");
       } else {
         alert("이메일 인증이 아직 완료되지 않았습니다.");
       }
-    } catch {
+    } catch (error) {
+      console.error(error);
       alert("이메일 인증 확인 중 오류가 발생했습니다.");
     }
   };
+
 
   // 회원가입 처리
   const handleSubmit = async (e: React.FormEvent) => {

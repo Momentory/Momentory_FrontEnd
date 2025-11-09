@@ -1,23 +1,24 @@
 import axios, { AxiosError } from "axios";
-import type {
-  AxiosResponse,
-  InternalAxiosRequestConfig,
-} from "axios";
+import type { AxiosResponse, InternalAxiosRequestConfig } from "axios";
 import { tokenStore } from "../lib/token";
 
-// Axios 인스턴스 생성
+/* ----------------------------- 기본 설정 ----------------------------- */
+
+// // 환경별 API 주소 자동 전환 (로컬/운영 모두 대응)
+// const BASE_URL =
+//   import.meta.env.VITE_API_BASE_URL || "https://www.momentory.store";
+
+// axios 인스턴스 생성
 export const api = axios.create({
-  baseURL: "/api", // 환경변수 기반으로 바꿔도 무방
+  baseURL: "https://www.momentory.store",
   withCredentials: true,
   headers: { "Content-Type": "application/json" },
 });
 
-// 요청 인터셉터: AccessToken 자동 첨부 (비로그인용 API 예외 처리 포함)
-api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
-  const access = tokenStore.getAccess();
+/* ----------------------------- 요청 인터셉터 ----------------------------- */
 
-  // 토큰을 첨부하지 않을 엔드포인트 목록
-  const noAuthUrls = [
+// 비로그인용 API 예외 목록
+const noAuthUrls = [
   "/api/auth/check-email",
   "/api/auth/check-nickname",
   "/api/auth/send-email",
@@ -28,11 +29,14 @@ api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   "/api/auth/reissue",
 ];
 
+// AccessToken 자동 첨부
+api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
+  const access = tokenStore.getAccess();
 
-  // 요청 URL이 예외 목록에 포함되어 있는지 확인
-  const isNoAuth = noAuthUrls.some((url) => config.url?.includes(url));
+  const isNoAuth = noAuthUrls.some((url) =>
+    config.url?.includes(url.replace("/api", ""))
+  );
 
-  // 비로그인용 API가 아닐 경우에만 토큰 추가
   if (access && !isNoAuth) {
     config.headers = config.headers ?? {};
     (config.headers as any).Authorization = `Bearer ${access}`;
@@ -41,7 +45,8 @@ api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   return config;
 });
 
-// 토큰 재발급 상태 관리
+/* ----------------------------- 재발급 관리 변수 ----------------------------- */
+
 let isRefreshing = false;
 let requestQueue: Array<(token: string) => void> = [];
 
@@ -50,7 +55,8 @@ const processQueue = (newAccess: string) => {
   requestQueue = [];
 };
 
-// 응답 인터셉터: 401 → RefreshToken 재발급 후 재시도
+/* ----------------------------- 응답 인터셉터 ----------------------------- */
+
 api.interceptors.response.use(
   (response: AxiosResponse<any>) => response,
   async (error: AxiosError) => {
@@ -82,7 +88,6 @@ api.interceptors.response.use(
           throw error;
         }
 
-        // RefreshToken으로 재발급 요청
         const { data } = await axios.post(
           "https://www.momentory.store/api/auth/reissue",
           { refreshToken },

@@ -1,38 +1,56 @@
 import { api } from "./client";
 
+/* ----------------------------- 홈 화면 API ----------------------------- */
+
+// 오늘의 여행지 Top 3
 export const getTopPlaces = async () => {
   try {
     const res = await api.get("/api/home/travel-top3");
     console.log("[getTopPlaces] response:", res.data);
-    return res.data.data; 
+    return res.data.data;
   } catch (error: any) {
     console.error("[getTopPlaces] 실패:", error.response?.status, error.response?.data || error);
-    throw error; 
+    throw error;
   }
 };
 
+// 최신 업로드 사진 3개
 export const getRecentPhotos = async () => {
   try {
     const res = await api.get("/api/home/recent-photos");
-    console.log(" [getRecentPhotos] response:", res.data);
+    console.log("[getRecentPhotos] response:", res.data);
     return res.data.data;
   } catch (error: any) {
-    console.error(" [getRecentPhotos] 실패:", error.response?.status, error.response?.data || error);
+    console.error("[getRecentPhotos] 실패:", error.response?.status, error.response?.data || error);
     throw error;
   }
 };
 
-
-export const getMapPreview = async () => {
+// 나의 캐릭터 현황 (토큰 필요)
+export const getCharacterStatus = async () => {
   try {
-    const res = await api.get("/api/home/map-preview");
-    console.log("[getMapPreview] response:", res.data);
+    const res = await api.get("/api/home/character-status");
+    console.log("[getCharacterStatus] response:", res.data);
     return res.data.data;
   } catch (error: any) {
-    console.error("[getMapPreview] 실패:", error.response?.status, error.response?.data || error);
+    console.error("[getCharacterStatus] 실패:", error.response?.status, error.response?.data || error);
     throw error;
   }
 };
+
+// 다가오는 이벤트
+export const getEvents = async () => {
+  try {
+    const res = await api.get("/api/home/events");
+    console.log("[getEvents] response:", res.data);
+    return res.data.data;
+  } catch (error: any) {
+    console.error("[getEvents] 실패:", error.response?.status, error.response?.data || error);
+    throw error;
+  }
+};
+
+/* ----------------------------- 샘플 데이터 (임시용) ----------------------------- */
 
 export const getAllPlaces = async () => {
   return [

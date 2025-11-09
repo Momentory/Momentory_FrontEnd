@@ -13,7 +13,14 @@ import TravelPage from './pages/travel-page';
 import MyAlbumPage from './pages/album-page';
 import UploadPage from './pages/photo-upload-page/UploadPage';
 
-import { CommunityPage, CommunityUploadPage, CommunityDetailPage } from "./pages/community-page";
+import CommunityDetailPage from "./pages/community-page/CommunityDetailPage";
+import CommunityPage from "./pages/community-page/CommunityPage";
+import CommunityMyPage from "./pages/community-page/CommunityMyPage";
+import CommunityWritePage from "./pages/community-page/CommunityWritePage";
+import CommunitySearchPage from "./pages/community-page/CommunitySearchPage";
+import UserProfilePage from "./pages/community-page/UserProfilePage"; 
+
+
 import SplashPage from "./pages/Auth/SplashPage";
 import LoginScreen from "./pages/Auth/LoginScreen";
 import SigninScreen from "./pages/Auth/SigninScreen";
@@ -77,9 +84,14 @@ const protectedRoutes: RouteObject[] = [
       { path: 'character', element: <CharacterPage /> },
       { path: 'upload', element: <UploadPage /> },
       { path: 'album', element: <MyAlbumPage /> },
+
       { path: 'community', element: <CommunityPage /> },
-      { path: "community/upload", element: <CommunityUploadPage /> },
-      { path: "community/:postId", element: <CommunityDetailPage /> },
+      { path: "community/detail/:id", element: <CommunityDetailPage /> },
+      { path: "community/write", element: <CommunityWritePage /> },
+      { path: "community/mypage", element: <CommunityMyPage /> },
+      { path: "community/search", element: <CommunitySearchPage /> },
+      { path: "community/user/:userId", element: <UserProfilePage /> },
+      
 
       { path: 'settings', element: <SettingsHomePage /> },
       { path: '/settings/profile-edit', element: <ProfileEditPage /> },
@@ -88,10 +100,10 @@ const protectedRoutes: RouteObject[] = [
       { path: '/settings/terms-of-service', element: <ServicePage /> },
       { path: '/settings/privacy-policy', element: <PrivacyPolicyPage /> },
       { path: '/settings/security', element: <SecurityPage /> },
-      { path: '/settings/withdraw', element: <WithdrawPage/> },
-      { path: '/settings/security/change-password', element: <ChangePasswordPage/> },
-      
- 
+      { path: '/settings/withdraw', element: <WithdrawPage /> },
+      { path: '/settings/security/change-password', element: <ChangePasswordPage /> },
+
+
       { path: 'travel', element: <TravelPage /> },
 
       { path: 'myMap', element: <MyMapPage /> },
@@ -107,8 +119,8 @@ const protectedRoutes: RouteObject[] = [
       { path: 'myMap', element: <MyMapPage /> },
       { path: 'publicMap', element: <PublicMapPage /> },
       { path: 'share', element: <SharePage /> },
-      { path: 'shop', element: <ShopPage/> },
-      { path: 'closet', element: <MyClosetPage/> },
+      { path: 'shop', element: <ShopPage /> },
+      { path: 'closet', element: <MyClosetPage /> },
     ],
   },
 ];
