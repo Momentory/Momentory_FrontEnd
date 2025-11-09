@@ -1,10 +1,10 @@
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useState, useRef } from "react";
 import { ArrowLeft } from "lucide-react";
 
 export default function UserProfilePage() {
   const navigate = useNavigate();
-  const { userId } = useParams();
+  // const { userId } = useParams();
   const [activeTab, setActiveTab] = useState<"list" | "scrap" | "like">("list");
   const [backgroundImage, setBackgroundImage] = useState("/images/city.png");
   const fileInputRef = useRef<HTMLInputElement | null>(null);

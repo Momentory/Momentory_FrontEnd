@@ -2,15 +2,6 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { checkNickname } from '../../api/auth';
 
-
-// 백엔드 응답 타입 명시
-interface CheckNicknameResponse {
-  isSuccess: boolean;
-  code: string;
-  message: string;
-  result: string; // "중복 없음" | "중복 있음"
-}
-
 export default function CreateProfilePage() {
   const navigate = useNavigate();
   const [nickname, setNickname] = useState('');
