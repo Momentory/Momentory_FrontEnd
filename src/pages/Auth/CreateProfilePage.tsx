@@ -1,19 +1,17 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { checkNickname } from '../../api/auth';
+import { checkNickname, signup } from '../../api/auth'; // ✅ signup 추가
 
 export default function CreateProfilePage() {
   const navigate = useNavigate();
   const [nickname, setNickname] = useState('');
   const [introduction, setIntroduction] = useState('');
   const [link, setLink] = useState('');
-  const [nicknameAvailable, setNicknameAvailable] = useState<boolean | null>(
-    null
-  );
+  const [nicknameAvailable, setNicknameAvailable] = useState<boolean | null>(null);
   const [checkingNickname, setCheckingNickname] = useState(false);
   const maxIntroLength = 100;
 
-  //  닉네임 변경 시 자동 중복 확인 (디바운스 0.5초)
+  /*  닉네임 변경 시 자동 중복 확인 (디바운스 0.5초) */
   useEffect(() => {
     if (!nickname.trim()) {
       setNicknameAvailable(null);
@@ -26,12 +24,10 @@ export default function CreateProfilePage() {
         const res = await checkNickname(nickname);
         console.log("닉네임 중복확인 응답:", res);
         setNicknameAvailable(res.available);
-
       } catch (error) {
         console.error('닉네임 중복확인 실패:', error);
         setNicknameAvailable(null);
       } finally {
-        // 여기 반드시 필요!
         setCheckingNickname(false);
       }
     }, 500);
@@ -40,16 +36,41 @@ export default function CreateProfilePage() {
   }, [nickname]);
 
 
-  // 회원가입 버튼 클릭
-  const handleSubmit = () => {
+  /* 회원가입 버튼 클릭 */
+  const handleSubmit = async () => {
     if (!nickname.trim()) return alert('닉네임을 입력해주세요.');
     if (checkingNickname)
       return alert('닉네임 중복 확인 중입니다. 잠시만 기다려주세요.');
     if (nicknameAvailable === false)
       return alert('이미 사용 중인 닉네임입니다.');
 
-    alert('프로필이 저장되었습니다!');
-    navigate('/select');
+    try {
+      // 실제 서버에 전송할 회원정보 (이전 단계에서 localStorage에 저장된 값 포함)
+      const payload = {
+        email: localStorage.getItem('signupEmail') || '',
+        password: localStorage.getItem('signupPassword') || '',
+        nickname: nickname,
+        name: localStorage.getItem('signupName') || '',
+        phone: localStorage.getItem('signupPhone') || '',
+        birth: localStorage.getItem('signupBirth') || '',
+      };
+
+      console.log('회원가입 요청 payload:', payload);
+
+      // 서버에 회원가입 요청
+      const res:any = await signup(payload);
+      console.log('회원가입 응답:', res);
+
+      if (res.isSuccess || res.code === 'COMMON200') {
+        alert('회원가입이 완료되었습니다!');
+        navigate('/select');
+      } else {
+        alert(`회원가입 실패: ${res.message}`);
+      }
+    } catch (err: any) {
+      console.error('회원가입 요청 실패:', err);
+      alert('회원가입 중 오류가 발생했습니다.');
+    }
   };
 
   return (
@@ -110,11 +131,11 @@ export default function CreateProfilePage() {
           </p>
         ) : nicknameAvailable === true ? (
           <p className="text-green-500 text-[13px] mt-1">
-            사용 가능한 닉네임입니다 ✅
+            사용 가능한 닉네임입니다 
           </p>
         ) : nicknameAvailable === false ? (
           <p className="text-red-500 text-[13px] mt-1">
-            이미 사용 중인 닉네임입니다 ❌
+            이미 사용 중인 닉네임입니다 
           </p>
         ) : null}
       </div>
@@ -146,9 +167,7 @@ export default function CreateProfilePage() {
 
       {/* 외부 링크 */}
       <div className="w-[329px] flex flex-col space-y-1">
-        <label className="text-[15px] font-semibold mb-1 block">
-          외부 링크
-        </label>
+        <label className="text-[15px] font-semibold mb-1 block">외부 링크</label>
         <div className="relative">
           <input
             type="text"
@@ -165,21 +184,21 @@ export default function CreateProfilePage() {
         </div>
       </div>
 
-      {/* 회원가입 버튼 */}
+      {/* ✅ 회원가입 버튼 */}
       <button
         disabled={!nicknameAvailable || checkingNickname}
         onClick={handleSubmit}
-        className={`w-[329px] h-[60px] text-white text-[18px] font-semibold rounded-[20px] mt-8 active:scale-95 transition ${nicknameAvailable && !checkingNickname
-          ? "bg-[#FF7070]"
-          : "bg-gray-300 cursor-not-allowed"
-          }`}
+        className={`w-[329px] h-[60px] text-white text-[18px] font-semibold rounded-[20px] mt-8 active:scale-95 transition ${
+          nicknameAvailable && !checkingNickname
+            ? 'bg-[#FF7070]'
+            : 'bg-gray-300 cursor-not-allowed'
+        }`}
       >
         {checkingNickname
-          ? "확인 중..."
+          ? '확인 중...'
           : nicknameAvailable
-            ? "회원가입 완료"
-            : "회원가입 불가"}
-
+          ? '회원가입 완료'
+          : '회원가입 불가'}
       </button>
 
       {/* 임시 이동 버튼 */}

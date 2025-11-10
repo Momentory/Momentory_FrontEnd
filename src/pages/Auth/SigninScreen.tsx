@@ -25,7 +25,9 @@ export default function LoginPage() {
       });
 
       alert('로그인 성공!');
-      navigate('/splash'); // 로그인 성공 시 이동할 페이지
+      
+      navigate('/home'); // 로그인 성공 시 이동할 페이지
+      
     } catch (err: any) {
       console.error('로그인 에러 전체:', err);
       console.error('응답 데이터:', err.response?.data);
