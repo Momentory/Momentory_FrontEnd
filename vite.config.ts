@@ -11,15 +11,15 @@ export default defineConfig({
   },
   server: {
     host: true,
-      // @ts-ignore
-    https: true, // ✅ SSL 활성화
+     // @ts-expect-error
+    https: true, // SSL 활성화
     port: 5173,
     proxy: {
       '/api': {
-        target: 'https://www.momentory.store', // ✅ 백엔드 주소
+        target: 'https://www.momentory.store', // 백엔드 주소
         changeOrigin: true,
         secure: false,
-        rewrite: (path) => path, // ✅ '/api' 제거
+        rewrite: (path) => path, // '/api' 제거
       },
     },
   },
