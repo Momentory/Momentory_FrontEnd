@@ -10,11 +10,17 @@ interface ReissueResponse {
   refreshToken?: string;
 }
 
+
+
+/* ----------------------------- Axios 기본 설정 ----------------------------- */
+
+// API 클라이언트 생성
 export const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || "https://www.momentory.store",
+  baseURL: import.meta.env.VITE_API_BASE_URL,
   withCredentials: true,
 });
 
+/* ----------------------------- 요청 인터셉터 ----------------------------- */
 
 const noAuthUrls = [
   "/auth/login",
