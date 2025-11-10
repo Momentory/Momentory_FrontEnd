@@ -47,3 +47,21 @@ export interface UpdateAlbumResponse {
   id: number;
   title: string;
 }
+
+export interface MyPhoto {
+  photoId: number;
+  imageName: string;
+  imageUrl: string;
+  latitude: number;
+  longitude: number;
+  address: string;
+  memo: string;
+  visibility: string;
+  createdAt: string;
+}
+
+export interface MyPhotosResponse {
+  photos: MyPhoto[];
+  nextCursor: string;
+  hasNext: boolean;
+}

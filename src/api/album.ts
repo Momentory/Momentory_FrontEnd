@@ -7,6 +7,7 @@ import type {
   CreateAlbumResponse,
   UpdateAlbumRequest,
   UpdateAlbumResponse,
+  MyPhotosResponse,
 } from '../types/album';
 
 export const album = {
@@ -71,6 +72,16 @@ export const album = {
   // 공유 앨범 조회 (비로그인 접근 가능)
   async getSharedAlbum(shareUuid: string): Promise<ApiResponse<{ title: string; images: { imageUrl: string; index: number }[] }>> {
     const res = await api.get<ApiResponse<{ title: string; images: { imageUrl: string; index: number }[] }>>(`/albums/share/${shareUuid}`);
+    return res.data;
+  },
+
+  // 내 사진 목록 조회 (커서 페이지네이션)
+  async getMyPhotos(cursor?: string, size: number = 20): Promise<ApiResponse<MyPhotosResponse>> {
+    const params = new URLSearchParams();
+    if (cursor) params.append('cursor', cursor);
+    params.append('size', size.toString());
+
+    const res = await api.get<ApiResponse<MyPhotosResponse>>(`/mypage/photos?${params.toString()}`);
     return res.data;
   },
 };

@@ -1,6 +1,7 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import html2canvas from 'html2canvas';
+import { useMyPhotos } from '../../hooks/useMyPhotos';
 import DropdownHeader from '../../components/common/DropdownHeader';
 import Modal from '../../components/common/Modal';
 import Popover from '../../components/common/Popover';
@@ -49,9 +50,9 @@ const createEmptyPageData = (templateId: number): PageData => ({
 });
 
 const EditAlbumPage = () => {
-  const { albumId } = useParams();
+  const { albumId, id } = useParams();
   const navigate = useNavigate();
-  const initialTemplateId = 1;
+  const initialTemplateId = id ? Number(id) : 1;
   const templateRef = useRef<HTMLDivElement>(null);
 
   const [pages, setPages] = useState<PageData[]>([createEmptyPageData(initialTemplateId)]);
@@ -63,11 +64,28 @@ const EditAlbumPage = () => {
   const [showTemplateEditModal, setShowTemplateEditModal] = useState(false);
   const [showImageSelector, setShowImageSelector] = useState(false);
   const [currentImageField, setCurrentImageField] = useState<string>('');
-  const [uploadedImages, setUploadedImages] = useState<string[]>([
-    '/src/assets/icons/exampleAlbum.svg'
-  ]);
   const [isLoading, setIsLoading] = useState(false);
   const [albumTitle, setAlbumTitle] = useState('');
+
+  const {
+    data: photosData,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading: isLoadingPhotos,
+    isError: isPhotosError,
+  } = useMyPhotos(20);
+
+  const uploadedImages = useMemo(() => {
+    if (!photosData?.pages) return [];
+    return photosData.pages.flatMap(page => page.photos.map(photo => photo.imageUrl));
+  }, [photosData]);
+
+  const loadMorePhotos = () => {
+    if (hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  };
 
   useEffect(() => {
     if (albumId) {
@@ -75,15 +93,10 @@ const EditAlbumPage = () => {
         setIsLoading(true);
         try {
           const response = await album.getAlbumDetail(Number(albumId));
-          
+
           if (response.isSuccess && response.result) {
-            const { title, images } = response.result;
+            const { title } = response.result;
             setAlbumTitle(title);
-            
-            const imageUrls = images
-              .sort((a, b) => a.index - b.index)
-              .map(img => img.imageUrl);
-            setUploadedImages(imageUrls);
           }
         } catch (err) {
           console.error('앨범 불러오기 실패:', err);
@@ -92,7 +105,6 @@ const EditAlbumPage = () => {
           setIsLoading(false);
         }
       };
-      
       fetchAlbumDetail();
     }
   }, [albumId]);
@@ -393,6 +405,10 @@ const EditAlbumPage = () => {
             images={uploadedImages}
             onSelect={handleImageSelect}
             maxSelection={getMaxSelectionForCurrentTemplate()}
+            onLoadMore={loadMorePhotos}
+            hasMore={hasNextPage}
+            isLoading={isFetchingNextPage}
+            isError={isPhotosError}
           />
         </Modal>
       )}
