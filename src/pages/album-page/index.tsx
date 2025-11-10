@@ -98,8 +98,14 @@ const MyAlbumPage = () => {
               <p className="text-red-600 text-center">{error}</p>
             </div>
           ) : albums.length === 0 ? (
-            <div className="flex justify-center items-center py-10 bg-gray-100 rounded-lg">
-              <p className="text-gray-600">생성된 앨범이 없습니다.</p>
+            <div className="flex flex-col justify-center items-center py-10 gap-4">
+              <p className="text-gray-600 text-lg">아직 생성한 앨범이 없습니다!</p>
+              <button
+                onClick={() => navigate('/create-album')}
+                className="text-[#FF7070] font-bold text-base flex items-center gap-1"
+              >
+                + 앨범 생성하러 가기
+              </button>
             </div>
           ) : (
             <AlbumList albums={transformedAlbums} />

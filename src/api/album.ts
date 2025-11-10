@@ -12,19 +12,19 @@ import type {
 export const album = {
   // 내 앨범 목록 조회
   async getMyAlbums(): Promise<ApiResponse<AlbumListItem[]>> {
-    const res = await api.get<ApiResponse<AlbumListItem[]>>('/api/mypage/albums');
+    const res = await api.get<ApiResponse<AlbumListItem[]>>('/mypage/albums');
     return res.data;
   },
 
   // 앨범 상세 조회
   async getAlbumDetail(albumId: number): Promise<ApiResponse<AlbumDetail>> {
-    const res = await api.get<ApiResponse<AlbumDetail>>(`/api/mypage/albums/${albumId}`);
+    const res = await api.get<ApiResponse<AlbumDetail>>(`/mypage/albums/${albumId}`);
     return res.data;
   },
 
   // 앨범 생성
   async createAlbum(data: CreateAlbumRequest): Promise<ApiResponse<CreateAlbumResponse>> {
-    const res = await api.post<ApiResponse<CreateAlbumResponse>>('/api/mypage/albums', data);
+    const res = await api.post<ApiResponse<CreateAlbumResponse>>('/mypage/albums', data);
     return res.data;
   },
 
@@ -34,9 +34,26 @@ export const album = {
     data: UpdateAlbumRequest
   ): Promise<ApiResponse<UpdateAlbumResponse>> {
     const res = await api.patch<ApiResponse<UpdateAlbumResponse>>(
-      `/api/mypage/albums/${albumId}`,
+      `/mypage/albums/${albumId}`,
       data
     );
+    return res.data;
+  },
+
+  
+  // 이미지 다건 업로드
+  async uploadImages(imageBlobs: { blob: Blob; name: string }[]): Promise<ApiResponse<{ imageName: string; imageUrl: string }[]>> {
+    const formData = new FormData();
+
+    imageBlobs.forEach((image) => {
+      formData.append('images', image.blob, `${image.name}.jpg`);
+    });
+
+    const res = await api.post<ApiResponse<{ imageName: string; imageUrl: string }[]>>('/image/upload/batch', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
     return res.data;
   },
 };

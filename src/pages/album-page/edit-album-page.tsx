@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import html2canvas from 'html2canvas';
 import DropdownHeader from '../../components/common/DropdownHeader';
 import Modal from '../../components/common/Modal';
 import Popover from '../../components/common/Popover';
@@ -51,6 +52,7 @@ const EditAlbumPage = () => {
   const { albumId } = useParams();
   const navigate = useNavigate();
   const initialTemplateId = 1;
+  const templateRef = useRef<HTMLDivElement>(null);
 
   const [pages, setPages] = useState<PageData[]>([createEmptyPageData(initialTemplateId)]);
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
@@ -61,7 +63,9 @@ const EditAlbumPage = () => {
   const [showTemplateEditModal, setShowTemplateEditModal] = useState(false);
   const [showImageSelector, setShowImageSelector] = useState(false);
   const [currentImageField, setCurrentImageField] = useState<string>('');
-  const [uploadedImages, setUploadedImages] = useState<string[]>([]);
+  const [uploadedImages, setUploadedImages] = useState<string[]>([
+    '/src/assets/icons/exampleAlbum.svg'
+  ]);
   const [isLoading, setIsLoading] = useState(false);
   const [albumTitle, setAlbumTitle] = useState('');
 
@@ -181,36 +185,77 @@ const EditAlbumPage = () => {
     setCurrentImageField('');
   };
 
+  const capturePageAsImage = async (pageIndex: number): Promise<Blob> => {
+    if (!templateRef.current) {
+      throw new Error('템플릿을 찾을 수 없습니다.');
+    }
+
+    setCurrentPageIndex(pageIndex);
+
+    await new Promise(resolve => setTimeout(resolve, 100));
+
+    const canvas = await html2canvas(templateRef.current, {
+      backgroundColor: '#ffffff',
+      scale: 2,
+      useCORS: true,
+      allowTaint: true,
+    });
+
+    return new Promise((resolve) => {
+      canvas.toBlob((blob) => {
+        if (blob) {
+          resolve(blob);
+        } else {
+          throw new Error('이미지 변환에 실패했습니다.');
+        }
+      }, 'image/jpeg', 0.8);
+    });
+  };
+
   const handleSaveAlbum = async () => {
-    if (!albumTitle.trim()) {
+    const firstPageTitle = pages[0]?.title || albumTitle;
+    if (!firstPageTitle.trim()) {
       alert('앨범 제목을 입력해주세요.');
       return;
     }
-    const usedImages = new Set<string>();
-    pages.forEach(page => {
-      if (page.image) usedImages.add(page.image);
-      if (page.image1) usedImages.add(page.image1);
-      if (page.image2) usedImages.add(page.image2);
-      if (page.image3) usedImages.add(page.image3);
-    });
-
-    const albumImages: AlbumImage[] = Array.from(usedImages).map((url, index) => ({
-      imageName: `image_${index}`,
-      imageUrl: url,
-      index,
-    }));
 
     try {
       setIsLoading(true);
+
+      // 모든 페이지를 이미지로 캡처
+      const imageBlobs: { blob: Blob; name: string }[] = [];
+
+      for (let i = 0; i < pages.length; i++) {
+        const imageBlob = await capturePageAsImage(i);
+        imageBlobs.push({
+          blob: imageBlob,
+          name: `page_${i + 1}`,
+        });
+      }
+
+      // 이미지를 한 번에 업로드
+      const uploadResponse = await album.uploadImages(imageBlobs);
+
+      if (!uploadResponse.isSuccess || !uploadResponse.result) {
+        throw new Error('이미지 업로드에 실패했습니다.');
+      }
+
+      // 업로드된 이미지 정보 변환
+      const albumImages: AlbumImage[] = uploadResponse.result.map((img, index) => ({
+        imageName: img.imageName,
+        imageUrl: img.imageUrl,
+        index,
+      }));
+
       if (albumId) {
         await album.updateAlbum(Number(albumId), {
-          title: albumTitle,
+          title: firstPageTitle,
           images: albumImages,
         });
         alert('앨범이 수정되었습니다.');
       } else {
         const response = await album.createAlbum({
-          title: albumTitle,
+          title: firstPageTitle,
           images: albumImages,
         });
         alert('앨범이 생성되었습니다.');
@@ -262,14 +307,16 @@ const EditAlbumPage = () => {
         }
       />
       <div className="flex flex-col items-center relative">
-        {Template && (
-          <Template
-            data={currentPage}
-            updateData={(changes) => updatePageData(currentPageIndex, changes)}
-            onEmptyAreaClick={handleEmptyAreaClick}
-            onImageClick={handleImageFieldClick}
-          />
-        )}
+        <div ref={templateRef}>
+          {Template && (
+            <Template
+              data={currentPage}
+              updateData={(changes) => updatePageData(currentPageIndex, changes)}
+              onEmptyAreaClick={handleEmptyAreaClick}
+              onImageClick={handleImageFieldClick}
+            />
+          )}
+        </div>
         {popoverPosition && (
           <Popover
             position={popoverPosition}
