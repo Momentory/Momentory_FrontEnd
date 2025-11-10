@@ -13,12 +13,13 @@ interface ReissueResponse {
 
 /* ----------------------------- Axios 기본 설정 ----------------------------- */
 
-// 개발/배포 모두 Vite proxy 기준 경로(`/api`) 사용
+// API 클라이언트 생성
 export const api = axios.create({
-  baseURL: "/api",
+  baseURL: import.meta.env.VITE_API_BASE_URL,
   withCredentials: true,
   headers: { "Content-Type": "application/json" },
 });
+
 
 /* ----------------------------- 요청 인터셉터 ----------------------------- */
 
