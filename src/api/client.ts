@@ -5,11 +5,12 @@ import axios, {
 } from "axios";
 import { tokenStore } from "../lib/token";
 
-/* ----------------------------- 타입 정의 ----------------------------- */
 interface ReissueResponse {
   accessToken: string;
   refreshToken?: string;
 }
+
+
 
 /* ----------------------------- Axios 기본 설정 ----------------------------- */
 
@@ -17,132 +18,88 @@ interface ReissueResponse {
 export const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
   withCredentials: true,
-  headers: { "Content-Type": "application/json" },
 });
-
 
 /* ----------------------------- 요청 인터셉터 ----------------------------- */
 
-// 토큰 제외 대상 API (로그인, 회원가입 등)
 const noAuthUrls = [
+  "/auth/login",
+  "/auth/userSignup",
+  "/auth/send-email",
+  "/auth/verify-email",
   "/auth/check-email",
   "/auth/check-nickname",
-  "/auth/send-email",
-  "/auth/check-email-verified",
-  "/auth/validate-password",
-  "/auth/userSignup",
-  "/auth/login",
+  "/auth/kakao/callback",
   "/auth/reissue",
 ];
 
-api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
-  const access = tokenStore.getAccess();
-  const isNoAuth = noAuthUrls.some((url) => config.url?.includes(url));
+api.interceptors.request.use(
+  (config) => {
+    config.headers = config.headers || {};
 
-  if (access && !isNoAuth) {
-    config.headers = config.headers ?? {};
-    (config.headers as AxiosRequestHeaders).Authorization = `Bearer ${access}`;
-  }
+    if (noAuthUrls.some((url) => config.url?.includes(url))) {
+      delete config.headers.Authorization;
+    } else {
+      const accessToken = localStorage.getItem("accessToken");
+      if (accessToken) {
+        config.headers.Authorization = `Bearer ${accessToken}`;
+      }
+    }
 
-  return config;
-});
+    console.log("[Axios Request]", config.url, config.headers.Authorization);
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
 
-/* ----------------------------- 재발급 관리용 큐 ----------------------------- */
-
-let isRefreshing = false;
-let requestQueue: Array<(token: string) => void> = [];
-
-const processQueue = (newAccess: string) => {
-  requestQueue.forEach((cb) => cb(newAccess));
-  requestQueue = [];
-};
-
-/* ----------------------------- 응답 인터셉터 ----------------------------- */
 
 api.interceptors.response.use(
-  (response: AxiosResponse<unknown>) => response,
+  (response: AxiosResponse<unknown>) => {
+    console.log("[Axios Response]", response.status, response.data);
+    return response;
+  },
   async (error: unknown) => {
     if (!axios.isAxiosError(error)) {
-      console.error("Axios 인터셉터 오류 (네트워크 외):", error);
+      console.error("Axios 인터셉터 오류:", error);
       throw error;
     }
 
-    const original = error.config as InternalAxiosRequestConfig & {
-      _retry?: boolean;
-    };
-
+    const original = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
     const status = error.response?.status;
 
-    // 재시도 중복 방지
     if (!original || original._retry) throw error;
 
-    // 401 Unauthorized → 토큰 재발급 시도
     if (status === 401) {
-      if (isRefreshing) {
-        // 이미 재발급 중이면 큐에 대기
-        return new Promise((resolve) => {
-          requestQueue.push((newAccess) => {
-            original.headers = original.headers ?? {};
-            (original.headers as AxiosRequestHeaders).Authorization =
-              `Bearer ${newAccess}`;
-            resolve(api(original));
-          });
-        });
-      }
-
-      original._retry = true;
-      isRefreshing = true;
-
       try {
-        const refreshToken = tokenStore.getRefresh();
+        const refreshToken = tokenStore.getRefresh?.();
         if (!refreshToken) {
-          tokenStore.clear();
+          tokenStore.clear?.();
           throw error;
         }
 
-        // /api/auth/reissue 호출
-        const { data } = await axios.post<ReissueResponse>(
-          "/api/auth/reissue",
-          { refreshToken },
-          { headers: { "Content-Type": "application/json" } }
-        );
+        const { data } = await api.post<ReissueResponse>("/auth/reissue", { refreshToken });
 
-        const newAccess = data.accessToken;
-        const newRefresh = data.refreshToken ?? refreshToken;
-
-        // 토큰 저장 및 헤더 갱신
-        tokenStore.set({
-          accessToken: newAccess,
-          refreshToken: newRefresh,
+        tokenStore.set?.({
+          accessToken: data.accessToken,
+          refreshToken: data.refreshToken ?? refreshToken,
         });
 
-        api.defaults.headers.common["Authorization"] = `Bearer ${newAccess}`;
-        processQueue(newAccess);
-
-        // 실패했던 요청 재시도
+        api.defaults.headers.common["Authorization"] = `Bearer ${data.accessToken}`;
         original.headers = original.headers ?? {};
-        (original.headers as AxiosRequestHeaders).Authorization =
-          `Bearer ${newAccess}`;
+        (original.headers as AxiosRequestHeaders).Authorization = `Bearer ${data.accessToken}`;
+
         return api(original);
-      } catch (reissueError) {
-        tokenStore.clear();
-
-        if (axios.isAxiosError(reissueError)) {
-          console.error(
-            "토큰 재발급 실패 (Axios Error):",
-            reissueError.response?.data
-          );
-        } else {
-          console.error("토큰 재발급 중 알 수 없는 오류:", reissueError);
-        }
-
-        throw reissueError;
-      } finally {
-        isRefreshing = false;
+      } catch (err) {
+        tokenStore.clear?.();
+        console.error("토큰 재발급 실패:", err);
+        throw err;
       }
     }
 
-    // 그 외 에러는 그대로 throw
+    if (error.code === "ERR_NETWORK") {
+      console.error("네트워크 연결 실패 (서버 응답 없음)");
+    }
+
     throw error;
   }
 );

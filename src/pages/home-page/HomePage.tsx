@@ -5,6 +5,8 @@ import {
   getRecentPhotos,
   getCharacterStatus,
   getEvents,
+  getMyPoint, 
+  getMyMapInfo 
 } from "../../api/home";
 import { X } from "lucide-react";
 
@@ -22,7 +24,7 @@ export default function HomePage() {
   // 유저 기본 데이터
   const [userName, setUserName] = useState("Username");
   const [level, setLevel] = useState(0);
-  const [points, setPoints] = useState(0);
+  const [points, setPoints] = useState(0); 
 
   // 상태
   const [isDropdownOpen, _setIsDropdownOpen] = useState(false);
@@ -36,36 +38,51 @@ export default function HomePage() {
   const [recentPhotos, setRecentPhotos] = useState<any[]>([]);
   const [events, setEvents] = useState<any[]>([]);
   const [markers, setMarkers] = useState<Marker[]>([]);
+  
 
   useEffect(() => {
     const fetchHomeData = async () => {
       try {
         setIsLoading(true);
 
-        // 병렬로 API 호출
-        const [places, photos, charStatus, evts] = await Promise.all([
+        //  병렬로 API 호출 
+        const [
+          places, 
+          photos, 
+          charStatus, 
+          evts, 
+          pointData,
+          mapData 
+        ] = await Promise.all([
           getTopPlaces(),
           getRecentPhotos(),
           getCharacterStatus(),
           getEvents(),
+          getMyPoint(),
+          getMyMapInfo() 
         ]);
 
         // 여행지 / 사진
         setTopPlaces(Array.isArray(places) ? places : []);
         setRecentPhotos(Array.isArray(photos) ? photos : []);
 
-        // 캐릭터 상태
+        // 캐릭터 상태 
         if (charStatus) {
           setUserName(charStatus.nickname ?? "User");
           setLevel(charStatus.level ?? 0);
-          setPoints(charStatus.points ?? 0);
+        }
+
+        // 포인트 
+        if (pointData) {
+          setPoints(pointData.points ?? pointData.currentPoints ?? 0);
         }
 
         // 이벤트
         setEvents(Array.isArray(evts) ? evts : []);
 
-        // 지도 마커 초기화
-        setMarkers([]);
+        // 지도 마커 설정 
+        setMarkers(Array.isArray(mapData) ? (mapData as Marker[]) : []);
+
       } catch (e) {
         console.error("홈 데이터 로드 실패:", e);
         setIsError(true);
@@ -73,7 +90,7 @@ export default function HomePage() {
         setIsLoading(false);
       }
     };
-
+    
     fetchHomeData();
   }, []);
 
@@ -129,12 +146,12 @@ export default function HomePage() {
         <img
           src="/images/ribon.png"
           alt="리본"
-          className="absolute"
+          className="absolute z-4"
           style={{
             width: "76px",
             height: "48px",
             bottom: "118px",
-            left: "47%",
+            left: "43%",
           }}
         />
       </div>
@@ -226,9 +243,9 @@ export default function HomePage() {
               {
                 img: "/images/roulette.png",
                 label: "여행지 추천",
-                link: "/album",
+                link: "/recommended-places",
               },
-              { img: "/images/star.png", label: "스탬프", link: "/travel" },
+              { img: "/images/star.png", label: "스탬프", link: "stamp-acquisition" },
             ].map((item) => (
               <div
                 key={item.label}
@@ -377,6 +394,7 @@ export default function HomePage() {
                     backgroundColor: m.color,
                     transform: "translate(-50%, -50%)",
                   }}
+                  title={m.name} 
                 />
               ))}
             </div>
