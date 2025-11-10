@@ -12,6 +12,27 @@ const AlbumDetailPage = () => {
   const [albumTitle, setAlbumTitle] = useState('');
   const [isLoading, setIsLoading] = useState(true);
 
+  const handleShare = async () => {
+    if (!albumId) return;
+
+    try {
+      const response = await album.createShareLink(Number(albumId));
+
+      if (response.isSuccess && response.result) {
+        const shareUrl = response.result.shareUrl;
+
+        // 클립보드에 복사
+        await navigator.clipboard.writeText(shareUrl);
+        alert('공유 링크가 복사되었습니다!\n친구에게 링크를 공유해보세요.');
+      } else {
+        alert('공유 링크 생성에 실패했습니다.');
+      }
+    } catch (err) {
+      console.error('공유 링크 생성 실패:', err);
+      alert('공유 링크 생성에 실패했습니다.');
+    }
+  };
+
   useEffect(() => {
     if (!albumId) return;
 
@@ -90,7 +111,7 @@ const AlbumDetailPage = () => {
             </button>
             <button
               className="flex h-14 w-14 items-center justify-center rounded-full border border-gray-200 bg-white shadow-md transition hover:bg-gray-100 cursor-pointer"
-              onClick={() => alert('공유 기능 추후 구현.')}
+              onClick={handleShare}
             >
               <ShareIcon className="h-6 w-6 text-gray-700" />
             </button>

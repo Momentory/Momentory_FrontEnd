@@ -40,7 +40,6 @@ export const album = {
     return res.data;
   },
 
-  
   // 이미지 다건 업로드
   async uploadImages(imageBlobs: { blob: Blob; name: string }[]): Promise<ApiResponse<{ imageName: string; imageUrl: string }[]>> {
     const formData = new FormData();
@@ -54,6 +53,24 @@ export const album = {
         'Content-Type': 'multipart/form-data',
       },
     });
+    return res.data;
+  },
+
+  // 앨범 공유 링크 생성
+  async createShareLink(albumId: number): Promise<ApiResponse<{ shareUrl: string }>> {
+    const res = await api.post<ApiResponse<{ shareUrl: string }>>(`/albums/${albumId}/share`);
+    return res.data;
+  },
+
+  // 앨범 공유 해제
+  async unshareAlbum(albumId: number): Promise<ApiResponse<{}>> {
+    const res = await api.patch<ApiResponse<{}>>(`/albums/${albumId}/unshare`);
+    return res.data;
+  },
+
+  // 공유 앨범 조회 (비로그인 접근 가능)
+  async getSharedAlbum(shareUuid: string): Promise<ApiResponse<{ title: string; images: { imageUrl: string; index: number }[] }>> {
+    const res = await api.get<ApiResponse<{ title: string; images: { imageUrl: string; index: number }[] }>>(`/albums/share/${shareUuid}`);
     return res.data;
   },
 };
