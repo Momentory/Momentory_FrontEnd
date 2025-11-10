@@ -11,7 +11,7 @@ export default defineConfig({
   },
   server: {
     host: true,
-     // @ts-expect-error
+    // @ts-expect-error vite https config issue
     https: true, // SSL 활성화
     port: 5173,
     proxy: {
