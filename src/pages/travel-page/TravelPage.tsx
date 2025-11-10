@@ -89,10 +89,10 @@ export default function TravelPage() {
         <div className="absolute top-[70px] right-4 bg-white rounded-lg shadow-md p-3 z-30">
           <p className="text-sm text-gray-700 mb-1">정렬 기준</p>
           <button className="text-[14px] w-full text-left hover:text-[#FF7070]">
-            🔹 가나다순
+            가나다순
           </button>
           <button className="text-[14px] w-full text-left hover:text-[#FF7070]">
-            🔹 인기순
+            인기순
           </button>
         </div>
       )}

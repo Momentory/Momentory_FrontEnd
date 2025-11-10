@@ -7,7 +7,7 @@ export const getTopPlaces = async () => {
   try {
     const res = await api.get("/api/home/travel-top3");
     console.log("[getTopPlaces] response:", res.data);
-    return res.data.data;
+    return res.data.data; // .data.data가 맞는지 확인 필요 (이하 동일)
   } catch (error: any) {
     console.error(
       "[getTopPlaces] 실패:",
@@ -59,6 +59,38 @@ export const getEvents = async () => {
   } catch (error: any) {
     console.error(
       "[getEvents] 실패:",
+      error.response?.status,
+      error.response?.data || error
+    );
+    throw error;
+  }
+};
+
+// 내 포인트 조회 (API 문서 기반으로 /api/point로 수정)
+export const getMyPoint = async () => {
+  try {
+    const res = await api.get("/api/point"); 
+    console.log("[getMyPoint] response:", res.data);
+    return res.data.data; // API 응답 구조에 따라 .data가 맞을 수 있음
+  } catch (error: any) {
+    console.error(
+      "[getMyPoint] 실패:",
+      error.response?.status,
+      error.response?.data || error
+    );
+    throw error;
+  }
+};
+
+//나의 지도 - 방문 지역 색깔 정보
+export const getMyMapInfo = async () => {
+  try {
+    const res = await api.get("/api/map/my");
+    console.log("[getMyMapInfo] response:", res.data);
+    return res.data.data; // API 응답 구조에 따라 .data가 맞을 수 있음
+  } catch (error: any) {
+    console.error(
+      "[getMyMapInfo] 실패:",
       error.response?.status,
       error.response?.data || error
     );
