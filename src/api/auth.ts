@@ -73,7 +73,7 @@ export const verifyEmail = async (token: string): Promise<VerifyEmailResponse> =
 
 
 
-// ✅ 닉네임 중복 확인
+// 닉네임 중복 확인
 export const checkNickname = async (nickName: string) => {
   try {
     const res = await api.get("/auth/check-nickname", { params: { nickName } });

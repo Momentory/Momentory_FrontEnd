@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { checkNickname, signup } from '../../api/auth'; // ✅ signup 추가
+import { checkNickname, signup } from '../../api/auth'; 
 
 export default function CreateProfilePage() {
   const navigate = useNavigate();
