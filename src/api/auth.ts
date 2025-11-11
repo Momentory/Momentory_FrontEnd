@@ -10,13 +10,18 @@ export const signup = (payload: any) =>
 
 
 export const login = async (payload: { email: string; password: string }) => {
-  const { data } = await api.post("/auth/login", payload);
-  tokenStore.set({
-    accessToken: data.accessToken,
-    refreshToken: data.refreshToken,
-  });
-  api.defaults.headers.common["Authorization"] = `Bearer ${data.accessToken}`;
-  return data;
+ const { data } = await api.post("/api/auth/login", payload);
+
+const { accessToken, refreshToken } = data.result;
+
+tokenStore.set({
+  accessToken,
+  refreshToken,
+});
+
+api.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
+return data;
+
 };
 
 export const logout = async () => {

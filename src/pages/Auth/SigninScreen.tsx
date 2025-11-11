@@ -20,8 +20,8 @@ export default function LoginPage() {
     try {
       const data = await login({ email, password });
       tokenStore.set({
-        accessToken: data.accessToken,
-        refreshToken: data.refreshToken,
+        accessToken: data.result.accessToken,
+        refreshToken: data.result.refreshToken,
       });
 
       alert('로그인 성공!');
