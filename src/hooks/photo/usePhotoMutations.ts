@@ -119,7 +119,7 @@ export type UpdatePhotoNearbyVariables = {
   limit?: number;
 };
 
-export function useUpdatePhotoNearbyMutation(
+export function usePhotoNearby(
   options?: UseMutationOptions<
     NearbySpotsResponse,
     unknown,

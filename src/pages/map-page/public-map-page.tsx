@@ -7,6 +7,7 @@ import BottomSheet from '../../components/map/BottomSheet';
 import MapPinIcon from '../../assets/map-pin.svg?react';
 import LockIcon from '../../assets/lock-icon.svg?react';
 import shareButton from '../../assets/share-button.svg';
+import RouletteIcon from '../../assets/roulette.svg?react';
 
 import useMapZoom from '../../hooks/map/useMapZoom';
 import useBottomSheet from '../../hooks/map/useBottomSheet';
@@ -74,7 +75,32 @@ export default function PublicMapPage() {
         <DropdownHeader
           title="전체 지도"
           hasDropdown
+          leftIcon={null}
+          onLeftClick={undefined}
           dropdownItems={dropdownItems}
+          rightAction={
+            <div className="relative">
+              <button
+                className="cursor-pointer relative"
+                onClick={() => navigate('/roulette')}
+              >
+                <RouletteIcon className="w-10 h-10" />
+              </button>
+              <div className="absolute right-0 top-full mt-2 w-[140px] bg-white text-[#AE8D8D] text-xs font-bold border border-[#FF7070] px-3 py-2 rounded-lg z-50 animate-[fadeIn_0.2s_ease-out] text-center leading-relaxed">
+                아직 방문하지 않은
+                <br />
+                지역이 있다면?
+                <br />
+                룰렛으로 골라봐요~!
+                <div className="absolute -top-2 right-4">
+                  <div className="w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-b-8 border-b-[#FF7070]"></div>
+                  <div className="absolute top-px left-1/2 -translate-x-1/2">
+                    <div className="w-0 h-0 border-l-[5px] border-l-transparent border-r-[5px] border-r-transparent border-b-[7px] border-b-white"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          }
         />
 
         <PublicMapView

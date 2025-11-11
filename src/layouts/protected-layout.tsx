@@ -63,10 +63,13 @@ const ProtectedLayout = () => {
   );
 
   const isHeaderHidden =
-    location.pathname.startsWith('/settings') || isAlbumReadPage;
+    location.pathname.startsWith('/settings') ||
+    location.pathname.startsWith('/all-my-photos/viewer') ||
+    isAlbumReadPage;
 
   const isNavbarHidden =
     location.pathname.startsWith('/settings') ||
+    location.pathname.startsWith('/all-my-photos/viewer') ||
     isShopPage ||
     isClosetPage ||
     isEditPage ||

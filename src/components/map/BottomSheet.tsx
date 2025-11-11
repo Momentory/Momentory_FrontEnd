@@ -27,7 +27,6 @@ export default function BottomSheet({
     const startY = e.clientY;
     const startHeight = height;
     const startExpanded = isExpanded;
-
     const onMove = (e: MouseEvent) => {
       e.preventDefault();
       const deltaY = startY - e.clientY;
@@ -71,7 +70,7 @@ export default function BottomSheet({
   const handlePhotoFrameClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     // 지역별 사진 페이지로 이동
-    navigate(`/region-photos/${encodeURIComponent(regionName)}`, {
+    navigate('/all-my-photos', {
       state: { isPublic },
     });
   };
