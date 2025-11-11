@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import DropdownHeader from '../../components/common/DropdownHeader';
 import Modal from '../../components/common/Modal';
 import bigRouletteImage from '../../assets/bigroulette.svg';
@@ -8,33 +8,59 @@ import star5 from '../../assets/star5.svg';
 import star6 from '../../assets/star6.svg';
 import star7 from '../../assets/star7.svg';
 import star8 from '../../assets/star8.svg';
-
-const regions = [
-  { name: '수원시', color: '#B3E5FC' },
-  { name: '용인시', color: '#FFF9C4' },
-  { name: '부천시', color: '#C5E1A5' },
-  { name: '시흥시', color: '#F8BBD0' },
-  { name: '성남시', color: '#FFCCBC' },
-  { name: '안산시', color: '#FFE0B2' },
-  { name: '김포시', color: '#B3E5FC' },
-  { name: '화성시', color: '#C5E1A5' },
-];
-
-const recentWinners = [
-  { name: '고양시', icon: '🐾' },
-  { name: '부천시', icon: '🌸' },
-  { name: '용인시', icon: '🌳' },
-  { name: '수원시', icon: '🍎' },
-];
+import {
+  getRouletteSlots,
+  spinRoulette,
+  getRouletteHistory,
+} from '../../api/roulette';
+import type { RouletteSlot, RouletteHistoryItem } from '../../types/roulette';
 
 export default function RoulettePage() {
+  const [slots, setSlots] = useState<RouletteSlot[]>([]);
+  const [recentWinners, setRecentWinners] = useState<RouletteHistoryItem[]>(
+    []
+  );
   const [isSpinning, setIsSpinning] = useState(false);
   const [showResult, setShowResult] = useState(false);
   const [winner, setWinner] = useState<string | null>(null);
+  const [winnerImageUrl, setWinnerImageUrl] = useState<string | null>(null);
   const [finalRotation, setFinalRotation] = useState(0);
+  const [remainingPoint, setRemainingPoint] = useState<number | null>(null);
+  const [deadline, setDeadline] = useState<string | null>(null);
   const fixedRotationCount = 10;
 
-  const handleSpin = () => {
+  // 슬롯 데이터 가져오기
+  useEffect(() => {
+    const fetchSlots = async () => {
+      try {
+        const data = await getRouletteSlots();
+        setSlots(data.slots);
+      } catch (error) {
+        console.error('슬롯 조회 실패:', error);
+      }
+    };
+
+    const fetchHistory = async () => {
+      try {
+        const data = await getRouletteHistory();
+        // 최근 4개만 가져오기
+        const recent = data.roulettes.slice(0, 4);
+        setRecentWinners(recent);
+      } catch (error) {
+        console.error('히스토리 조회 실패:', error);
+      }
+    };
+
+    fetchSlots();
+    fetchHistory();
+  }, []);
+
+  const handleSpin = async () => {
+    if (slots.length === 0) {
+      alert('슬롯을 불러오는 중입니다.');
+      return;
+    }
+
     const rotation = 360 * fixedRotationCount + Math.random() * 360;
 
     setFinalRotation(0);
@@ -44,12 +70,12 @@ export default function RoulettePage() {
       setFinalRotation(rotation);
     });
 
-    setTimeout(() => {
+    setTimeout(async () => {
       const normalizedAngle = ((rotation % 360) + 360) % 360;
       const pointerAngle = (270 - normalizedAngle + 360) % 360;
 
       let sectionIndex = 0;
-      for (let i = 0; i < regions.length; i++) {
+      for (let i = 0; i < slots.length; i++) {
         const sectionCenterAngle = (i * anglePerRegion - 90 + 360) % 360;
         const halfAngle = anglePerRegion / 2;
         const sectionStartAngle = (sectionCenterAngle - halfAngle + 360) % 360;
@@ -74,9 +100,36 @@ export default function RoulettePage() {
         }
       }
 
-      setWinner(regions[sectionIndex].name);
-      setIsSpinning(false);
-      setShowResult(true);
+      const selectedSlot = slots[sectionIndex];
+
+      try {
+        // API 호출
+        const result = await spinRoulette({
+          type: selectedSlot.type,
+          selectedName: selectedSlot.name,
+          itemId: selectedSlot.itemId,
+        });
+
+        setWinner(result.reward);
+        setWinnerImageUrl(selectedSlot.imageUrl);
+        setRemainingPoint(result.remainingPoint);
+        setDeadline(result.deadline);
+        setIsSpinning(false);
+        setShowResult(true);
+
+        // 히스토리 갱신
+        const historyData = await getRouletteHistory();
+        const recent = historyData.roulettes.slice(0, 4);
+        setRecentWinners(recent);
+      } catch (error: any) {
+        console.error('룰렛 스핀 실패:', error);
+        setIsSpinning(false);
+        if (error.response?.data?.message) {
+          alert(`룰렛 실패: ${error.response.data.message}`);
+        } else {
+          alert('룰렛을 돌리는데 실패했습니다.');
+        }
+      }
     }, 10000);
   };
 
@@ -84,7 +137,7 @@ export default function RoulettePage() {
     setShowResult(false);
   };
 
-  const anglePerRegion = 360 / regions.length;
+  const anglePerRegion = 360 / (slots.length || 8);
 
   const stars = [
     { svg: star3, size: 90, top: '15%', left: '20%' },
@@ -151,7 +204,7 @@ export default function RoulettePage() {
                 }}
               />
 
-              {regions.map((region, index) => {
+              {slots.map((slot, index) => {
                 const rotationAngle = index * anglePerRegion;
                 const positionAngle = index * anglePerRegion - 90;
                 const radian = positionAngle * (Math.PI / 180);
@@ -174,7 +227,7 @@ export default function RoulettePage() {
                         transform: 'translate(-50%, -50%)',
                       }}
                     >
-                      {region.name}
+                      {slot.name}
                     </div>
                   </div>
                 );
@@ -205,15 +258,36 @@ export default function RoulettePage() {
             <div className="space-y-3">
               {recentWinners.map((item, index) => (
                 <div
-                  key={index}
-                  className={`flex items-center gap-2 p-4 rounded-lg w-full ${
+                  key={item.rouletteId}
+                  className={`flex flex-col gap-1 p-4 rounded-lg w-full ${
                     index % 2 === 1 ? 'bg-[#FFEDED]' : ''
                   }`}
                 >
-                  <span className="text-2xl">{item.icon}</span>
-                  <span className="text-[18px] font-bold text-[#000000]">
-                    {item.name}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-2xl">🎁</span>
+                    <span className="text-[18px] font-bold text-[#000000]">
+                      {item.reward}
+                    </span>
+                    {item.completed && (
+                      <span className="ml-auto text-sm font-medium text-green-600 bg-green-100 px-2 py-1 rounded">
+                        완료
+                      </span>
+                    )}
+                    {!item.completed && (
+                      <span className="ml-auto text-sm font-medium text-orange-600 bg-orange-100 px-2 py-1 rounded">
+                        미완료
+                      </span>
+                    )}
+                  </div>
+                  {item.deadline && (
+                    <div className="text-sm text-gray-600 pl-10">
+                      마감: {new Date(item.deadline).toLocaleDateString('ko-KR', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                      })}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
@@ -244,15 +318,31 @@ export default function RoulettePage() {
       {showResult && winner && (
         <Modal title="결과 확인" onClose={handleCloseResult}>
           <div className="w-full flex flex-col items-center">
-            <div className="w-full h-32 bg-gray-200 rounded-lg mb-4 flex items-center justify-center">
-              <span className="text-gray-400">이미지</span>
-            </div>
-            <p className="text-center text-base font-medium text-gray-800 mb-6">
+            {winnerImageUrl && (
+              <div className="w-full h-32 bg-gray-200 rounded-lg mb-4 flex items-center justify-center overflow-hidden">
+                <img
+                  src={winnerImageUrl}
+                  alt={winner}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            )}
+            <p className="text-center text-base font-medium text-gray-800 mb-2">
               <span className="font-bold" style={{ color: '#B66262' }}>
                 [{winner}]
               </span>{' '}
-              지역이 당첨되었습니다!
+              당첨되었습니다!
             </p>
+            {remainingPoint !== null && (
+              <p className="text-center text-sm text-gray-600 mb-2">
+                남은 포인트: {remainingPoint}P
+              </p>
+            )}
+            {deadline && (
+              <p className="text-center text-sm text-gray-600 mb-4">
+                인증 기한: {new Date(deadline).toLocaleDateString('ko-KR')}
+              </p>
+            )}
             <button
               onClick={handleCloseResult}
               className="w-full py-3 px-6 rounded-xl bg-[#FF7070] text-white font-bold text-base hover:bg-[#ff6060] active:bg-[#ff5050] transition-colors"
