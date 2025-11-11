@@ -231,6 +231,19 @@ const handleTouchStart = (e: React.TouchEvent) => {
                 >
                   이펙트
                 </button>
+                <hr className="border-t border-stone-300" />
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onCategoryChange?.('DECORATION');
+                    setIsDropdownOpen(false);
+                  }}
+                  onMouseDown={(e) => e.stopPropagation()}
+                  onTouchStart={(e) => e.stopPropagation()}
+                 className="text-left text-[#727272] text-xs font-bold tracking-tight px-6 py-3"
+                >
+                  장식
+                </button>
               </div>
             </div>
             )}

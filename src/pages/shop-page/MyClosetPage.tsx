@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DropdownHeader from '../../components/common/DropdownHeader';
 import StarIcon from '../../assets/icons/starIcon.svg?react';
@@ -11,6 +11,7 @@ import HatIcon from '../../assets/accessories/모자.svg';
 import BottomSheet from '../../components/Shop/BottomSheet';
 import CharacterDisplay from '../../components/Shop/CharacterDisplay';
 import useBottomSheet from '../../hooks/shop/useBottomSheet';
+import { getUserPoint } from '../../api/shop';
 
 interface Accessory {
   id: number;
@@ -22,12 +23,27 @@ interface Accessory {
 
 const MyClosetPage = () => {
   const navigate = useNavigate();
-  const [level] = useState(35);
-  const [point] = useState(1500);
-  const [gem] = useState(2000);
+  const [level, setLevel] = useState(35);
+  const [point, setPoint] = useState(0);
+  const [gem, setGem] = useState(0);
   const [selectedCategory, setSelectedCategory] = useState<string>('장식');
   const { height, isExpanded, setHeight, setIsExpanded } = useBottomSheet();
   const [equippedAccessories, setEquippedAccessories] = useState<number[]>([]);
+
+  useEffect(() => {
+    const fetchUserPoint = async () => {
+      try {
+        const pointInfo = await getUserPoint();
+        setLevel(pointInfo.level);
+        setPoint(pointInfo.userPoint.currentPoint);
+        setGem(pointInfo.userPoint.totalPoint);
+      } catch (error) {
+        console.error('포인트 정보 불러오기 실패:', error);
+      }
+    };
+
+    fetchUserPoint();
+  }, []);
 
   const accessories: Accessory[] = [
     { id: 1, name: '장미', icon: RoseIcon, locked: false, type: 'head' },

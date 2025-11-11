@@ -14,7 +14,7 @@ import CharacterDisplay from '../../components/Shop/CharacterDisplay';
 import useBottomSheet from '../../hooks/shop/useBottomSheet';
 import Modal from '../../components/common/Modal';
 import PointIcon from '../../assets/icons/pointIcon.svg';
-import { getShopItems, purchaseItem } from '../../api/shop';
+import { getShopItems, purchaseItem, getUserPoint } from '../../api/shop';
 import type { ShopItem, ItemCategory } from '../../types/shop';
 
 interface ShopAccessory {
@@ -28,9 +28,9 @@ interface ShopAccessory {
 
 const ShopPage = () => {
   const navigate = useNavigate();
-  const [level] = useState(35);
-  const [point, setPoint] = useState(1500);
-  const [gem] = useState(2000);
+  const [level, setLevel] = useState(35);
+  const [point, setPoint] = useState(0);
+  const [gem, setGem] = useState(0);
   const [selectedCategory, setSelectedCategory] = useState<string>('장식');
   const { height, isExpanded, setHeight, setIsExpanded } = useBottomSheet();
   const [equippedAccessories] = useState<number[]>([]);
@@ -64,8 +64,20 @@ const ShopPage = () => {
     }
   };
 
+  const fetchUserPoint = async () => {
+    try {
+      const pointInfo = await getUserPoint();
+      setLevel(pointInfo.level);
+      setPoint(pointInfo.userPoint.currentPoint);
+      setGem(pointInfo.userPoint.totalPoint);
+    } catch (error) {
+      console.error('포인트 정보 불러오기 실패:', error);
+    }
+  };
+
   useEffect(() => {
     fetchShopItems();
+    fetchUserPoint();
   }, []);
 
   useEffect(() => {
@@ -144,7 +156,9 @@ const ShopPage = () => {
     try {
       await purchaseItem(selectedItem.id);
 
-      setPoint(point - selectedItem.price);
+      // 포인트 정보 다시 불러오기
+      await fetchUserPoint();
+
       setOwnedAccessories([...ownedAccessories, selectedItem.id]);
 
       setShopItems((prevItems) =>

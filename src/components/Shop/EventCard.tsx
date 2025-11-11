@@ -35,7 +35,7 @@ const EventCard = ({ item, onClick, children }: EventCardProps) => (
         </>
       ) : (
         <div className="flex flex-col items-center justify-center py-8">
-          <NoEventIcon className="mb-4 opacity-50" />
+          <NoEventIcon className="mb-4" />
           <p className="text-[#939393] text-xl font-bold">현재 진행중인 이벤트가 없어요!</p>
         </div>
       )}

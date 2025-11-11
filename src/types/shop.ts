@@ -42,3 +42,20 @@ export interface ShopAccessory {
   price: number;
   description?: string;
 }
+
+export interface UserPoint {
+  currentPoint: number;
+  totalPoint: number;
+}
+
+export interface PointInfo {
+  level: number;
+  userPoint: UserPoint;
+}
+
+export interface PointResponse {
+  isSuccess: boolean;
+  code: string;
+  message: string;
+  result: PointInfo;
+}

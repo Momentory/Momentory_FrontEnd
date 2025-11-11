@@ -1,27 +1,46 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { ShopAccessory } from '../../types/shop';
 
 import DropdownHeader from '../../components/common/DropdownHeader';
 import Modal from '../../components/common/Modal';
-import ItemCard from '../../components/Shop/ItemCard'; 
+import ItemCard from '../../components/Shop/ItemCard';
+import NoItem from '../../assets/icons/noEvent.svg?react';
 
 import Bg from '../../assets/accessories/bgImg.svg';
-import RoseIcon from '../../assets/accessories/장미.svg';
-import RibbonIcon from '../../assets/accessories/리본.svg';
-import FeatherIcon from '../../assets/accessories/깃털.svg';
 import PointIcon from '../../assets/icons/pointIcon.svg';
+import { getRecentItems } from '../../api/shop';
 
 const NewItemPage = () => {
   const [point, setPoint] = useState(1500);
   const [ownedAccessories, setOwnedAccessories] = useState<number[]>([1]);
   const [selectedItem, setSelectedItem] = useState<ShopAccessory | null>(null);
   const [toastMessage, setToastMessage] = useState('');
+  const [newItems, setNewItems] = useState<ShopAccessory[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const newItems: ShopAccessory[] = [
-    { id: 2, name: '장미', icon: RoseIcon, type: '장식', price: 200 },
-    { id: 3, name: '리본', icon: RibbonIcon, type: '장식', price: 200 },
-    { id: 4, name: '깃털', icon: FeatherIcon, type: '장식', price: 200 },
-  ];
+  useEffect(() => {
+    const fetchRecentItems = async () => {
+      try {
+        setIsLoading(true);
+        const items = await getRecentItems();
+        const mappedItems = items.map((item) => ({
+          id: item.itemId,
+          name: item.name,
+          icon: item.imageUrl,
+          type: item.category,
+          price: item.price,
+        }));
+        setNewItems(mappedItems);
+      } catch (error) {
+        console.error('최근 아이템 불러오기 실패:', error);
+        setNewItems([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchRecentItems();
+  }, []);
 
   const handleItemClick = (item: ShopAccessory) => {
     if (ownedAccessories.includes(item.id)) {
@@ -53,15 +72,24 @@ const NewItemPage = () => {
       <DropdownHeader title="최근 추가된" />
 
       <main className="flex items-center justify-center p-4 pt-[116px] min-h-screen">
-        <div className="flex flex-col items-center w-full max-w-sm mx-auto gap-3">
-          {newItems.map((item) => (
-            <ItemCard
-              key={item.id}
-              item={item}
-              onClick={() => handleItemClick(item)}
-            />
-          ))}
-        </div>
+        {isLoading ? (
+          <div className="text-white text-lg">로딩중...</div>
+        ) : newItems.length > 0 ? (
+          <div className="flex flex-col items-center w-full max-w-sm mx-auto gap-3">
+            {newItems.map((item) => (
+              <ItemCard
+                key={item.id}
+                item={item}
+                onClick={() => handleItemClick(item)}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center bg-white rounded-xl py-12 px-12 shadow-md">
+          <NoItem className="mb-4" />
+          <div className="text-[#737373] text-2xl font-bold  ">최근 추가된 아이템이 없어요!</div>
+          </div>
+        )}
       </main>
 
       {selectedItem && (
