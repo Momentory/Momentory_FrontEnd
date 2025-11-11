@@ -52,7 +52,7 @@ const NewItemPage = () => {
     >
       <DropdownHeader title="최근 추가된" />
 
-      <main className="pt-10 flex justify-center items-center p-4">
+      <main className="flex items-center justify-center p-4 pt-[116px] min-h-screen">
         <div className="flex flex-col items-center w-full max-w-sm mx-auto gap-3">
           {newItems.map((item) => (
             <ItemCard

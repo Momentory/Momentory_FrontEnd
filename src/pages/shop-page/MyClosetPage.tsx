@@ -1,7 +1,9 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import DropdownHeader from '../../components/common/DropdownHeader';
 import StarIcon from '../../assets/icons/starIcon.svg?react';
 import ShareIcon from '../../assets/icons/albumShare.svg?react';
+import ShopIcon from '../../assets/accessories/shop.svg?react';
 import RoseIcon from '../../assets/accessories/장미.svg';
 import RibbonIcon from '../../assets/accessories/리본.svg';
 import FeatherIcon from '../../assets/accessories/깃털.svg';
@@ -19,10 +21,11 @@ interface Accessory {
 }
 
 const MyClosetPage = () => {
+  const navigate = useNavigate();
   const [level] = useState(35);
   const [point] = useState(1500);
   const [gem] = useState(2000);
-  const [selectedCategory] = useState('장식');
+  const [selectedCategory, setSelectedCategory] = useState<string>('장식');
   const { height, isExpanded, setHeight, setIsExpanded } = useBottomSheet();
   const [equippedAccessories, setEquippedAccessories] = useState<number[]>([]);
 
@@ -32,6 +35,16 @@ const MyClosetPage = () => {
     { id: 3, name: '깃털', icon: FeatherIcon, locked: true, type: 'body' },
     { id: 4, name: '모자', icon: HatIcon, locked: true, type: 'head' },
   ];
+
+  const handleCategoryChange = (category: string) => {
+    const categoryMap: { [key: string]: string } = {
+      CLOTHING: '의상',
+      EXPRESSION: '표정',
+      EFFECT: '이펙트',
+      DECORATION: '장식',
+    };
+    setSelectedCategory(categoryMap[category] || category);
+  };
 
   const handleAccessoryClick = (id: number) => {
     const accessory = accessories.find((acc) => acc.id === id);
@@ -50,15 +63,26 @@ const MyClosetPage = () => {
 
   return (
     <div className="flex flex-col h-screen bg-white overflow-hidden">
-      <DropdownHeader title="캐릭터 옷장" />
-
-      <CharacterDisplay
-        level={level}
-        gem={gem}
-        point={point}
-        equippedAccessories={equippedAccessories}
-        accessories={accessories}
+      <DropdownHeader
+        title="캐릭터 옷장"
+        rightItem={
+          <button
+            onClick={() => navigate('/shop')}
+            className="flex items-center justify-center w-8 h-8 cursor-pointer"
+          >
+            <ShopIcon className="w-6 h-6" />
+          </button>
+        }
       />
+
+      <div className="pt-[116px] flex-1 flex flex-col">
+        <CharacterDisplay
+          level={level}
+          gem={gem}
+          point={point}
+          equippedAccessories={equippedAccessories}
+          accessories={accessories}
+        />
 
       <div
         className="fixed max-w-[480px] mx-auto px-4 left-0 right-0 flex justify-between items-center gap-4 z-[100] pointer-events-auto transition-all duration-300"
@@ -101,7 +125,9 @@ const MyClosetPage = () => {
         selectedCategory={selectedCategory}
         equippedAccessories={equippedAccessories}
         onAccessoryClick={handleAccessoryClick}
+        onCategoryChange={handleCategoryChange}
       />
+      </div>
     </div>
   );
 };

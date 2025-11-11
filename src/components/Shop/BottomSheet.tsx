@@ -1,7 +1,6 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
 import ChevronDown from '../../assets/icons/dropdown.svg?react';
-import LockIcon from '../../assets/icons/albumShare.svg?react';
+import LockIcon from '../../assets/icons/lockIcon.svg?react';
 
 export interface Accessory {
   id: number;
@@ -20,6 +19,7 @@ export interface BottomSheetProps {
   selectedCategory: string;
   equippedAccessories: number[];
   onAccessoryClick: (id: number) => void;
+  onCategoryChange?: (category: string) => void;
 }
 
 export default function BottomSheet({
@@ -31,10 +31,11 @@ export default function BottomSheet({
   selectedCategory,
   equippedAccessories,
   onAccessoryClick,
+  onCategoryChange,
 }: BottomSheetProps) {
-  const navigate = useNavigate();
   const [isDragging, setIsDragging] = React.useState(false);
   const [hasMoved, setHasMoved] = React.useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
 
   const handleMouseDown = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -95,7 +96,6 @@ export default function BottomSheet({
   };
 
 const handleTouchStart = (e: React.TouchEvent) => {
-  e.preventDefault();
   setIsDragging(true);
   setHasMoved(false);
 
@@ -103,15 +103,15 @@ const handleTouchStart = (e: React.TouchEvent) => {
   const startHeight = height;
 
   const onMove = (e: TouchEvent) => {
+    e.preventDefault();
     const deltaY = Math.abs(startY - e.touches[0].clientY);
-    if (deltaY > 10) setHasMoved(true); 
+    if (deltaY > 10) setHasMoved(true);
     const actualDeltaY = startY - e.touches[0].clientY;
     const newHeight = Math.max(100, Math.min(460, startHeight + actualDeltaY));
     setHeight(newHeight);
   };
 
   const onEnd = (e: TouchEvent) => {
-    e.preventDefault();
     setIsDragging(false);
 
     const deltaY = startY - (e.changedTouches[0]?.clientY || startY);
@@ -162,28 +162,79 @@ const handleTouchStart = (e: React.TouchEvent) => {
       }}
     >
       <div
-        className="cursor-grab active:cursor-grabbing select-none"
+        className="cursor-grab active:cursor-grabbing select-none py-4"
         onMouseDown={handleMouseDown}
         onTouchStart={handleTouchStart}
       >
-        <div className="w-20 h-1 bg-[#E2E2E2] rounded-full mx-auto mt-4" />
+        <div className="w-20 h-1 bg-[#E2E2E2] rounded-full mx-auto" />
+      </div>
 
-        <div className="flex justify-between items-center px-6 py-4">
-          <div className="flex items-center gap-1">
-            <span className="text-[25px] font-bold text-gray-800">
-              {selectedCategory}
-            </span>
-            <ChevronDown className="w-5 h-5" />
+      <div>
+        <div className="flex justify-between items-center px-6 pb-4">
+          <div className="relative">
+            <button
+              className="flex items-center gap-4 cursor-pointer"
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsDropdownOpen(!isDropdownOpen);
+              }}
+              onMouseDown={(e) => e.stopPropagation()}
+              onTouchStart={(e) => e.stopPropagation()}
+            >
+              <span className="text-2xl font-extrabold text-[#444444]">
+                {selectedCategory}
+              </span>
+              <ChevronDown className={`w-3 h-2 transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`} />
+            </button>
+            {isDropdownOpen && (
+              <div
+                className="absolute left-0 top-full mt-2 w-40 bg-white rounded-2xl shadow-[3px_4px_4px_0px_rgba(0,0,0,0.25)] border border-zinc-400 z-[40]"
+                onMouseDown={(e) => e.stopPropagation()}
+                onTouchStart={(e) => e.stopPropagation()}
+              >
+              <div className="flex flex-col px-2.5 py-1.5">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onCategoryChange?.('CLOTHING');
+                    setIsDropdownOpen(false);
+                  }}
+                  onMouseDown={(e) => e.stopPropagation()}
+                  onTouchStart={(e) => e.stopPropagation()}
+                  className="text-left text-[#727272] text-xs font-bold tracking-tight px-6 py-3"
+                >
+                  의상
+                </button>
+                <hr className="border-t border-stone-300" />
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onCategoryChange?.('EXPRESSION');
+                    setIsDropdownOpen(false);
+                  }}
+                  onMouseDown={(e) => e.stopPropagation()}
+                  onTouchStart={(e) => e.stopPropagation()}
+                 className="text-left text-[#727272] text-xs font-bold tracking-tight px-6 py-3"
+                >
+                  표정
+                </button>
+                <hr className="border-t border-stone-300" />
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onCategoryChange?.('EFFECT');
+                    setIsDropdownOpen(false);
+                  }}
+                  onMouseDown={(e) => e.stopPropagation()}
+                  onTouchStart={(e) => e.stopPropagation()}
+                 className="text-left text-[#727272] text-xs font-bold tracking-tight px-6 py-3"
+                >
+                  이펙트
+                </button>
+              </div>
+            </div>
+            )}
           </div>
-          <button
-            className="text-sm font-medium text-gray-600 pointer-events-auto cursor-pointer"
-            onClick={(e) => {
-              e.stopPropagation();
-              navigate('/shop');
-            }}
-          >
-            상점 둘러보기 &gt;
-          </button>
         </div>
       </div>
 

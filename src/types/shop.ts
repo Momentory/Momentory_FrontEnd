@@ -1,3 +1,39 @@
+export type ItemCategory = 'CLOTHING' | 'EXPRESSION' | 'EFFECT' | 'DECORATION';
+
+export interface ShopItem {
+  itemId: number;
+  name: string;
+  category: ItemCategory;
+  imageUrl: string;
+  price: number;
+  unlockLevel: number;
+  owned: boolean;
+}
+
+export interface PurchasedItem {
+  itemId: number;
+  name: string;
+  category: ItemCategory;
+  imageName: string;
+  imageUrl: string;
+  price: number;
+  unlockLevel: number;
+}
+
+export interface ShopItemsResponse {
+  isSuccess: boolean;
+  code: string;
+  message: string;
+  result: ShopItem[];
+}
+
+export interface PurchaseItemResponse {
+  isSuccess: boolean;
+  code: string;
+  message: string;
+  result: PurchasedItem;
+}
+
 export interface ShopAccessory {
   id: number;
   name: string;

@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DropdownHeader from '../../components/common/DropdownHeader';
 import StarIcon from '../../assets/icons/starIcon.svg?react';
 import EventIcon from '../../assets/icons/eventIcon.svg?react';
 import RecentIcon from '../../assets/icons/recentAddItem.svg?react';
+import ClosetIcon from '../../assets/accessories/closet.svg?react';
 import RoseIcon from '../../assets/accessories/장미.svg';
 import RibbonIcon from '../../assets/accessories/리본.svg';
 import FeatherIcon from '../../assets/accessories/깃털.svg';
@@ -13,6 +14,8 @@ import CharacterDisplay from '../../components/Shop/CharacterDisplay';
 import useBottomSheet from '../../hooks/shop/useBottomSheet';
 import Modal from '../../components/common/Modal';
 import PointIcon from '../../assets/icons/pointIcon.svg';
+import { getShopItems, purchaseItem } from '../../api/shop';
+import type { ShopItem, ItemCategory } from '../../types/shop';
 
 interface ShopAccessory {
   id: number;
@@ -28,49 +31,91 @@ const ShopPage = () => {
   const [level] = useState(35);
   const [point, setPoint] = useState(1500);
   const [gem] = useState(2000);
-  const [selectedCategory] = useState('장식');
+  const [selectedCategory, setSelectedCategory] = useState<string>('장식');
   const { height, isExpanded, setHeight, setIsExpanded } = useBottomSheet();
   const [equippedAccessories] = useState<number[]>([]);
   const [ownedAccessories, setOwnedAccessories] = useState<number[]>([1, 2]);
   const [selectedItem, setSelectedItem] = useState<ShopAccessory | null>(null);
   const [toastMessage, setToastMessage] = useState('');
+  const [shopItems, setShopItems] = useState<ShopItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const shopAccessories: ShopAccessory[] = [
-    {
-      id: 1,
-      name: '장미',
-      icon: RoseIcon,
-      locked: false,
-      type: '장식',
-      price: 100,
-    },
-    {
-      id: 2,
-      name: '리본',
-      icon: RibbonIcon,
-      locked: false,
-      type: '장식',
-      price: 150,
-    },
-    {
-      id: 3,
-      name: '깃털',
-      icon: FeatherIcon,
-      locked: false,
-      type: 'body',
-      price: 200,
-    },
-    {
-      id: 4,
-      name: '모자',
-      icon: HatIcon,
-      locked: false,
-      type: '장식',
-      price: 300,
-    },
-    { id: 5, name: '잠금1', icon: '', locked: true, type: '장식', price: 500 },
-    { id: 6, name: '잠금2', icon: '', locked: true, type: 'body', price: 800 },
-  ];
+  const handleCategoryChange = (category: string) => {
+    const categoryMap: { [key: string]: string } = {
+      CLOTHING: '의상',
+      EXPRESSION: '표정',
+      EFFECT: '이펙트',
+      DECORATION: '장식',
+    };
+    setSelectedCategory(categoryMap[category] || category);
+
+    fetchShopItems(category as ItemCategory);
+  };
+
+  const fetchShopItems = async (category?: ItemCategory) => {
+    try {
+      setIsLoading(true);
+      const items = await getShopItems(category);
+      setShopItems(items);
+    } catch (error) {
+      console.error('상점 아이템 불러오기 실패:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchShopItems();
+  }, []);
+
+  useEffect(() => {
+    const owned = shopItems.filter((item) => item.owned).map((item) => item.itemId);
+    setOwnedAccessories(owned);
+  }, [shopItems]);
+
+  const shopAccessories: ShopAccessory[] = shopItems.length > 0
+    ? shopItems.map((item) => ({
+        id: item.itemId,
+        name: item.name,
+        icon: item.imageUrl,
+        locked: item.unlockLevel > level,
+        type: item.category,
+        price: item.price,
+      }))
+    : [
+        {
+          id: 1,
+          name: '장미',
+          icon: RoseIcon,
+          locked: false,
+          type: '장식',
+          price: 100,
+        },
+        {
+          id: 2,
+          name: '리본',
+          icon: RibbonIcon,
+          locked: false,
+          type: '장식',
+          price: 150,
+        },
+        {
+          id: 3,
+          name: '깃털',
+          icon: FeatherIcon,
+          locked: false,
+          type: 'body',
+          price: 200,
+        },
+        {
+          id: 4,
+          name: '모자',
+          icon: HatIcon,
+          locked: false,
+          type: '장식',
+          price: 300,
+        },
+      ];
 
   // 액세서리 클릭
   const handleAccessoryClick = (id: number) => {
@@ -86,7 +131,7 @@ const ShopPage = () => {
   };
 
   // 모달 내 "구매" 버튼 클릭
-  const handleConfirmPurchase = () => {
+  const handleConfirmPurchase = async () => {
     if (!selectedItem) return;
 
     if (point < selectedItem.price) {
@@ -96,12 +141,28 @@ const ShopPage = () => {
       return;
     }
 
-    // 구매 성공
-    setPoint(point - selectedItem.price);
-    setOwnedAccessories([...ownedAccessories, selectedItem.id]);
-    setToastMessage('구매가 성공적으로 완료되었습니다!');
-    setSelectedItem(null);
-    setTimeout(() => setToastMessage(''), 2000);
+    try {
+      await purchaseItem(selectedItem.id);
+
+      setPoint(point - selectedItem.price);
+      setOwnedAccessories([...ownedAccessories, selectedItem.id]);
+
+      setShopItems((prevItems) =>
+        prevItems.map((item) =>
+          item.itemId === selectedItem.id ? { ...item, owned: true } : item
+        )
+      );
+
+      setToastMessage('구매가 성공적으로 완료되었습니다!');
+      setSelectedItem(null);
+      setTimeout(() => setToastMessage(''), 2000);
+    } catch (error: any) {
+      console.error('구매 실패:', error);
+      const errorMessage = error.response?.data?.message || '구매에 실패했습니다.';
+      setToastMessage(errorMessage);
+      setSelectedItem(null);
+      setTimeout(() => setToastMessage(''), 2000);
+    }
   };
 
   const displayAccessories = shopAccessories.map((acc) => ({
@@ -114,17 +175,33 @@ const ShopPage = () => {
 
   return (
     <div className="flex flex-col h-screen bg-white overflow-hidden">
-      <DropdownHeader title="상점" />
-
-      <CharacterDisplay
-        level={level}
-        gem={gem}
-        point={point}
-        equippedAccessories={equippedAccessories}
-        accessories={displayAccessories}
+      <DropdownHeader
+        title="상점"
+        rightItem={
+          <button
+            onClick={() => navigate('/closet')}
+            className="flex items-center justify-center w-8 h-8 cursor-pointer"
+          >
+            <ClosetIcon className="w-6 h-6" />
+          </button>
+        }
       />
 
-      {/* 하단 버튼들 */}
+      <div className="pt-[116px] flex-1 flex flex-col">
+        {isLoading ? (
+          <div className="flex items-center justify-center h-full">
+            <p className="text-gray-500">상점 아이템을 불러오는 중...</p>
+          </div>
+        ) : (
+          <>
+            <CharacterDisplay
+              level={level}
+              gem={gem}
+              point={point}
+              equippedAccessories={equippedAccessories}
+              accessories={displayAccessories}
+            />
+
       <div
         className="fixed max-w-[480px] mx-auto px-4 left-0 right-0 flex justify-between items-center gap-4 z-[100] pointer-events-auto transition-all duration-300"
         style={{ bottom: `${height + 16}px` }}
@@ -148,7 +225,6 @@ const ShopPage = () => {
         </div>
       </div>
 
-      {/* 하단 시트 */}
       <ShopBottomSheet
         height={height}
         setHeight={setHeight}
@@ -160,6 +236,7 @@ const ShopPage = () => {
         equippedAccessories={equippedAccessories}
         onAccessoryClick={handleAccessoryClick}
         userPoints={point}
+        onCategoryChange={handleCategoryChange}
       />
 
       {selectedItem && (
@@ -201,11 +278,14 @@ const ShopPage = () => {
         </Modal>
       )}
 
-      {toastMessage && (
-        <div className="fixed bottom-10 left-5 right-5 rounded-3xl bg-black/50 px-4 py-2 text-center text-base font-bold text-white animate-fade-in z-[1000]">
-          {toastMessage}
-        </div>
+          {toastMessage && (
+            <div className="fixed bottom-10 left-5 right-5 rounded-3xl bg-black/50 px-4 py-2 text-center text-base font-bold text-white animate-fade-in z-[1000]">
+              {toastMessage}
+            </div>
+          )}
+        </>
       )}
+      </div>
     </div>
   );
 };

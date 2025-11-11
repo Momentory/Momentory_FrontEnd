@@ -32,7 +32,7 @@ const CharacterDisplay = ({
         <img src={Bg} alt="background" className="w-full h-full object-cover" />
       </div>
 
-      <div className="absolute px-4 pt-3 pb-2 left-0 right-0 flex justify-between items-center z-10 bg-black/15">
+      <div className="absolute px-4 pt-3 pb-2 left-0 right-0 flex justify-between items-center z-[60] bg-black/15">
         <span className="text-lg font-bold text-black">Level {level}</span>
         <div className="flex items-center gap-1">
           <GemIcon className="w-6 h-6"/>
@@ -42,8 +42,8 @@ const CharacterDisplay = ({
         </div>
       </div>
 
-      <div className="absolute inset-0 flex items-center justify-center">
-        <div className="relative w-64 h-64">
+      <div className="absolute inset-0 flex items-center justify-center px-16">
+        <div className="relative w-full h-full">
           <img src={Character} alt="character" className="w-full h-full object-contain" />
           {equippedAccessories.map((id) => {
             const acc = accessories.find((a) => a.id === id);
