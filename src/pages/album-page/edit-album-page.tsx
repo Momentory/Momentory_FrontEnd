@@ -407,7 +407,7 @@ const EditAlbumPage = () => {
             maxSelection={getMaxSelectionForCurrentTemplate()}
             onLoadMore={loadMorePhotos}
             hasMore={hasNextPage}
-            isLoading={isFetchingNextPage}
+            isLoading={isLoadingPhotos || isFetchingNextPage}
             isError={isPhotosError}
           />
         </Modal>

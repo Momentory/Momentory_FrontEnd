@@ -61,6 +61,7 @@ import AlbumReadPage from './pages/album-page/album-read-page';
 import SharedAlbumPage from './pages/album-page/shared-album-page';
 import MyClosetPage from './pages/shop-page/MyClosetPage';
 import ShopPage from './pages/shop-page/ShopPage';
+import GalleryPage from './pages/album-page/gallery-page';
 
 const queryClient = new QueryClient();
 
@@ -142,7 +143,7 @@ const protectedRoutes: RouteObject[] = [
       { path: 'authentication', element: <AuthenticationPage /> },
       { path: 'auth-error-resolution', element: <AuthErrorResolutionPage /> },
       { path: 'recommended-places', element: <RecommendedPlacesPage /> },
-
+      { path: 'gallery', element: <GalleryPage /> },
       { path: 'photo-edit', element: <PhotoEditPage /> },
     ],
   },
