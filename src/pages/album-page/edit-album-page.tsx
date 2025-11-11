@@ -1,5 +1,7 @@
-import { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useState, useEffect, useRef, useMemo } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import html2canvas from 'html2canvas';
+import { useMyPhotos } from '../../hooks/useMyPhotos';
 import DropdownHeader from '../../components/common/DropdownHeader';
 import Modal from '../../components/common/Modal';
 import Popover from '../../components/common/Popover';
@@ -18,7 +20,9 @@ import pageTemplate1Icon from '../../assets/icons/pageTemplete1.svg';
 import pageTemplate2Icon from '../../assets/icons/pageTemplete2.svg';
 import pageTemplate3Icon from '../../assets/icons/pageTemplete3.svg';
 import pageTemplate4Icon from '../../assets/icons/pageTemplete4.svg';
+import { album } from '../../api/album';
 import type { PageData, TemplateProps } from '../../types/Templates';
+import type { AlbumImage } from '../../types/album';
 
 const templateMap: Record<number, React.FC<TemplateProps>> = {
   1: TitleTemplate1,
@@ -46,8 +50,10 @@ const createEmptyPageData = (templateId: number): PageData => ({
 });
 
 const EditAlbumPage = () => {
-  const { id } = useParams();
-  const initialTemplateId = Number(id) || 1;
+  const { albumId, id } = useParams();
+  const navigate = useNavigate();
+  const initialTemplateId = id ? Number(id) : 1;
+  const templateRef = useRef<HTMLDivElement>(null);
 
   const [pages, setPages] = useState<PageData[]>([createEmptyPageData(initialTemplateId)]);
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
@@ -58,14 +64,50 @@ const EditAlbumPage = () => {
   const [showTemplateEditModal, setShowTemplateEditModal] = useState(false);
   const [showImageSelector, setShowImageSelector] = useState(false);
   const [currentImageField, setCurrentImageField] = useState<string>('');
-  
-  // 업로드된 이미지 목록 (API 연결로 변경 필요)
-  const [uploadedImages] = useState<string[]>([
-    '/images/everland.jpg',
-    '/images/event1.png',
-    '/images/event2.png',
-    '/images/event3.png',
-  ]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [albumTitle, setAlbumTitle] = useState('');
+
+  const {
+    data: photosData,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading: isLoadingPhotos,
+    isError: isPhotosError,
+  } = useMyPhotos(20);
+
+  const uploadedImages = useMemo(() => {
+    if (!photosData?.pages) return [];
+    return photosData.pages.flatMap(page => page.photos.map(photo => photo.imageUrl));
+  }, [photosData]);
+
+  const loadMorePhotos = () => {
+    if (hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  };
+
+  useEffect(() => {
+    if (albumId) {
+      const fetchAlbumDetail = async () => {
+        setIsLoading(true);
+        try {
+          const response = await album.getAlbumDetail(Number(albumId));
+
+          if (response.isSuccess && response.result) {
+            const { title } = response.result;
+            setAlbumTitle(title);
+          }
+        } catch (err) {
+          console.error('앨범 불러오기 실패:', err);
+          alert('앨범을 불러오는데 실패했습니다.');
+        } finally {
+          setIsLoading(false);
+        }
+      };
+      fetchAlbumDetail();
+    }
+  }, [albumId]);
 
   const currentPage = pages[currentPageIndex];
   const Template = templateMap[currentPage.templateId];
@@ -79,7 +121,7 @@ const EditAlbumPage = () => {
   const addPage = (templateId: number) => {
     const newPage = createEmptyPageData(templateId);
     setPages((prevPages) => [...prevPages, newPage]);
-    setCurrentPageIndex(pages.length); // 새로 추가된 페이지의 인덱스
+    setCurrentPageIndex(pages.length);
     setShowModal(false);
     setSelectedTemplate(null);
   };
@@ -105,12 +147,8 @@ const EditAlbumPage = () => {
 
   const getMaxSelectionForCurrentTemplate = () => {
     const currentTemplateId = currentPage.templateId;
-    
-    // PageTemplate1: 3개 이미지
     if (currentTemplateId === 11) return 3;
-    // PageTemplate3: 2개 이미지
     if (currentTemplateId === 13) return 2;
-    // 나머지는 단일 이미지
     return 1;
   };
 
@@ -159,6 +197,90 @@ const EditAlbumPage = () => {
     setCurrentImageField('');
   };
 
+  const capturePageAsImage = async (pageIndex: number): Promise<Blob> => {
+    if (!templateRef.current) {
+      throw new Error('템플릿을 찾을 수 없습니다.');
+    }
+
+    setCurrentPageIndex(pageIndex);
+
+    await new Promise(resolve => setTimeout(resolve, 100));
+
+    const canvas = await html2canvas(templateRef.current, {
+      backgroundColor: '#ffffff',
+      scale: 2,
+      useCORS: true,
+      allowTaint: true,
+    });
+
+    return new Promise((resolve) => {
+      canvas.toBlob((blob) => {
+        if (blob) {
+          resolve(blob);
+        } else {
+          throw new Error('이미지 변환에 실패했습니다.');
+        }
+      }, 'image/jpeg', 0.8);
+    });
+  };
+
+  const handleSaveAlbum = async () => {
+    const firstPageTitle = pages[0]?.title || albumTitle;
+    if (!firstPageTitle.trim()) {
+      alert('앨범 제목을 입력해주세요.');
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+
+      // 모든 페이지를 이미지로 캡처
+      const imageBlobs: { blob: Blob; name: string }[] = [];
+
+      for (let i = 0; i < pages.length; i++) {
+        const imageBlob = await capturePageAsImage(i);
+        imageBlobs.push({
+          blob: imageBlob,
+          name: `page_${i + 1}`,
+        });
+      }
+
+      // 이미지를 한 번에 업로드
+      const uploadResponse = await album.uploadImages(imageBlobs);
+
+      if (!uploadResponse.isSuccess || !uploadResponse.result) {
+        throw new Error('이미지 업로드에 실패했습니다.');
+      }
+
+      // 업로드된 이미지 정보 변환
+      const albumImages: AlbumImage[] = uploadResponse.result.map((img, index) => ({
+        imageName: img.imageName,
+        imageUrl: img.imageUrl,
+        index,
+      }));
+
+      if (albumId) {
+        await album.updateAlbum(Number(albumId), {
+          title: firstPageTitle,
+          images: albumImages,
+        });
+        alert('앨범이 수정되었습니다.');
+      } else {
+        const response = await album.createAlbum({
+          title: firstPageTitle,
+          images: albumImages,
+        });
+        alert('앨범이 생성되었습니다.');
+        navigate(`/album/${response.result.id}`);
+      }
+    } catch (err) {
+      console.error('앨범 저장 실패:', err);
+      alert('앨범 저장에 실패했습니다.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const pageTemplatesForModal = [
     { id: 11, image: pageTemplate1Icon },
     { id: 12, image: pageTemplate2Icon },
@@ -166,28 +288,47 @@ const EditAlbumPage = () => {
     { id: 14, image: pageTemplate4Icon },
   ];
 
+  if (isLoading && albumId) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <p className="text-gray-600">앨범을 불러오는 중...</p>
+      </div>
+    );
+  }
+
   return (
     <div>
       <DropdownHeader 
         title={`${currentPageIndex + 1} / ${pages.length}`}
         rightItem={
-          <button
-            className="flex items-center justify-center font-bold text-[#5D9CCF] transition"
-            onClick={() => setShowModal(true)}
-          >
-            추가
-          </button>
+          <div className="flex gap-2">
+            <button
+              className="font-bold text-[#5D9CCF] transition"
+              onClick={() => setShowModal(true)}
+            >
+              추가
+            </button>
+            <button
+              className="font-bold text-[#FF7070] transition"
+              onClick={handleSaveAlbum}
+              disabled={isLoading}
+            >
+              {isLoading ? '저장중...' : '저장'}
+            </button>
+          </div>
         }
       />
       <div className="flex flex-col items-center relative">
-        {Template && (
-          <Template
-            data={currentPage}
-            updateData={(changes) => updatePageData(currentPageIndex, changes)}
-            onEmptyAreaClick={handleEmptyAreaClick}
-            onImageClick={handleImageFieldClick}
-          />
-        )}
+        <div ref={templateRef}>
+          {Template && (
+            <Template
+              data={currentPage}
+              updateData={(changes) => updatePageData(currentPageIndex, changes)}
+              onEmptyAreaClick={handleEmptyAreaClick}
+              onImageClick={handleImageFieldClick}
+            />
+          )}
+        </div>
         {popoverPosition && (
           <Popover
             position={popoverPosition}
@@ -264,6 +405,10 @@ const EditAlbumPage = () => {
             images={uploadedImages}
             onSelect={handleImageSelect}
             maxSelection={getMaxSelectionForCurrentTemplate()}
+            onLoadMore={loadMorePhotos}
+            hasMore={hasNextPage}
+            isLoading={isLoadingPhotos || isFetchingNextPage}
+            isError={isPhotosError}
           />
         </Modal>
       )}

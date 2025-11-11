@@ -1,53 +1,75 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useState, useEffect, useRef, useMemo } from 'react';
+import { useParams } from 'react-router-dom';
 import HTMLFlipBook from 'react-pageflip';
 import { album } from '../../api/album';
 
-const AlbumReadPage=()=> {
-  const navigate = useNavigate();
-  const { albumId } = useParams();
+const SharedAlbumPage = () => {
+  const { shareUuid } = useParams();
   const bookRef = useRef<any>(null);
   const [current, setCurrent] = useState(0);
-  const [viewport, setViewport] = useState<{ width: number; height: number }>({ 
-    width: 0, 
-    height: 0 
+  const [viewport, setViewport] = useState<{ width: number; height: number }>({
+    width: 0,
+    height: 0
   });
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const FlipBook = HTMLFlipBook as unknown as any;
 
-  useEffect(() => {
-    if (!albumId) return;
+  // 목업 데이터 사용 여부 (shareUuid가 'mock'이면 목업 사용)
+  const useMockData = shareUuid === 'mock';
 
-    const fetchAlbumImages = async () => {
+  useEffect(() => {
+    if (!shareUuid) return;
+
+    const fetchSharedAlbum = async () => {
       setIsLoading(true);
+      setError(null);
+
       try {
-        const response = await album.getAlbumDetail(Number(albumId));
-        
+        // 목업 데이터 사용
+        if (useMockData) {
+          await new Promise(resolve => setTimeout(resolve, 500));
+
+          setImageUrls([
+            'https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=400&h=700&fit=crop',
+            'https://images.unsplash.com/photo-1586500036706-41963de24d97?w=400&h=700&fit=crop',
+            'https://images.unsplash.com/photo-1542224566-6e85f2e6772f?w=400&h=700&fit=crop',
+            'https://images.unsplash.com/photo-1519046904884-53103b34b206?w=400&h=700&fit=crop'
+          ]);
+          setIsLoading(false);
+          return;
+        }
+
+        // 실제 API 호출
+        const response = await album.getSharedAlbum(shareUuid);
+
         if (response.isSuccess && response.result) {
-          const { images } = response.result;
-          const sortedImages = images
+          const { images: albumImages } = response.result;
+          const sortedImages = albumImages
             .sort((a, b) => a.index - b.index)
             .map(img => img.imageUrl);
           setImageUrls(sortedImages);
+        } else {
+          setError('앨범을 찾을 수 없습니다.');
         }
       } catch (err) {
-        console.error('앨범 이미지 불러오기 실패:', err);
-        alert('앨범을 불러오는데 실패했습니다.');
+        console.error('공유 앨범 조회 실패:', err);
+        setError('앨범을 불러오는데 실패했습니다.');
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchAlbumImages();
-  }, [albumId]);
+    fetchSharedAlbum();
+  }, [shareUuid, useMockData]);
 
   const pages = useMemo(() => imageUrls, [imageUrls]);
 
   const handlePrev = () => {
     bookRef.current?.pageFlip()?.flipPrev();
   };
-  
+
   const handleNext = () => {
     bookRef.current?.pageFlip()?.flipNext();
   };
@@ -69,18 +91,21 @@ const AlbumReadPage=()=> {
     );
   }
 
-  if (pages.length === 0) {
+  if (error) {
     return (
       <div className="fixed inset-0 bg-gray-100 flex items-center justify-center">
         <div className="text-center">
-          <p className="text-gray-600 mb-4">표시할 이미지가 없습니다.</p>
-          <button
-            className="px-4 py-2 bg-[#FF7070] text-white rounded-lg"
-            onClick={() => navigate(-1)}
-          >
-            돌아가기
-          </button>
+          <p className="text-red-600 mb-2">{error}</p>
+          <p className="text-gray-500 text-sm">링크가 유효하지 않거나 공유가 해제되었습니다.</p>
         </div>
+      </div>
+    );
+  }
+
+  if (pages.length === 0) {
+    return (
+      <div className="fixed inset-0 bg-gray-100 flex items-center justify-center">
+        <p className="text-gray-600">표시할 이미지가 없습니다.</p>
       </div>
     );
   }
@@ -95,7 +120,7 @@ const AlbumReadPage=()=> {
           const width = Math.min(maxWidth, Math.max(minWidth, viewport.width));
           const idealHeight = Math.round(width * ratio);
           const height = Math.min(viewport.height, idealHeight);
-          
+
           return (
             <FlipBook
               width={width}
@@ -108,10 +133,10 @@ const AlbumReadPage=()=> {
             >
               {pages.map((url, idx) => (
                 <div key={idx} className="w-full h-full">
-                  <img 
-                    src={url} 
-                    alt={`page-${idx + 1}`} 
-                    className="w-full h-full object-cover" 
+                  <img
+                    src={url}
+                    alt={`page-${idx + 1}`}
+                    className="w-full h-full object-cover"
                   />
                 </div>
               ))}
@@ -131,21 +156,25 @@ const AlbumReadPage=()=> {
         />
       </div>
 
-      <div className="absolute top-0 left-0 p-3">
-        <button
-          className="px-3 py-1.5 rounded border border-[#e5e5e5] bg-white text-[#333] text-sm active:bg-[#f7f7f7]"
-          onClick={() => navigate(-1)}
-        >
-          뒤로
-        </button>
-      </div>
-
       <div className="absolute bottom-3 left-1/2 -translate-x-1/2 text-[#333] text-sm">
         <span className="px-3 py-1 rounded-full bg-black/5">
           {current + 1} / {pages.length}
         </span>
       </div>
+
+      <div className="absolute bottom-12 left-1/2 -translate-x-1/2 text-center">
+        <p className="text-xs text-gray-400">
+          Made by Momentory
+        </p>
+        <a
+          href="https://momentoryy.vercel.app"
+          className="text-xs text-[#FF7070] hover:underline"
+        >
+          나도 앨범 만들기 →
+        </a>
+      </div>
     </div>
   );
-}
-export default AlbumReadPage;
+};
+
+export default SharedAlbumPage;
