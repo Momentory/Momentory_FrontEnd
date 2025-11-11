@@ -6,9 +6,15 @@ import axios, {
 import { tokenStore } from "../lib/token";
 
 interface ReissueResponse {
-  accessToken: string;
-  refreshToken?: string;
+  isSuccess: boolean;
+  code: string;
+  message: string;
+  result: {
+    accessToken: string;
+    refreshToken: string;
+  };
 }
+
 
 
 
@@ -80,13 +86,13 @@ api.interceptors.response.use(
         const { data } = await api.post<ReissueResponse>("/auth/reissue", { refreshToken });
 
         tokenStore.set?.({
-          accessToken: data.accessToken,
-          refreshToken: data.refreshToken ?? refreshToken,
+          accessToken: data.result.accessToken,
+          refreshToken: data.result.refreshToken ?? refreshToken,
         });
 
-        api.defaults.headers.common["Authorization"] = `Bearer ${data.accessToken}`;
+        api.defaults.headers.common["Authorization"] = `Bearer ${data.result.accessToken}`;
         original.headers = original.headers ?? {};
-        (original.headers as AxiosRequestHeaders).Authorization = `Bearer ${data.accessToken}`;
+        (original.headers as AxiosRequestHeaders).Authorization = `Bearer ${data.result.accessToken}`;
 
         return api(original);
       } catch (err) {
