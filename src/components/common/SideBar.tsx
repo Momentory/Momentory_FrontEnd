@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom"; 
+import { useNavigate } from "react-router-dom";
 import Profile from "../../assets/icons/defaultProfile.svg?react";
 import ShareIcon from "../../assets/icons/shareIcon.svg?react";
 import MapIcon from "../../assets/icons/mapIcon.svg?react";
@@ -10,6 +10,7 @@ import AccessoryIcon from "../../assets/icons/accessoriesIcon.svg?react";
 import CommunityIcon from "../../assets/icons/communityIcon.svg?react";
 import SettingsIcon from "../../assets/icons/settingsIcon.svg?react";
 import LogoutIcon from "../../assets/icons/logoutIcon.svg?react";
+import { logout } from "../../api/auth";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -28,21 +29,29 @@ const Sidebar = ({
 
   const handleSettingsClick = () => { // 설정 클릭 핸들러 추가
     navigate("/settings"); // 설정 페이지로 이동
-    onClose(); // 사이드바 닫기
+    onClose();
   };
 
-  const handleLogoutClick = () => { // 로그아웃 추가 (선택)
-    localStorage.removeItem("accessToken");
-    navigate("/login");
+  // 로그아웃 API 요청 + 토큰 제거 + 페이지 이동
+  const handleLogoutClick = async () => {
+    try {
+      await logout();
+      alert("로그아웃되었습니다.");
+      navigate("/auth/login");
+    } catch (error) {
+      console.error("로그아웃 실패:", error);
+      alert("로그아웃 중 오류가 발생했습니다.");
+    } finally {
+      onClose();
+    }
   };
 
   return (
     <>
       <div
         onClick={onClose}
-        className={`absolute inset-0 bg-stone-700/60 z-200 transition-opacity duration-300 ${
-          isOpen ? "opacity-100 visible" : "opacity-0 invisible"
-        }`}
+        className={`absolute inset-0 bg-stone-700/60 z-200 transition-opacity duration-300 ${isOpen ? "opacity-100 visible" : "opacity-0 invisible"
+          }`}
       ></div>
 
       <aside

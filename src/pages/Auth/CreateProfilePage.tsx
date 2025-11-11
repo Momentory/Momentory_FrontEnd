@@ -1,17 +1,17 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { checkNickname } from "../../api/auth";
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { checkNickname, signup } from '../../api/auth'; // ✅ signup 추가
 
 export default function CreateProfilePage() {
   const navigate = useNavigate();
-  const [nickname, setNickname] = useState("");
-  const [introduction, setIntroduction] = useState("");
-  const [link, setLink] = useState("");
+  const [nickname, setNickname] = useState('');
+  const [introduction, setIntroduction] = useState('');
+  const [link, setLink] = useState('');
   const [nicknameAvailable, setNicknameAvailable] = useState<boolean | null>(null);
   const [checkingNickname, setCheckingNickname] = useState(false);
   const maxIntroLength = 100;
 
-  // 닉네임 변경 시 자동 중복확인 (디바운스 0.5초)
+  /*  닉네임 변경 시 자동 중복 확인 (디바운스 0.5초) */
   useEffect(() => {
     if (!nickname.trim()) {
       setNicknameAvailable(null);
@@ -23,17 +23,9 @@ export default function CreateProfilePage() {
       try {
         const res = await checkNickname(nickname);
         console.log("닉네임 중복확인 응답:", res);
-
-        // 응답 구조 안전 처리
-        const available =
-          res?.available ??
-          res?.data?.available ??
-          (res && res.code === 200) ??
-          false;
-
-        setNicknameAvailable(available);
+        setNicknameAvailable(res.available);
       } catch (error) {
-        console.error("닉네임 중복확인 실패:", error);
+        console.error('닉네임 중복확인 실패:', error);
         setNicknameAvailable(null);
       } finally {
         setCheckingNickname(false);
@@ -43,14 +35,42 @@ export default function CreateProfilePage() {
     return () => clearTimeout(timeout);
   }, [nickname]);
 
-  // 회원가입 버튼 클릭
-  const handleSubmit = () => {
-    if (!nickname.trim()) return alert("닉네임을 입력해주세요.");
-    if (checkingNickname) return alert("닉네임 중복 확인 중입니다. 잠시만 기다려주세요.");
-    if (nicknameAvailable === false) return alert("이미 사용 중인 닉네임입니다.");
 
-    alert("프로필이 저장되었습니다!");
-    navigate("/select");
+  /* 회원가입 버튼 클릭 */
+  const handleSubmit = async () => {
+    if (!nickname.trim()) return alert('닉네임을 입력해주세요.');
+    if (checkingNickname)
+      return alert('닉네임 중복 확인 중입니다. 잠시만 기다려주세요.');
+    if (nicknameAvailable === false)
+      return alert('이미 사용 중인 닉네임입니다.');
+
+    try {
+      // 실제 서버에 전송할 회원정보 (이전 단계에서 localStorage에 저장된 값 포함)
+      const payload = {
+        email: localStorage.getItem('signupEmail') || '',
+        password: localStorage.getItem('signupPassword') || '',
+        nickname: nickname,
+        name: localStorage.getItem('signupName') || '',
+        phone: localStorage.getItem('signupPhone') || '',
+        birth: localStorage.getItem('signupBirth') || '',
+      };
+
+      console.log('회원가입 요청 payload:', payload);
+
+      // 서버에 회원가입 요청
+      const res:any = await signup(payload);
+      console.log('회원가입 응답:', res);
+
+      if (res.isSuccess || res.code === 'COMMON200') {
+        alert('회원가입이 완료되었습니다!');
+        navigate('/select');
+      } else {
+        alert(`회원가입 실패: ${res.message}`);
+      }
+    } catch (err: any) {
+      console.error('회원가입 요청 실패:', err);
+      alert('회원가입 중 오류가 발생했습니다.');
+    }
   };
 
   return (
@@ -106,17 +126,25 @@ export default function CreateProfilePage() {
 
         {/* 닉네임 상태 메시지 */}
         {checkingNickname ? (
-          <p className="text-gray-400 text-[13px] mt-1 animate-pulse">닉네임 중복 확인 중...</p>
+          <p className="text-gray-400 text-[13px] mt-1 animate-pulse">
+            닉네임 중복 확인 중...
+          </p>
         ) : nicknameAvailable === true ? (
-          <p className="text-green-500 text-[13px] mt-1">사용 가능한 닉네임입니다 ✅</p>
+          <p className="text-green-500 text-[13px] mt-1">
+            사용 가능한 닉네임입니다 
+          </p>
         ) : nicknameAvailable === false ? (
-          <p className="text-red-500 text-[13px] mt-1">이미 사용 중인 닉네임입니다 ❌</p>
+          <p className="text-red-500 text-[13px] mt-1">
+            이미 사용 중인 닉네임입니다 
+          </p>
         ) : null}
       </div>
 
       {/* 자기소개 */}
       <div className="w-[329px] flex flex-col space-y-1 mb-4">
-        <label className="text-[15px] font-semibold mb-1 block">자기 소개</label>
+        <label className="text-[15px] font-semibold mb-1 block">
+          자기 소개
+        </label>
         <div className="relative">
           <textarea
             placeholder="자기 소개를 써주세요."
@@ -156,23 +184,27 @@ export default function CreateProfilePage() {
         </div>
       </div>
 
-      {/* 회원가입 버튼 */}
+      {/* ✅ 회원가입 버튼 */}
       <button
         disabled={!nicknameAvailable || checkingNickname}
         onClick={handleSubmit}
         className={`w-[329px] h-[60px] text-white text-[18px] font-semibold rounded-[20px] mt-8 active:scale-95 transition ${
           nicknameAvailable && !checkingNickname
-            ? "bg-[#FF7070]"
-            : "bg-gray-300 cursor-not-allowed"
+            ? 'bg-[#FF7070]'
+            : 'bg-gray-300 cursor-not-allowed'
         }`}
       >
-        {checkingNickname ? "확인 중..." : nicknameAvailable ? "회원가입 완료" : "회원가입 불가"}
+        {checkingNickname
+          ? '확인 중...'
+          : nicknameAvailable
+          ? '회원가입 완료'
+          : '회원가입 불가'}
       </button>
 
       {/* 임시 이동 버튼 */}
       <button
         type="button"
-        onClick={() => navigate("/select")}
+        onClick={() => navigate('/select')}
         className="w-[329px] h-[60px] bg-[#FF7070] text-white text-[18px] font-semibold rounded-[20px] mt-4 active:scale-95 transition"
       >
         (임시) 다음으로 →

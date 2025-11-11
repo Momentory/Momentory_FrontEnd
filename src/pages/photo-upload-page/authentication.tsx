@@ -42,8 +42,7 @@ export default function AuthenticationPage() {
     setAuthStatus('loading');
 
     setTimeout(() => {
-      const success = Math.random() > 0.5;
-      setAuthStatus(success ? 'success' : 'error');
+      setAuthStatus('success');
     }, 2000);
   };
 

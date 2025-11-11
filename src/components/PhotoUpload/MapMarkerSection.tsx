@@ -1,5 +1,5 @@
-import { useEffect, useState, useRef } from 'react';
-import map from '../../assets/map.svg';
+import { useEffect, useState } from 'react';
+import map from '../../assets/gyeonggi-map.svg';
 import { gpsToMapPosition, extractCityName } from '../../utils/mapCoordinates';
 
 interface MapMarkerSectionProps {
@@ -18,8 +18,7 @@ export default function MapMarkerSection({
   onMarkerClick,
 }: MapMarkerSectionProps) {
   const [mapPosition, setMapPosition] = useState({ top: '50%', left: '50%' });
-  const [cityName, setCityName] = useState<string | null>(null);
-  const svgElementRef = useRef<SVGElement | null>(null);
+  const [_cityName, setCityName] = useState<string | null>(null);
 
   useEffect(() => {
     const position = gpsToMapPosition(markerLocation.lat, markerLocation.lng);
@@ -53,79 +52,9 @@ export default function MapMarkerSection({
   const gradientStart = `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
   const gradientEnd = `rgb(${darkRgb.r}, ${darkRgb.g}, ${darkRgb.b})`;
 
-  useEffect(() => {
-    if (!cityName) return;
-
-    const mapElement = document.querySelector(
-      '#upload-map-container img[alt="지도"]'
-    );
-    if (!mapElement) return;
-
-    if (svgElementRef.current) {
-      const allPaths = svgElementRef.current.querySelectorAll('path');
-      allPaths.forEach((path) => {
-        const originalFill = path.getAttribute('data-original-fill');
-        if (originalFill) {
-          path.setAttribute('fill', originalFill);
-          path.removeAttribute('opacity');
-        }
-      });
-
-      const pathElements = svgElementRef.current.querySelectorAll(
-        `path[id^="${cityName}"]`
-      );
-      pathElements.forEach((pathElement) => {
-        let originalFill = pathElement.getAttribute('data-original-fill');
-        if (!originalFill) {
-          originalFill = pathElement.getAttribute('fill');
-          if (originalFill && originalFill !== 'none') {
-            pathElement.setAttribute('data-original-fill', originalFill);
-          }
-        }
-        if (originalFill && originalFill !== 'none') {
-          pathElement.setAttribute('fill', markerColor);
-          pathElement.setAttribute('opacity', '0.5');
-        }
-      });
-      return;
-    }
-
-    fetch(map)
-      .then((res) => res.text())
-      .then((svgText) => {
-        const parser = new DOMParser();
-        const svgDoc = parser.parseFromString(svgText, 'image/svg+xml');
-        const svgElement = svgDoc.querySelector('svg');
-
-        if (svgElement && mapElement.parentElement) {
-          svgElement.setAttribute('class', mapElement.className);
-          svgElement.setAttribute(
-            'style',
-            mapElement.getAttribute('style') || ''
-          );
-          mapElement.replaceWith(svgElement);
-          svgElementRef.current = svgElement;
-
-          const pathElements = svgElement.querySelectorAll(
-            `path[id^="${cityName}"]`
-          );
-          pathElements.forEach((pathElement) => {
-            pathElement.classList.add('selected');
-            const originalFill = pathElement.getAttribute('fill');
-            if (originalFill && originalFill !== 'none') {
-              pathElement.setAttribute('data-original-fill', originalFill);
-              pathElement.setAttribute('fill', markerColor);
-              pathElement.setAttribute('opacity', '0.5');
-            }
-          });
-        }
-      })
-      .catch((err) => console.error('SVG 로드 실패:', err));
-  }, [cityName, markerColor]);
-
   return (
-    <div className="px-4 py-3">
-      <h2 className="text-base font-semibold mb-3">Map Marker</h2>
+    <div className="py-3">
+      <h2 className="text-[18px] font-semibold mb-3">지도 마커</h2>
 
       <div
         id="upload-map-container"

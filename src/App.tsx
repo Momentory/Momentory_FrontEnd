@@ -7,27 +7,19 @@ import {
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import PublicLayout from './layouts/public-layout';
 import ProtectedLayout from './layouts/protected-layout';
+
+// 기본 페이지
 import CharacterPage from './pages/character-page';
 import HomePage from './pages/home-page';
 import TravelPage from './pages/travel-page';
 import MyAlbumPage from './pages/album-page';
 
-import {
-  CommunityPage,
-  CommunityUploadPage,
-  CommunityDetailPage,
-} from './pages/community-page';
-
-import PhotoUploadPage from './pages/photo-upload-page';
-import PhotoUploadProgressPage from './pages/photo-upload-page/upload-progress';
-import PhotoUploadSuccessPage from './pages/photo-upload-page/upload-success';
-import PhotoUploadCompletePage from './pages/photo-upload-page/upload-complete';
-import StampAcquisitionPage from './pages/photo-upload-page/stamp-acquisition';
-import QuestionPage from './pages/photo-upload-page/question';
-import AuthenticationPage from './pages/photo-upload-page/authentication';
-import AuthErrorResolutionPage from './pages/photo-upload-page/auth-error-resolution';
-import RecommendedPlacesPage from './pages/photo-upload-page/recommended-places';
-import PhotoEditPage from './pages/photo-edit-page';
+import CommunityDetailPage from './pages/community-page/CommunityDetailPage';
+import CommunityPage from './pages/community-page/CommunityPage';
+import CommunityMyPage from './pages/community-page/CommunityMyPage';
+import CommunityWritePage from './pages/community-page/CommunityWritePage';
+import CommunitySearchPage from './pages/community-page/CommunitySearchPage';
+import UserProfilePage from './pages/community-page/UserProfilePage';
 
 import SplashPage from './pages/Auth/SplashPage';
 import LoginScreen from './pages/Auth/LoginScreen';
@@ -51,8 +43,21 @@ import ChangePasswordPage from './pages/settings-page/ChangePasswordPage';
 
 import MyMapPage from './pages/map-page/my-map-page';
 import PublicMapPage from './pages/map-page/public-map-page';
+import RoulettePage from './pages/roulette-page/index';
 import SharePage from './pages/share-page';
+
 import RegionPhotosPage from './pages/photo-upload-page/region-photos';
+import PhotoUploadPage from './pages/photo-upload-page';
+import PhotoUploadProgressPage from './pages/photo-upload-page/upload-progress';
+import PhotoUploadSuccessPage from './pages/photo-upload-page/upload-success';
+import PhotoUploadCompletePage from './pages/photo-upload-page/upload-complete';
+import StampAcquisitionPage from './pages/photo-upload-page/stamp-acquisition';
+import QuestionPage from './pages/photo-upload-page/question';
+import AuthenticationPage from './pages/photo-upload-page/authentication';
+import AuthErrorResolutionPage from './pages/photo-upload-page/auth-error-resolution';
+import RecommendedPlacesPage from './pages/photo-upload-page/recommended-places';
+
+import PhotoEditPage from './pages/photo-edit-page';
 
 import CreateAlbumPage from './pages/album-page/create-album-page';
 import AlbumDetailPage from './pages/album-page/album-detail-page';
@@ -62,9 +67,12 @@ import SharedAlbumPage from './pages/album-page/shared-album-page';
 import MyClosetPage from './pages/shop-page/MyClosetPage';
 import ShopPage from './pages/shop-page/ShopPage';
 import GalleryPage from './pages/album-page/gallery-page';
+import NewItemPage from './pages/shop-page/NewItemPage';
+import EventPage from './pages/shop-page/EventPage';
 
 const queryClient = new QueryClient();
 
+/* ------------------ 공개 라우트 ------------------ */
 const publicRoutes: RouteObject[] = [
   {
     path: '/',
@@ -84,6 +92,7 @@ const publicRoutes: RouteObject[] = [
   },
 ];
 
+/* ------------------ 보호 라우트 ------------------ */
 const protectedRoutes: RouteObject[] = [
   {
     path: '/',
@@ -93,47 +102,35 @@ const protectedRoutes: RouteObject[] = [
       { path: 'home', element: <HomePage /> },
       { path: 'character', element: <CharacterPage /> },
       { path: 'album', element: <MyAlbumPage /> },
-      { path: 'community', element: <CommunityPage /> },
-      { path: 'community/upload', element: <CommunityUploadPage /> },
-      { path: 'community/:postId', element: <CommunityDetailPage /> },
 
+      { path: 'community', element: <CommunityPage /> },
+      { path: 'community/detail/:id', element: <CommunityDetailPage /> },
+      { path: 'community/write', element: <CommunityWritePage /> },
+      { path: 'community/mypage', element: <CommunityMyPage /> },
+      { path: 'community/search', element: <CommunitySearchPage /> },
+      { path: 'community/user/:userId', element: <UserProfilePage /> },
+    
       { path: 'settings', element: <SettingsHomePage /> },
-      { path: '/settings/profile-edit', element: <ProfileEditPage /> },
+      { path: 'settings/profile-edit', element: <ProfileEditPage /> },
+      { path: 'settings/notifications', element: <NotificationSettingsPage /> },
+      { path: 'settings/privacy-data', element: <PrivacyDataPage /> },
+      { path: 'settings/terms-of-service', element: <ServicePage /> },
+      { path: 'settings/privacy-policy', element: <PrivacyPolicyPage /> },
+      { path: 'settings/security', element: <SecurityPage /> },
+      { path: 'settings/withdraw', element: <WithdrawPage /> },
       {
-        path: '/settings/notifications',
-        element: <NotificationSettingsPage />,
-      },
-      { path: '/settings/privacy-data', element: <PrivacyDataPage /> },
-      { path: '/settings/terms-of-service', element: <ServicePage /> },
-      { path: '/settings/privacy-policy', element: <PrivacyPolicyPage /> },
-      { path: '/settings/security', element: <SecurityPage /> },
-      { path: '/settings/withdraw', element: <WithdrawPage /> },
-      {
-        path: '/settings/security/change-password',
+        path: 'settings/security/change-password',
         element: <ChangePasswordPage />,
       },
 
       { path: 'travel', element: <TravelPage /> },
-
       { path: 'myMap', element: <MyMapPage /> },
       { path: 'publicMap', element: <PublicMapPage /> },
+      { path: 'roulette', element: <RoulettePage /> },
       { path: 'share', element: <SharePage /> },
       { path: 'region-photos/:region', element: <RegionPhotosPage /> },
 
-      { path: 'create-album', element: <CreateAlbumPage /> },
-      { path: 'album/:albumId', element: <AlbumDetailPage /> },
-      { path: 'album/:albumId/read', element: <AlbumReadPage /> },
-      { path: 'edit/:id', element: <EditAlbumPage /> },
-
-      { path: 'myMap', element: <MyMapPage /> },
-      { path: 'publicMap', element: <PublicMapPage /> },
-      { path: 'share', element: <SharePage /> },
-
-      { path: 'shop', element: <ShopPage /> },
-      { path: 'closet', element: <MyClosetPage /> },
-
       { path: 'upload', element: <PhotoUploadPage /> },
-
       { path: 'photo-edit', element: <PhotoEditPage /> },
       { path: 'photo-upload-progress', element: <PhotoUploadProgressPage /> },
       { path: 'photo-upload-success', element: <PhotoUploadSuccessPage /> },
@@ -143,6 +140,16 @@ const protectedRoutes: RouteObject[] = [
       { path: 'authentication', element: <AuthenticationPage /> },
       { path: 'auth-error-resolution', element: <AuthErrorResolutionPage /> },
       { path: 'recommended-places', element: <RecommendedPlacesPage /> },
+
+      { path: 'create-album', element: <CreateAlbumPage /> },
+      { path: 'album/:albumId', element: <AlbumDetailPage /> },
+      { path: 'album/:albumId/read', element: <AlbumReadPage /> },
+      { path: 'edit/:id', element: <EditAlbumPage /> },
+
+      { path: 'shop', element: <ShopPage /> },
+      { path: 'closet', element: <MyClosetPage /> },
+      { path: 'shop/new', element: <NewItemPage /> },
+      { path: 'shop/event', element: <EventPage /> },
       { path: 'gallery', element: <GalleryPage /> },
       { path: 'photo-edit', element: <PhotoEditPage /> },
     ],

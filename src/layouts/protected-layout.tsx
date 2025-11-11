@@ -50,6 +50,7 @@ const ProtectedLayout = () => {
     '/edit',
     '/myMap',
     '/publicMap',
+    '/roulette',
     '/share',
     '/upload',
     '/photo-edit',

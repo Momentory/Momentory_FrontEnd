@@ -68,3 +68,15 @@ h2 {
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
+
+
+@keyframes fade-in {
+  0% { opacity: 0; transform: translateY(10px); }
+  20% { opacity: 1; transform: translateY(0); }
+  80% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(10px); }
+}
+
+.animate-fade-in {
+  animation: fade-in 2s ease-in-out forwards;
+}

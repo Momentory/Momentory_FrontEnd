@@ -1,11 +1,7 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import {
-  checkEmail,
-  sendEmail,
-  checkEmailVerified,
-  signup,
-} from "../../api/auth";
+import { checkEmail, sendEmail, verifyEmail, signup } from "../../api/auth";
+
 
 export default function CreateAccountPage() {
   const navigate = useNavigate();
@@ -28,12 +24,12 @@ export default function CreateAccountPage() {
   const [emailSent, setEmailSent] = useState(false);
   const [emailVerified, setEmailVerified] = useState(false);
 
-  // 비밀번호 유효성 검사
+  // ✅ 비밀번호 유효성 검사
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setPassword(value);
 
-    // 규칙: 8자 이상 + 영문 + 숫자 포함
+    // 8자 이상, 영문 + 숫자 포함
     const regex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d!@#$%^&*()_+]{8,}$/;
     if (!regex.test(value)) {
       setIsPasswordValid(false);
@@ -43,7 +39,6 @@ export default function CreateAccountPage() {
       setPasswordMessage("사용 가능한 비밀번호입니다.");
     }
 
-    // 동시에 일치 여부도 갱신
     if (passwordConfirm) {
       if (value === passwordConfirm) {
         setIsPasswordMatch(true);
@@ -55,7 +50,7 @@ export default function CreateAccountPage() {
     }
   };
 
-  // 비밀번호 확인 입력
+  // ✅ 비밀번호 확인
   const handlePasswordConfirm = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setPasswordConfirm(value);
@@ -69,45 +64,62 @@ export default function CreateAccountPage() {
     }
   };
 
-  // 이메일 인증 요청
+  // ✅ 이메일 인증 링크 발송
   const handleEmailClick = async () => {
-    try {
+    if (!email) return alert("이메일을 입력해주세요.");
 
-      await checkEmail(email);
-      await sendEmail(email);
+    try {
+      // 1️⃣ 이메일 중복 확인
+      const checkRes: any = await checkEmail(email);
+      console.log(" checkEmail 응답:", checkRes);
+
+      if (checkRes?.result === "중복임" || checkRes?.result === "중복 있음") {
+        alert("이미 가입된 이메일입니다.");
+        return;
+      }
+
+      // 2️⃣ 인증 메일 전송 (문자열 형태로 전송해야 함)
+      const sendRes = await sendEmail(email);
+      console.log("sendEmail 응답:", sendRes);
 
       setEmailSent(true);
       alert("인증 메일이 발송되었습니다. 메일함을 확인해주세요.");
-    } catch {
-      alert("이미 존재하는 이메일이거나 발송 중 오류가 발생했습니다.");
+    } catch (error: any) {
+      console.error("❌ 이메일 발송 오류:", error);
+
+      if (error.response?.data?.message) {
+        alert(`오류: ${error.response.data.message}`);
+      } else {
+        alert("이메일 발송 중 오류가 발생했습니다.");
+      }
     }
   };
 
 
-  // 이메일 인증 확인
+  // 이메일 인증 확인 (token 기반)
   const handleVerifyClick = async () => {
+    const token = prompt("이메일로 받은 인증 링크의 토큰을 입력해주세요:");
+    if (!token) return;
+
     try {
-      const { data } = await checkEmailVerified(email);
-      if (data.verified) {
-        setEmailVerified(true);
-        alert("이메일 인증이 완료되었습니다.");
-      } else {
-        alert("이메일 인증이 아직 완료되지 않았습니다.");
-      }
-    } catch {
+      const res = await verifyEmail(token);
+      console.log("이메일 인증 확인:", res);
+
+      setEmailVerified(true);
+      alert("이메일 인증이 완료되었습니다!");
+    } catch (error) {
+      console.error("❌ 이메일 인증 확인 오류:", error);
       alert("이메일 인증 확인 중 오류가 발생했습니다.");
     }
   };
 
-  // 회원가입 처리
+  // ✅ 회원가입 처리
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!agree) return alert("약관에 동의해야 가입할 수 있습니다.");
-    if (!isPasswordValid)
-      return alert("비밀번호 형식이 올바르지 않습니다.");
-    if (!isPasswordMatch)
-      return alert("비밀번호가 일치하지 않습니다.");
+    if (!isPasswordValid) return alert("비밀번호 형식이 올바르지 않습니다.");
+    if (!isPasswordMatch) return alert("비밀번호가 일치하지 않습니다.");
     if (!emailVerified) return alert("이메일 인증을 완료해주세요.");
 
     try {
@@ -121,7 +133,8 @@ export default function CreateAccountPage() {
       });
       alert("회원가입이 완료되었습니다!");
       navigate("/account-created");
-    } catch {
+    } catch (error) {
+      console.error("회원가입 오류:", error);
       alert("회원가입 중 오류가 발생했습니다.");
     }
   };
@@ -136,9 +149,7 @@ export default function CreateAccountPage() {
           className="absolute top-[-80px] left-[2px] w-[35px] h-[35px] cursor-pointer"
           onClick={() => navigate(-1)}
         />
-        <h1 className="text-[24px] font-semibold text-black ml-10">
-          회원가입
-        </h1>
+        <h1 className="text-[24px] font-semibold text-black ml-10">회원가입</h1>
       </div>
 
       {/* 폼 */}
@@ -224,10 +235,10 @@ export default function CreateAccountPage() {
               type="button"
               onClick={emailSent ? handleVerifyClick : handleEmailClick}
               className={`w-[90px] h-[50px] rounded-[10px] text-white text-[14px] font-medium ${emailVerified
-                  ? "bg-green-400"
-                  : emailSent
-                    ? "bg-gray-400"
-                    : "bg-[#FF7070]"
+                ? "bg-green-400"
+                : emailSent
+                  ? "bg-gray-400"
+                  : "bg-[#FF7070]"
                 }`}
             >
               {emailVerified ? "완료" : emailSent ? "인증" : "링크발송"}
@@ -247,8 +258,6 @@ export default function CreateAccountPage() {
             onChange={handlePasswordChange}
             className="w-full h-[50px] rounded-[10px] border border-gray-300 px-4 text-[15px] placeholder-gray-400 mb-1"
           />
-
-          {/* 유효성 메시지 */}
           {password && (
             <p
               className={`text-[13px] mt-1 ${isPasswordValid ? "text-green-500" : "text-red-500"
@@ -257,8 +266,6 @@ export default function CreateAccountPage() {
               {passwordMessage}
             </p>
           )}
-
-          {/* 비밀번호 확인 */}
           <input
             type="password"
             placeholder="비밀번호 확인"
@@ -266,8 +273,6 @@ export default function CreateAccountPage() {
             onChange={handlePasswordConfirm}
             className="w-full h-[50px] rounded-[10px] border border-gray-300 px-4 text-[15px] placeholder-gray-400 mt-2"
           />
-
-          {/* 일치 여부 메시지 */}
           {passwordConfirm && (
             <p
               className={`text-[13px] mt-1 ${isPasswordMatch ? "text-green-500" : "text-red-500"
@@ -305,7 +310,7 @@ export default function CreateAccountPage() {
           다음
         </button>
 
-        {/* 임시 이동 버튼 (테스트용) */}
+        {/* 임시 이동 버튼 */}
         <button
           type="button"
           onClick={() => navigate("/create-profile")}
