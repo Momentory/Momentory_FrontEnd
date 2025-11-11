@@ -6,9 +6,15 @@ import axios, {
 import { tokenStore } from "../lib/token";
 
 interface ReissueResponse {
-  accessToken: string;
-  refreshToken?: string;
+  isSuccess: boolean;
+  code: string;
+  message: string;
+  result: {
+    accessToken: string;
+    refreshToken: string;
+  };
 }
+
 
 
 
@@ -16,7 +22,7 @@ interface ReissueResponse {
 
 // API 클라이언트 생성
 export const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL+"/api",
+  baseURL: import.meta.env.VITE_API_BASE_URL,
   withCredentials: true,
 });
 
@@ -80,8 +86,8 @@ api.interceptors.response.use(
         const { data } = await api.post<ReissueResponse>("/auth/reissue", { refreshToken });
 
         tokenStore.set?.({
-          accessToken: data.accessToken,
-          refreshToken: data.refreshToken ?? refreshToken,
+          accessToken: data.result.accessToken,
+          refreshToken: data.result.refreshToken ?? refreshToken,
         });
 
         api.defaults.headers.common["Authorization"] = `Bearer ${data.accessToken}`;
