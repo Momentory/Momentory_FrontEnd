@@ -90,9 +90,9 @@ api.interceptors.response.use(
           refreshToken: data.result.refreshToken ?? refreshToken,
         });
 
-        api.defaults.headers.common["Authorization"] = `Bearer ${data.accessToken}`;
+        api.defaults.headers.common["Authorization"] = `Bearer ${data.result.accessToken}`;
         original.headers = original.headers ?? {};
-        (original.headers as AxiosRequestHeaders).Authorization = `Bearer ${data.accessToken}`;
+        (original.headers as AxiosRequestHeaders).Authorization = `Bearer ${data.result.accessToken}`;
 
         return api(original);
       } catch (err) {
