@@ -16,6 +16,7 @@ interface DropdownHeaderProps {
   rightItem?: React.ReactNode;
   rightAction?: React.ReactNode;
   leftIcon?: React.ReactNode;
+  onLeftClick?: () => void;
 }
 
 const DropdownHeader = ({
@@ -25,6 +26,7 @@ const DropdownHeader = ({
   rightItem,
   rightAction,
   leftIcon,
+  onLeftClick,
 }: DropdownHeaderProps) => {
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
@@ -41,20 +43,30 @@ const DropdownHeader = ({
     navigate(item.path);
   };
 
-  const handleClickBack = () => navigate(-1);
-  const LeftIcon = leftIcon || <BackIcon className="w-4 h-4" />;
+  const handleClickBack = () => {
+    if (onLeftClick) {
+      onLeftClick();
+      return;
+    }
+    navigate(-1);
+  };
+  const LeftIcon =
+    leftIcon === null ? null : leftIcon || <BackIcon className="w-4 h-4" />;
 
   return (
     <div className="fixed top-[56px] left-1/2 -translate-x-1/2 w-full max-w-[480px] z-40">
       <div className="relative bg-white shadow-[0px_6px_8px_0px_rgba(0,0,0,0.25)] z-10">
         <div className="relative flex items-center justify-center h-[60px] px-4">
-          <button
-            type="button"
-            onClick={handleClickBack}
-            className="absolute left-4 flex items-center justify-center w-6 h-6 cursor-pointer"
-          >
-            {LeftIcon}
-          </button>
+          {LeftIcon !== null && (
+            <button
+              type="button"
+              onClick={handleClickBack}
+              className="absolute left-4 flex items-center justify-center w-6 h-6 cursor-pointer"
+            >
+              {LeftIcon}
+            </button>
+          )}
+
           <div
             className={`flex items-center justify-center ${
               hasDropdown ? 'cursor-pointer' : ''

@@ -9,7 +9,7 @@ export default function StampAcquisitionPage() {
   const location = useLocation();
   const [showAnimation, setShowAnimation] = useState(false);
 
-  const stampType = location.state?.stampType || 'regional';
+  const stampType = location.state?.stampType ?? null;
   const rawRegionName = location.state?.regionName || '하남시';
   const regionName = extractRegionName(rawRegionName);
   const points = location.state?.points || 50;
@@ -18,12 +18,23 @@ export default function StampAcquisitionPage() {
   const [imageError, setImageError] = useState(false);
 
   useEffect(() => {
+    if (!stampType) {
+      navigate('/photo-upload-complete', {
+        replace: true,
+        state: location.state,
+      });
+      return;
+    }
     setShowAnimation(true);
-  }, []);
+  }, [stampType, navigate, location.state]);
 
   const handleClick = () => {
     if (stampType === 'cultural') {
-      navigate('/recommended-places');
+      navigate('/recommended-places', {
+        state: {
+          ...location.state,
+        },
+      });
     } else {
       navigate('/photo-upload-complete', {
         state: {
@@ -38,6 +49,10 @@ export default function StampAcquisitionPage() {
   const handleContentClick = (e: React.MouseEvent) => {
     e.stopPropagation();
   };
+
+  if (!stampType) {
+    return null;
+  }
 
   return (
     <div

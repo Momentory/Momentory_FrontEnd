@@ -1,8 +1,9 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import Header from '../components/common/Header';
 import Navbar from '../components/common/NavBar';
 import PhotoUploadBottomSheet from '../components/PhotoUpload/PhotoUploadBottomSheet';
+import { uploadFile } from '../api/S3';
 
 const ProtectedLayout = () => {
   const location = useLocation();
@@ -17,27 +18,58 @@ const ProtectedLayout = () => {
 
   const [isUploadBottomSheetOpen, setIsUploadBottomSheetOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const handleFileChange = useCallback(
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file || isUploadingImage) return;
 
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      navigate('/upload', {
-        state: { selectedImage: reader.result as string },
-      });
-      setIsUploadBottomSheetOpen(false);
-    };
-    reader.onerror = () => alert('이미지를 불러오는데 실패했습니다.');
-    reader.readAsDataURL(file);
-  };
+      const readFileAsDataURL = (targetFile: File) =>
+        new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = () =>
+            reject(new Error('이미지를 불러오는데 실패했습니다.'));
+          reader.readAsDataURL(targetFile);
+        });
+
+      setIsUploadingImage(true);
+      try {
+        const [dataUrl, uploadResponse] = await Promise.all([
+          readFileAsDataURL(file),
+          uploadFile(file),
+        ]);
+
+        navigate('/upload', {
+          state: {
+            selectedImage: dataUrl,
+            uploadResult: uploadResponse.result,
+            uploadSource: 'gallery',
+          },
+        });
+        setIsUploadBottomSheetOpen(false);
+      } catch (error) {
+        console.error('이미지 준비 실패:', error);
+        alert('이미지를 업로드하지 못했습니다. 다시 시도해주세요.');
+      } finally {
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
+        setIsUploadingImage(false);
+      }
+    },
+    [isUploadingImage, navigate]
+  );
 
   const isHeaderHidden =
-    location.pathname.startsWith('/settings') || isAlbumReadPage;
+    location.pathname.startsWith('/settings') ||
+    location.pathname.startsWith('/all-my-photos/viewer') ||
+    isAlbumReadPage;
 
   const isNavbarHidden =
     location.pathname.startsWith('/settings') ||
+    location.pathname.startsWith('/all-my-photos/viewer') ||
     isShopPage ||
     isClosetPage ||
     isEditPage ||
@@ -55,6 +87,9 @@ const ProtectedLayout = () => {
     '/upload',
     '/photo-edit',
     '/recommended-places',
+    '/region-photos',
+    '/shop',
+    '/closet',
   ].some((path) => location.pathname.startsWith(path));
 
   const isUploadFlow = [

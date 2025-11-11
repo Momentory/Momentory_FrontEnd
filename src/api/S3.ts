@@ -59,5 +59,3 @@ export const deleteFile = async (
     throw error;
   }
 };
-
-

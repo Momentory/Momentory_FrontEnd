@@ -41,6 +41,12 @@ export const uploadPhoto = async (
   payload: UploadPhotoRequest
 ): Promise<UploadPhotoResponse> => {
   try {
+    if (!payload.imageName || !payload.imageUrl) {
+      throw new Error(
+        'imageName과 imageUrl이 필요합니다 (S3 업로드 결과 확인).'
+      );
+    }
+
     const res = await api.post<UploadPhotoResponse>('/api/photos', payload);
     return res.data;
   } catch (error) {
@@ -131,11 +137,14 @@ export const updatePhotoVisibility = async (
  * @returns 추천 결과
  */
 export const updatePhotoNearby = async (
-  photoId: number
+  photoId: number,
+  limit = 4
 ): Promise<NearbySpotsResponse> => {
   try {
     const res = await api.put<NearbySpotsResponse>(
-      `/api/photos/${photoId}/nearby`
+      `/api/photos/${photoId}/nearby`,
+      undefined,
+      { params: { limit } }
     );
     return res.data;
   } catch (error) {
@@ -143,5 +152,3 @@ export const updatePhotoNearby = async (
     throw error;
   }
 };
-
-
