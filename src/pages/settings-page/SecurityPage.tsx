@@ -46,16 +46,6 @@ export default function SecurityPage() {
                     </div>
                 </div>
             </div>
-
-            {/* 저장 버튼 */}
-            <div className="px-6 mb-8">
-                <button
-                    onClick={() => alert("보안 설정이 저장되었습니다.")}
-                    className="w-full bg-[#FF7070] text-white text-[22px] font-semibold py-5 rounded-full shadow-md active:scale-[0.97] transition-all duration-150"
-                >
-                    저장하기
-                </button>
-            </div>
         </div>
     );
 }

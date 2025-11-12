@@ -140,7 +140,7 @@ const Header = ({ userName = "Username" }) => {
                 <div className="absolute right-0 top-[52px] w-[150px] bg-white text-gray-700 rounded-xl shadow-lg overflow-hidden border z-50 animate-[fadeIn_0.2s_ease-out]">
                   <button
                     onClick={() => {
-                      alert("프로필 수정");
+                      navigate("/settings/profile-edit");
                       setIsDropdownOpen(false);
                     }}
                     className="block w-full text-left px-4 py-2 text-[14px] hover:bg-gray-50"

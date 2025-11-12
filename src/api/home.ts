@@ -6,7 +6,6 @@ import { api } from './client';
 export const getTopPlaces = async () => {
   try {
     const res = await api.get('/api/home/travel-top3');
-    console.log('[getTopPlaces] response:', res.data);
     return res.data.result;
   } catch (error: any) {
     console.error(
@@ -22,7 +21,6 @@ export const getTopPlaces = async () => {
 export const getRecentPhotos = async () => {
   try {
     const res = await api.get('/api/home/recent-photos');
-    console.log('[getRecentPhotos] response:', res.data);
     return res.data.result;
   } catch (error: any) {
     console.error(
@@ -38,7 +36,6 @@ export const getRecentPhotos = async () => {
 export const getCharacterStatus = async () => {
   try {
     const res = await api.get('/api/home/character-status');
-    console.log('[getCharacterStatus] response:', res.data);
     return res.data.result;
   } catch (error: any) {
     console.error(
@@ -54,7 +51,6 @@ export const getCharacterStatus = async () => {
 export const getEvents = async () => {
   try {
     const res = await api.get('/api/home/events');
-    console.log('[getEvents] response:', res.data);
     return res.data.result;
   } catch (error: any) {
     console.error(
@@ -66,12 +62,11 @@ export const getEvents = async () => {
   }
 };
 
-// 내 포인트 조회
+// 내 포인트 조회 (API 문서 기반으로 /api/point로 수정)
 export const getMyPoint = async () => {
   try {
     const res = await api.get('/api/point');
-    console.log('[getMyPoint] response:', res.data);
-    return res.data.result;
+    return res.data.result; // API 응답 구조에 따라 .result가 맞을 수 있음
   } catch (error: any) {
     console.error(
       '[getMyPoint] 실패:',
@@ -82,12 +77,11 @@ export const getMyPoint = async () => {
   }
 };
 
-// 나의 지도 - 방문 지역 색깔 정보
+//나의 지도 - 방문 지역 색깔 정보
 export const getMyMapInfo = async () => {
   try {
     const res = await api.get('/api/map/my');
-    console.log('[getMyMapInfo] response:', res.data);
-    return res.data.result;
+    return res.data.result; // API 응답 구조에 따라 .result가 맞을 수 있음
   } catch (error: any) {
     console.error(
       '[getMyMapInfo] 실패:',
