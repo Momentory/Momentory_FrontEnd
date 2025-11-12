@@ -1,8 +1,5 @@
-/**
- * 경기도 31개 시/군 목록 및 스탬프 매핑
- */
+// 경기도 31개 시·군 & 스탬프 유틸
 
-// 경기도 시/군 목록
 export const GYEONGGI_REGIONS = [
   '수원시',
   '고양시',
@@ -39,40 +36,72 @@ export const GYEONGGI_REGIONS = [
 
 export type GyeonggiRegion = (typeof GYEONGGI_REGIONS)[number];
 
-/**
- * 지역명으로 스탬프 이미지 경로 가져오기
- * @param regionName 지역명 (예: "하남시")
- * @returns 스탬프 이미지 경로
- */
+/* 지역명 정규화 */
+function normalizeRegionName(name: string): string {
+  return name.replace('경기도', '').trim();
+}
+
+/* 스탬프 이미지 경로 */
 export function getStampImagePath(regionName: string): string {
-  // 지역명 정규화 (예: "하남시" -> "하남시")
-  const normalizedName = regionName.replace('경기도', '').trim();
-
-  // public/stamps 폴더에 있는 스탬프 이미지 경로 반환
-  // 예: /stamps/하남시.svg
-  return `/stamps/${normalizedName}.svg`;
+  const name = normalizeRegionName(regionName);
+  return `/stamps/${name}.svg`;
 }
 
-/**
- * 지역명이 유효한 경기도 시/군인지 확인
- * @param regionName 지역명
- * @returns 유효한 지역이면 true
- */
+export function getCulturalStampImagePath(stampName: string): string {
+  const name = stampName.trim();
+  return `/cultural-stamps/${name}.svg`;
+}
+
+/* 경기도 시·군 여부 체크 */
 export function isValidGyeonggiRegion(regionName: string): boolean {
-  const normalizedName = regionName.replace('경기도', '').trim();
-  return GYEONGGI_REGIONS.some((region) => normalizedName.includes(region));
+  const name = normalizeRegionName(regionName);
+  return GYEONGGI_REGIONS.some((region) => name.includes(region));
 }
 
-/**
- * 지역명에서 시/군 이름만 추출 (예: "경기도 하남시" -> "하남시")
- * @param regionName 지역명
- * @returns 시/군 이름
- */
+/* 지역명에서 시·군만 추출 */
 export function extractRegionName(regionName: string): string {
-  const normalizedName = regionName.replace('경기도', '').trim();
-  const matched = GYEONGGI_REGIONS.find((region) =>
-    normalizedName.includes(region)
-  );
-  return matched || normalizedName;
+  const name = normalizeRegionName(regionName);
+  return GYEONGGI_REGIONS.find((region) => name.includes(region)) ?? name;
 }
 
+/* 문화 스탬프 매핑 */
+type CulturalStampMapping = {
+  keywords: string[];
+  stampName: string;
+};
+
+const CULTURAL_STAMP_MAPPINGS: CulturalStampMapping[] = [
+  { keywords: ['수원 화성', '유네스코'], stampName: '수원 화성' },
+  { keywords: ['평택항'], stampName: '평택항' },
+  { keywords: ['누에섬 등대전망대', '탄도항누에섬'], stampName: '안산 누에섬' },
+  { keywords: ['킨텍스'], stampName: '고양 킨텍스' },
+  { keywords: ['서울대공원'], stampName: '과천 서울대공원' },
+  { keywords: ['왕방계곡'], stampName: '동두천 계곡' },
+  { keywords: ['남한산성 행궁'], stampName: '성남 남한산성' },
+];
+
+/* 관광지명 → 표준 스탬프명 매핑 */
+export function mapCulturalSpotName(spotName: string): {
+  canonicalName: string;
+  stampDisplayName: string;
+  isSupported: boolean;
+} {
+  const name = spotName?.trim();
+  if (!name) {
+    return { canonicalName: '', stampDisplayName: '', isSupported: false };
+  }
+
+  const matched = CULTURAL_STAMP_MAPPINGS.find((mapping) =>
+    mapping.keywords.some((keyword) => name.includes(keyword))
+  );
+
+  if (!matched) {
+    return { canonicalName: name, stampDisplayName: name, isSupported: false };
+  }
+
+  return {
+    canonicalName: matched.stampName,
+    stampDisplayName: matched.stampName,
+    isSupported: true,
+  };
+}

@@ -7,6 +7,8 @@ import { extractGPSFromImage, reverseGeocode } from '../../utils/imageMetadata';
 import { useMarkerStore } from '../../stores/markerStore';
 import { gpsToMapPosition, extractCityName } from '../../utils/mapCoordinates';
 import marker1 from '../../assets/map-marker1.svg';
+import { useLocationToAddress } from '../../hooks/photo/usePhotoQueries';
+import { uploadFile } from '../../api/S3';
 
 export default function PhotoUploadPage() {
   const navigate = useNavigate();
@@ -22,6 +24,11 @@ export default function PhotoUploadPage() {
   const [selectedImage, setSelectedImage] = useState<string | null>(
     selectedImageFromState || null
   );
+  const [uploadedInfo, setUploadedInfo] = useState<{
+    imageName: string;
+    imageUrl: string;
+  } | null>(location.state?.uploadResult ?? null);
+  const [isUploadingS3, setIsUploadingS3] = useState(false);
   const [description, setDescription] = useState('');
   const [isPrivate, setIsPrivate] = useState(false);
   const [markerColor, setMarkerColor] = useState('#FFB7B7');
@@ -31,6 +38,10 @@ export default function PhotoUploadPage() {
     lat: 37.5665,
     lng: 126.978,
   });
+  const [gpsCoords, setGpsCoords] = useState<{
+    lat: number;
+    lng: number;
+  } | null>(null);
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const [showCamera, setShowCamera] = useState(false);
@@ -67,7 +78,7 @@ export default function PhotoUploadPage() {
     navigate('/home');
   }, [stream, navigate]);
 
-  const handleCapture = () => {
+  const handleCapture = async () => {
     if (!videoRef.current || !stream) {
       return;
     }
@@ -101,6 +112,33 @@ export default function PhotoUploadPage() {
 
       setShowCamera(false);
       setSelectedImage(imageUrl);
+      try {
+        const blob = await new Promise<Blob | null>((resolve) =>
+          canvas.toBlob((result) => resolve(result), 'image/jpeg', 0.9)
+        );
+
+        if (!blob) {
+          throw new Error('이미지 변환 실패');
+        }
+
+        const fileName = `camera-${Date.now()}.jpg`;
+        const file = new File([blob], fileName, { type: 'image/jpeg' });
+        setUploadedInfo(null);
+        setIsUploadingS3(true);
+        try {
+          const uploadResponse = await uploadFile(file);
+          setUploadedInfo(uploadResponse.result);
+        } catch (uploadError) {
+          console.error(uploadError);
+          alert('사진을 업로드하지 못했습니다. 다시 시도해주세요.');
+        } finally {
+          setIsUploadingS3(false);
+        }
+        setGpsCoords(null);
+      } catch (error) {
+        console.error(error);
+        alert('사진 파일을 생성하지 못했습니다. 다시 시도해주세요.');
+      }
     } catch (error) {
       alert('사진 촬영에 실패했습니다. 다시 시도해주세요.');
     }
@@ -129,16 +167,60 @@ export default function PhotoUploadPage() {
       });
     }
 
-    navigate('/photo-edit', { state: { imageUrl: imageToSend } });
+    if (!uploadedInfo || isUploadingS3) {
+      alert('이미지를 업로드하는 중입니다. 잠시 후 다시 시도해주세요.');
+      return;
+    }
+
+    navigate('/photo-edit', {
+      state: {
+        imageUrl: imageToSend,
+        uploadResult: uploadedInfo,
+        uploadContext: {
+          description,
+          isPrivate,
+          markerColor,
+          markerLocation,
+          cityName: cityName || '미확인',
+        },
+      },
+    });
   };
 
   const displayImage = selectedImageFromState || selectedImage;
+
+  const { data: locationAddressData, isFetching: isLocationFetching } =
+    useLocationToAddress(gpsCoords?.lat, gpsCoords?.lng, {
+      enabled: Boolean(gpsCoords),
+      staleTime: 1000 * 60 * 5,
+    });
+
+  useEffect(() => {
+    if (!locationAddressData?.result) {
+      return;
+    }
+    setMarkerLocation((prev) => ({
+      ...prev,
+      address: locationAddressData.result.address,
+      lat: locationAddressData.result.latitude,
+      lng: locationAddressData.result.longitude,
+    }));
+  }, [locationAddressData]);
 
   useEffect(() => {
     if (selectedImageFromState && selectedImageFromState !== selectedImage) {
       setSelectedImage(selectedImageFromState);
     }
   }, [selectedImageFromState, selectedImage]);
+
+  useEffect(() => {
+    if (location.state?.uploadResult) {
+      setUploadedInfo(location.state.uploadResult);
+    }
+  }, [
+    location.state?.uploadResult?.imageName,
+    location.state?.uploadResult?.imageUrl,
+  ]);
 
   useEffect(() => {
     const extractGPS = async () => {
@@ -170,6 +252,7 @@ export default function PhotoUploadPage() {
           lat: gpsLocation.lat,
           lng: gpsLocation.lng,
         });
+        setGpsCoords({ lat: gpsLocation.lat, lng: gpsLocation.lng });
       }
     };
 
@@ -254,7 +337,12 @@ export default function PhotoUploadPage() {
         rightAction={
           <button
             onClick={handleNext}
-            className="text-blue-500 font-semibold text-[15px]"
+            disabled={isLocationFetching}
+            className={`text-[15px] font-semibold ${
+              isLocationFetching
+                ? 'text-gray-400 cursor-not-allowed'
+                : 'text-blue-500'
+            }`}
           >
             다음
           </button>
@@ -264,7 +352,7 @@ export default function PhotoUploadPage() {
       <div className="flex-1 overflow-y-auto pb-20">
         <div className="flex justify-center p-6">
           <div
-            className="w-[340px] bg-gray-100"
+            className="w-[340px] bg-gray-100 relative"
             style={{ aspectRatio: '340/290' }}
           >
             <img
@@ -272,6 +360,11 @@ export default function PhotoUploadPage() {
               alt="선택된 사진"
               className="w-full h-full object-cover rounded-lg"
             />
+            {isUploadingS3 && (
+              <div className="absolute inset-0 rounded-lg bg-white/70 backdrop-blur-[1px] flex items-center justify-center text-sm font-semibold text-[#A47272]">
+                S3 업로드 중...
+              </div>
+            )}
           </div>
         </div>
 

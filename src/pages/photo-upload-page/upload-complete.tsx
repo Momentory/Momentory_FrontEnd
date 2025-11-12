@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { MapPin } from 'lucide-react';
 import SaveIcon from '../../assets/save.svg?react';
 import Share2Icon from '../../assets/share2.svg?react';
 import LinkIcon from '../../assets/link.svg?react';
@@ -9,6 +10,8 @@ import HeartIcon from '../../assets/heart.svg?react';
 import FacebookIcon from '../../assets/facebook.svg?react';
 import Modal from '../../components/common/Modal';
 import { getImageBlob, downloadBlob } from '../../utils/image';
+import { mapCulturalSpotName } from '../../utils/stampUtils';
+import { getKakao } from '../../utils/kakao';
 
 export default function PhotoUploadCompletePage() {
   const location = useLocation();
@@ -22,18 +25,42 @@ export default function PhotoUploadCompletePage() {
   const [nearbyPlace, setNearbyPlace] = useState<string | null>(null);
 
   useEffect(() => {
-    const nearbyPlaceName = location.state?.nearbyPlace || '경복궁';
+    const nearbyPlaceName = location.state?.nearbyPlace;
 
     if (nearbyPlaceName) {
-      setNearbyPlace(nearbyPlaceName);
-      setShowNearbyPlaceModal(true);
+      const { isSupported } = mapCulturalSpotName(nearbyPlaceName);
+      if (isSupported) {
+        setNearbyPlace(nearbyPlaceName);
+        setShowNearbyPlaceModal(true);
+        return;
+      }
     }
+
+    setNearbyPlace(null);
+    setShowNearbyPlaceModal(false);
   }, [location.state]);
 
   const handleSave = async () => {
     try {
       const blob = await getImageBlob(uploadedImage);
-      const filename = `momentory-photo-${new Date().toISOString().split('T')[0]}.png`;
+      const now = new Date().toISOString().split('T')[0];
+      let extension = 'png';
+
+      switch (blob.type) {
+        case 'image/jpeg':
+        case 'image/jpg':
+          extension = 'jpg';
+          break;
+        case 'image/webp':
+          extension = 'webp';
+          break;
+        case 'image/png':
+        default:
+          extension = 'png';
+          break;
+      }
+
+      const filename = `momentory-photo-${now}.${extension}`;
       downloadBlob(blob, filename);
       alert('사진이 저장되었습니다!');
     } catch (error) {
@@ -102,34 +129,41 @@ export default function PhotoUploadCompletePage() {
     switch (platform) {
       case 'kakaotalk': {
         try {
-          // 카카오톡은 이미지 직접 공유 API를 제공하지 않아,
-          // 기기에 다운로드 후 앱 실행을 유도하여 사용자가 직접 공유하도록 함
-          const blob = await getImageBlob(uploadedImage);
-          const filename = `momentory-photo-${new Date().toISOString().split('T')[0]}.jpg`;
-          downloadBlob(blob, filename);
-
-          // 모바일 환경 확인
-          const isMobile =
-            /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-              navigator.userAgent
-            );
-
-          if (isMobile) {
-            // 모바일: 카카오톡 앱 열기 시도
-            setTimeout(() => {
-              window.location.href = 'kakaotalk://';
-              alert(
-                '사진이 다운로드되었습니다. 카카오톡 앱에서 다운로드한 사진을 공유해주세요.'
-              );
-            }, 500);
-          } else {
+          if (uploadedImage.startsWith('data:')) {
             alert(
-              '사진이 다운로드되었습니다. 카카오톡 앱에서 다운로드한 사진을 공유해주세요.'
+              '카카오톡 공유를 위해서는 웹에서 접근 가능한 이미지 URL이 필요합니다. 사진 업로드 후 다시 시도해주세요.'
             );
+            break;
           }
+
+          const Kakao = await getKakao();
+
+          Kakao.Share.sendDefault({
+            objectType: 'feed',
+            content: {
+              title: 'Momentory',
+              description: '나의 순간을 Momentory에서 확인해보세요!',
+              imageUrl: uploadedImage,
+              link: {
+                mobileWebUrl: window.location.href,
+                webUrl: window.location.href,
+              },
+            },
+            buttons: [
+              {
+                title: '사진 보러가기',
+                link: {
+                  mobileWebUrl: window.location.href,
+                  webUrl: window.location.href,
+                },
+              },
+            ],
+          });
         } catch (error) {
           console.error('카카오톡 공유 실패:', error);
-          alert('카카오톡 공유에 실패했습니다. 다시 시도해주세요.');
+          alert(
+            '카카오톡 공유 중 오류가 발생했습니다. 앱 설정과 JavaScript 키를 확인해주세요.'
+          );
         }
         break;
       }
@@ -238,23 +272,19 @@ export default function PhotoUploadCompletePage() {
     setShowNearbyPlaceModal(false);
   };
 
-  const recommendedPlaces = [
-    {
-      id: 1,
-      name: '역곡계곡',
-      image: '/images/yeokgok-valley.jpg',
-    },
-    {
-      id: 2,
-      name: '가톨릭미술관',
-      image: '/images/catholic-museum.jpg',
-    },
-    {
-      id: 3,
-      name: '부천공원',
-      image: '/images/bucheon-park.jpg',
-    },
-  ];
+  const nearbySpots =
+    (location.state?.nearbySpots as
+      | Array<{
+          name: string;
+          imageUrl?: string | null;
+        }>
+      | undefined) ?? [];
+
+  const recommendedPlaces = nearbySpots.slice(0, 3).map((spot, index) => ({
+    id: `${spot.name}-${index}`,
+    name: spot.name,
+    image: spot.imageUrl?.trim() || null,
+  }));
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-white">
@@ -271,13 +301,13 @@ export default function PhotoUploadCompletePage() {
           <div className="flex gap-3 w-full">
             <button
               onClick={handleNearbyPlaceYes}
-              className="flex-1 py-4 px-6 rounded-[12px] bg-[#FF7070] text-white font-semibold text-base hover:bg-[#ff6060] transition-colors"
+              className="flex-1 py-4 px-6 rounded-[12px] bg-[#FF7070] text-white font-semibold text-base hover:bg-[#ff6060] transition-colors whitespace-nowrap"
             >
               예, 방문했어요
             </button>
             <button
               onClick={handleNearbyPlaceNo}
-              className="flex-1 py-4 px-6 rounded-[12px] bg-[#EAEAEA] text-[#8D8D8D] font-semibold text-base hover:bg-gray-200 transition-colors"
+              className="flex-1 py-4 px-6 rounded-[12px] bg-[#EAEAEA] text-[#8D8D8D] font-semibold text-base hover:bg-gray-200 transition-colors whitespace-nowrap"
             >
               아니요
             </button>
@@ -295,12 +325,16 @@ export default function PhotoUploadCompletePage() {
         </div>
 
         <div className="mb-20 flex justify-center">
-          <div className="relative w-70 h-70 bg-white border-2 border-[#B3B3B3] overflow-visible shadow-xl p-5">
-            <img
-              src={uploadedImage}
-              alt="업로드된 사진"
-              className="w-full aspect-194/166 object-cover"
-            />
+          <div className="relative w-[280px] bg-white border-2 border-[#B3B3B3] overflow-visible shadow-xl">
+            <div className="px-5 pt-5 pb-15">
+              <div className="w-full" style={{ aspectRatio: '340 / 290' }}>
+                <img
+                  src={uploadedImage}
+                  alt="업로드된 사진"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            </div>
             <div className="absolute bottom-0 right-0 flex gap-2 translate-x-1/4 translate-y-1/2 z-10">
               <button
                 onClick={handleSave}
@@ -372,22 +406,46 @@ export default function PhotoUploadCompletePage() {
             추가로 이런 관광지는 어떠세요?
           </h2>
         </div>
-        <div className="flex flex-wrap justify-center gap-5">
-          {recommendedPlaces.map((place) => (
-            <div key={place.id} className="bg-white overflow-hidden w-[90px]">
-              <div className="aspect-square bg-gray-200 border border-[#812D2D] rounded-lg overflow-hidden">
-                <img
-                  src={place.image}
-                  alt={place.name}
-                  className="w-full h-full object-cover"
-                />
+        {recommendedPlaces.length ? (
+          <div className="flex flex-wrap justify-center gap-5">
+            {recommendedPlaces.map((place) => (
+              <div key={place.id} className="bg-white overflow-hidden w-[90px]">
+                <div className="aspect-square bg-gray-200 border border-[#812D2D] rounded-lg overflow-hidden">
+                  {place.image ? (
+                    <img
+                      src={place.image}
+                      alt={place.name}
+                      className="w-full h-full object-cover"
+                      onError={(event) => {
+                        if (
+                          event.currentTarget.dataset.fallbackApplied === 'true'
+                        ) {
+                          return;
+                        }
+                        event.currentTarget.dataset.fallbackApplied = 'true';
+                        event.currentTarget.src = '/images/default.jpg';
+                      }}
+                    />
+                  ) : (
+                    <div className="flex h-full w-full flex-col items-center justify-center gap-1 bg-[#F3F3F3] text-[#A47272]">
+                      <MapPin className="h-5 w-5" strokeWidth={1.5} />
+                      <span className="text-[11px] font-semibold">
+                        이미지 준비중
+                      </span>
+                    </div>
+                  )}
+                </div>
+                <p className="text-xs text-center py-2 font-semibold text-[#873737]">
+                  {place.name}
+                </p>
               </div>
-              <p className="text-xs text-center py-2 font-semibold text-[#873737]">
-                {place.name}
-              </p>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-center text-sm text-[#A3A3A3]">
+            추천 관광지 정보를 불러오지 못했습니다.
+          </p>
+        )}
       </div>
     </div>
   );

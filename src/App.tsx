@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import {
   createBrowserRouter,
   RouterProvider,
@@ -46,7 +47,6 @@ import PublicMapPage from './pages/map-page/public-map-page';
 import RoulettePage from './pages/roulette-page/index';
 import SharePage from './pages/share-page';
 
-import RegionPhotosPage from './pages/photo-upload-page/region-photos';
 import PhotoUploadPage from './pages/photo-upload-page';
 import PhotoUploadProgressPage from './pages/photo-upload-page/upload-progress';
 import PhotoUploadSuccessPage from './pages/photo-upload-page/upload-success';
@@ -58,6 +58,9 @@ import AuthErrorResolutionPage from './pages/photo-upload-page/auth-error-resolu
 import RecommendedPlacesPage from './pages/photo-upload-page/recommended-places';
 
 import PhotoEditPage from './pages/photo-edit-page';
+
+import RegionPhotosPage from './pages/photo-upload-page/all-my-photos';
+import AllMyPhotosViewerPage from './pages/photo-upload-page/all-my-photos-viewer';
 
 import CreateAlbumPage from './pages/album-page/create-album-page';
 import AlbumDetailPage from './pages/album-page/album-detail-page';
@@ -109,7 +112,7 @@ const protectedRoutes: RouteObject[] = [
       { path: 'community/mypage', element: <CommunityMyPage /> },
       { path: 'community/search', element: <CommunitySearchPage /> },
       { path: 'community/user/:userId', element: <UserProfilePage /> },
-    
+
       { path: 'settings', element: <SettingsHomePage /> },
       { path: 'settings/profile-edit', element: <ProfileEditPage /> },
       { path: 'settings/notifications', element: <NotificationSettingsPage /> },
@@ -128,7 +131,8 @@ const protectedRoutes: RouteObject[] = [
       { path: 'publicMap', element: <PublicMapPage /> },
       { path: 'roulette', element: <RoulettePage /> },
       { path: 'share', element: <SharePage /> },
-      { path: 'region-photos/:region', element: <RegionPhotosPage /> },
+      { path: 'all-my-photos', element: <RegionPhotosPage /> },
+      { path: 'all-my-photos/viewer', element: <AllMyPhotosViewerPage /> },
 
       { path: 'upload', element: <PhotoUploadPage /> },
       { path: 'photo-edit', element: <PhotoEditPage /> },
@@ -151,6 +155,7 @@ const protectedRoutes: RouteObject[] = [
       { path: 'shop/new', element: <NewItemPage /> },
       { path: 'shop/event', element: <EventPage /> },
       { path: 'gallery', element: <GalleryPage /> },
+
       { path: 'photo-edit', element: <PhotoEditPage /> },
     ],
   },
@@ -159,6 +164,13 @@ const protectedRoutes: RouteObject[] = [
 const router = createBrowserRouter([...publicRoutes, ...protectedRoutes]);
 
 function App() {
+  useEffect(() => {
+    // Kakao SDK 로드 ?�인
+    if (window.Kakao && !window.Kakao.isInitialized()) {
+      window.Kakao.init(import.meta.env.VITE_KAKAO_JAVASCRIPT_KEY);
+    }
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <RouterProvider router={router} />

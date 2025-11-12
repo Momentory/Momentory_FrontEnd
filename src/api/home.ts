@@ -66,7 +66,7 @@ export const getEvents = async () => {
   }
 };
 
-// 내 포인트 조회 (API 문서 기반으로 /api/point로 수정)
+// 내 포인트 조회
 export const getMyPoint = async () => {
   try {
     const res = await api.get("/api/point"); 
@@ -82,7 +82,7 @@ export const getMyPoint = async () => {
   }
 };
 
-//나의 지도 - 방문 지역 색깔 정보
+// 나의 지도 - 방문 지역 색깔 정보
 export const getMyMapInfo = async () => {
   try {
     const res = await api.get("/api/map/my");

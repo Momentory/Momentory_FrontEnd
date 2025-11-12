@@ -2,8 +2,8 @@ import axios, {
   type AxiosResponse,
   type InternalAxiosRequestConfig,
   type AxiosRequestHeaders,
-} from "axios";
-import { tokenStore } from "../lib/token";
+} from 'axios';
+import { tokenStore } from '../lib/token';
 
 interface ReissueResponse {
   isSuccess: boolean;
@@ -14,6 +14,10 @@ interface ReissueResponse {
     refreshToken: string;
   };
 }
+<<<<<<< HEAD
+=======
+
+>>>>>>> b8c6f92ddcf48f5ab703f692326b571fb1077fb8
 /* ----------------------------- Axios 기본 설정 ----------------------------- */
 // API 클라이언트 생성
 export const api = axios.create({
@@ -23,6 +27,7 @@ export const api = axios.create({
 
 /* ----------------------------- 요청 인터셉터 ----------------------------- */
 const noAuthUrls = [
+<<<<<<< HEAD
   "/api/auth/login",
   "/api/auth/userSignup",
   "/api/auth/send-email",
@@ -31,6 +36,16 @@ const noAuthUrls = [
   "/api/auth/check-nickname",
   "/api/auth/kakao/callback",
   "/api/auth/reissue",
+=======
+  '/auth/login',
+  '/auth/userSignup',
+  '/auth/send-email',
+  '/auth/verify-email',
+  '/auth/check-email',
+  '/auth/check-nickname',
+  '/auth/kakao/callback',
+  '/auth/reissue',
+>>>>>>> b8c6f92ddcf48f5ab703f692326b571fb1077fb8
 ];
 
 api.interceptors.request.use(
@@ -40,31 +55,32 @@ api.interceptors.request.use(
     if (noAuthUrls.some((url) => config.url?.includes(url))) {
       delete config.headers.Authorization;
     } else {
-      const accessToken = localStorage.getItem("accessToken");
+      const accessToken = localStorage.getItem('accessToken');
       if (accessToken) {
         config.headers.Authorization = `Bearer ${accessToken}`;
       }
     }
 
-    console.log("[Axios Request]", config.url, config.headers.Authorization);
+    console.log('[Axios Request]', config.url, config.headers.Authorization);
     return config;
   },
   (error) => Promise.reject(error)
 );
 
-
 api.interceptors.response.use(
   (response: AxiosResponse<unknown>) => {
-    console.log("[Axios Response]", response.status, response.data);
+    console.log('[Axios Response]', response.status, response.data);
     return response;
   },
   async (error: unknown) => {
     if (!axios.isAxiosError(error)) {
-      console.error("Axios 인터셉터 오류:", error);
+      console.error('Axios 인터셉터 오류:', error);
       throw error;
     }
 
-    const original = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
+    const original = error.config as InternalAxiosRequestConfig & {
+      _retry?: boolean;
+    };
     const status = error.response?.status;
 
     if (!original || original._retry) throw error;
@@ -77,27 +93,31 @@ api.interceptors.response.use(
           throw error;
         }
 
-        const { data } = await api.post<ReissueResponse>("/auth/reissue", { refreshToken });
+        const { data } = await api.post<ReissueResponse>('/auth/reissue', {
+          refreshToken,
+        });
 
         tokenStore.set?.({
           accessToken: data.result.accessToken,
           refreshToken: data.result.refreshToken ?? refreshToken,
         });
 
-        api.defaults.headers.common["Authorization"] = `Bearer ${data.result.accessToken}`;
+        api.defaults.headers.common['Authorization'] =
+          `Bearer ${data.result.accessToken}`;
         original.headers = original.headers ?? {};
-        (original.headers as AxiosRequestHeaders).Authorization = `Bearer ${data.result.accessToken}`;
+        (original.headers as AxiosRequestHeaders).Authorization =
+          `Bearer ${data.result.accessToken}`;
 
         return api(original);
       } catch (err) {
         tokenStore.clear?.();
-        console.error("토큰 재발급 실패:", err);
+        console.error('토큰 재발급 실패:', err);
         throw err;
       }
     }
 
-    if (error.code === "ERR_NETWORK") {
-      console.error("네트워크 연결 실패 (서버 응답 없음)");
+    if (error.code === 'ERR_NETWORK') {
+      console.error('네트워크 연결 실패 (서버 응답 없음)');
     }
 
     throw error;
