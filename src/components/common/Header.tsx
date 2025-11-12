@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 
@@ -8,8 +8,13 @@ import ActiveBell from "../../assets/icons/bellActiveIcon.svg?react";
 import Profile from "../../assets/icons/defaultProfile.svg?react";
 import Dropdown from "../../assets/icons/dropdown.svg?react";
 import Sidebar from "./SideBar";
+import { useWebSocket } from "../../hooks/notification/useWebSocket";
+import { getUnreadStatus } from "../../api/notification";
+import { getMyProfileSummary } from "../../api/mypage";
+import { getUserIdFromToken } from "../../utils/jwt";
+import { tokenStore } from "../../lib/token";
 
-const Header = ({ userName = "Username", hasNotification = false }) => {
+const Header = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [hasNotification, setHasNotification] = useState(false);
@@ -163,7 +168,7 @@ const Header = ({ userName = "Username", hasNotification = false }) => {
                 <div className="absolute right-0 top-[52px] w-[150px] bg-white text-gray-700 rounded-xl shadow-lg overflow-hidden border z-50 animate-[fadeIn_0.2s_ease-out]">
                   <button
                     onClick={() => {
-                      alert("프로필 수정");
+                      navigate("/settings/profile-edit");
                       setIsDropdownOpen(false);
                     }}
                     className="block w-full text-left px-4 py-2 text-[14px] hover:bg-gray-50"
