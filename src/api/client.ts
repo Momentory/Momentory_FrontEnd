@@ -6,12 +6,15 @@ import axios, {
 import { tokenStore } from "../lib/token";
 
 interface ReissueResponse {
-  accessToken: string;
-  refreshToken?: string;
+  isSuccess: boolean;
+  code: string;
+  message: string;
+  result: {
+    accessToken: string;
+    refreshToken: string;
+  };
 }
-
 /* ----------------------------- Axios 기본 설정 ----------------------------- */
-
 // API 클라이언트 생성
 export const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
@@ -19,16 +22,15 @@ export const api = axios.create({
 });
 
 /* ----------------------------- 요청 인터셉터 ----------------------------- */
-
 const noAuthUrls = [
-  "/auth/login",
-  "/auth/userSignup",
-  "/auth/send-email",
-  "/auth/verify-email",
-  "/auth/check-email",
-  "/auth/check-nickname",
-  "/auth/kakao/callback",
-  "/auth/reissue",
+  "/api/auth/login",
+  "/api/auth/userSignup",
+  "/api/auth/send-email",
+  "/api/auth/verify-email",
+  "/api/auth/check-email",
+  "/api/auth/check-nickname",
+  "/api/auth/kakao/callback",
+  "/api/auth/reissue",
 ];
 
 api.interceptors.request.use(
@@ -78,13 +80,13 @@ api.interceptors.response.use(
         const { data } = await api.post<ReissueResponse>("/auth/reissue", { refreshToken });
 
         tokenStore.set?.({
-          accessToken: data.accessToken,
-          refreshToken: data.refreshToken ?? refreshToken,
+          accessToken: data.result.accessToken,
+          refreshToken: data.result.refreshToken ?? refreshToken,
         });
 
-        api.defaults.headers.common["Authorization"] = `Bearer ${data.accessToken}`;
+        api.defaults.headers.common["Authorization"] = `Bearer ${data.result.accessToken}`;
         original.headers = original.headers ?? {};
-        (original.headers as AxiosRequestHeaders).Authorization = `Bearer ${data.accessToken}`;
+        (original.headers as AxiosRequestHeaders).Authorization = `Bearer ${data.result.accessToken}`;
 
         return api(original);
       } catch (err) {

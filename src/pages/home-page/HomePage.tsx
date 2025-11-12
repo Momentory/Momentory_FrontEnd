@@ -5,18 +5,11 @@ import {
   getRecentPhotos,
   getCharacterStatus,
   getEvents,
-  getMyPoint, 
-  getMyMapInfo 
+  getMyPoint,
+  getMyMapInfo
 } from "../../api/home";
 import { X } from "lucide-react";
-
-interface Marker {
-  id: number;
-  name: string;
-  top: number;
-  left: number;
-  color: string;
-}
+import GyeonggiMap from './GyeonggiMap';
 
 export default function HomePage() {
   const navigate = useNavigate();
@@ -24,7 +17,7 @@ export default function HomePage() {
   // 유저 기본 데이터
   const [userName, setUserName] = useState("Username");
   const [level, setLevel] = useState(0);
-  const [points, setPoints] = useState(0); 
+  const [points, setPoints] = useState(0);
 
   // 상태
   const [isDropdownOpen, _setIsDropdownOpen] = useState(false);
@@ -37,29 +30,29 @@ export default function HomePage() {
   const [topPlaces, setTopPlaces] = useState<any[]>([]);
   const [recentPhotos, setRecentPhotos] = useState<any[]>([]);
   const [events, setEvents] = useState<any[]>([]);
-  const [markers, setMarkers] = useState<Marker[]>([]);
-  
+
+  const [mapColors, setMapColors] = useState<Record<string, string>>({});
 
   useEffect(() => {
     const fetchHomeData = async () => {
       try {
         setIsLoading(true);
 
-        //  병렬로 API 호출 
+        //  병렬로 API 호출 
         const [
-          places, 
-          photos, 
-          charStatus, 
-          evts, 
+          places,
+          photos,
+          charStatus,
+          evts,
           pointData,
-          mapData 
+          mapData
         ] = await Promise.all([
           getTopPlaces(),
           getRecentPhotos(),
           getCharacterStatus(),
           getEvents(),
           getMyPoint(),
-          getMyMapInfo() 
+          getMyMapInfo()
         ]);
 
         // 여행지 / 사진
@@ -74,14 +67,14 @@ export default function HomePage() {
 
         // 포인트 
         if (pointData) {
-          setPoints(pointData.points ?? pointData.currentPoints ?? 0);
+          setPoints(pointData.userPoint?.currentPoint ?? 0);
         }
 
         // 이벤트
         setEvents(Array.isArray(evts) ? evts : []);
 
-        // 지도 마커 설정 
-        setMarkers(Array.isArray(mapData) ? (mapData as Marker[]) : []);
+        // 지도 색깔 저장
+        setMapColors(mapData ?? {});
 
       } catch (e) {
         console.error("홈 데이터 로드 실패:", e);
@@ -90,7 +83,7 @@ export default function HomePage() {
         setIsLoading(false);
       }
     };
-    
+
     fetchHomeData();
   }, []);
 
@@ -188,9 +181,8 @@ export default function HomePage() {
             {[1, 2, 3].map((i) => (
               <div
                 key={i}
-                className={`w-[7px] h-[7px] rounded-full ${
-                  i === 1 ? "bg-[#FF7070]" : "bg-gray-300"
-                }`}
+                className={`w-[7px] h-[7px] rounded-full ${i === 1 ? "bg-[#FF7070]" : "bg-gray-300"
+                  }`}
               />
             ))}
           </div>
@@ -281,15 +273,15 @@ export default function HomePage() {
         {(topPlaces.length > 0
           ? topPlaces
           : [
-              {
-                id: 1,
-                name: "EVERLAND",
-                imageUrl: "/images/everland.jpg",
-                rating: 4.0,
-                reviewCount: 4321,
-                tags: ["#놀이공원", "#야경"],
-              },
-            ]
+            {
+              id: 1,
+              name: "EVERLAND",
+              imageUrl: "/images/everland.jpg",
+              rating: 4.0,
+              reviewCount: 4321,
+              tags: ["#놀이공원", "#야경"],
+            },
+          ]
         ).map((place, idx) => (
           <div
             key={idx}
@@ -377,27 +369,7 @@ export default function HomePage() {
             <h3 className="text-[16px] font-semibold text-center mb-4">
               나의 경기지도
             </h3>
-
-            {/* 지도 프리뷰 + 마커 표시 */}
-            <div className="relative flex justify-center">
-              <img
-                src="/images/map-preview.png"
-                className="w-[220px] h-auto rounded-md"
-              />
-              {markers.map((m) => (
-                <div
-                  key={m.id}
-                  className="absolute w-4 h-4 rounded-full border-2 border-white"
-                  style={{
-                    top: `${m.top}%`,
-                    left: `${m.left}%`,
-                    backgroundColor: m.color,
-                    transform: "translate(-50%, -50%)",
-                  }}
-                  title={m.name} 
-                />
-              ))}
-            </div>
+            <GyeonggiMap colors={mapColors} />
           </div>
         </div>
       )}

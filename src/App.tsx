@@ -63,9 +63,10 @@ import CreateAlbumPage from './pages/album-page/create-album-page';
 import AlbumDetailPage from './pages/album-page/album-detail-page';
 import EditAlbumPage from './pages/album-page/edit-album-page';
 import AlbumReadPage from './pages/album-page/album-read-page';
-
+import SharedAlbumPage from './pages/album-page/shared-album-page';
 import MyClosetPage from './pages/shop-page/MyClosetPage';
 import ShopPage from './pages/shop-page/ShopPage';
+import GalleryPage from './pages/album-page/gallery-page';
 import NewItemPage from './pages/shop-page/NewItemPage';
 import EventPage from './pages/shop-page/EventPage';
 
@@ -86,6 +87,7 @@ const publicRoutes: RouteObject[] = [
       { path: 'create-profile', element: <CreateProfilePage /> },
       { path: 'select', element: <SelectCharacterPage /> },
       { path: 'account', element: <AccountCreatedPage /> },
+      { path: 'share/:shareUuid', element: <SharedAlbumPage /> },
     ],
   },
 ];
@@ -148,6 +150,8 @@ const protectedRoutes: RouteObject[] = [
       { path: 'closet', element: <MyClosetPage /> },
       { path: 'shop/new', element: <NewItemPage /> },
       { path: 'shop/event', element: <EventPage /> },
+      { path: 'gallery', element: <GalleryPage /> },
+      { path: 'photo-edit', element: <PhotoEditPage /> },
     ],
   },
 ];

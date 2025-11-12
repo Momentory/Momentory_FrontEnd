@@ -24,7 +24,7 @@ export default function CreateAccountPage() {
   const [emailSent, setEmailSent] = useState(false);
   const [emailVerified, setEmailVerified] = useState(false);
 
-  // ✅ 비밀번호 유효성 검사
+  // 비밀번호 유효성 검사
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setPassword(value);
@@ -50,7 +50,7 @@ export default function CreateAccountPage() {
     }
   };
 
-  // ✅ 비밀번호 확인
+  // 비밀번호 확인
   const handlePasswordConfirm = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setPasswordConfirm(value);
@@ -64,12 +64,12 @@ export default function CreateAccountPage() {
     }
   };
 
-  // ✅ 이메일 인증 링크 발송
+  // 이메일 인증 링크 발송
   const handleEmailClick = async () => {
     if (!email) return alert("이메일을 입력해주세요.");
 
     try {
-      // 1️⃣ 이메일 중복 확인
+      // 이메일 중복 확인
       const checkRes: any = await checkEmail(email);
       console.log(" checkEmail 응답:", checkRes);
 
@@ -78,7 +78,7 @@ export default function CreateAccountPage() {
         return;
       }
 
-      // 2️⃣ 인증 메일 전송 (문자열 형태로 전송해야 함)
+      // 인증 메일 전송 (문자열 형태로 전송해야 함)
       const sendRes = await sendEmail(email);
       console.log("sendEmail 응답:", sendRes);
 
@@ -113,7 +113,7 @@ export default function CreateAccountPage() {
     }
   };
 
-  // ✅ 회원가입 처리
+  // 회원가입 처리
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
