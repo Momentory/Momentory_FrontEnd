@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 
@@ -23,6 +23,7 @@ const Header = () => {
   const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   // JWT 토큰에서 userId 추출
   const accessToken = tokenStore.getAccess();
@@ -93,6 +94,23 @@ const Header = () => {
     }
   }, [location.pathname]);
 
+  // 드롭다운 외부 클릭 감지
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    if (isDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isDropdownOpen]);
+
   // 현재 페이지가 settings인지 확인
   const isSettingsPage = location.pathname === '/settings';
 
@@ -141,7 +159,7 @@ const Header = () => {
             </div>
 
             {/* Username + 드롭다운 */}
-            <div className="relative flex items-center gap-2.5">
+            <div ref={dropdownRef} className="relative flex items-center gap-2.5">
               {profileImageUrl ? (
                 <img
                   src={profileImageUrl}

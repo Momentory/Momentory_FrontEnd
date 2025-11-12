@@ -137,7 +137,7 @@ export default function ProfileEditPage() {
           />
         </div>
         <p className="mt-3 text-[27px] font-semibold text-gray-800">
-          {loading ? "로딩 중..." : nickname || "닉네임"}
+          {loading ? "로딩 중..." : profile?.name || "이름"}
         </p>
       </div>
 

@@ -237,14 +237,14 @@ export default function HomePage() {
               {
                 img: "/images/location-pin.png",
                 label: "나의지도",
-                onClick: () => setIsMapModalOpen(true),
+                link: "/mymap"
               },
               {
                 img: "/images/roulette.png",
                 label: "여행지 추천",
-                link: "/recommended-places",
+                link: "/roulette",
               },
-              { img: "/images/star.png", label: "스탬프", link: "stamp-acquisition" },
+              { img: "/images/star.png", label: "스탬프", link: "/stamp-collection" },
             ].map((item) => (
               <div
                 key={item.label}

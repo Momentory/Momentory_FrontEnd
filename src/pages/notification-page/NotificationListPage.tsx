@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import DropdownHeader from "../../components/common/DropdownHeader";
 import {
   getNotifications,
   markAsRead,
@@ -170,30 +171,24 @@ export default function NotificationListPage() {
   };
 
   return (
-    <div className="w-full max-w-[480px] mx-auto bg-white min-h-screen pt-[56px]">
-      {/* 서브 헤더 (뒤로가기 + 타이틀 + 모두 읽음) */}
-      <div className="flex items-center justify-between px-5 py-4 bg-white border-b border-gray-200">
-        <div className="flex items-center gap-3">
-          <img
-            src="/images/109618.png"
-            alt="뒤로가기"
-            className="w-[26px] h-[26px] cursor-pointer"
-            onClick={() => navigate(-1)}
-          />
-          <h1 className="text-[20px] font-semibold text-gray-800">알림</h1>
-        </div>
-        {unreadCount > 0 && (
-          <button
-            onClick={handleMarkAllAsRead}
-            className="text-[14px] text-[#FF7070] font-medium"
-          >
-            모두 읽음
-          </button>
-        )}
-      </div>
+    <div className="w-full max-w-[480px] mx-auto bg-white min-h-screen">
+      <DropdownHeader
+        title="알림"
+        hasDropdown={false}
+        rightAction={
+          unreadCount > 0 ? (
+            <button
+              onClick={handleMarkAllAsRead}
+              className="text-[14px] text-[#FF7070] font-medium"
+            >
+              모두 읽음
+            </button>
+          ) : undefined
+        }
+      />
 
       {/* 알림 목록 */}
-      <div className="pb-20">
+      <div className="pb-20 mt-2">
         {loading ? (
           <div className="flex justify-center items-center py-20">
             <div className="text-gray-500">알림을 불러오는 중...</div>

@@ -90,6 +90,8 @@ const ProtectedLayout = () => {
     '/region-photos',
     '/shop',
     '/closet',
+    '/stamp-collection',
+    '/notifications',
   ].some((path) => location.pathname.startsWith(path));
 
   const isUploadFlow = [

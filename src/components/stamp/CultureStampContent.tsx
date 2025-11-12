@@ -8,20 +8,7 @@ export default function CultureStampContent() {
   const [clickedBox, setClickedBox] = useState<number | null>(null);
 
   return (
-    <div className="w-full max-w-[480px] mx-auto bg-white min-h-screen pt-[33px]">
-      {/* 상단바 - 기존 헤더 아래에 표시 */}
-      <div className="relative flex items-center justify-center px-5 py-4 bg-white">
-        {/* 뒤로가기 버튼 */}
-        <img
-          src="/images/109618.png"
-          alt="뒤로가기"
-          className="absolute left-[20px] top-[50%] -translate-y-1/2 w-[30px] h-[30px] cursor-pointer"
-          onClick={() => navigate(-1)}
-        />
-
-        {/* 타이틀 */}
-        <h1 className="text-[25px] font-semibold text-gray-800">컬렉션</h1>
-      </div>
+    <div className="w-full max-w-[480px] mx-auto bg-white min-h-screen top-0">
 
       {/* 선택 영역 */}
       <div>
