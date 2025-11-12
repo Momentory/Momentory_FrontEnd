@@ -73,6 +73,8 @@ import GalleryPage from './pages/album-page/gallery-page';
 import NewItemPage from './pages/shop-page/NewItemPage';
 import EventPage from './pages/shop-page/EventPage';
 
+import StampCollectionPage from './pages/stamp-page/StampCollectionPage';
+
 const queryClient = new QueryClient();
 
 /* ------------------ 공개 라우트 ------------------ */
@@ -155,6 +157,8 @@ const protectedRoutes: RouteObject[] = [
       { path: 'shop/new', element: <NewItemPage /> },
       { path: 'shop/event', element: <EventPage /> },
       { path: 'gallery', element: <GalleryPage /> },
+      { path: 'stamp-collection', element: <StampCollectionPage /> },
+      { path: 'stamp-collection/:type', element: <StampCollectionPage /> },
 
       { path: 'photo-edit', element: <PhotoEditPage /> },
     ],
