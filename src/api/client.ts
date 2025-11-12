@@ -16,7 +16,6 @@ interface ReissueResponse {
 }
 
 /* ----------------------------- Axios 기본 설정 ----------------------------- */
-
 // API 클라이언트 생성
 export const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
@@ -24,16 +23,15 @@ export const api = axios.create({
 });
 
 /* ----------------------------- 요청 인터셉터 ----------------------------- */
-
 const noAuthUrls = [
-  '/auth/login',
-  '/auth/userSignup',
-  '/auth/send-email',
-  '/auth/verify-email',
-  '/auth/check-email',
-  '/auth/check-nickname',
-  '/auth/kakao/callback',
-  '/auth/reissue',
+  "/api/auth/login",
+  "/api/auth/userSignup",
+  "/api/auth/send-email",
+  "/api/auth/verify-email",
+  "/api/auth/check-email",
+  "/api/auth/check-nickname",
+  "/api/auth/kakao/callback",
+  "/api/auth/reissue",
 ];
 
 api.interceptors.request.use(
