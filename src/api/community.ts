@@ -36,14 +36,14 @@ export const deleteCommunityPost = async (postId: number) => {
 
 /* ----------------------------- 댓글 관련 ----------------------------- */
 
-// ✅ 댓글 목록 조회 (디버깅 로그 포함)
+//  댓글 목록 조회 (디버깅 로그 포함)
 export const getComments = async (postId: number) => {
   try {
     const res = await api.get(`/community/posts/${postId}/comments`);
-    console.log("💬 [API] 댓글 목록 응답:", res.data);
+    console.log(" [API] 댓글 목록 응답:", res.data);
     return res;
   } catch (error) {
-    console.error("❌ [API] 댓글 목록 불러오기 실패:", error);
+    console.error("[API] 댓글 목록 불러오기 실패:", error);
     throw error;
   }
 };
@@ -56,13 +56,29 @@ export const createComment = (postId: number, payload: { content: string }) =>
   });
 
 
-// 댓글 수정
-export const updateComment = (commentId: number, content: string) =>
-  api.put(`/api/community/posts/comments/${commentId}`, { content });
+/* ------------------------ 댓글 수정 ------------------------ */
+export const updateComment = async (commentId: number, content: string) => {
+  try {
+    const res = await api.put(`/community/posts/comments/${commentId}`, { content });
+    console.log(" [API] 댓글 수정 응답:", res.data);
+    return res;
+  } catch (error) {
+    console.error(" [API] 댓글 수정 실패:", error);
+    throw error;
+  }
+};
 
-// 댓글 삭제
-export const deleteComment = (postId: number, commentId: number) =>
-  api.delete(`/community/posts/${postId}/comments/${commentId}`);
+/* ------------------------ 댓글 삭제 ------------------------ */
+export const deleteComment = async (commentId: number) => {
+  try {
+    const res = await api.delete(`/api/community/posts/comments/${commentId}`);
+    console.log(" [API] 댓글 삭제 응답:", res.data);
+    return res;
+  } catch (error) {
+    console.error(" [API] 댓글 삭제 실패:", error);
+    throw error;
+  }
+};
 /* ----------------------------- 게시글 반응 ----------------------------- */
 
 // 좋아요 토글
@@ -132,5 +148,3 @@ export const getMyScraps = async () => {
   const res = await api.get(`/api/community/users/me/scraps`);
   return res.data;
 };
-
-
