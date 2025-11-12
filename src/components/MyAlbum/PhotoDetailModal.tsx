@@ -8,7 +8,10 @@ interface PhotoDetailModalProps {
   onClose: () => void;
 }
 
-const PhotoDetailModal: React.FC<PhotoDetailModalProps> = ({ photo, onClose }) => {
+const PhotoDetailModal: React.FC<PhotoDetailModalProps> = ({
+  photo,
+  onClose,
+}) => {
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [lightPosition, setLightPosition] = useState({ x: 0, y: 0 });
   const [lightOpacity, setLightOpacity] = useState(0);
@@ -64,10 +67,7 @@ const PhotoDetailModal: React.FC<PhotoDetailModalProps> = ({ photo, onClose }) =
             }}
           />
 
-          <div
-            className="bg-gray-100 mb-4"
-            style={{ aspectRatio: '4/3' }}
-          >
+          <div className="bg-gray-100 mb-4" style={{ aspectRatio: '4/3' }}>
             <img
               src={photo.imageUrl}
               alt={photo.memo || '사진'}
@@ -77,10 +77,7 @@ const PhotoDetailModal: React.FC<PhotoDetailModalProps> = ({ photo, onClose }) =
 
           <div className="px-2 space-y-3">
             {photo.memo && (
-              <p
-                className="text-gray-800 text-center font-handwriting text-lg leading-relaxed"
-                style={{ fontFamily: "'Nanum Pen Script', cursive" }}
-              >
+              <p className="text-gray-800 text-center font-handwriting text-lg leading-relaxed">
                 {photo.memo}
               </p>
             )}

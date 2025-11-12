@@ -1,64 +1,142 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import DropdownHeader from '../../components/common/DropdownHeader';
 import StarIcon from '../../assets/icons/starIcon.svg?react';
 import ShareIcon from '../../assets/icons/albumShare.svg?react';
-import RoseIcon from '../../assets/accessories/장미.svg';
-import RibbonIcon from '../../assets/accessories/리본.svg';
-import FeatherIcon from '../../assets/accessories/깃털.svg';
-import HatIcon from '../../assets/accessories/모자.svg';
+import ShopIcon from '../../assets/accessories/shop.svg?react';
+import CatImage from '../../assets/accessories/cat.svg';
+import DogImage from '../../assets/accessories/dog.svg';
 import BottomSheet from '../../components/Shop/BottomSheet';
+import type { Accessory } from '../../components/Shop/BottomSheet';
 import CharacterDisplay from '../../components/Shop/CharacterDisplay';
 import useBottomSheet from '../../hooks/shop/useBottomSheet';
-
-interface Accessory {
-  id: number;
-  name: string;
-  icon: string;
-  locked: boolean;
-  type: string;
-}
+import { useUserPoint, useCurrentCharacter, useMyItems, useShopItems } from '../../hooks/shop/useShopQueries';
+import { useEquipItem, useUnequipItem } from '../../hooks/shop/useEquipItem';
+import type { ItemCategory } from '../../types/shop';
 
 const MyClosetPage = () => {
-  const [level] = useState(35);
-  const [point] = useState(1500);
-  const [gem] = useState(2000);
-  const [selectedCategory] = useState('장식');
+  const navigate = useNavigate();
+  const [selectedCategory, setSelectedCategory] = useState<ItemCategory>('DECORATION');
   const { height, isExpanded, setHeight, setIsExpanded } = useBottomSheet();
-  const [equippedAccessories, setEquippedAccessories] = useState<number[]>([]);
 
-  const accessories: Accessory[] = [
-    { id: 1, name: '장미', icon: RoseIcon, locked: false, type: 'head' },
-    { id: 2, name: '리본', icon: RibbonIcon, locked: false, type: 'head' },
-    { id: 3, name: '깃털', icon: FeatherIcon, locked: true, type: 'body' },
-    { id: 4, name: '모자', icon: HatIcon, locked: true, type: 'head' },
-  ];
+  const categoryDisplayMap: { [key in ItemCategory]: string } = {
+    CLOTHING: '의상',
+    EXPRESSION: '표정',
+    EFFECT: '이펙트',
+    DECORATION: '장식',
+  };
+
+  const { data: pointData } = useUserPoint();
+  const { data: currentCharacter } = useCurrentCharacter();
+  const { data: myItems = [] } = useMyItems(selectedCategory);
+  const { data: shopItems = [] } = useShopItems(selectedCategory);
+
+  const equipMutation = useEquipItem({
+    onError: (error) => console.error('아이템 착용 실패:', error),
+  });
+
+  const unequipMutation = useUnequipItem({
+    onError: (error) => console.error('아이템 해제 실패:', error),
+  });
+
+  const level = currentCharacter?.level || 1;
+  const point = pointData?.userPoint.currentPoint || 0;
+  const gem = pointData?.userPoint.totalPoint || 0;
+
+  const characterImage = useMemo(() => {
+    if (!currentCharacter) return CatImage;
+    return currentCharacter.characterType === 'CAT' ? CatImage : DogImage;
+  }, [currentCharacter]);
+
+  const equippedAccessories = useMemo(() => {
+    if (!currentCharacter) return [];
+    const equippedItemIds: number[] = [];
+    if (currentCharacter.equipped.clothing) equippedItemIds.push(currentCharacter.equipped.clothing.itemId);
+    if (currentCharacter.equipped.expression) equippedItemIds.push(currentCharacter.equipped.expression.itemId);
+    if (currentCharacter.equipped.effect) equippedItemIds.push(currentCharacter.equipped.effect.itemId);
+    if (currentCharacter.equipped.decoration) equippedItemIds.push(currentCharacter.equipped.decoration.itemId);
+    return equippedItemIds;
+  }, [currentCharacter]);
+
+  const accessories: Accessory[] = useMemo(() => {
+    const ownedItemIds = new Set(myItems.map(item => item.itemId));
+
+    const ownedAccessories = myItems.map(item => ({
+      id: item.itemId,
+      name: item.name,
+      icon: item.imageUrl,
+      locked: false,
+      type: item.category.toLowerCase()
+    }));
+
+    const lockedAccessories = shopItems
+      .filter(item => !ownedItemIds.has(item.itemId))
+      .map(item => ({
+        id: item.itemId,
+        name: item.name,
+        icon: item.imageUrl,
+        locked: true,
+        type: item.category.toLowerCase()
+      }));
+
+    return [...ownedAccessories, ...lockedAccessories];
+  }, [myItems, shopItems]);
+
+  const handleCategoryChange = (category: string) => {
+    setSelectedCategory(category as ItemCategory);
+  };
 
   const handleAccessoryClick = (id: number) => {
     const accessory = accessories.find((acc) => acc.id === id);
-    if (!accessory || accessory.locked) return;
+    if (!accessory || accessory.locked || !currentCharacter) return;
 
     if (equippedAccessories.includes(id)) {
-      setEquippedAccessories(equippedAccessories.filter((accId) => accId !== id));
+      unequipMutation.mutate({ characterId: currentCharacter.characterId, itemId: id });
     } else {
-      // 같은 타입 액세서리는 하나만 착용
-      const newEquipped = equippedAccessories.filter(
-        (accId) => accessories.find((acc) => acc.id === accId)?.type !== accessory.type
-      );
-      setEquippedAccessories([...newEquipped, id]);
+      // 같은 카테고리의 아이템이 착용되어 있으면 먼저 해제
+      const categoryKey = accessory.type.toLowerCase() as keyof typeof currentCharacter.equipped;
+      const currentEquippedItem = currentCharacter.equipped[categoryKey];
+
+      if (currentEquippedItem) {
+        unequipMutation.mutate(
+          { characterId: currentCharacter.characterId, itemId: currentEquippedItem.itemId },
+          {
+            onSuccess: () => {
+              // 기존 아이템 해제 후 새 아이템 착용
+              equipMutation.mutate({ characterId: currentCharacter.characterId, itemId: id });
+            },
+          }
+        );
+      } else {
+        // 직접 착용
+        equipMutation.mutate({ characterId: currentCharacter.characterId, itemId: id });
+      }
     }
   };
 
   return (
     <div className="flex flex-col h-screen bg-white overflow-hidden">
-      <DropdownHeader title="캐릭터 옷장" />
-
-      <CharacterDisplay
-        level={level}
-        gem={gem}
-        point={point}
-        equippedAccessories={equippedAccessories}
-        accessories={accessories}
+      <DropdownHeader
+        title="캐릭터 옷장"
+        rightItem={
+          <button
+            onClick={() => navigate('/shop')}
+            className="flex items-center justify-center w-8 h-8 cursor-pointer"
+          >
+            <ShopIcon className="w-6 h-6" />
+          </button>
+        }
       />
+
+      <div className="pt-[116px] flex-1 flex flex-col">
+        <CharacterDisplay
+          level={level}
+          gem={gem}
+          point={point}
+          equippedAccessories={equippedAccessories}
+          accessories={accessories}
+          characterImage={characterImage}
+        />
 
       <div
         className="fixed max-w-[480px] mx-auto px-4 left-0 right-0 flex justify-between items-center gap-4 z-[100] pointer-events-auto transition-all duration-300"
@@ -98,10 +176,12 @@ const MyClosetPage = () => {
         isExpanded={isExpanded}
         setIsExpanded={setIsExpanded}
         accessories={accessories}
-        selectedCategory={selectedCategory}
+        selectedCategory={categoryDisplayMap[selectedCategory]}
         equippedAccessories={equippedAccessories}
         onAccessoryClick={handleAccessoryClick}
+        onCategoryChange={handleCategoryChange}
       />
+      </div>
     </div>
   );
 };
