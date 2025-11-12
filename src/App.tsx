@@ -75,7 +75,6 @@ import EventPage from './pages/shop-page/EventPage';
 
 const queryClient = new QueryClient();
 
-/* ------------------ 공개 라우트 ------------------ */
 const publicRoutes: RouteObject[] = [
   {
     path: '/',
@@ -95,7 +94,6 @@ const publicRoutes: RouteObject[] = [
   },
 ];
 
-/* ------------------ 보호 라우트 ------------------ */
 const protectedRoutes: RouteObject[] = [
   {
     path: '/',
@@ -165,7 +163,6 @@ const router = createBrowserRouter([...publicRoutes, ...protectedRoutes]);
 
 function App() {
   useEffect(() => {
-    // Kakao SDK 로드 ?�인
     if (window.Kakao && !window.Kakao.isInitialized()) {
       window.Kakao.init(import.meta.env.VITE_KAKAO_JAVASCRIPT_KEY);
     }
