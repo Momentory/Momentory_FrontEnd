@@ -38,7 +38,7 @@ export default function HomePage() {
       try {
         setIsLoading(true);
 
-        //  병렬로 API 호출 
+        //병렬로 API 호출
         const [
           places,
           photos,
