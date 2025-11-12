@@ -1,12 +1,41 @@
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { deleteAccount } from "../../api/mypage";
+import { tokenStore } from "../../lib/token";
 
 export default function WithdrawPage() {
     const navigate = useNavigate();
+    const [loading, setLoading] = useState(false);
 
-    const handleWithdraw = () => {
-        if (window.confirm("정말 회원탈퇴를 진행하시겠습니까?\n이 작업은 되돌릴 수 없습니다.")) {
-            alert("회원탈퇴가 완료되었습니다.");
-            navigate("/login");
+    const handleWithdraw = async () => {
+        const confirmed = window.confirm(
+            "정말 회원탈퇴를 진행하시겠습니까?\n\n" +
+            "⚠️ 주의사항:\n" +
+            "- 모든 데이터가 영구적으로 삭제됩니다\n" +
+            "- 이 작업은 되돌릴 수 없습니다\n" +
+            "- 탈퇴 후 같은 계정으로 재가입할 수 없습니다"
+        );
+
+        if (!confirmed) return;
+
+        setLoading(true);
+        try {
+            await deleteAccount();
+
+            // 로컬 스토리지 정리
+            tokenStore.clear();
+            localStorage.clear();
+
+            alert("회원탈퇴가 완료되었습니다.\n그동안 이용해주셔서 감사합니다.");
+            navigate("/login", { replace: true });
+        } catch (error: any) {
+            console.error("회원탈퇴 실패:", error);
+            alert(
+                error.response?.data?.message ||
+                "회원탈퇴 처리 중 오류가 발생했습니다."
+            );
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -89,9 +118,10 @@ export default function WithdrawPage() {
             <div className="px-6 mb-8">
                 <button
                     onClick={handleWithdraw}
-                    className="w-full bg-[#FF7070] text-white text-[22px] font-semibold py-5 rounded-full shadow-md active:scale-[0.98] transition-all duration-150"
+                    disabled={loading}
+                    className="w-full bg-[#FF7070] text-white text-[22px] font-semibold py-5 rounded-full shadow-md active:scale-[0.98] transition-all duration-150 disabled:bg-gray-400 disabled:cursor-not-allowed"
                 >
-                    탈퇴하기
+                    {loading ? "탈퇴 처리 중..." : "탈퇴하기"}
                 </button>
             </div>
         </div>

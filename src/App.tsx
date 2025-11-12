@@ -42,6 +42,8 @@ import SecurityPage from './pages/settings-page/SecurityPage';
 import WithdrawPage from './pages/settings-page/WithdrawPage';
 import ChangePasswordPage from './pages/settings-page/ChangePasswordPage';
 
+import NotificationListPage from './pages/notification-page/NotificationListPage';
+
 import MyMapPage from './pages/map-page/my-map-page';
 import PublicMapPage from './pages/map-page/public-map-page';
 import RoulettePage from './pages/roulette-page/index';
@@ -113,6 +115,8 @@ const protectedRoutes: RouteObject[] = [
       { path: 'community/mypage', element: <CommunityMyPage /> },
       { path: 'community/search', element: <CommunitySearchPage /> },
       { path: 'community/user/:userId', element: <UserProfilePage /> },
+
+      { path: 'notifications', element: <NotificationListPage /> },
 
       { path: 'settings', element: <SettingsHomePage /> },
       { path: 'settings/profile-edit', element: <ProfileEditPage /> },

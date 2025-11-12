@@ -13,7 +13,6 @@ import type {
 export const getRouletteSlots = async () => {
   try {
     const res = await api.get<RouletteSlotsResponse>('/api/roulette/slots');
-    console.log('[getRouletteSlots] response:', res.data);
     return res.data.result;
   } catch (error: any) {
     console.error(
@@ -32,7 +31,6 @@ export const spinRoulette = async (request: RouletteSpinRequest) => {
       '/api/roulette/spin',
       request
     );
-    console.log('[spinRoulette] response:', res.data);
     return res.data.result;
   } catch (error: any) {
     console.error(
@@ -50,7 +48,6 @@ export const getRouletteHistory = async () => {
     const res = await api.get<RouletteHistoryResponse>(
       '/api/roulette/history'
     );
-    console.log('[getRouletteHistory] response:', res.data);
     return res.data.result;
   } catch (error: any) {
     console.error(
@@ -68,7 +65,6 @@ export const getIncompleteRoulettes = async () => {
     const res = await api.get<RouletteIncompleteResponse>(
       '/api/roulette/incomplete'
     );
-    console.log('[getIncompleteRoulettes] response:', res.data);
     return res.data.result;
   } catch (error: any) {
     console.error(
