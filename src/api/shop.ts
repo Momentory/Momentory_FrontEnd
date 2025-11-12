@@ -3,7 +3,8 @@ import type {
   ItemCategory,
   ShopItemsResponse,
   PurchaseItemResponse,
-  PointResponse
+  PointResponse,
+  MyItemsResponse
 } from '../types/shop';
 
 export const getShopItems = async (category?: ItemCategory) => {
@@ -29,5 +30,11 @@ export const getShopEvents = async () => {
 
 export const getUserPoint = async () => {
   const { data } = await api.get<PointResponse>('/api/point');
+  return data.result;
+}
+
+export const getMyItems = async (category?: ItemCategory) => {
+  const params = category ? { category } : {};
+  const { data } = await api.get<MyItemsResponse>('/api/items/mine', { params });
   return data.result;
 }

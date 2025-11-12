@@ -1,21 +1,20 @@
-import { useState, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DropdownHeader from '../../components/common/DropdownHeader';
 import StarIcon from '../../assets/icons/starIcon.svg?react';
 import EventIcon from '../../assets/icons/eventIcon.svg?react';
 import RecentIcon from '../../assets/icons/recentAddItem.svg?react';
 import ClosetIcon from '../../assets/accessories/closet.svg?react';
-import RoseIcon from '../../assets/accessories/장미.svg';
-import RibbonIcon from '../../assets/accessories/리본.svg';
-import FeatherIcon from '../../assets/accessories/깃털.svg';
-import HatIcon from '../../assets/accessories/모자.svg';
+import CatImage from '../../assets/accessories/cat.svg';
+import DogImage from '../../assets/accessories/dog.svg';
 import ShopBottomSheet from '../../components/Shop/ShopBottomSheet';
 import CharacterDisplay from '../../components/Shop/CharacterDisplay';
 import useBottomSheet from '../../hooks/shop/useBottomSheet';
+import { useUserPoint, useCurrentCharacter, useShopItems } from '../../hooks/shop/useShopQueries';
+import { usePurchaseItem } from '../../hooks/shop/usePurchaseItem';
 import Modal from '../../components/common/Modal';
 import PointIcon from '../../assets/icons/pointIcon.svg';
-import { getShopItems, purchaseItem, getUserPoint } from '../../api/shop';
-import type { ShopItem, ItemCategory } from '../../types/shop';
+import type { ItemCategory } from '../../types/shop';
 
 interface ShopAccessory {
   id: number;
@@ -28,108 +27,78 @@ interface ShopAccessory {
 
 const ShopPage = () => {
   const navigate = useNavigate();
-  const [level, setLevel] = useState(35);
-  const [point, setPoint] = useState(0);
-  const [gem, setGem] = useState(0);
-  const [selectedCategory, setSelectedCategory] = useState<string>('장식');
+  const [selectedCategory, setSelectedCategory] = useState<ItemCategory>('DECORATION');
   const { height, isExpanded, setHeight, setIsExpanded } = useBottomSheet();
-  const [equippedAccessories] = useState<number[]>([]);
-  const [ownedAccessories, setOwnedAccessories] = useState<number[]>([1, 2]);
   const [selectedItem, setSelectedItem] = useState<ShopAccessory | null>(null);
   const [toastMessage, setToastMessage] = useState('');
-  const [shopItems, setShopItems] = useState<ShopItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+
+  const categoryDisplayMap: { [key in ItemCategory]: string } = {
+    CLOTHING: '의상',
+    EXPRESSION: '표정',
+    EFFECT: '이펙트',
+    DECORATION: '장식',
+  };
+
+  const getCategoryName = (category: string): string => {
+    return categoryDisplayMap[category as ItemCategory] || category;
+  };
+
+  const { data: pointData } = useUserPoint();
+  const { data: currentCharacter } = useCurrentCharacter();
+  const { data: shopItems = [], isLoading } = useShopItems(selectedCategory);
+
+  const purchaseMutation = usePurchaseItem({
+    currentCategory: selectedCategory,
+    onSuccess: () => {
+      setToastMessage('구매가 성공적으로 완료되었습니다!');
+      setSelectedItem(null);
+      setTimeout(() => setToastMessage(''), 2000);
+    },
+    onError: (error: any) => {
+      console.error('구매 실패:', error);
+      const errorMessage = error.response?.data?.message || '구매에 실패했습니다.';
+      setToastMessage(errorMessage);
+      setSelectedItem(null);
+      setTimeout(() => setToastMessage(''), 2000);
+    },
+  });
 
   const handleCategoryChange = (category: string) => {
-    const categoryMap: { [key: string]: string } = {
-      CLOTHING: '의상',
-      EXPRESSION: '표정',
-      EFFECT: '이펙트',
-      DECORATION: '장식',
-    };
-    setSelectedCategory(categoryMap[category] || category);
-
-    fetchShopItems(category as ItemCategory);
+    setSelectedCategory(category as ItemCategory);
   };
 
-  const fetchShopItems = async (category?: ItemCategory) => {
-    try {
-      setIsLoading(true);
-      const items = await getShopItems(category);
-      setShopItems(items);
-    } catch (error) {
-      console.error('상점 아이템 불러오기 실패:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const characterImage = useMemo(() => {
+    if (!currentCharacter) return CatImage;
+    return currentCharacter.characterType === 'CAT' ? CatImage : DogImage;
+  }, [currentCharacter]);
 
-  const fetchUserPoint = async () => {
-    try {
-      const pointInfo = await getUserPoint();
-      setLevel(pointInfo.level);
-      setPoint(pointInfo.userPoint.currentPoint);
-      setGem(pointInfo.userPoint.totalPoint);
-    } catch (error) {
-      console.error('포인트 정보 불러오기 실패:', error);
-    }
-  };
+  const level = currentCharacter?.level || 1;
+  const point = pointData?.userPoint.currentPoint || 0;
+  const gem = pointData?.userPoint.totalPoint || 0;
 
-  useEffect(() => {
-    fetchShopItems();
-    fetchUserPoint();
-  }, []);
+  const equippedAccessories = useMemo(() => {
+    if (!currentCharacter) return [];
+    const equippedItemIds: number[] = [];
+    if (currentCharacter.equipped.clothing) equippedItemIds.push(currentCharacter.equipped.clothing.itemId);
+    if (currentCharacter.equipped.expression) equippedItemIds.push(currentCharacter.equipped.expression.itemId);
+    if (currentCharacter.equipped.effect) equippedItemIds.push(currentCharacter.equipped.effect.itemId);
+    if (currentCharacter.equipped.decoration) equippedItemIds.push(currentCharacter.equipped.decoration.itemId);
+    return equippedItemIds;
+  }, [currentCharacter]);
 
-  useEffect(() => {
-    const owned = shopItems.filter((item) => item.owned).map((item) => item.itemId);
-    setOwnedAccessories(owned);
+  const ownedAccessories = useMemo(() => {
+    return shopItems.filter((item) => item.owned).map((item) => item.itemId);
   }, [shopItems]);
 
-  const shopAccessories: ShopAccessory[] = shopItems.length > 0
-    ? shopItems.map((item) => ({
-        id: item.itemId,
-        name: item.name,
-        icon: item.imageUrl,
-        locked: item.unlockLevel > level,
-        type: item.category,
-        price: item.price,
-      }))
-    : [
-        {
-          id: 1,
-          name: '장미',
-          icon: RoseIcon,
-          locked: false,
-          type: '장식',
-          price: 100,
-        },
-        {
-          id: 2,
-          name: '리본',
-          icon: RibbonIcon,
-          locked: false,
-          type: '장식',
-          price: 150,
-        },
-        {
-          id: 3,
-          name: '깃털',
-          icon: FeatherIcon,
-          locked: false,
-          type: 'body',
-          price: 200,
-        },
-        {
-          id: 4,
-          name: '모자',
-          icon: HatIcon,
-          locked: false,
-          type: '장식',
-          price: 300,
-        },
-      ];
+  const shopAccessories: ShopAccessory[] = shopItems.map((item) => ({
+    id: item.itemId,
+    name: item.name,
+    icon: item.imageUrl,
+    locked: item.unlockLevel > level,
+    type: item.category,
+    price: item.price,
+  }));
 
-  // 액세서리 클릭
   const handleAccessoryClick = (id: number) => {
     const accessory = shopAccessories.find((acc) => acc.id === id);
     if (!accessory || accessory.locked) return;
@@ -138,12 +107,10 @@ const ShopPage = () => {
       return;
     }
 
-    // 구매 확인 모달 띄우기
     setSelectedItem(accessory);
   };
 
-  // 모달 내 "구매" 버튼 클릭
-  const handleConfirmPurchase = async () => {
+  const handleConfirmPurchase = () => {
     if (!selectedItem) return;
 
     if (point < selectedItem.price) {
@@ -153,30 +120,7 @@ const ShopPage = () => {
       return;
     }
 
-    try {
-      await purchaseItem(selectedItem.id);
-
-      // 포인트 정보 다시 불러오기
-      await fetchUserPoint();
-
-      setOwnedAccessories([...ownedAccessories, selectedItem.id]);
-
-      setShopItems((prevItems) =>
-        prevItems.map((item) =>
-          item.itemId === selectedItem.id ? { ...item, owned: true } : item
-        )
-      );
-
-      setToastMessage('구매가 성공적으로 완료되었습니다!');
-      setSelectedItem(null);
-      setTimeout(() => setToastMessage(''), 2000);
-    } catch (error: any) {
-      console.error('구매 실패:', error);
-      const errorMessage = error.response?.data?.message || '구매에 실패했습니다.';
-      setToastMessage(errorMessage);
-      setSelectedItem(null);
-      setTimeout(() => setToastMessage(''), 2000);
-    }
+    purchaseMutation.mutate(selectedItem.id);
   };
 
   const displayAccessories = shopAccessories.map((acc) => ({
@@ -214,6 +158,7 @@ const ShopPage = () => {
               point={point}
               equippedAccessories={equippedAccessories}
               accessories={displayAccessories}
+              characterImage={characterImage}
             />
 
       <div
@@ -245,7 +190,7 @@ const ShopPage = () => {
         isExpanded={isExpanded}
         setIsExpanded={setIsExpanded}
         accessories={shopAccessories}
-        selectedCategory={selectedCategory}
+        selectedCategory={categoryDisplayMap[selectedCategory]}
         ownedAccessories={ownedAccessories}
         equippedAccessories={equippedAccessories}
         onAccessoryClick={handleAccessoryClick}
@@ -266,7 +211,7 @@ const ShopPage = () => {
                 <span className="text-[#FF7070] font-semibold">
                   [{selectedItem.name}]
                 </span>{' '}
-                {selectedItem.type}을(를)
+                {getCategoryName(selectedItem.type)}을(를)
               </span>
               <span className="w-1.5"></span>
               <span className="whitespace-nowrap inline-flex items-center">

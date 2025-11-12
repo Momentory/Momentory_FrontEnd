@@ -1,6 +1,5 @@
 import PointIcon from '../../assets/icons/pointIcon.svg?react';
 import Bg from '../../assets/accessories/bgImg.svg';
-import Character from '../../assets/accessories/character.svg';
 import GemIcon from '../../assets/icons/gemIcon.svg?react'
 
 interface Accessory {
@@ -17,6 +16,7 @@ interface CharacterDisplayProps {
   gem: number;
   equippedAccessories: number[];
   accessories: Accessory[];
+  characterImage: string;
 }
 
 const CharacterDisplay = ({
@@ -25,6 +25,7 @@ const CharacterDisplay = ({
   point,
   equippedAccessories,
   accessories,
+  characterImage,
 }: CharacterDisplayProps) => {
   return (
     <div className="relative flex-1 h-full overflow-hidden">
@@ -44,7 +45,7 @@ const CharacterDisplay = ({
 
       <div className="absolute inset-0 flex items-center justify-center px-16">
         <div className="relative w-full h-full">
-          <img src={Character} alt="character" className="w-full h-full object-contain" />
+          <img src={characterImage} alt="character" className="w-full h-full object-contain" />
           {equippedAccessories.map((id) => {
             const acc = accessories.find((a) => a.id === id);
             if (!acc) return null;

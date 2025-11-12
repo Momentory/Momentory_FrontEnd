@@ -59,3 +59,18 @@ export interface PointResponse {
   message: string;
   result: PointInfo;
 }
+
+export interface MyItem {
+  itemId: number;
+  name: string;
+  category: ItemCategory;
+  imageUrl: string;
+  equipped: boolean;
+}
+
+export interface MyItemsResponse {
+  isSuccess: boolean;
+  code: string;
+  message: string;
+  result: MyItem[];
+}

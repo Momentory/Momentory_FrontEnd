@@ -259,32 +259,25 @@ const handleTouchStart = (e: React.TouchEvent) => {
               <button
                 key={accessory.id}
                 onClick={() => onAccessoryClick(accessory.id)}
-                className={`flex flex-col items-center gap-2 p-3 rounded-xl transition-all ${
+                className={`aspect-square w-full flex items-center justify-center rounded-xl transition-all relative ${
                   accessory.locked
-                    ? 'bg-gray-100 border-2 border-gray-300 cursor-not-allowed'
+                    ? 'bg-white border-2 border-gray-300 cursor-not-allowed'
                     : isEquipped
-                    ? 'border-2 border-[#FF7070]'
+                    ? 'bg-white border-2 border-[#FF7070]'
                     : 'bg-white border-2 border-black'
                 }`}
               >
-                <div className="w-16 h-16 flex items-center justify-center overflow-hidden relative">
+                {accessory.locked ? (
+                  <div className="flex items-center justify-center">
+                    <LockIcon className="w-8 h-8 text-gray-400" />
+                  </div>
+                ) : (
                   <img
                     src={accessory.icon}
                     alt={accessory.name}
-                    className={`max-w-full max-h-full object-contain ${
-                      accessory.locked ? 'opacity-40' : 'opacity-100'
-                    }`}
-                    style={{
-                      transform: 'scale(0.5)',
-                      transformOrigin: 'center',
-                    }}
+                    className="max-w-full max-h-full object-contain"
                   />
-                  {accessory.locked && (
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <LockIcon/>
-                    </div>
-                  )}
-                </div>
+                )}
               </button>
             );
           })}
