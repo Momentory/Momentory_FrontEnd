@@ -6,7 +6,6 @@ import { api } from './client';
 export const getTopPlaces = async () => {
   try {
     const res = await api.get('/api/home/travel-top3');
-    console.log('[getTopPlaces] response:', res.data);
     return res.data.data; // .data.data가 맞는지 확인 필요 (이하 동일)
   } catch (error: any) {
     console.error(
@@ -22,7 +21,6 @@ export const getTopPlaces = async () => {
 export const getRecentPhotos = async () => {
   try {
     const res = await api.get('/api/home/recent-photos');
-    console.log('[getRecentPhotos] response:', res.data);
     return res.data.data;
   } catch (error: any) {
     console.error(
@@ -38,7 +36,6 @@ export const getRecentPhotos = async () => {
 export const getCharacterStatus = async () => {
   try {
     const res = await api.get('/api/home/character-status');
-    console.log('[getCharacterStatus] response:', res.data);
     return res.data.data;
   } catch (error: any) {
     console.error(
@@ -54,7 +51,6 @@ export const getCharacterStatus = async () => {
 export const getEvents = async () => {
   try {
     const res = await api.get('/api/home/events');
-    console.log('[getEvents] response:', res.data);
     return res.data.data;
   } catch (error: any) {
     console.error(
@@ -70,7 +66,6 @@ export const getEvents = async () => {
 export const getMyPoint = async () => {
   try {
     const res = await api.get('/api/point');
-    console.log('[getMyPoint] response:', res.data);
     return res.data.data; // API 응답 구조에 따라 .data가 맞을 수 있음
   } catch (error: any) {
     console.error(
@@ -86,7 +81,6 @@ export const getMyPoint = async () => {
 export const getMyMapInfo = async () => {
   try {
     const res = await api.get('/api/map/my');
-    console.log('[getMyMapInfo] response:', res.data);
     return res.data.data; // API 응답 구조에 따라 .data가 맞을 수 있음
   } catch (error: any) {
     console.error(

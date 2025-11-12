@@ -49,7 +49,6 @@ api.interceptors.request.use(
       }
     }
 
-    console.log('[Axios Request]', config.url, config.headers.Authorization);
     return config;
   },
   (error) => Promise.reject(error)
@@ -57,7 +56,6 @@ api.interceptors.request.use(
 
 api.interceptors.response.use(
   (response: AxiosResponse<unknown>) => {
-    console.log('[Axios Response]', response.status, response.data);
     return response;
   },
   async (error: unknown) => {

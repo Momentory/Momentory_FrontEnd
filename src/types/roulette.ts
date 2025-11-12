@@ -42,6 +42,9 @@ export interface RouletteSpinResponse {
 // 룰렛 타입
 export type RouletteType = 'TRAVEL' | 'GENERAL';
 
+// 룰렛 상태
+export type RouletteStatus = 'IN_PROGRESS' | 'SUCCESS' | 'FAILED';
+
 // 룰렛 내역 항목
 export interface RouletteHistoryItem {
   rouletteId: number;
@@ -49,7 +52,7 @@ export interface RouletteHistoryItem {
   reward: string;
   usedPoint: number;
   earnedPoint: number;
-  completed: boolean;
+  status: RouletteStatus | null; // 백엔드에서 null을 반환할 수 있음
   createdAt: string;
   deadline: string | null;
 }
