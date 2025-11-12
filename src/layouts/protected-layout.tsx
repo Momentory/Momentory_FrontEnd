@@ -15,6 +15,7 @@ const ProtectedLayout = () => {
   const isAlbumReadPage = location.pathname.includes('/read');
   const isShopPage = location.pathname.startsWith('/shop');
   const isClosetPage = location.pathname.startsWith('/closet');
+  const isMyClosetPage = location.pathname.startsWith('/my-closet');
 
   const [isUploadBottomSheetOpen, setIsUploadBottomSheetOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -74,6 +75,7 @@ const ProtectedLayout = () => {
     isClosetPage ||
     isEditPage ||
     isAlbumPage ||
+    isMyClosetPage ||
     isCreateAlbumPage;
 
   const hasDropdownHeader = [

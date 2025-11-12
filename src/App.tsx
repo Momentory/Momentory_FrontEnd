@@ -67,6 +67,7 @@ import AlbumDetailPage from './pages/album-page/album-detail-page';
 import EditAlbumPage from './pages/album-page/edit-album-page';
 import AlbumReadPage from './pages/album-page/album-read-page';
 import SharedAlbumPage from './pages/album-page/shared-album-page';
+import ClosetPage from './pages/shop-page/ClosetPage';
 import MyClosetPage from './pages/shop-page/MyClosetPage';
 import ShopPage from './pages/shop-page/ShopPage';
 import GalleryPage from './pages/album-page/gallery-page';
@@ -149,7 +150,8 @@ const protectedRoutes: RouteObject[] = [
       { path: 'edit/:id', element: <EditAlbumPage /> },
 
       { path: 'shop', element: <ShopPage /> },
-      { path: 'closet', element: <MyClosetPage /> },
+      { path: 'closet', element: <ClosetPage /> },
+      { path: 'my-closet', element: <MyClosetPage /> },
       { path: 'shop/new', element: <NewItemPage /> },
       { path: 'shop/event', element: <EventPage /> },
       { path: 'gallery', element: <GalleryPage /> },
