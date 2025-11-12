@@ -14,7 +14,7 @@ export default function NotificationListPage() {
 
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
-  const [totalCount, setTotalCount] = useState(0);
+  const [_totalCount, setTotalCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
   // 알림 목록 조회 - 페이지 진입할 때마다 새로 조회
@@ -34,21 +34,6 @@ export default function NotificationListPage() {
       console.error("알림 목록 조회 실패:", error);
     } finally {
       setLoading(false);
-    }
-  };
-
-  // 특정 알림 읽음 처리
-  const handleMarkAsRead = async (notificationId: number) => {
-    try {
-      await markAsRead(notificationId);
-      setNotifications((prev) =>
-        prev.map((n) =>
-          n.notificationId === notificationId ? { ...n, read: true } : n
-        )
-      );
-      setUnreadCount((prev) => Math.max(0, prev - 1));
-    } catch (error) {
-      console.error("알림 읽음 처리 실패:", error);
     }
   };
 

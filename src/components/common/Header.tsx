@@ -30,7 +30,7 @@ const Header = () => {
   const userId = getUserIdFromToken(accessToken);
 
   // WebSocket 연결 (로그인된 경우에만)
-  const { notifications: realtimeNotifications } = useWebSocket({
+  useWebSocket({
     userId,
     autoConnect: !!userId,
     onNotification: (notification) => {

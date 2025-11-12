@@ -249,7 +249,7 @@ export default function HomePage() {
               <div
                 key={item.label}
                 className="flex flex-col items-center cursor-pointer active:scale-95 transition"
-                onClick={item.onClick ?? (() => navigate(item.link ?? ""))}
+                onClick={() => navigate(item.link)}
               >
                 <div className="w-[58px] h-[58px] bg-white rounded-full flex items-center justify-center mb-2 shadow-md">
                   <img
