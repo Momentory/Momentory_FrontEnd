@@ -14,10 +14,7 @@ interface ReissueResponse {
     refreshToken: string;
   };
 }
-<<<<<<< HEAD
-=======
 
->>>>>>> b8c6f92ddcf48f5ab703f692326b571fb1077fb8
 /* ----------------------------- Axios 기본 설정 ----------------------------- */
 // API 클라이언트 생성
 export const api = axios.create({
@@ -27,7 +24,6 @@ export const api = axios.create({
 
 /* ----------------------------- 요청 인터셉터 ----------------------------- */
 const noAuthUrls = [
-<<<<<<< HEAD
   "/api/auth/login",
   "/api/auth/userSignup",
   "/api/auth/send-email",
@@ -36,16 +32,6 @@ const noAuthUrls = [
   "/api/auth/check-nickname",
   "/api/auth/kakao/callback",
   "/api/auth/reissue",
-=======
-  '/auth/login',
-  '/auth/userSignup',
-  '/auth/send-email',
-  '/auth/verify-email',
-  '/auth/check-email',
-  '/auth/check-nickname',
-  '/auth/kakao/callback',
-  '/auth/reissue',
->>>>>>> b8c6f92ddcf48f5ab703f692326b571fb1077fb8
 ];
 
 api.interceptors.request.use(
