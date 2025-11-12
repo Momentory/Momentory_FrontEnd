@@ -128,11 +128,11 @@ const MyClosetPage = () => {
         }
       />
 
-      <div className="pt-[116px] flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col">
         <CharacterDisplay
           level={level}
-          gem={gem}
           point={point}
+          gem={gem}
           equippedAccessories={equippedAccessories}
           accessories={accessories}
           characterImage={characterImage}

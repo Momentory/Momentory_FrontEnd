@@ -13,7 +13,7 @@ import useBottomSheet from '../../hooks/shop/useBottomSheet';
 import { useUserPoint, useCurrentCharacter, useShopItems } from '../../hooks/shop/useShopQueries';
 import { usePurchaseItem } from '../../hooks/shop/usePurchaseItem';
 import Modal from '../../components/common/Modal';
-import PointIcon from '../../assets/icons/pointIcon.svg';
+import PointIcon from '../../assets/icons/pointIcon.svg?react';
 import type { ItemCategory } from '../../types/shop';
 
 interface ShopAccessory {
@@ -145,7 +145,7 @@ const ShopPage = () => {
         }
       />
 
-      <div className="pt-[116px] flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col">
         {isLoading ? (
           <div className="flex items-center justify-center h-full">
             <p className="text-gray-500">상점 아이템을 불러오는 중...</p>
@@ -154,8 +154,8 @@ const ShopPage = () => {
           <>
             <CharacterDisplay
               level={level}
-              gem={gem}
               point={point}
+              gem={gem}
               equippedAccessories={equippedAccessories}
               accessories={displayAccessories}
               characterImage={characterImage}
@@ -215,7 +215,7 @@ const ShopPage = () => {
               </span>
               <span className="w-1.5"></span>
               <span className="whitespace-nowrap inline-flex items-center">
-                <img src={PointIcon} alt="포인트" className="w-4 h-4 mr-1" />
+                <PointIcon className="w-4 h-4 mr-1" />
                 {selectedItem.price}
                 <span className="ml-1">에 구입할까요?</span>
               </span>

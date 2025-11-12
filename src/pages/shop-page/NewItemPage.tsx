@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import type { ShopAccessory } from '../../types/shop';
+import type { ShopAccessory, ItemCategory } from '../../types/shop';
 
 import DropdownHeader from '../../components/common/DropdownHeader';
 import Modal from '../../components/common/Modal';
@@ -17,6 +17,17 @@ const NewItemPage = () => {
   const [toastMessage, setToastMessage] = useState('');
   const [newItems, setNewItems] = useState<ShopAccessory[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  const categoryDisplayMap: { [key in ItemCategory]: string } = {
+    CLOTHING: '의상',
+    EXPRESSION: '표정',
+    EFFECT: '이펙트',
+    DECORATION: '장식',
+  };
+
+  const getCategoryName = (category: string): string => {
+    return categoryDisplayMap[category as ItemCategory] || category;
+  };
 
   useEffect(() => {
     const fetchRecentItems = async () => {
@@ -66,12 +77,12 @@ const NewItemPage = () => {
 
   return (
     <div
-      className="min-h-screen bg-cover bg-center bg-fixed flex flex-col"
+      className="h-screen bg-cover bg-center overflow-hidden flex flex-col"
       style={{ backgroundImage: `url(${Bg})` }}
     >
       <DropdownHeader title="최근 추가된" />
 
-      <main className="flex items-center justify-center p-4 pt-[116px] min-h-screen">
+      <main className="flex-1 flex items-center justify-center p-4 overflow-y-auto">
         {isLoading ? (
           <div className="text-white text-lg">로딩중...</div>
         ) : newItems.length > 0 ? (
@@ -102,7 +113,7 @@ const NewItemPage = () => {
             />
             <p className="text-gray-700 mb-6 flex justify-center items-center flex-wrap px-4 text-center">
               <span className="whitespace-nowrap">
-                <span className="text-[#FF7070] font-semibold">[{selectedItem.name}]</span> {selectedItem.type}을(를)
+                <span className="text-[#FF7070] font-semibold">[{selectedItem.name}]</span> {getCategoryName(selectedItem.type)}을(를)
               </span>
               <span className="w-1.5"></span>
               <span className="whitespace-nowrap inline-flex items-center">

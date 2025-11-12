@@ -68,12 +68,12 @@ const EventPage = () => {
 
   return (
     <div
-      className="min-h-screen bg-cover bg-center bg-fixed"
+      className="h-screen bg-cover bg-center overflow-hidden flex flex-col"
       style={{ backgroundImage: `url(${Bg})` }}
     >
       <DropdownHeader title="이벤트" />
 
-      <main className="flex items-center justify-center p-4 pt-[116px] min-h-screen">
+      <main className="flex-1 flex items-center justify-center p-4 overflow-y-auto">
         {isLoading ? (
           <div className="text-white text-lg">로딩중...</div>
         ) : eventItems && eventItems.length > 0 ? (
