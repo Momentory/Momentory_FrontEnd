@@ -130,7 +130,7 @@ export default function RoulettePage() {
           alert('룰렛을 돌리는데 실패했습니다.');
         }
       }
-    }, 10000);
+    }, 4000);
   };
 
   const handleCloseResult = () => {
@@ -186,7 +186,7 @@ export default function RoulettePage() {
                 flexShrink: 0,
                 transform: `rotate(${finalRotation}deg)`,
                 transition: isSpinning
-                  ? 'transform 10s cubic-bezier(0.17, 0.67, 0.12, 0.99)'
+                  ? 'transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99)'
                   : 'none',
               }}
             >
@@ -265,17 +265,29 @@ export default function RoulettePage() {
                 >
                   <div className="flex items-center gap-2">
                     <span className="text-2xl">🎁</span>
-                    <span className="text-[18px] font-bold text-[#000000]">
-                      {item.reward}
-                    </span>
-                    {item.completed && (
+                    <div className="flex flex-col gap-1 flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[18px] font-bold text-[#000000]">
+                          {item.reward}
+                        </span>
+                        <span className="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-0.5 rounded">
+                          {item.type === 'TRAVEL' ? '여행' : '일반'}
+                        </span>
+                      </div>
+                    </div>
+                    {item.status === 'SUCCESS' && (
                       <span className="ml-auto text-sm font-medium text-green-600 bg-green-100 px-2 py-1 rounded">
                         완료
                       </span>
                     )}
-                    {!item.completed && (
+                    {(item.status === 'IN_PROGRESS' || item.status === null) && (
                       <span className="ml-auto text-sm font-medium text-orange-600 bg-orange-100 px-2 py-1 rounded">
-                        미완료
+                        진행 중
+                      </span>
+                    )}
+                    {item.status === 'FAILED' && (
+                      <span className="ml-auto text-sm font-medium text-red-600 bg-red-100 px-2 py-1 rounded">
+                        실패
                       </span>
                     )}
                   </div>

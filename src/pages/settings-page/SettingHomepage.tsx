@@ -1,8 +1,27 @@
 import { useNavigate } from "react-router-dom";
 import { ChevronRight } from "lucide-react";
+import { useState, useEffect } from "react";
+import { getMyProfile, type UserProfile } from "../../api/mypage";
 
 export default function SettingsPage() {
   const navigate = useNavigate();
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const data = await getMyProfile();
+        setProfile(data);
+      } catch (error) {
+        console.error('프로필 조회 실패:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, []);
 
   return (
     <div className="w-full max-w-[480px] mx-auto bg-white min-h-screen">
@@ -22,12 +41,18 @@ export default function SettingsPage() {
 
       {/* 프로필 영역 */}
       <div className="flex flex-col items-center mt-10 mb-6">
-        <img
-          src="/images/profile.png"
-          alt="프로필 이미지"
-          className="w-[150px] h-[150px] rounded-full bg-gray-200"
-        />
-        <p className="mt-3 text-[27px] font-semibold text-black-800">닉네임</p>
+        {loading ? (
+          <div className="w-[150px] h-[150px] rounded-full bg-gray-200 animate-pulse" />
+        ) : (
+          <img
+            src={profile?.imageUrl || "/images/profile.png"}
+            alt="프로필 이미지"
+            className="w-[150px] h-[150px] rounded-full bg-gray-200 object-cover"
+          />
+        )}
+        <p className="mt-3 text-[27px] font-semibold text-black-800">
+          {loading ? "로딩 중..." : profile?.nickname || "닉네임"}
+        </p>
       </div>
 
       {/* 설정 섹션 */}

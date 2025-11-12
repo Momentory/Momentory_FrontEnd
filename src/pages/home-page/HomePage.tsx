@@ -8,6 +8,7 @@ import {
   getMyPoint,
   getMyMapInfo
 } from "../../api/home";
+import { getMyProfileSummary } from "../../api/mypage";
 import { X } from "lucide-react";
 import GyeonggiMap from './GyeonggiMap';
 
@@ -45,27 +46,33 @@ export default function HomePage() {
           charStatus,
           evts,
           pointData,
-          mapData
+          mapData,
+          profileSummary
         ] = await Promise.all([
           getTopPlaces(),
           getRecentPhotos(),
           getCharacterStatus(),
           getEvents(),
           getMyPoint(),
-          getMyMapInfo()
+          getMyMapInfo(),
+          getMyProfileSummary()
         ]);
 
         // 여행지 / 사진
         setTopPlaces(Array.isArray(places) ? places : []);
         setRecentPhotos(Array.isArray(photos) ? photos : []);
 
-        // 캐릭터 상태 
+        // 프로필 정보 (닉네임)
+        if (profileSummary) {
+          setUserName(profileSummary.nickname ?? "User");
+        }
+
+        // 캐릭터 상태 (레벨)
         if (charStatus) {
-          setUserName(charStatus.nickname ?? "User");
           setLevel(charStatus.level ?? 0);
         }
 
-        // 포인트 
+        // 포인트
         if (pointData) {
           setPoints(pointData.userPoint?.currentPoint ?? 0);
         }
@@ -230,19 +237,19 @@ export default function HomePage() {
               {
                 img: "/images/location-pin.png",
                 label: "나의지도",
-                onClick: () => setIsMapModalOpen(true),
+                link: "/mymap"
               },
               {
                 img: "/images/roulette.png",
                 label: "여행지 추천",
-                link: "/recommended-places",
+                link: "/roulette",
               },
-              { img: "/images/star.png", label: "스탬프", link: "stamp-acquisition" },
+              { img: "/images/star.png", label: "스탬프", link: "/stamp-collection" },
             ].map((item) => (
               <div
                 key={item.label}
                 className="flex flex-col items-center cursor-pointer active:scale-95 transition"
-                onClick={item.onClick ?? (() => navigate(item.link ?? ""))}
+                onClick={() => navigate(item.link)}
               >
                 <div className="w-[58px] h-[58px] bg-white rounded-full flex items-center justify-center mb-2 shadow-md">
                   <img

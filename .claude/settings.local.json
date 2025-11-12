@@ -1,7 +1,17 @@
 {
   "permissions": {
     "allow": [
-      "Bash(findstr:*)"
+      "Bash(findstr:*)",
+      "Bash(npm install:*)",
+      "Bash(dir:*)",
+      "Bash(npm run build:*)",
+      "Bash(nul)",
+      "Bash(npm run dev:*)",
+      "Bash(git rm:*)",
+      "Bash(powershell -Command \"if (Test-Path .\\nul) { Remove-Item .\\nul -Force; Write-Host ''nul file deleted'' } else { Write-Host ''nul file not found'' }\")",
+      "Bash(.gitignore)",
+      "Bash(git add:*)",
+      "Bash(npm i:*)"
     ],
     "deny": [],
     "ask": []

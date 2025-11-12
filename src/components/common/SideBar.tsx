@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
 import Profile from "../../assets/icons/defaultProfile.svg?react";
 import ShareIcon from "../../assets/icons/shareIcon.svg?react";
 import MapIcon from "../../assets/icons/mapIcon.svg?react";
@@ -11,16 +12,35 @@ import CommunityIcon from "../../assets/icons/communityIcon.svg?react";
 import SettingsIcon from "../../assets/icons/settingsIcon.svg?react";
 import LogoutIcon from "../../assets/icons/logoutIcon.svg?react";
 import { logout } from "../../api/auth";
+import { getMyProfileSummary } from "../../api/mypage";
 
 interface SidebarProps {
   isOpen: boolean;
   onClose: () => void;
-  userName?: string;
-  userEmail?: string;
 }
 
-const Sidebar = ({ isOpen, onClose, userName = "Username", userEmail = "example@email.com",}: SidebarProps) => {
-   const navigate = useNavigate();
+const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
+  const navigate = useNavigate();
+  const [nickname, setNickname] = useState("Username");
+  const [email, setEmail] = useState("example@email.com");
+  const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
+
+  // 프로필 정보 조회
+  useEffect(() => {
+    if (isOpen) {
+      const fetchProfile = async () => {
+        try {
+          const profile = await getMyProfileSummary();
+          setNickname(profile.nickname);
+          setEmail(profile.email);
+          setProfileImageUrl(profile.imageUrl);
+        } catch (error) {
+          console.error("프로필 정보 조회 실패:", error);
+        }
+      };
+      fetchProfile();
+    }
+  }, [isOpen]);
   const handleNavigate = (path: string) => {
     navigate(path);
     onClose();
@@ -53,10 +73,18 @@ const Sidebar = ({ isOpen, onClose, userName = "Username", userEmail = "example@
       >
         <div className="bg-[#FF7070] text-white pl-4.5 py-7">
           <div className="flex flex-row items-center gap-2.5">
-            <Profile className="w-13 h-13" />
+            {profileImageUrl ? (
+              <img
+                src={profileImageUrl}
+                alt="프로필"
+                className="w-13 h-13 rounded-full object-cover"
+              />
+            ) : (
+              <Profile className="w-13 h-13" />
+            )}
             <div className="flex flex-col items-start">
-              <p className="text-white text-base font-normal">{userName}</p>
-              <p className="text-xs font-normal text-[#894040]">{userEmail}</p>
+              <p className="text-white text-base font-normal">{nickname}</p>
+              <p className="text-xs font-normal text-[#894040]">{email}</p>
             </div>
           </div>
         </div>
