@@ -1,22 +1,22 @@
-import { useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
+import { useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
 
-import Menu from "../../assets/icons/menuIcon.svg?react";
-import Bell from "../../assets/icons/bellIcon.svg?react";
-import ActiveBell from "../../assets/icons/bellActiveIcon.svg?react";
-import Profile from "../../assets/icons/defaultProfile.svg?react";
-import Dropdown from "../../assets/icons/dropdown.svg?react";
-import Sidebar from "./SideBar";
+import Menu from '../../assets/icons/menuIcon.svg?react';
+import Bell from '../../assets/icons/bellIcon.svg?react';
+import ActiveBell from '../../assets/icons/bellActiveIcon.svg?react';
+import Profile from '../../assets/icons/defaultProfile.svg?react';
+import Dropdown from '../../assets/icons/dropdown.svg?react';
+import Sidebar from './SideBar';
 
-const Header = ({ userName = "Username", hasNotification = false }) => {
+const Header = ({ userName = 'Username', hasNotification = false }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
   // 현재 페이지가 settings인지 확인
-  const isSettingsPage = location.pathname === "/settings";
+  const isSettingsPage = location.pathname === '/settings';
 
   return (
     <>
@@ -60,7 +60,7 @@ const Header = ({ userName = "Username", hasNotification = false }) => {
               >
                 <Dropdown
                   className={`w-3 text-white cursor-pointer transition-transform duration-200 ${
-                    isDropdownOpen ? "rotate-180" : "rotate-0"
+                    isDropdownOpen ? 'rotate-180' : 'rotate-0'
                   }`}
                 />
               </button>
@@ -70,7 +70,7 @@ const Header = ({ userName = "Username", hasNotification = false }) => {
                 <div className="absolute right-0 top-[52px] w-[150px] bg-white text-gray-700 rounded-xl shadow-lg overflow-hidden border z-50 animate-[fadeIn_0.2s_ease-out]">
                   <button
                     onClick={() => {
-                      alert("프로필 수정");
+                      alert('프로필 수정');
                       setIsDropdownOpen(false);
                     }}
                     className="block w-full text-left px-4 py-2 text-[14px] hover:bg-gray-50"
@@ -79,7 +79,7 @@ const Header = ({ userName = "Username", hasNotification = false }) => {
                   </button>
                   <button
                     onClick={() => {
-                      alert("로그아웃");
+                      alert('로그아웃');
                       setIsDropdownOpen(false);
                     }}
                     className="block w-full text-left px-4 py-2 text-[14px] hover:bg-gray-50"
