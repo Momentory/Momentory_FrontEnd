@@ -155,7 +155,7 @@ const handleTouchStart = (e: React.TouchEvent) => {
 
   return (
     <div
-      className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] bg-white rounded-t-2xl shadow-lg z-50 overflow-hidden"
+      className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] bg-white rounded-t-2xl shadow-lg z-500 overflow-hidden"
       style={{
         height: `${height}px`,
         transition: isDragging ? 'none' : 'height 0.3s ease-out',

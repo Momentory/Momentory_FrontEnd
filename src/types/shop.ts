@@ -74,3 +74,38 @@ export interface MyItemsResponse {
   message: string;
   result: MyItem[];
 }
+
+export interface WardrobeItem {
+  itemId: number;
+  name: string;
+  imageUrl: string;
+}
+
+export interface Wardrobe {
+  wardrobeId: number;
+  clothing: WardrobeItem | null;
+  expression: WardrobeItem | null;
+  effect: WardrobeItem | null;
+  decoration: WardrobeItem | null;
+}
+
+export interface WardrobeListResponse {
+  isSuccess: boolean;
+  code: string;
+  message: string;
+  result: Wardrobe[];
+}
+
+export interface WardrobeSaveResponse {
+  isSuccess: boolean;
+  code: string;
+  message: string;
+  result: PurchasedItem;
+}
+
+export interface WardrobeApplyResponse {
+  isSuccess: boolean;
+  code: string;
+  message: string;
+  result: PurchasedItem;
+}

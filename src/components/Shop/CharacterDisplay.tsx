@@ -21,21 +21,21 @@ interface CharacterDisplayProps {
 
 const CharacterDisplay = ({
   level,
-  gem,
   point,
+  gem,
   equippedAccessories,
   accessories,
   characterImage,
 }: CharacterDisplayProps) => {
   return (
-    <div className="relative flex-1 h-full overflow-hidden">
+    <div className="relative flex-1 h-full overflow-hidden pt-[60px]">
       <div className="absolute inset-0">
         <img src={Bg} alt="background" className="w-full h-full object-cover" />
       </div>
 
-      <div className="absolute px-4 pt-3 pb-2 left-0 right-0 flex justify-between items-center z-[60] bg-black/15">
+      <div className="fixed top-[116px] left-0 right-0 max-w-[480px] mx-auto px-4 py-3 flex justify-between items-center z-[60] bg-black/15">
         <span className="text-lg font-bold text-black">Level {level}</span>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-2">
           <GemIcon className="w-6 h-6"/>
           <span className="text-lg font-bold text-black">{gem}</span>
           <PointIcon className="w-6 h-6" />
