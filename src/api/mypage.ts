@@ -75,6 +75,22 @@ export const getMyProfile = async () => {
   }
 };
 
+// 1-1. 내 프로필 요약 조회
+export const getMyProfileSummary = async () => {
+  try {
+    const res = await api.get<ApiResponse<UserProfileSummary>>('/api/mypage/profile/summary');
+    console.log('[getMyProfileSummary] response:', res.data);
+    return res.data.result;
+  } catch (error: any) {
+    console.error(
+      '[getMyProfileSummary] 실패:',
+      error.response?.status,
+      error.response?.data || error
+    );
+    throw error;
+  }
+};
+
 // 2. 프로필 업데이트
 export const updateProfile = async (data: UpdateProfileRequest) => {
   try {

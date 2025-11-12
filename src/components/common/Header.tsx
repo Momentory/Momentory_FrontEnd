@@ -10,14 +10,17 @@ import Dropdown from "../../assets/icons/dropdown.svg?react";
 import Sidebar from "./SideBar";
 import { useWebSocket } from "../../hooks/notification/useWebSocket";
 import { getUnreadStatus } from "../../api/notification";
+import { getMyProfileSummary } from "../../api/mypage";
 import { getUserIdFromToken } from "../../utils/jwt";
 import { tokenStore } from "../../lib/token";
 
-const Header = ({ userName = "Username" }) => {
+const Header = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [hasNotification, setHasNotification] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [userName, setUserName] = useState("Username");
+  const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -35,6 +38,23 @@ const Header = ({ userName = "Username" }) => {
       setUnreadCount(notification.unreadCount);
     },
   });
+
+  // 프로필 정보 조회
+  useEffect(() => {
+    if (!userId) return;
+
+    const fetchProfile = async () => {
+      try {
+        const profile = await getMyProfileSummary();
+        setUserName(profile.nickname);
+        setProfileImageUrl(profile.imageUrl);
+      } catch (error) {
+        console.error("프로필 정보 조회 실패:", error);
+      }
+    };
+
+    fetchProfile();
+  }, [userId]);
 
   // 초기 미확인 알림 상태 조회
   useEffect(() => {
@@ -122,7 +142,15 @@ const Header = ({ userName = "Username" }) => {
 
             {/* Username + 드롭다운 */}
             <div className="relative flex items-center gap-2.5">
-              <Profile className="w-8 h-8" />
+              {profileImageUrl ? (
+                <img
+                  src={profileImageUrl}
+                  alt="프로필"
+                  className="w-8 h-8 rounded-full object-cover"
+                />
+              ) : (
+                <Profile className="w-8 h-8" />
+              )}
               <p className="text-white font-medium">{userName}</p>
               <button
                 onClick={() => setIsDropdownOpen((prev) => !prev)}
