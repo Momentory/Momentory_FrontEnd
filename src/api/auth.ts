@@ -1,8 +1,8 @@
 import { api } from './client';
 import { tokenStore } from '../lib/token';
 
-/* ----------------------------- 타입 정의 ----------------------------- */
 
+/* ----------------------------- 타입 정의 ----------------------------- */
 interface LoginResponse {
   result: {
     accessToken: string;
@@ -14,7 +14,7 @@ interface SignupPayload {
   email: string;
   password: string;
   nickname: string;
-  [key: string]: unknown; // 추가적인 필드가 있을 경우를 대비
+  [key: string]: unknown;
 }
 
 interface VerifyEmailResponse {
@@ -29,7 +29,6 @@ interface CheckResult {
 }
 
 /* ----------------------------- 회원가입 / 로그인 ----------------------------- */
-
 export const signup = (payload: SignupPayload) =>
   api.post('/api/auth/userSignup', JSON.stringify(payload), {
     headers: { 'Content-Type': 'application/json' },
@@ -37,21 +36,11 @@ export const signup = (payload: SignupPayload) =>
 
 export const login = async (payload: { email: string; password: string }) => {
   try {
-    const { data }: { data: LoginResponse } = await api.post(
-      '/api/auth/login',
-      payload
-    );
-
+    const { data }: { data: LoginResponse } = await api.post('/api/auth/login', payload);
     const { accessToken, refreshToken } = data.result;
 
-    tokenStore.set({
-      accessToken,
-      refreshToken,
-    });
-
-    // 로그인 성공 시 헤더에 즉시 적용
+    tokenStore.set({ accessToken, refreshToken });
     api.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
-
     return data;
   } catch (error) {
     console.error('Login Failed:', error);
@@ -72,21 +61,15 @@ export const logout = async () => {
 
 export const reissue = async () => {
   try {
-    const { data }: { data: LoginResponse } = await api.post(
-      '/api/auth/reissue',
-      {
-        refreshToken: tokenStore.getRefresh(),
-      }
-    );
+    const { data }: { data: LoginResponse } = await api.post('/api/auth/reissue', {
+      refreshToken: tokenStore.getRefresh(),
+    });
 
     tokenStore.set({
       accessToken: data.result.accessToken,
       refreshToken: data.result.refreshToken,
     });
-
-    api.defaults.headers.common['Authorization'] =
-      `Bearer ${data.result.accessToken}`;
-
+    api.defaults.headers.common['Authorization'] = `Bearer ${data.result.accessToken}`;
     return data.result;
   } catch (error) {
     console.error('토큰 재발급 실패:', error);
@@ -96,44 +79,27 @@ export const reissue = async () => {
 };
 
 /* ----------------------------- 이메일 / 닉네임 / 인증 관련 ----------------------------- */
-
 export const sendEmail = async (email: string) => {
-  const res = await api.post(
-    '/api/auth/send-email',
-    { email },
-    {
-      headers: {
-        'Content-Type': 'application/json', // 일반적인 JSON 전송으로 통일
-      },
-    }
-  );
+  const res = await api.post('/api/auth/send-email', email, {
+    headers: { 'Content-Type': 'text/plain' },
+  });
   return res.data;
 };
 
 export const checkEmail = async (email: string) => {
-  const { data } = await api.get('/api/auth/check-email', {
-    params: { email },
-  });
+  const encoded = encodeURIComponent(email);
+  const { data } = await api.get(`/api/auth/check-email?email=${encoded}`);
   return data;
 };
 
-export const checkEmailVerified = (email: string) =>
-  api.get('/api/auth/check-email-verified', { params: { email } });
-
-export const verifyEmail = async (
-  token: string
-): Promise<VerifyEmailResponse> => {
+export const verifyEmail = async (token: string): Promise<VerifyEmailResponse> => {
   const res = await api.get(`/api/auth/verify-email?token=${token}`);
   return res.data;
 };
 
-// 닉네임 중복 확인
 export const checkNickname = async (nickName: string): Promise<CheckResult> => {
   try {
-    const res = await api.get('/api/auth/check-nickname', {
-      params: { nickName },
-    });
-    // 서버 응답 구조에 따라 '중복 없음' 체크 로직 유지
+    const res = await api.get('/api/auth/check-nickname', { params: { nickName } });
     return { available: res.data.result === '중복 없음' };
   } catch (error) {
     console.error('닉네임 중복확인 실패:', error);
@@ -142,14 +108,11 @@ export const checkNickname = async (nickName: string): Promise<CheckResult> => {
 };
 
 /* ----------------------------- 비밀번호 ----------------------------- */
-
 export const validatePassword = async (
   password: string
 ): Promise<{ valid: boolean; message?: string }> => {
   try {
-    const { data } = await api.get('/api/auth/validate-password', {
-      params: { password },
-    });
+    const { data } = await api.get('/api/auth/validate-password', { params: { password } });
     return data;
   } catch (error) {
     console.error('비밀번호 유효성 검사 실패:', error);
@@ -157,12 +120,9 @@ export const validatePassword = async (
   }
 };
 
-export const changePassword = (payload: {
-  email: string;
-  newPassword: string;
-}) => api.patch('/api/auth/change-password', payload);
+export const changePassword = (payload: { email: string; newPassword: string }) =>
+  api.patch('/api/auth/change-password', payload);
 
 /* ----------------------------- 카카오 프로필 ----------------------------- */
-
 export const setKakaoProfile = (payload: Record<string, unknown>) =>
   api.post('/api/auth/kakao/profile', payload);

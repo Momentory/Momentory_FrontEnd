@@ -10,7 +10,7 @@ export default function KakaoCallback() {
     console.log("카카오 로그인 코드:", code);
     alert("임시 로그인 성공! 캐릭터 선택 페이지로 이동합니다.");
 
-    // ✅ 백엔드 없이 임시 로그인 처리
+    // 임시 로그인 처리
     localStorage.setItem("accessToken", "dummy-token");
     navigate("/auth/select-character");
   }, [navigate]);
