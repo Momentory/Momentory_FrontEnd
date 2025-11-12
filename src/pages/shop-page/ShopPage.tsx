@@ -1,18 +1,20 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DropdownHeader from '../../components/common/DropdownHeader';
 import StarIcon from '../../assets/icons/starIcon.svg?react';
 import EventIcon from '../../assets/icons/eventIcon.svg?react';
 import RecentIcon from '../../assets/icons/recentAddItem.svg?react';
-import RoseIcon from '../../assets/accessories/장미.svg';
-import RibbonIcon from '../../assets/accessories/리본.svg';
-import FeatherIcon from '../../assets/accessories/깃털.svg';
-import HatIcon from '../../assets/accessories/모자.svg';
+import ClosetIcon from '../../assets/accessories/closet.svg?react';
+import CatImage from '../../assets/accessories/cat.svg';
+import DogImage from '../../assets/accessories/dog.svg';
 import ShopBottomSheet from '../../components/Shop/ShopBottomSheet';
 import CharacterDisplay from '../../components/Shop/CharacterDisplay';
 import useBottomSheet from '../../hooks/shop/useBottomSheet';
+import { useUserPoint, useCurrentCharacter, useShopItems } from '../../hooks/shop/useShopQueries';
+import { usePurchaseItem } from '../../hooks/shop/usePurchaseItem';
 import Modal from '../../components/common/Modal';
 import PointIcon from '../../assets/icons/pointIcon.svg';
+import type { ItemCategory } from '../../types/shop';
 
 interface ShopAccessory {
   id: number;
@@ -25,54 +27,78 @@ interface ShopAccessory {
 
 const ShopPage = () => {
   const navigate = useNavigate();
-  const [level] = useState(35);
-  const [point, setPoint] = useState(1500);
-  const [gem] = useState(2000);
-  const [selectedCategory] = useState('장식');
+  const [selectedCategory, setSelectedCategory] = useState<ItemCategory>('DECORATION');
   const { height, isExpanded, setHeight, setIsExpanded } = useBottomSheet();
-  const [equippedAccessories] = useState<number[]>([]);
-  const [ownedAccessories, setOwnedAccessories] = useState<number[]>([1, 2]);
   const [selectedItem, setSelectedItem] = useState<ShopAccessory | null>(null);
   const [toastMessage, setToastMessage] = useState('');
 
-  const shopAccessories: ShopAccessory[] = [
-    {
-      id: 1,
-      name: '장미',
-      icon: RoseIcon,
-      locked: false,
-      type: '장식',
-      price: 100,
-    },
-    {
-      id: 2,
-      name: '리본',
-      icon: RibbonIcon,
-      locked: false,
-      type: '장식',
-      price: 150,
-    },
-    {
-      id: 3,
-      name: '깃털',
-      icon: FeatherIcon,
-      locked: false,
-      type: 'body',
-      price: 200,
-    },
-    {
-      id: 4,
-      name: '모자',
-      icon: HatIcon,
-      locked: false,
-      type: '장식',
-      price: 300,
-    },
-    { id: 5, name: '잠금1', icon: '', locked: true, type: '장식', price: 500 },
-    { id: 6, name: '잠금2', icon: '', locked: true, type: 'body', price: 800 },
-  ];
+  const categoryDisplayMap: { [key in ItemCategory]: string } = {
+    CLOTHING: '의상',
+    EXPRESSION: '표정',
+    EFFECT: '이펙트',
+    DECORATION: '장식',
+  };
 
-  // 액세서리 클릭
+  const getCategoryName = (category: string): string => {
+    return categoryDisplayMap[category as ItemCategory] || category;
+  };
+
+  const { data: pointData } = useUserPoint();
+  const { data: currentCharacter } = useCurrentCharacter();
+  const { data: shopItems = [], isLoading } = useShopItems(selectedCategory);
+
+  const purchaseMutation = usePurchaseItem({
+    currentCategory: selectedCategory,
+    onSuccess: () => {
+      setToastMessage('구매가 성공적으로 완료되었습니다!');
+      setSelectedItem(null);
+      setTimeout(() => setToastMessage(''), 2000);
+    },
+    onError: (error: any) => {
+      console.error('구매 실패:', error);
+      const errorMessage = error.response?.data?.message || '구매에 실패했습니다.';
+      setToastMessage(errorMessage);
+      setSelectedItem(null);
+      setTimeout(() => setToastMessage(''), 2000);
+    },
+  });
+
+  const handleCategoryChange = (category: string) => {
+    setSelectedCategory(category as ItemCategory);
+  };
+
+  const characterImage = useMemo(() => {
+    if (!currentCharacter) return CatImage;
+    return currentCharacter.characterType === 'CAT' ? CatImage : DogImage;
+  }, [currentCharacter]);
+
+  const level = currentCharacter?.level || 1;
+  const point = pointData?.userPoint.currentPoint || 0;
+  const gem = pointData?.userPoint.totalPoint || 0;
+
+  const equippedAccessories = useMemo(() => {
+    if (!currentCharacter) return [];
+    const equippedItemIds: number[] = [];
+    if (currentCharacter.equipped.clothing) equippedItemIds.push(currentCharacter.equipped.clothing.itemId);
+    if (currentCharacter.equipped.expression) equippedItemIds.push(currentCharacter.equipped.expression.itemId);
+    if (currentCharacter.equipped.effect) equippedItemIds.push(currentCharacter.equipped.effect.itemId);
+    if (currentCharacter.equipped.decoration) equippedItemIds.push(currentCharacter.equipped.decoration.itemId);
+    return equippedItemIds;
+  }, [currentCharacter]);
+
+  const ownedAccessories = useMemo(() => {
+    return shopItems.filter((item) => item.owned).map((item) => item.itemId);
+  }, [shopItems]);
+
+  const shopAccessories: ShopAccessory[] = shopItems.map((item) => ({
+    id: item.itemId,
+    name: item.name,
+    icon: item.imageUrl,
+    locked: item.unlockLevel > level,
+    type: item.category,
+    price: item.price,
+  }));
+
   const handleAccessoryClick = (id: number) => {
     const accessory = shopAccessories.find((acc) => acc.id === id);
     if (!accessory || accessory.locked) return;
@@ -81,11 +107,9 @@ const ShopPage = () => {
       return;
     }
 
-    // 구매 확인 모달 띄우기
     setSelectedItem(accessory);
   };
 
-  // 모달 내 "구매" 버튼 클릭
   const handleConfirmPurchase = () => {
     if (!selectedItem) return;
 
@@ -96,12 +120,7 @@ const ShopPage = () => {
       return;
     }
 
-    // 구매 성공
-    setPoint(point - selectedItem.price);
-    setOwnedAccessories([...ownedAccessories, selectedItem.id]);
-    setToastMessage('구매가 성공적으로 완료되었습니다!');
-    setSelectedItem(null);
-    setTimeout(() => setToastMessage(''), 2000);
+    purchaseMutation.mutate(selectedItem.id);
   };
 
   const displayAccessories = shopAccessories.map((acc) => ({
@@ -114,17 +133,34 @@ const ShopPage = () => {
 
   return (
     <div className="flex flex-col h-screen bg-white overflow-hidden">
-      <DropdownHeader title="상점" />
-
-      <CharacterDisplay
-        level={level}
-        gem={gem}
-        point={point}
-        equippedAccessories={equippedAccessories}
-        accessories={displayAccessories}
+      <DropdownHeader
+        title="상점"
+        rightItem={
+          <button
+            onClick={() => navigate('/closet')}
+            className="flex items-center justify-center w-8 h-8 cursor-pointer"
+          >
+            <ClosetIcon className="w-6 h-6" />
+          </button>
+        }
       />
 
-      {/* 하단 버튼들 */}
+      <div className="pt-[116px] flex-1 flex flex-col">
+        {isLoading ? (
+          <div className="flex items-center justify-center h-full">
+            <p className="text-gray-500">상점 아이템을 불러오는 중...</p>
+          </div>
+        ) : (
+          <>
+            <CharacterDisplay
+              level={level}
+              gem={gem}
+              point={point}
+              equippedAccessories={equippedAccessories}
+              accessories={displayAccessories}
+              characterImage={characterImage}
+            />
+
       <div
         className="fixed max-w-[480px] mx-auto px-4 left-0 right-0 flex justify-between items-center gap-4 z-[100] pointer-events-auto transition-all duration-300"
         style={{ bottom: `${height + 16}px` }}
@@ -148,18 +184,18 @@ const ShopPage = () => {
         </div>
       </div>
 
-      {/* 하단 시트 */}
       <ShopBottomSheet
         height={height}
         setHeight={setHeight}
         isExpanded={isExpanded}
         setIsExpanded={setIsExpanded}
         accessories={shopAccessories}
-        selectedCategory={selectedCategory}
+        selectedCategory={categoryDisplayMap[selectedCategory]}
         ownedAccessories={ownedAccessories}
         equippedAccessories={equippedAccessories}
         onAccessoryClick={handleAccessoryClick}
         userPoints={point}
+        onCategoryChange={handleCategoryChange}
       />
 
       {selectedItem && (
@@ -175,7 +211,7 @@ const ShopPage = () => {
                 <span className="text-[#FF7070] font-semibold">
                   [{selectedItem.name}]
                 </span>{' '}
-                {selectedItem.type}을(를)
+                {getCategoryName(selectedItem.type)}을(를)
               </span>
               <span className="w-1.5"></span>
               <span className="whitespace-nowrap inline-flex items-center">
@@ -201,11 +237,14 @@ const ShopPage = () => {
         </Modal>
       )}
 
-      {toastMessage && (
-        <div className="fixed bottom-10 left-5 right-5 rounded-3xl bg-black/50 px-4 py-2 text-center text-base font-bold text-white animate-fade-in z-[1000]">
-          {toastMessage}
-        </div>
+          {toastMessage && (
+            <div className="fixed bottom-10 left-5 right-5 rounded-3xl bg-black/50 px-4 py-2 text-center text-base font-bold text-white animate-fade-in z-[1000]">
+              {toastMessage}
+            </div>
+          )}
+        </>
       )}
+      </div>
     </div>
   );
 };
