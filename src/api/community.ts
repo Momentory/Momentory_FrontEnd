@@ -36,34 +36,49 @@ export const deleteCommunityPost = async (postId: number) => {
 
 /* ----------------------------- 댓글 관련 ----------------------------- */
 
-// 댓글 목록 조회
+//  댓글 목록 조회 (디버깅 로그 포함)
 export const getComments = async (postId: number) => {
-  const res = await api.get(`/api/community/posts/${postId}/comments`);
-  return res.data;
+  try {
+    const res = await api.get(`/community/posts/${postId}/comments`);
+    console.log(" [API] 댓글 목록 응답:", res.data);
+    return res;
+  } catch (error) {
+    console.error("[API] 댓글 목록 불러오기 실패:", error);
+    throw error;
+  }
 };
 
-// 댓글 등록
-export const postComment = async (postId: number, content: string) => {
-  const res = await api.post(`/api/community/posts/${postId}/comments`, {
-    content,
+
+// 댓글 작성
+export const createComment = (postId: number, payload: { content: string }) =>
+  api.post(`/community/posts/${postId}/comments`, payload, {
+    headers: { "Content-Type": "application/json" },
   });
-  return res.data;
-};
 
-// 댓글 수정
+
+/* ------------------------ 댓글 수정 ------------------------ */
 export const updateComment = async (commentId: number, content: string) => {
-  const res = await api.put(`/api/community/posts/comments/${commentId}`, {
-    content,
-  });
-  return res.data;
+  try {
+    const res = await api.put(`/community/posts/comments/${commentId}`, { content });
+    console.log(" [API] 댓글 수정 응답:", res.data);
+    return res;
+  } catch (error) {
+    console.error(" [API] 댓글 수정 실패:", error);
+    throw error;
+  }
 };
 
-// 댓글 삭제
+/* ------------------------ 댓글 삭제 ------------------------ */
 export const deleteComment = async (commentId: number) => {
-  const res = await api.delete(`/api/community/posts/comments/${commentId}`);
-  return res.data;
+  try {
+    const res = await api.delete(`/api/community/posts/comments/${commentId}`);
+    console.log(" [API] 댓글 삭제 응답:", res.data);
+    return res;
+  } catch (error) {
+    console.error(" [API] 댓글 삭제 실패:", error);
+    throw error;
+  }
 };
-
 /* ----------------------------- 게시글 반응 ----------------------------- */
 
 // 좋아요 토글

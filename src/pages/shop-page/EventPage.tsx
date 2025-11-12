@@ -3,16 +3,16 @@ import DropdownHeader from '../../components/common/DropdownHeader';
 import Modal from '../../components/common/Modal';
 import Bg from '../../assets/accessories/bgImg.svg';
 import PointIcon from '../../assets/icons/pointIcon.svg';
-import type { ShopAccessory } from '../../types/shop';
+import type { ShopItem } from '../../types/shop';
 import EventCard from '../../components/Shop/EventCard';
 import { getShopEvents, purchaseItem } from '../../api/shop';
 
 const EventPage = () => {
   const [point, setPoint] = useState(1500);
   const [ownedAccessories, setOwnedAccessories] = useState<number[]>([]);
-  const [selectedItem, setSelectedItem] = useState<ShopAccessory | null>(null);
+  const [selectedItem, setSelectedItem] = useState<ShopItem | null>(null);
   const [toastMessage, setToastMessage] = useState('');
-  const [eventItems, setEventItems] = useState<ShopAccessory[]>([]);
+  const [eventItems, setEventItems] = useState<ShopItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -32,8 +32,8 @@ const EventPage = () => {
     }
   };
 
-  const handleItemClick = (item: ShopAccessory) => {
-    if (ownedAccessories.includes(item.id)) {
+  const handleItemClick = (item: ShopItem) => {
+    if (ownedAccessories.includes(item.itemId)) {
       setToastMessage('이미 보유한 아이템입니다.');
       setTimeout(() => setToastMessage(''), 2000);
       return;
@@ -52,9 +52,9 @@ const EventPage = () => {
     }
 
     try {
-      await purchaseItem(selectedItem.id);
+      await purchaseItem(selectedItem.itemId);
       setPoint(point - selectedItem.price);
-      setOwnedAccessories([...ownedAccessories, selectedItem.id]);
+      setOwnedAccessories([...ownedAccessories, selectedItem.itemId]);
       setToastMessage('구매가 성공적으로 완료되었습니다!');
       setSelectedItem(null);
       setTimeout(() => setToastMessage(''), 2000);
@@ -80,7 +80,7 @@ const EventPage = () => {
           <div className="flex flex-col gap-4">
             {eventItems.map((item) => (
               <EventCard
-                key={item.id}
+                key={item.itemId}
                 item={item}
                 onClick={() => handleItemClick(item)}
               />
@@ -95,7 +95,7 @@ const EventPage = () => {
         <Modal title="아이템 구입" onClose={() => setSelectedItem(null)}>
           <div className="flex flex-col items-center text-center px-3.5">
             <img
-              src={selectedItem.icon}
+              src={selectedItem.imageUrl}
               alt={selectedItem.name}
               className="w-20 h-20 mb-4 rounded-xl border border-gray-200"
             />
@@ -104,7 +104,7 @@ const EventPage = () => {
                 <span className="text-[#FF7070] font-semibold">
                   [{selectedItem.name}]
                 </span>{' '}
-                {selectedItem.type}을(를)
+                {selectedItem.category}을(를)
               </span>
               <span className="w-1.5"></span>
               <span className="whitespace-nowrap inline-flex items-center">

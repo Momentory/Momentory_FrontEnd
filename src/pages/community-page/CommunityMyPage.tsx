@@ -169,7 +169,6 @@ export default function CommunityMyPage() {
                   },
                 });
               } else {
-                // 다른 이미지는 클릭해도 아무 동작 없음 (원하면 다른 조건도 추가 가능)
                 console.log("이 게시글은 상세 페이지 연결 없음:", src);
               }
             }}

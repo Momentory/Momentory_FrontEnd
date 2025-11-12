@@ -32,3 +32,20 @@ export function downloadBlob(blob: Blob, filename: string): void {
   document.body.removeChild(link);
   URL.revokeObjectURL(blobUrl);
 }
+
+// s3 연결하면서 추가된 부분
+/**
+ * data URL을 File 객체로 변환하는 유틸리티 함수
+ * @param dataUrl 변환할 data URL
+ * @param fileName 생성될 파일명
+ */
+export async function dataUrlToFile(
+  dataUrl: string,
+  fileName: string
+): Promise<File> {
+  const response = await fetch(dataUrl);
+  const blob = await response.blob();
+  const mimeMatch = dataUrl.match(/^data:(.*?);/);
+  const mimeType = mimeMatch ? mimeMatch[1] : blob.type || 'image/png';
+  return new File([blob], fileName, { type: mimeType });
+}

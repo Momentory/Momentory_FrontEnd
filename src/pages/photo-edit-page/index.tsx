@@ -10,11 +10,36 @@ import TransformTab from '../../components/PhotoEdit/TransformTab';
 
 type TabType = 'adjust' | 'filter' | 'transform';
 
+type UploadContext = {
+  description: string;
+  isPrivate: boolean;
+  markerColor: string;
+  markerLocation: {
+    address: string;
+    lat: number;
+    lng: number;
+  };
+  cityName: string;
+};
+
 export default function PhotoEditPage() {
   const location = useLocation();
   const navigate = useNavigate();
+  const state = location.state as
+    | {
+        imageUrl?: string;
+        uploadContext?: UploadContext;
+        uploadResult?: {
+          imageName: string;
+          imageUrl: string;
+        };
+      }
+    | undefined;
+
+  const uploadContext = state?.uploadContext;
+  const uploadResult = state?.uploadResult;
   const [selectedImage, setSelectedImage] = useState(
-    location.state?.imageUrl || '/images/everland.jpg'
+    state?.imageUrl || '/images/everland.jpg'
   );
 
   const [activeTab, setActiveTab] = useState<TabType>('adjust');
@@ -59,7 +84,19 @@ export default function PhotoEditPage() {
     },
   ];
 
+  useEffect(() => {
+    if (!state?.imageUrl || !uploadContext || !uploadResult) {
+      navigate('/upload', { replace: true });
+    }
+  }, [state?.imageUrl, uploadContext, uploadResult, navigate]);
+
   const handleNext = async () => {
+    if (!uploadContext || !uploadResult) {
+      alert('업로드 정보를 찾을 수 없습니다. 처음부터 다시 진행해주세요.');
+      navigate('/upload', { replace: true });
+      return;
+    }
+
     // 공통 state 객체를 미리 생성
     const baseState = {
       brightness,
@@ -69,8 +106,10 @@ export default function PhotoEditPage() {
       selectedFilter,
       rotation,
       position,
-      markerColor: location.state?.markerColor,
-      markerLocation: location.state?.markerLocation,
+      markerColor: uploadContext.markerColor,
+      markerLocation: uploadContext.markerLocation,
+      uploadContext,
+      uploadResult,
     };
 
     if (!imageContainerRef.current || !imageRef.current) {

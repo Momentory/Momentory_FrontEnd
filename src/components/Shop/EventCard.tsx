@@ -1,9 +1,9 @@
-import type { ShopAccessory } from '../../types/shop';
+import type { ShopItem } from '../../types/shop';
 import PointIcon from '../../assets/icons/pointIcon.svg';
 import NoEventIcon from '../../assets/icons/noEvent.svg?react';
 
 interface EventCardProps {
-  item: ShopAccessory | null;
+  item: ShopItem | null;
   onClick: () => void;
   children?: React.ReactNode;
 }
@@ -20,11 +20,11 @@ const EventCard = ({ item, onClick, children }: EventCardProps) => (
         <>
           <div className="rounded-xl p-[3px] bg-gradient-to-b from-[#F5A753] to-[#A97742]">
             <div className="bg-white rounded-lg">
-              <img src={item.icon} alt={item.name} className="w-20 h-20" />
+              <img src={item.imageUrl} alt={item.name} className="w-20 h-20" />
             </div>
           </div>
           <h2 className="text-xl font-bold text-[#D24848]">{item.name}</h2>
-          <p className="text-sm text-gray-500">{item.description}</p>
+          <p className="text-sm text-gray-500">{item.category}</p>
           <button
             onClick={onClick}
             className="flex items-center justify-center gap-2 px-10 py-3 mt-5 cursor-pointer text-lg font-bold text-white bg-[#FF7070] rounded-[20px]"
