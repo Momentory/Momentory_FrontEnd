@@ -315,9 +315,9 @@ export default function PhotoUploadCompletePage() {
         </Modal>
       )}
 
-      <div className="w-full max-w-[480px] mx-auto px-10 pt-15">
+      <div className="w-full max-w-[480px] mx-auto px-10 pt-10">
         <div className="mb-10">
-          <h1 className="text-[29px] font-bold text-left text-[#444444]">
+          <h1 className="text-[29px] font-extrabold text-left text-[#444444]">
             사진 업로드가
             <br />
             완료되었어요!
@@ -325,13 +325,20 @@ export default function PhotoUploadCompletePage() {
         </div>
 
         <div className="mb-20 flex justify-center">
-          <div className="relative w-[280px] bg-white border-2 border-[#B3B3B3] overflow-visible shadow-xl">
-            <div className="px-5 pt-5 pb-15">
-              <div className="w-full" style={{ aspectRatio: '340 / 290' }}>
+          <div className="relative w-[280px] bg-white border-2 border-[#B3B3B3] shadow-xl">
+            <div className="px-5 pt-5 pb-[60px]">
+              <div
+                className="w-full bg-gray-100"
+                style={{ aspectRatio: '340 / 290' }}
+              >
                 <img
                   src={uploadedImage}
                   alt="업로드된 사진"
                   className="w-full h-full object-cover"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.src = '/images/default.jpg';
+                  }}
                 />
               </div>
             </div>
@@ -354,10 +361,10 @@ export default function PhotoUploadCompletePage() {
       </div>
 
       <div className="w-full max-w-[480px] mx-auto bg-[#F8F1F1] rounded-xl p-4">
-        <p className="text-center text-[#B28B8B] mb-6">
+        <p className="text-center text-[#B28B8B] font-bold mb-6">
           공유할 채널을 선택하세요
         </p>
-        <div className="flex justify-center gap-10">
+        <div className="flex justify-center gap-8 sm:gap-10 md:gap-12 flex-wrap">
           <button
             onClick={handleCopyLink}
             className="flex flex-col items-center gap-1"
@@ -400,7 +407,7 @@ export default function PhotoUploadCompletePage() {
         </div>
       </div>
 
-      <div className="w-full max-w-[480px] mx-auto mb-8">
+      <div className="w-full max-w-[480px] mx-auto mb-20 pb-8">
         <div className="bg-[#FF7070] p-5 mb-4">
           <h2 className="text-white font-bold text-lg text-left px-5">
             추가로 이런 관광지는 어떠세요?
