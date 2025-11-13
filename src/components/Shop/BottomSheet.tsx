@@ -8,6 +8,7 @@ export interface Accessory {
   icon: string;
   locked: boolean;
   type: string;
+  unlockLevel?: number;
 }
 
 export interface BottomSheetProps {
@@ -36,6 +37,16 @@ export default function BottomSheet({
   const [isDragging, setIsDragging] = React.useState(false);
   const [hasMoved, setHasMoved] = React.useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
+  const [hoveredItem, setHoveredItem] = React.useState<number | null>(null);
+
+  React.useEffect(() => {
+    if (hoveredItem !== null) {
+      const timer = setTimeout(() => {
+        setHoveredItem(null);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [hoveredItem]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -50,7 +61,7 @@ export default function BottomSheet({
       if (deltaY > 5) setHasMoved(true);
 
       const actualDeltaY = startY - e.clientY;
-      const newHeight = Math.max(100, Math.min(460, startHeight + actualDeltaY));
+      const newHeight = Math.max(100, Math.min(400, startHeight + actualDeltaY));
       setHeight(newHeight);
     };
 
@@ -65,20 +76,20 @@ export default function BottomSheet({
             setHeight(100);
             setIsExpanded(false);
           } else {
-            setHeight(460);
+            setHeight(350);
             setIsExpanded(true);
           }
         }, 0);
       } else {
         if (deltaY > 50) {
-          setHeight(460);
+          setHeight(350);
           setIsExpanded(true);
         } else if (deltaY < -50) {
           setHeight(100);
           setIsExpanded(false);
         } else {
-          if (height > 280) {
-            setHeight(460);
+          if (height > 225) {
+            setHeight(350);
             setIsExpanded(true);
           } else {
             setHeight(100);
@@ -107,7 +118,7 @@ const handleTouchStart = (e: React.TouchEvent) => {
     const deltaY = Math.abs(startY - e.touches[0].clientY);
     if (deltaY > 10) setHasMoved(true);
     const actualDeltaY = startY - e.touches[0].clientY;
-    const newHeight = Math.max(100, Math.min(460, startHeight + actualDeltaY));
+    const newHeight = Math.max(100, Math.min(500, startHeight + actualDeltaY));
     setHeight(newHeight);
   };
 
@@ -122,20 +133,20 @@ const handleTouchStart = (e: React.TouchEvent) => {
           setHeight(100);
           setIsExpanded(false);
         } else {
-          setHeight(460);
+          setHeight(500);
           setIsExpanded(true);
         }
       }, 50);
     } else {
       if (deltaY > 50) {
-        setHeight(460);
+        setHeight(500);
         setIsExpanded(true);
       } else if (deltaY < -50) {
         setHeight(100);
         setIsExpanded(false);
       } else {
-        if (height > 280) {
-          setHeight(460);
+        if (height > 300) {
+          setHeight(500);
           setIsExpanded(true);
         } else {
           setHeight(100);
@@ -251,34 +262,57 @@ const handleTouchStart = (e: React.TouchEvent) => {
         </div>
       </div>
 
-      <div className="px-6 pb-6">
+      {hoveredItem && (
+        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 px-4 py-3 bg-black/90 text-white text-sm rounded-xl whitespace-nowrap z-[9999] shadow-xl max-w-[90%]">
+          <div className="font-bold text-base mb-1">
+            {accessories.find(a => a.id === hoveredItem)?.name}
+          </div>
+          {accessories.find(a => a.id === hoveredItem)?.unlockLevel && (
+            <div className="text-gray-300 text-xs">
+              Lv.{accessories.find(a => a.id === hoveredItem)?.unlockLevel} 일 때 획득할 수 있어요
+            </div>
+          )}
+        </div>
+      )}
+
+      <div className="px-6 pb-6 relative">
         <div className="grid grid-cols-4 gap-3 overflow-y-auto max-h-[360px]">
           {accessories.map((accessory) => {
             const isEquipped = equippedAccessories.includes(accessory.id);
             return (
-              <button
+              <div
                 key={accessory.id}
-                onClick={() => onAccessoryClick(accessory.id)}
-                className={`aspect-square w-full flex items-center justify-center rounded-xl transition-all relative ${
-                  accessory.locked
-                    ? 'bg-white border-2 border-gray-300 cursor-not-allowed'
-                    : isEquipped
-                    ? 'bg-white border-2 border-[#FF7070]'
-                    : 'bg-white border-2 border-black'
-                }`}
+                className="relative"
               >
-                {accessory.locked ? (
-                  <div className="flex items-center justify-center">
-                    <LockIcon className="w-8 h-8 text-gray-400" />
-                  </div>
-                ) : (
-                  <img
-                    src={accessory.icon}
-                    alt={accessory.name}
-                    className="max-w-full max-h-full object-contain"
-                  />
-                )}
-              </button>
+                <button
+                  onClick={() => {
+                    if (accessory.locked) {
+                      setHoveredItem(hoveredItem === accessory.id ? null : accessory.id);
+                    } else {
+                      onAccessoryClick(accessory.id);
+                    }
+                  }}
+                  className={`aspect-square w-full flex items-center justify-center rounded-xl transition-all relative ${
+                    accessory.locked
+                      ? 'bg-white border-2 border-gray-300 cursor-pointer'
+                      : isEquipped
+                      ? 'bg-white border-2 border-[#FF7070]'
+                      : 'bg-white border-2 border-black'
+                  }`}
+                >
+                  {accessory.locked ? (
+                    <div className="flex items-center justify-center">
+                      <LockIcon className="w-8 h-8 text-gray-400" />
+                    </div>
+                  ) : (
+                    <img
+                      src={accessory.icon}
+                      alt={accessory.name}
+                      className="max-w-full max-h-full object-contain"
+                    />
+                  )}
+                </button>
+              </div>
             );
           })}
         </div>

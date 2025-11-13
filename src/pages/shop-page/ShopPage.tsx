@@ -97,6 +97,7 @@ const ShopPage = () => {
     locked: item.unlockLevel > level,
     type: item.category,
     price: item.price,
+    unlockLevel: item.unlockLevel,
   }));
 
   const handleAccessoryClick = (id: number) => {
@@ -123,13 +124,52 @@ const ShopPage = () => {
     purchaseMutation.mutate(selectedItem.id);
   };
 
-  const displayAccessories = shopAccessories.map((acc) => ({
-    id: acc.id,
-    name: acc.name,
-    icon: acc.icon,
-    locked: acc.locked,
-    type: acc.type,
-  }));
+
+  // 캐릭터에 착용된 모든 아이템 정보 (모든 카테고리)
+  const allEquippedAccessories = useMemo(() => {
+    if (!currentCharacter) return [];
+    const equipped = currentCharacter.equipped;
+    const equippedItems = [];
+
+    if (equipped.clothing) {
+      equippedItems.push({
+        id: equipped.clothing.itemId,
+        name: equipped.clothing.name,
+        icon: equipped.clothing.imageUrl,
+        locked: false,
+        type: 'CLOTHING',
+      });
+    }
+    if (equipped.expression) {
+      equippedItems.push({
+        id: equipped.expression.itemId,
+        name: equipped.expression.name,
+        icon: equipped.expression.imageUrl,
+        locked: false,
+        type: 'EXPRESSION',
+      });
+    }
+    if (equipped.effect) {
+      equippedItems.push({
+        id: equipped.effect.itemId,
+        name: equipped.effect.name,
+        icon: equipped.effect.imageUrl,
+        locked: false,
+        type: 'EFFECT',
+      });
+    }
+    if (equipped.decoration) {
+      equippedItems.push({
+        id: equipped.decoration.itemId,
+        name: equipped.decoration.name,
+        icon: equipped.decoration.imageUrl,
+        locked: false,
+        type: 'DECORATION',
+      });
+    }
+
+    return equippedItems;
+  }, [currentCharacter]);
 
   return (
     <div className="flex flex-col h-screen bg-white overflow-hidden">
@@ -157,8 +197,10 @@ const ShopPage = () => {
               point={point}
               gem={gem}
               equippedAccessories={equippedAccessories}
-              accessories={displayAccessories}
+              accessories={allEquippedAccessories}
               characterImage={characterImage}
+              characterType={currentCharacter?.characterType}
+              bottomSheetHeight={height}
             />
 
       <div

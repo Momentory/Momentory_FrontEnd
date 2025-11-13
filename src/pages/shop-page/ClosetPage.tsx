@@ -76,7 +76,8 @@ const ClosetPage = () => {
         name: item.name,
         icon: item.imageUrl,
         locked: true,
-        type: item.category.toLowerCase()
+        type: item.category.toLowerCase(),
+        unlockLevel: item.unlockLevel
       }));
 
     return [...ownedAccessories, ...lockedAccessories];
@@ -179,6 +180,8 @@ const ClosetPage = () => {
           equippedAccessories={equippedAccessories}
           accessories={allEquippedAccessories}
           characterImage={characterImage}
+          characterType={currentCharacter?.characterType}
+          bottomSheetHeight={height}
         />
 
       <div

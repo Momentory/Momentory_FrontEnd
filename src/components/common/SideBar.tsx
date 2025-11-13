@@ -63,12 +63,12 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
     <>
       <div
         onClick={onClose}
-        className={`absolute inset-0 bg-stone-700/60 z-200 transition-opacity duration-300 ${isOpen ? "opacity-100 visible" : "opacity-0 invisible"
+        className={`absolute inset-0 bg-stone-700/60 z-9999 transition-opacity duration-300 ${isOpen ? "opacity-100 visible" : "opacity-0 invisible"
           }`}
       ></div>
 
       <aside
-        className={`absolute top-0 left-0 h-full w-[82vw] max-w-[480px] bg-white shadow-lg z-200 transition-transform duration-300 ease-in-out overflow-y-auto 
+        className={`absolute top-0 left-0 h-full w-[82vw] max-w-[480px] bg-white shadow-lg z-9999 transition-transform duration-300 ease-in-out overflow-y-auto 
         ${isOpen ? "translate-x-0" : "-translate-x-full"}`}
       >
         <div className="bg-[#FF7070] text-white pl-4.5 py-7">

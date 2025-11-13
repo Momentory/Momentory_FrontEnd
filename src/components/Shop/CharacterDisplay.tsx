@@ -1,6 +1,7 @@
 import PointIcon from '../../assets/icons/pointIcon.svg?react';
 import Bg from '../../assets/accessories/bgImg.svg';
-import GemIcon from '../../assets/icons/gemIcon.svg?react'
+import GemIcon from '../../assets/icons/gemIcon.svg?react';
+import { getItemTransform, transformToCSS } from '../../config/itemPositions';
 
 interface Accessory {
   id: number;
@@ -17,6 +18,8 @@ interface CharacterDisplayProps {
   equippedAccessories: number[];
   accessories: Accessory[];
   characterImage: string;
+  characterType?: string;
+  bottomSheetHeight?: number;
 }
 
 const CharacterDisplay = ({
@@ -26,10 +29,11 @@ const CharacterDisplay = ({
   equippedAccessories,
   accessories,
   characterImage,
+  bottomSheetHeight = 100,
 }: CharacterDisplayProps) => {
   return (
-    <div className="relative flex-1 h-full overflow-hidden pt-[60px]">
-      <div className="absolute inset-0">
+    <>
+      <div className="fixed inset-0 max-w-[480px] mx-auto left-0 right-0 z-0">
         <img src={Bg} alt="background" className="w-full h-full object-cover" />
       </div>
 
@@ -43,24 +47,34 @@ const CharacterDisplay = ({
         </div>
       </div>
 
-      <div className="absolute inset-0 flex items-center justify-center px-16">
-        <div className="relative w-full h-full">
+      <div
+        className="fixed inset-0 flex items-end justify-center px-16 max-w-[480px] mx-auto left-0 right-0 z-10 transition-all duration-300"
+        style={{ paddingBottom: `${bottomSheetHeight + 32}px` }}
+      >
+        <div className="relative w-full max-w-[300px] aspect-square">
           <img src={characterImage} alt="character" className="w-full h-full object-contain" />
           {equippedAccessories.map((id) => {
             const acc = accessories.find((a) => a.id === id);
-            if (!acc) return null;
+            if (!acc || !acc.type) return null;
+
+            const itemTransform = getItemTransform(id, acc.type.toUpperCase());
+            const transformStyle = transformToCSS(itemTransform);
+
             return (
               <img
                 key={id}
                 src={acc.icon}
                 alt={acc.name}
+                style={{
+                  transform: transformStyle,
+                }}
                 className="absolute inset-0 w-full h-full object-contain pointer-events-none"
               />
             );
           })}
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
