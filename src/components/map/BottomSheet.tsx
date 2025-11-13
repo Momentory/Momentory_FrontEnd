@@ -30,6 +30,7 @@ export default function BottomSheet({
 
   const MAX_HEIGHT = 516;
   const MIN_HEIGHT = 100;
+  const BOTTOM_BAR_HEIGHT = 80; // bottom navigation bar 높이
 
   const {
     data: myRegionPhotos,
@@ -214,15 +215,28 @@ export default function BottomSheet({
   };
 
   return (
-    <div
-      className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[450px] overflow-hidden rounded-t-2xl bg-white shadow-lg transition-all duration-300"
-      style={{ height: `${height}px` }}
-    >
+    <>
+      {/* 외부 클릭 감지용 오버레이 (bottom bar 제외) */}
+      {isExpanded && (
+        <div
+          className="fixed top-0 left-0 right-0 z-[49] bg-black/20"
+          style={{ bottom: '80px' }}
+          onClick={() => {
+            setHeight(MIN_HEIGHT);
+            setIsExpanded(false);
+          }}
+        />
+      )}
+
       <div
-        className="mx-auto mt-4 h-1 w-20 cursor-pointer rounded-full bg-[#E2E2E2]"
-        onMouseDown={handleDrag}
-        onClick={handleClick}
-      />
+        className="absolute left-1/2 -translate-x-1/2 w-[450px] overflow-hidden rounded-t-2xl bg-white shadow-lg transition-all duration-300 z-50"
+        style={{ height: `${height}px`, bottom: `${BOTTOM_BAR_HEIGHT}px` }}
+      >
+        <div
+          className="mx-auto mt-4 h-1 w-20 cursor-pointer rounded-full bg-[#E2E2E2]"
+          onMouseDown={handleDrag}
+          onClick={handleClick}
+        />
 
       <div className="p-6 pb-14">
         <h2 className="mb-1 text-[25px] font-bold">
@@ -254,6 +268,7 @@ export default function BottomSheet({
 
         {renderContent()}
       </div>
-    </div>
+      </div>
+    </>
   );
 }

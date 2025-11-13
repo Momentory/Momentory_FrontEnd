@@ -78,6 +78,12 @@ export function useUploadTask({
           memo: uploadContext.description,
         };
 
+        console.log('📤 사진 업로드 요청:', {
+          cityName: payload.cityName,
+          latitude: payload.latitude,
+          longitude: payload.longitude,
+        });
+
         const photoResponse = await uploadPhotoMutate(payload);
         if (isCancelled) return;
 

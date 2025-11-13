@@ -9,6 +9,7 @@ interface UseMapZoomOptions {
 export default function useMapZoom({ markers }: UseMapZoomOptions) {
   const [zoomed, setZoomed] = useState(false);
   const [activeMarkerId, setActiveMarkerId] = useState<number | null>(null);
+  const [isPinching, setIsPinching] = useState(false);
   const originPosRef = useRef<{ top: string; left: string } | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const pinchStartDistRef = useRef<number | null>(null);
@@ -16,6 +17,7 @@ export default function useMapZoom({ markers }: UseMapZoomOptions) {
   const scaleRef = useRef(1);
   const pinchBaseScaleRef = useRef(1);
   const [scale, setScale] = useState(1);
+  const rafIdRef = useRef<number | null>(null);
 
   const getDistance = useCallback(
     (
@@ -87,6 +89,7 @@ export default function useMapZoom({ markers }: UseMapZoomOptions) {
     (e: React.TouchEvent) => {
       if (e.touches.length === 2) {
         isPinchingRef.current = true;
+        setIsPinching(true);
         pinchStartDistRef.current = getDistance(e.touches[0], e.touches[1]);
         pinchBaseScaleRef.current = scaleRef.current;
         setOriginFromMidpoint(e.touches[0], e.touches[1]);
@@ -99,18 +102,32 @@ export default function useMapZoom({ markers }: UseMapZoomOptions) {
     (e: React.TouchEvent) => {
       if (!isPinchingRef.current || e.touches.length !== 2) return;
       e.preventDefault();
+
+      // requestAnimationFrame으로 성능 최적화
+      if (rafIdRef.current) {
+        cancelAnimationFrame(rafIdRef.current);
+      }
+
       const currentDist = getDistance(e.touches[0], e.touches[1]);
       const startDist = pinchStartDistRef.current || currentDist;
       const ratio = currentDist / startDist;
       const next = Math.max(1, Math.min(2, pinchBaseScaleRef.current * ratio));
-      updateZoomState(next);
-      setOriginFromMidpoint(e.touches[0], e.touches[1]);
+
+      rafIdRef.current = requestAnimationFrame(() => {
+        updateZoomState(next);
+        setOriginFromMidpoint(e.touches[0], e.touches[1]);
+      });
     },
     [getDistance, setOriginFromMidpoint, updateZoomState]
   );
 
   const handleTouchEnd = useCallback(() => {
+    if (rafIdRef.current) {
+      cancelAnimationFrame(rafIdRef.current);
+      rafIdRef.current = null;
+    }
     isPinchingRef.current = false;
+    setIsPinching(false);
     pinchStartDistRef.current = null;
   }, []);
 
@@ -161,6 +178,7 @@ export default function useMapZoom({ markers }: UseMapZoomOptions) {
     originPosRef,
     containerRef,
     scale,
+    isPinching,
     handleWheel,
     handleTouchStart,
     handleTouchMove,

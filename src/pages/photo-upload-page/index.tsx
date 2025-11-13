@@ -3,9 +3,9 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import DropdownHeader from '../../components/common/DropdownHeader';
 import ColorPickerModal from '../../components/PhotoUpload/ColorPickerModal';
 import MapMarkerSection from '../../components/PhotoUpload/MapMarkerSection';
-import { extractGPSFromImage, reverseGeocode } from '../../utils/imageMetadata';
+import { extractGPSFromImage } from '../../utils/imageMetadata';
 import { useMarkerStore } from '../../stores/markerStore';
-import { gpsToMapPosition, extractCityName } from '../../utils/mapCoordinates';
+import { gpsToMapPosition } from '../../utils/mapCoordinates';
 import marker1 from '../../assets/map-marker1.svg';
 import { useLocationToAddress } from '../../hooks/photo/usePhotoQueries';
 import { uploadFile } from '../../api/S3';
@@ -37,6 +37,7 @@ export default function PhotoUploadPage() {
     address: '부천시 역곡동',
     lat: 37.5665,
     lng: 126.978,
+    cityName: '부천시',
   });
   const [gpsCoords, setGpsCoords] = useState<{
     lat: number;
@@ -152,7 +153,8 @@ export default function PhotoUploadPage() {
       return;
     }
 
-    const cityName = extractCityName(markerLocation.address);
+    // API 응답에서 받은 cityName을 직접 사용
+    const cityName = markerLocation.cityName;
     const position = gpsToMapPosition(markerLocation.lat, markerLocation.lng);
 
     if (cityName) {
@@ -199,11 +201,18 @@ export default function PhotoUploadPage() {
     if (!locationAddressData?.result) {
       return;
     }
+    console.log('✅ API 응답:', {
+      cityName: locationAddressData.result.cityName,
+      address: locationAddressData.result.address,
+      lat: locationAddressData.result.latitude,
+      lng: locationAddressData.result.longitude,
+    });
     setMarkerLocation((prev) => ({
       ...prev,
       address: locationAddressData.result.address,
       lat: locationAddressData.result.latitude,
       lng: locationAddressData.result.longitude,
+      cityName: locationAddressData.result.cityName,
     }));
   }, [locationAddressData]);
 
@@ -230,28 +239,7 @@ export default function PhotoUploadPage() {
       const gpsLocation = await extractGPSFromImage(image);
 
       if (gpsLocation) {
-        let address = '위치 정보 없음';
-        try {
-          const geocodedAddress = await reverseGeocode(
-            gpsLocation.lat,
-            gpsLocation.lng
-          );
-          if (geocodedAddress) {
-            address = geocodedAddress;
-            const koreanMatch = geocodedAddress.match(/대한민국\s*(.+)/);
-            if (koreanMatch) {
-              address = koreanMatch[1].trim();
-            }
-          }
-        } catch (error) {
-          console.error(error);
-        }
-
-        setMarkerLocation({
-          address,
-          lat: gpsLocation.lat,
-          lng: gpsLocation.lng,
-        });
+        // GPS 좌표를 설정하면 API 호출이 자동으로 일어남
         setGpsCoords({ lat: gpsLocation.lat, lng: gpsLocation.lng });
       }
     };
@@ -440,6 +428,74 @@ export default function PhotoUploadPage() {
               markerLocation={markerLocation}
               onMarkerClick={() => setShowColorPicker(true)}
             />
+          </div>
+        </div>
+
+        <div className="flex justify-center mb-5 mt-5">
+          <div className="w-full max-w-[420px]">
+            <div className="border-t-2" style={{ borderColor: '#E6D5D5' }} />
+          </div>
+        </div>
+
+        <div className="flex justify-center px-6">
+          <div className="w-full max-w-[400px]">
+            <div className="mb-4 pt-4">
+              <h2 className="text-[18px] font-semibold mb-4 text-orange-600">
+                🧪 테스트용 GPS 좌표 입력
+              </h2>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-gray-700">
+                    위도 (Latitude)
+                  </label>
+                  <input
+                    type="number"
+                    step="0.0001"
+                    value={markerLocation.lat}
+                    onChange={(e) =>
+                      setMarkerLocation((prev) => ({
+                        ...prev,
+                        lat: parseFloat(e.target.value) || 0,
+                      }))
+                    }
+                    className="w-full px-3 py-2 rounded-lg border-2 border-gray-300 focus:outline-none focus:border-orange-400 text-sm"
+                    placeholder="37.5034"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-gray-700">
+                    경도 (Longitude)
+                  </label>
+                  <input
+                    type="number"
+                    step="0.0001"
+                    value={markerLocation.lng}
+                    onChange={(e) =>
+                      setMarkerLocation((prev) => ({
+                        ...prev,
+                        lng: parseFloat(e.target.value) || 0,
+                      }))
+                    }
+                    className="w-full px-3 py-2 rounded-lg border-2 border-gray-300 focus:outline-none focus:border-orange-400 text-sm"
+                    placeholder="126.766"
+                  />
+                </div>
+              </div>
+              <button
+                onClick={() =>
+                  setGpsCoords({
+                    lat: markerLocation.lat,
+                    lng: markerLocation.lng,
+                  })
+                }
+                className="mt-3 w-full px-4 py-2 rounded-lg bg-orange-500 text-white font-medium hover:bg-orange-600 transition-colors text-sm"
+              >
+                주소 변환하기
+              </button>
+              <p className="text-xs text-gray-500 mt-2">
+                💡 부천시: 37.5034, 126.766 / 수원시: 37.2636, 127.0286
+              </p>
+            </div>
           </div>
         </div>
       </div>

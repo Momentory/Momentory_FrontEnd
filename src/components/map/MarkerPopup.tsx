@@ -31,7 +31,7 @@ export default function MarkerPopup({
   };
 
   const inverseScale = mapScale > 1 ? 1 / mapScale : 1;
-  const MARKER_RADIUS = 16; // marker width 32px / 2
+  const MARKER_RADIUS = 10; // marker width 20px / 2
   const GAP = 1;
   const POPUP_WIDTH = 100;
   const POPUP_HEIGHT = 62;
@@ -48,7 +48,7 @@ export default function MarkerPopup({
         <img
           src={iconSrc}
           alt={marker.location ?? '지도 마커'}
-          className="w-8 h-8 cursor-pointer drop-shadow-md"
+          className="w-5 h-5 cursor-pointer drop-shadow-md"
           onClick={handleMarkerClick}
         />
       )}

@@ -2,6 +2,7 @@ import mapBack from '../../assets/map-back.svg';
 import map from '../../assets/gyeonggi-map.svg';
 
 import MarkerPopup from './MarkerPopup';
+import RegionColorLayer from './RegionColorLayer';
 import type { PublicMapViewProps } from '../../types/map';
 
 const BASE_MAP_SCALE = 1.25; // 지도 기본 크기 (살짝 확대)
@@ -15,6 +16,8 @@ export default function PublicMapView({
   originPosRef,
   containerRef,
   scale,
+  isPinching,
+  colorMap = {},
   zoomInMarker,
   zoomOutMarker,
   handleWheel,
@@ -38,7 +41,6 @@ export default function PublicMapView({
         backgroundImage: `url(${mapBack})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
-        transition: '0.6s ease-in-out',
         touchAction: 'none',
       }}
       onWheel={handleWheel}
@@ -50,12 +52,14 @@ export default function PublicMapView({
       }}
     >
       <div
-        className="absolute inset-0 w-full h-full transition-transform duration-600"
+        className="absolute inset-0 w-full h-full"
         style={{
           transformOrigin: originPosRef.current
             ? `${originPosRef.current.left} ${originPosRef.current.top}`
             : 'center center',
           transform: `translate(${position.x}px, ${position.y}px) scale(${BASE_MAP_SCALE * scale})`,
+          willChange: isPinching ? 'transform' : 'auto',
+          transition: isPinching ? 'none' : 'transform 0.3s ease-out',
         }}
       >
         <img
@@ -63,6 +67,9 @@ export default function PublicMapView({
           alt="지도"
           className="absolute inset-0 w-full h-full object-contain"
         />
+
+        {/* 방문한 지역 색상 오버레이 */}
+        <RegionColorLayer colorMap={colorMap} />
 
         {markers.map((marker, index) => {
           const active = activeMarkerId === marker.id;

@@ -17,7 +17,7 @@ import useBottomSheet from '../../hooks/map/useBottomSheet';
 import { captureMap } from '../../utils/screenshot';
 import { dataUrlToFile } from '../../utils/image';
 import { uploadFile } from '../../api/S3';
-import { gpsToMapPosition } from '../../utils/mapCoordinates';
+import { getRegionMapPosition, REGION_REPRESENTATIVE_COORDS } from '../../utils/mapCoordinates';
 import type { Marker } from '../../types/map';
 import { useMyMapColors, useMyMapLatestPhotos } from '../../hooks/map/useMap';
 
@@ -50,18 +50,16 @@ export default function MyMapPage() {
           return acc;
         }
 
-        const { latitude, longitude } = photo;
+        // 지역명으로 지도 상의 정확한 위치 가져오기
+        const position = getRegionMapPosition(regionName);
 
-        if (
-          typeof latitude !== 'number' ||
-          Number.isNaN(latitude) ||
-          typeof longitude !== 'number' ||
-          Number.isNaN(longitude)
-        ) {
+        if (!position) {
+          console.warn(`${regionName}의 지도 위치를 찾을 수 없습니다.`);
           return acc;
         }
 
-        const position = gpsToMapPosition(latitude, longitude);
+        // GPS 좌표는 대표 좌표 사용 (백엔드 통신용)
+        const coords = REGION_REPRESENTATIVE_COORDS[regionName];
         const icon = markerIcons[index % markerIcons.length];
 
         acc.push({
@@ -70,8 +68,8 @@ export default function MyMapPage() {
           left: position.left,
           image: icon,
           location: regionName,
-          lat: latitude,
-          lng: longitude,
+          lat: coords?.lat || 37.5,
+          lng: coords?.lng || 127.0,
           color: colorMap?.[regionName],
           photo,
         });
@@ -88,6 +86,7 @@ export default function MyMapPage() {
     originPosRef,
     containerRef,
     scale,
+    isPinching,
     zoomIn: zoomInMarker, // alias 사용
     zoomOut: zoomOutMarker, // alias 사용
     handleWheel,
@@ -179,6 +178,8 @@ export default function MyMapPage() {
           originPosRef={originPosRef}
           containerRef={containerRef}
           scale={scale}
+          isPinching={isPinching}
+          colorMap={colorMap}
           zoomInMarker={zoomInMarker}
           zoomOutMarker={zoomOutMarker}
           handleWheel={handleWheel}
@@ -208,7 +209,7 @@ export default function MyMapPage() {
           className={`absolute right-4 w-14 h-14 shadow-lg z-20 transition-all duration-300 ${
             isCapturing ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105'
           }`}
-          style={{ bottom: `${height + 16}px` }}
+          style={{ bottom: `${height + 16 + 80}px` }}
         >
           <img src={shareButton} alt="공유" />
         </button>

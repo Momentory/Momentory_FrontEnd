@@ -1,13 +1,10 @@
 {
   "permissions": {
     "allow": [
+      "Bash(dir /b \"C:\\Users\\haeun\\Downloads\")",
       "Bash(findstr:*)",
-      "Bash(npm run dev:*)",
-      "Bash(npm uninstall:*)",
-      "Bash(npm install:*)",
-      "Bash(pnpm build:*)",
-      "Bash(pnpm install:*)",
-      "Bash(git add:*)"
+      "Bash(python analyze_svg.py:*)",
+      "Bash(dir \"C:\\Users\\haeun\\OneDrive\\Desktop\\FEProject\\Momentory_FrontEnd\\src\\utils\")"
     ],
     "deny": [],
     "ask": []
