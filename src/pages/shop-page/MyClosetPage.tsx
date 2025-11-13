@@ -55,7 +55,18 @@ const MyClosetPage = () => {
   const applyMutation = useApplyWardrobe();
 
   const handleSaveWardrobe = () => {
-    saveMutation.mutate();
+    if (!currentCharacter) {
+      alert('캐릭터 정보를 불러오는 중입니다.');
+      return;
+    }
+
+    const equipped = currentCharacter.equipped;
+    saveMutation.mutate({
+      clothingId: equipped.clothing?.itemId,
+      expressionId: equipped.expression?.itemId,
+      effectId: equipped.effect?.itemId,
+      decorationId: equipped.decoration?.itemId,
+    });
   };
 
   const handleApplyWardrobe = () => {

@@ -5,7 +5,12 @@ export const useSaveWardrobe = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: saveWardrobe,
+    mutationFn: (payload: {
+      clothingId?: number;
+      expressionId?: number;
+      effectId?: number;
+      decorationId?: number;
+    }) => saveWardrobe(payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['wardrobes'] });
       alert('현재 스타일이 저장되었습니다!');
