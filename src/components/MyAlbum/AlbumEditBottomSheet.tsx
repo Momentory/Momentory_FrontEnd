@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import type { PageData } from '../../types/Templates';
 
 interface AlbumEditBottomSheetProps {
@@ -143,7 +143,7 @@ export default function AlbumEditBottomSheet({
     setDragOverIndex(null);
   };
 
-  const handleTouchStart = (e: React.TouchEvent, index: number) => {
+  const handleTouchStart = (_e: React.TouchEvent, index: number) => {
     setDraggingIndex(index);
   };
 
