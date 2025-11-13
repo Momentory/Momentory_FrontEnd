@@ -13,7 +13,7 @@ interface AlbumListProps {
 
 const AlbumList = ({ albums }: AlbumListProps) => {
   return (
-    <div className="flex gap-5 overflow-x-auto pb-4">
+    <div className="flex gap-5 overflow-x-auto pb-4 scrollbar-hide">
       {albums.map(album => (
         <AlbumCard
           key={album.id}

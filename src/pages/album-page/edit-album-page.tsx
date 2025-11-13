@@ -748,36 +748,6 @@ const EditAlbumPage = () => {
             다음
           </button>
         </div>
-
-        {/* 순서 변경 버튼 */}
-        <div className="flex justify-center gap-4">
-          <button
-            className="px-4 py-2 bg-blue-500 text-white rounded disabled:opacity-50"
-            disabled={currentPageIndex === 0}
-            onClick={() => {
-              const newPages = [...pages];
-              [newPages[currentPageIndex], newPages[currentPageIndex - 1]] =
-                [newPages[currentPageIndex - 1], newPages[currentPageIndex]];
-              setPages(newPages);
-              setCurrentPageIndex(currentPageIndex - 1);
-            }}
-          >
-            ↑ 위로 이동
-          </button>
-          <button
-            className="px-4 py-2 bg-blue-500 text-white rounded disabled:opacity-50"
-            disabled={currentPageIndex === pages.length - 1}
-            onClick={() => {
-              const newPages = [...pages];
-              [newPages[currentPageIndex], newPages[currentPageIndex + 1]] =
-                [newPages[currentPageIndex + 1], newPages[currentPageIndex]];
-              setPages(newPages);
-              setCurrentPageIndex(currentPageIndex + 1);
-            }}
-          >
-            ↓ 아래로 이동
-          </button>
-        </div>
       </div>
       {showModal && (
         <Modal title="템플릿 선택" onClose={() => setShowModal(false)}>

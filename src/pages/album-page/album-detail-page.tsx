@@ -73,7 +73,10 @@ const AlbumDetailPage = () => {
 
   return (
     <>
-      <DropdownHeader title="나의 사진첩" />
+      <DropdownHeader
+        title="나의 사진첩"
+        onLeftClick={() => navigate('/album')}
+      />
       <main className="flex-grow p-11 pb-40 flex flex-col items-center">
         <div className="relative w-full max-w-sm">
           <div className="absolute -top-3 left-6 w-full h-full bg-[#E8CDCD]/60 rounded-3xl z-0 pr-7.5" />

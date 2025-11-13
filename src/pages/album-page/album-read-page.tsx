@@ -138,7 +138,7 @@ const AlbumReadPage=()=> {
           className="px-3 py-1.5 rounded border border-[#e5e5e5] bg-white text-[#333] text-sm active:bg-[#f7f7f7]"
           onClick={() => navigate(-1)}
         >
-          뒤로
+          나가기
         </button>
       </div>
 

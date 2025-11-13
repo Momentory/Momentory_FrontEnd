@@ -48,7 +48,7 @@ const GalleryPage = () => {
   return (
     <>
       <DropdownHeader title="사진 기록" />
-      <div ref={scrollRef} className="p-8 pb-20 bg-[#EDE2E2] mt-30">
+      <div ref={scrollRef} className="p-8 pb-20 bg-[#EDE2E2] pt-[130px]">
         {isLoading && (
           <div className="flex justify-center items-center min-h-[50vh]">
             <p className="text-gray-500">사진을 불러오는 중...</p>
