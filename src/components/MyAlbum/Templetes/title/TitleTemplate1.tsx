@@ -37,6 +37,7 @@ const TitleTemplate1: React.FC<TemplateProps> = ({ data, updateData, onEmptyArea
           <img
             src={data.image}
             alt="preview"
+            crossOrigin="anonymous"
             className="w-full h-full object-cover"
           />
         )}

@@ -6,8 +6,13 @@ const PageTemplate4: React.FC<TemplateProps> = ({ data, updateData, onImageClick
 
   return (
     <div className="relative w-full max-w-[480px] aspect-[9/16] mx-auto font-[inter] flex flex-col justify-end p-6 overflow-hidden bg-[#D8D8D8]">
-      {data.image && <img src={data.image} alt="background" className="absolute inset-0 w-full h-full object-cover z-0" />}
-      <div className="absolute inset-0 z-5 bg-gradient-to-b from-transparent from-50% to-black/80" />
+      {data.image && <img src={data.image} alt="background" crossOrigin="anonymous" className="absolute inset-0 w-full h-full object-cover z-0" />}
+      <div
+        className="absolute inset-0 z-5"
+        style={{
+          backgroundImage: 'linear-gradient(to bottom, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0.8) 100%)'
+        }}
+      />
       <div 
         className="absolute inset-0 flex items-center justify-center cursor-pointer z-10"
         onClick={() => onImageClick?.('image')}

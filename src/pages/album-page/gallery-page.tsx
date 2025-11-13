@@ -2,6 +2,7 @@ import { useEffect, useRef, useMemo, useState } from 'react';
 import DropdownHeader from '../../components/common/DropdownHeader';
 import PhotoDetailModal from '../../components/MyAlbum/PhotoDetailModal';
 import { useMyPhotos } from '../../hooks/useMyPhotos';
+import { toS3WebsiteUrl } from '../../utils/s3';
 import type { MyPhoto } from '../../types/album';
 
 const GalleryPage = () => {
@@ -19,7 +20,13 @@ const GalleryPage = () => {
 
   const photos = useMemo(() => {
     if (!photosData?.pages) return [];
-    return photosData.pages.flatMap(page => page.photos);
+    return photosData.pages.flatMap(page =>
+      page.photos.map(photo => ({
+        ...photo,
+        // S3 REST Endpoint를 Website Endpoint로 변환 (CORS 해결)
+        imageUrl: toS3WebsiteUrl(photo.imageUrl),
+      }))
+    );
   }, [photosData]);
 
   useEffect(() => {

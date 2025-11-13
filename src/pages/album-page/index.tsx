@@ -7,6 +7,7 @@ import ClosetIcon from '../../assets/icons/closetIcon.svg?react';
 import GalleryIcon from '../../assets/icons/galleryIcon.svg?react';
 import AlbumList from '../../components/MyAlbum/AlbumList';
 import { album } from '../../api/album';
+import { toS3WebsiteUrl } from '../../utils/s3';
 import type { AlbumListItem } from '../../types/album';
 
 const MyAlbumPage = () => {
@@ -41,7 +42,8 @@ const MyAlbumPage = () => {
 
   const transformedAlbums = albums.map(album => ({
     id: album.id,
-    imgSrc: album.thumbnailUrl,
+    // S3 REST Endpoint를 Website Endpoint로 변환 (CORS 해결)
+    imgSrc: toS3WebsiteUrl(album.thumbnailUrl),
     date: new Date(album.createdAt).toLocaleDateString('ko-KR'),
     location: album.title,
   }));

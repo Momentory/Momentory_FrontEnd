@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import HTMLFlipBook from 'react-pageflip';
 import { album } from '../../api/album';
+import { toS3WebsiteUrl } from '../../utils/s3';
 
 const SharedAlbumPage = () => {
   const { shareUuid } = useParams();
@@ -48,7 +49,8 @@ const SharedAlbumPage = () => {
           const { images: albumImages } = response.result;
           const sortedImages = albumImages
             .sort((a, b) => a.index - b.index)
-            .map(img => img.imageUrl);
+            // S3 REST Endpoint를 Website Endpoint로 변환 (CORS 해결)
+            .map(img => toS3WebsiteUrl(img.imageUrl));
           setImageUrls(sortedImages);
         } else {
           setError('앨범을 찾을 수 없습니다.');

@@ -63,7 +63,6 @@ interface ApiResponse<T> {
 export const getMyProfile = async () => {
   try {
     const res = await api.get<ApiResponse<UserProfile>>('/api/mypage/profile');
-    console.log('[getMyProfile] response:', res.data);
     return res.data.result;
   } catch (error: any) {
     console.error(
@@ -79,7 +78,6 @@ export const getMyProfile = async () => {
 export const getMyProfileSummary = async () => {
   try {
     const res = await api.get<ApiResponse<UserProfileSummary>>('/api/mypage/profile/summary');
-    console.log('[getMyProfileSummary] response:', res.data);
     return res.data.result;
   } catch (error: any) {
     console.error(
@@ -98,7 +96,6 @@ export const updateProfile = async (data: UpdateProfileRequest) => {
       '/api/mypage/profile',
       data
     );
-    console.log('[updateProfile] response:', res.data);
     return res.data.result;
   } catch (error: any) {
     console.error(
@@ -125,7 +122,6 @@ export const uploadImage = async (file: File) => {
         },
       }
     );
-    console.log('[uploadImage] response:', res.data);
     return res.data.result;
   } catch (error: any) {
     console.error(
@@ -141,7 +137,6 @@ export const uploadImage = async (file: File) => {
 export const deleteAccount = async () => {
   try {
     const res = await api.delete<ApiResponse<string>>('/api/mypage');
-    console.log('[deleteAccount] response:', res.data);
     return res.data.result;
   } catch (error: any) {
     console.error(

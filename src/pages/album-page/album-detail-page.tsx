@@ -4,6 +4,7 @@ import DropdownHeader from '../../components/common/DropdownHeader';
 import EditIcon from '../../assets/icons/albumEdit.svg?react';
 import ShareIcon from '../../assets/icons/albumShare.svg?react';
 import { album } from '../../api/album';
+import { toS3WebsiteUrl } from '../../utils/s3';
 
 const AlbumDetailPage = () => {
   const navigate = useNavigate();
@@ -44,10 +45,11 @@ const AlbumDetailPage = () => {
         if (response.isSuccess && response.result) {
           const { title, images } = response.result;
           setAlbumTitle(title);
-          
+
           if (images.length > 0) {
             const sortedImages = images.sort((a, b) => a.index - b.index);
-            setThumbnailUrl(sortedImages[0].imageUrl);
+            // S3 REST Endpoint를 Website Endpoint로 변환 (CORS 해결)
+            setThumbnailUrl(toS3WebsiteUrl(sortedImages[0].imageUrl));
           }
         }
       } catch (err) {
