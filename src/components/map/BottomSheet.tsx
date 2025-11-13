@@ -215,7 +215,7 @@ export default function BottomSheet({
 
   return (
     <div
-      className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[450px] overflow-hidden rounded-t-2xl bg-white shadow-lg transition-all duration-300"
+      className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[450px] overflow-hidden rounded-t-2xl bg-white shadow-lg transition-all duration-300"
       style={{ height: `${height}px` }}
     >
       <div
