@@ -1,11 +1,12 @@
 // 마커와 이미지 팝업 UI
-import type { Marker, Album } from '../../types/map';
+import type { Marker } from '../../types/map';
+import defaultMarkerIcon from '../../assets/map-pin.svg';
 
 interface Props {
   marker: Marker;
   active: boolean;
-  album?: Album;
   zoomed: boolean;
+  mapScale: number;
   onMarkerClick?: (markerId: number, location?: string) => void;
   style?: React.CSSProperties;
 }
@@ -13,17 +14,30 @@ interface Props {
 export default function MarkerPopup({
   marker,
   active,
-  album,
   zoomed,
+  mapScale,
   onMarkerClick,
   style,
 }: Props) {
-  const rightSide = parseFloat(marker.left) > 70;
+  const leftValue = parseFloat(marker.left);
+  const rightSide = Number.isNaN(leftValue) ? false : leftValue > 70;
+  const photo = marker.photo;
+  const markerColor = marker.color ?? '#FF7070';
+  const iconSrc = marker.image ?? defaultMarkerIcon;
 
-  const handleImageClick = (e: React.MouseEvent) => {
+  const handleMarkerClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     onMarkerClick?.(marker.id, marker.location);
   };
+
+  const inverseScale = mapScale > 1 ? 1 / mapScale : 1;
+  const MARKER_RADIUS = 16; // marker width 32px / 2
+  const GAP = 1;
+  const POPUP_WIDTH = 100;
+  const POPUP_HEIGHT = 62;
+  const POPUP_BORDER = 2;
+  const desiredOffset = MARKER_RADIUS * mapScale + GAP;
+  const translateX = (rightSide ? -1 : 1) * desiredOffset;
 
   return (
     <div
@@ -32,37 +46,56 @@ export default function MarkerPopup({
     >
       {(!zoomed || active) && (
         <img
-          src={marker.image}
-          className="w-8 h-8 cursor-pointer"
-          onClick={(e) => {
-            e.stopPropagation();
-            onMarkerClick?.(marker.id, marker.location);
-          }}
+          src={iconSrc}
+          alt={marker.location ?? '지도 마커'}
+          className="w-8 h-8 cursor-pointer drop-shadow-md"
+          onClick={handleMarkerClick}
         />
       )}
 
-      {zoomed && active && album && (
+      {zoomed && active && photo?.imageUrl && (
         <div
-          className="absolute top-1/2 -translate-y-1/2 flex items-center"
-          style={{ left: rightSide ? 'calc(-112px)' : 'calc(100% + 12px)' }}
+          className="absolute left-1/2 top-1/2 -translate-y-1/2"
+          style={{
+            transform: `translateX(${translateX}px)`,
+          }}
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="relative">
-            <div className="absolute w-4 h-4 rounded-full bg-[#FF7070] z-20 -top-1 -left-1" />
-            <img
-              src={album.imageUrl}
-              className="w-[100px] h-[62px] rounded-lg shadow-md cursor-pointer relative z-10 border-2 border-white"
-              onClick={handleImageClick}
+          <div
+            className="relative flex items-center justify-center"
+            style={{
+              transform: `scale(${inverseScale})`,
+              transformOrigin: rightSide ? '100% 50%' : '0% 50%',
+              width: POPUP_WIDTH,
+              height: POPUP_HEIGHT,
+            }}
+          >
+            <div
+              className="absolute z-20 rounded-full"
+              style={{
+                width: 16,
+                height: 16,
+                top: -8,
+                [rightSide ? 'right' : 'left']: -8,
+                backgroundColor: markerColor,
+                border: `${POPUP_BORDER}px solid white`,
+              }}
             />
-
-            <div className="mt-1 flex items-center gap-1 invisible">
-              <span className="w-4 h-4 bg-[#732727] text-white text-xs font-bold rounded-full flex items-center justify-center">
-                {album.id}
-              </span>
-              <p className="text-sm font-bold whitespace-nowrap">
-                나의 앨범 페이지로 이동
-              </p>
-            </div>
+            <img
+              src={photo.imageUrl}
+              alt={photo.address || marker.location || '최근 사진'}
+              className="rounded-lg shadow-md cursor-pointer object-cover bg-[#EDE2E2]"
+              style={{
+                width: POPUP_WIDTH,
+                height: POPUP_HEIGHT,
+                border: `${POPUP_BORDER}px solid white`,
+              }}
+              onClick={handleMarkerClick}
+              onError={(e) => {
+                e.currentTarget.src =
+                  'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjYyIiBmaWxsPSIjRUVFMiIgIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjEwMCIgaGVpZ2h0PSI2MiIgZmlsbD0iI0VERTJFMkUiIHJ4PSIxMiIvPjxnIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiM5OTkiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtZmFtaWx5PSJBcmlhbCI+PHRleHQgeD0iNTAlIiB5PSI1MCUiPm5vIGltYWdlPC90ZXh0PjwvZz48L3N2Zz4=';
+              }}
+            />
           </div>
         </div>
       )}
