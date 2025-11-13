@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import HTMLFlipBook from 'react-pageflip';
 import { album } from '../../api/album';
+import { toS3WebsiteUrl } from '../../utils/s3';
 
 const AlbumReadPage=()=> {
   const navigate = useNavigate();
@@ -28,7 +29,8 @@ const AlbumReadPage=()=> {
           const { images } = response.result;
           const sortedImages = images
             .sort((a, b) => a.index - b.index)
-            .map(img => img.imageUrl);
+            // S3 REST Endpoint를 Website Endpoint로 변환 (CORS 해결)
+            .map(img => toS3WebsiteUrl(img.imageUrl));
           setImageUrls(sortedImages);
         }
       } catch (err) {
@@ -136,7 +138,7 @@ const AlbumReadPage=()=> {
           className="px-3 py-1.5 rounded border border-[#e5e5e5] bg-white text-[#333] text-sm active:bg-[#f7f7f7]"
           onClick={() => navigate(-1)}
         >
-          뒤로
+          나가기
         </button>
       </div>
 

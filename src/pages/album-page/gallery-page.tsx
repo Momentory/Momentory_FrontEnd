@@ -2,6 +2,7 @@ import { useEffect, useRef, useMemo, useState } from 'react';
 import DropdownHeader from '../../components/common/DropdownHeader';
 import PhotoDetailModal from '../../components/MyAlbum/PhotoDetailModal';
 import { useMyPhotos } from '../../hooks/useMyPhotos';
+import { toS3WebsiteUrl } from '../../utils/s3';
 import type { MyPhoto } from '../../types/album';
 
 const GalleryPage = () => {
@@ -19,7 +20,13 @@ const GalleryPage = () => {
 
   const photos = useMemo(() => {
     if (!photosData?.pages) return [];
-    return photosData.pages.flatMap(page => page.photos);
+    return photosData.pages.flatMap(page =>
+      page.photos.map(photo => ({
+        ...photo,
+        // S3 REST Endpoint를 Website Endpoint로 변환 (CORS 해결)
+        imageUrl: toS3WebsiteUrl(photo.imageUrl),
+      }))
+    );
   }, [photosData]);
 
   useEffect(() => {
@@ -41,7 +48,7 @@ const GalleryPage = () => {
   return (
     <>
       <DropdownHeader title="사진 기록" />
-      <div ref={scrollRef} className="p-8 pb-20 bg-[#EDE2E2] mt-30">
+      <div ref={scrollRef} className="p-8 pb-20 bg-[#EDE2E2] pt-[130px]">
         {isLoading && (
           <div className="flex justify-center items-center min-h-[50vh]">
             <p className="text-gray-500">사진을 불러오는 중...</p>
