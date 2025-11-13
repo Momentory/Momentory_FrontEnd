@@ -8,7 +8,7 @@ interface MapMarkerSectionProps {
     address: string;
     lat: number;
     lng: number;
-  };
+  } | null;
   onMarkerClick: () => void;
 }
 
@@ -21,6 +21,9 @@ export default function MapMarkerSection({
   const [_cityName, setCityName] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!markerLocation) {
+      return;
+    }
     const position = gpsToMapPosition(markerLocation.lat, markerLocation.lng);
     setMapPosition(position);
 
@@ -70,47 +73,49 @@ export default function MapMarkerSection({
             className="absolute inset-0 w-full h-full object-contain"
           />
 
-          <div
-            className="absolute cursor-pointer z-10 drop-shadow-lg transition-all duration-200"
-            style={{
-              top: mapPosition.top,
-              left: mapPosition.left,
-              transform: 'translate(-50%, -100%)',
-            }}
-            onClick={onMarkerClick}
-          >
-            <svg
-              width="33"
-              height="34"
-              viewBox="0 0 33 34"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
+          {markerLocation && (
+            <div
+              className="absolute cursor-pointer z-10 drop-shadow-lg transition-all duration-200"
+              style={{
+                top: mapPosition.top,
+                left: mapPosition.left,
+                transform: 'translate(-50%, -100%)',
+              }}
+              onClick={onMarkerClick}
             >
-              <path
-                d="M0.43934 30.83C-0.146447 31.4158 -0.146447 32.3655 0.43934 32.9513C1.02513 33.5371 1.97487 33.5371 2.56066 32.9513L1.5 31.8906L0.43934 30.83ZM1.5 31.8906L2.56066 32.9513L20.3425 15.1695L19.2818 14.1088L18.2211 13.0482L0.43934 30.83L1.5 31.8906Z"
-                fill="#A6A6A6"
-              />
-              <circle
-                cx="19.1106"
-                cy="13.5"
-                r="11.5"
-                fill="url(#paint0_linear_pin)"
-              />
-              <defs>
-                <linearGradient
-                  id="paint0_linear_pin"
-                  x1="19.1106"
-                  y1="2"
-                  x2="19.1106"
-                  y2="25"
-                  gradientUnits="userSpaceOnUse"
-                >
-                  <stop stopColor={gradientStart} />
-                  <stop offset="1" stopColor={gradientEnd} />
-                </linearGradient>
-              </defs>
-            </svg>
-          </div>
+              <svg
+                width="33"
+                height="34"
+                viewBox="0 0 33 34"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M0.43934 30.83C-0.146447 31.4158 -0.146447 32.3655 0.43934 32.9513C1.02513 33.5371 1.97487 33.5371 2.56066 32.9513L1.5 31.8906L0.43934 30.83ZM1.5 31.8906L2.56066 32.9513L20.3425 15.1695L19.2818 14.1088L18.2211 13.0482L0.43934 30.83L1.5 31.8906Z"
+                  fill="#A6A6A6"
+                />
+                <circle
+                  cx="19.1106"
+                  cy="13.5"
+                  r="11.5"
+                  fill="url(#paint0_linear_pin)"
+                />
+                <defs>
+                  <linearGradient
+                    id="paint0_linear_pin"
+                    x1="19.1106"
+                    y1="2"
+                    x2="19.1106"
+                    y2="25"
+                    gradientUnits="userSpaceOnUse"
+                  >
+                    <stop stopColor={gradientStart} />
+                    <stop offset="1" stopColor={gradientEnd} />
+                  </linearGradient>
+                </defs>
+              </svg>
+            </div>
+          )}
         </div>
       </div>
     </div>
