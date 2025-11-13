@@ -129,7 +129,7 @@ export const deletePost = async (postId: number) => {
   } catch (err: any) {
     console.error(`게시글 삭제 실패(postId=${postId})`, err);
 
-    //  실제 요청 URL 출력 
+    //  실제 요청 URL 출력
     if (err.config) {
       console.log(" 실제 요청 URL:", err.config.url);
       console.log(" 요청 method:", err.config.method);
@@ -408,4 +408,26 @@ export const searchPostsBySingleTag = async (tag: string) => {
   const res = await api.get(`/api/community/posts/tag/${tag}`);
   return res.data.result.posts || [];
 };
+
+
+/* ----------------------------- 내 활동 ----------------------------- */
+
+// 내가 쓴 글 조회
+export const getMyPosts = async () => {
+  const res = await api.get(`/api/community/users/me/posts`);
+  return res.data;
+};
+
+// 내가 단 댓글 조회
+export const getMyComments = async () => {
+  const res = await api.get(`/api/community/users/me/comments`);
+  return res.data;
+};
+
+// 내가 스크랩한 게시글 조회
+export const getMyScraps = async () => {
+  const res = await api.get(`/api/community/users/me/scraps`);
+  return res.data;
+};
+
 
