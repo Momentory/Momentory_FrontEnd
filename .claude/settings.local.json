@@ -5,7 +5,9 @@
       "Bash(npm run dev:*)",
       "Bash(npm uninstall:*)",
       "Bash(npm install:*)",
-      "Bash(pnpm build:*)"
+      "Bash(pnpm build:*)",
+      "Bash(pnpm install:*)",
+      "Bash(git add:*)"
     ],
     "deny": [],
     "ask": []
