@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DropdownHeader from '../../components/common/DropdownHeader';
 import PublicMapView from '../../components/map/PublicMapView';
@@ -8,6 +8,9 @@ import MapPinIcon from '../../assets/map-pin.svg?react';
 import LockIcon from '../../assets/lock-icon.svg?react';
 import shareButton from '../../assets/share-button.svg';
 import RouletteIcon from '../../assets/roulette.svg?react';
+import marker1 from '../../assets/map-marker1.svg';
+import marker2 from '../../assets/map-marker2.svg';
+import marker3 from '../../assets/map-marker3.svg';
 
 import useMapZoom from '../../hooks/map/useMapZoom';
 import useBottomSheet from '../../hooks/map/useBottomSheet';
@@ -15,6 +18,8 @@ import { captureMap } from '../../utils/screenshot';
 import { dataUrlToFile } from '../../utils/image';
 import { uploadFile } from '../../api/S3';
 import type { Marker } from '../../types/map';
+import { gpsToMapPosition } from '../../utils/mapCoordinates';
+import { usePublicMapLatestPhotos } from '../../hooks/map/useMap';
 
 const dropdownItems = [
   { label: '전체 지도', icon: <MapPinIcon />, path: '/publicMap' },
@@ -24,11 +29,55 @@ const dropdownItems = [
 export default function PublicMapPage() {
   const navigate = useNavigate();
   const [isCapturing, setIsCapturing] = useState(false);
-  const [selectedRegion, setSelectedRegion] = useState<string>('고양시');
+  const [selectedRegion, setSelectedRegion] = useState<string>('');
   const { height, isExpanded, setHeight, setIsExpanded } = useBottomSheet();
 
-  // PublicMapView는 현재 마커가 없음
-  const markers = useMemo<Marker[]>(() => [], []);
+  const {
+    data: latestPhotos,
+    isLoading: isLoadingMarkers,
+    isError: isMarkerError,
+  } = usePublicMapLatestPhotos();
+
+  const markerIcons = useMemo(() => [marker1, marker2, marker3], []);
+
+  const markers = useMemo<Marker[]>(() => {
+    if (!latestPhotos) return [];
+
+    return Object.entries(latestPhotos).reduce<Marker[]>(
+      (acc, [regionName, photo], index) => {
+        if (!photo) return acc;
+
+        const { latitude, longitude } = photo;
+
+        if (
+          typeof latitude !== 'number' ||
+          Number.isNaN(latitude) ||
+          typeof longitude !== 'number' ||
+          Number.isNaN(longitude)
+        ) {
+          return acc;
+        }
+
+        const position = gpsToMapPosition(latitude, longitude);
+        const icon = markerIcons[index % markerIcons.length];
+
+        acc.push({
+          id: photo.photoId || index + 1,
+          top: position.top,
+          left: position.left,
+          image: icon,
+          location: regionName,
+          lat: latitude,
+          lng: longitude,
+          color: '#FF7070',
+          photo,
+        });
+
+        return acc;
+      },
+      []
+    );
+  }, [latestPhotos, markerIcons]);
 
   const {
     zoomed,
@@ -36,6 +85,8 @@ export default function PublicMapPage() {
     originPosRef,
     containerRef,
     scale,
+    zoomIn: zoomInMarker,
+    zoomOut: zoomOutMarker,
     handleWheel,
     handleTouchStart,
     handleTouchMove,
@@ -67,7 +118,19 @@ export default function PublicMapPage() {
     }
   };
 
-  const mapHeightClass = 'h-[calc(100vh-172px)]';
+  const mapHeightClass = 'h-[calc(100vh-140px)]';
+
+  useEffect(() => {
+    if (!selectedRegion && markers.length > 0) {
+      setSelectedRegion(markers[0].location ?? '');
+    } else if (
+      selectedRegion &&
+      markers.length > 0 &&
+      !markers.some((marker) => marker.location === selectedRegion)
+    ) {
+      setSelectedRegion(markers[0].location ?? '');
+    }
+  }, [markers, selectedRegion]);
 
   return (
     <div className="relative flex justify-center items-center bg-gray-50 font-Pretendard">
@@ -86,7 +149,7 @@ export default function PublicMapPage() {
               >
                 <RouletteIcon className="w-10 h-10" />
               </button>
-              <div className="absolute right-0 top-full mt-2 w-[140px] bg-white text-[#AE8D8D] text-xs font-bold border border-[#FF7070] px-3 py-2 rounded-lg z-50 animate-[fadeIn_0.2s_ease-out] text-center leading-relaxed">
+              <div className="absolute right-0 top-full mt-2 w-[140px] bg-white text-[#AE8D8D] text-xs font-bold border border-[#FF7070] px-3 py-2 rounded-lg z-30 animate-[fadeIn_0.2s_ease-out] text-center leading-relaxed">
                 아직 방문하지 않은
                 <br />
                 지역이 있다면?
@@ -111,6 +174,8 @@ export default function PublicMapPage() {
           originPosRef={originPosRef}
           containerRef={containerRef}
           scale={scale}
+          zoomInMarker={zoomInMarker}
+          zoomOutMarker={zoomOutMarker}
           handleWheel={handleWheel}
           handleTouchStart={handleTouchStart}
           handleTouchMove={handleTouchMove}
@@ -123,6 +188,14 @@ export default function PublicMapPage() {
             }
           }}
         />
+
+        {(isLoadingMarkers || isMarkerError) && (
+          <div className="absolute inset-x-0 top-[160px] z-30 mx-auto w-[360px] rounded-xl bg-black/60 px-4 py-3 text-center text-sm text-white backdrop-blur">
+            {isLoadingMarkers
+              ? '공개 사진 정보를 불러오는 중입니다...'
+              : '공개 사진 정보를 불러오지 못했어요.'}
+          </div>
+        )}
 
         <button
           onClick={handleShareClick}
@@ -142,6 +215,9 @@ export default function PublicMapPage() {
           setIsExpanded={setIsExpanded}
           isPublic={true}
           regionName={selectedRegion}
+          recentPhoto={
+            selectedRegion ? (latestPhotos?.[selectedRegion] ?? null) : null
+          }
         />
       </div>
     </div>
