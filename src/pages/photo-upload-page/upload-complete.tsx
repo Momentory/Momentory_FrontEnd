@@ -23,6 +23,7 @@ export default function PhotoUploadCompletePage() {
 
   const [showNearbyPlaceModal, setShowNearbyPlaceModal] = useState(false);
   const [nearbyPlace, setNearbyPlace] = useState<string | null>(null);
+  const [showShareChannels, setShowShareChannels] = useState(false);
 
   useEffect(() => {
     const nearbyPlaceName = location.state?.nearbyPlace;
@@ -70,6 +71,9 @@ export default function PhotoUploadCompletePage() {
   };
 
   const handleShareClick = async () => {
+    // 공유 채널 섹션 표시
+    setShowShareChannels(true);
+
     // Web Share API는 모바일 환경에서만 지원되는 경우가 많음
     if (
       navigator.share &&
@@ -101,21 +105,37 @@ export default function PhotoUploadCompletePage() {
 
   const handleCopyLink = async () => {
     try {
+      // 페이지에 표시되는 사진을 공유 (uploadedImage)
+      // data: URL이면 공유할 수 없음
+      if (uploadedImage.startsWith('data:')) {
+        alert(
+          '이미지 링크를 복사할 수 없습니다. 사진이 업로드된 후 다시 시도해주세요.'
+        );
+        return;
+      }
+
       // 최신 Clipboard API 시도
-      await navigator.clipboard.writeText(window.location.href);
-      alert('링크가 클립보드에 복사되었습니다!');
+      await navigator.clipboard.writeText(uploadedImage);
+      alert('사진 링크가 클립보드에 복사되었습니다!');
     } catch (error) {
       console.error('링크 복사 실패:', error);
       // 구형 방식 (execCommand)으로 폴백
+      if (uploadedImage.startsWith('data:')) {
+        alert(
+          '이미지 링크를 복사할 수 없습니다. 사진이 업로드된 후 다시 시도해주세요.'
+        );
+        return;
+      }
+
       const textArea = document.createElement('textarea');
-      textArea.value = window.location.href;
+      textArea.value = uploadedImage;
       textArea.style.position = 'fixed';
       textArea.style.opacity = '0';
       document.body.appendChild(textArea);
       textArea.select();
       try {
         document.execCommand('copy');
-        alert('링크가 클립보드에 복사되었습니다!');
+        alert('사진 링크가 클립보드에 복사되었습니다!');
       } catch {
         alert('링크 복사에 실패했습니다.');
       }
@@ -124,20 +144,32 @@ export default function PhotoUploadCompletePage() {
   };
 
   const handleShare = async (platform: string) => {
-    const shareUrl = window.location.href;
+    // 페이지에 표시되는 사진을 공유 (uploadedImage)
+    // data: URL이면 공유할 수 없음
+    if (uploadedImage.startsWith('data:')) {
+      alert(
+        '이미지를 공유할 수 없습니다. 사진이 업로드된 후 다시 시도해주세요.'
+      );
+      return;
+    }
+
+    const shareUrl = uploadedImage;
 
     switch (platform) {
       case 'kakaotalk': {
         try {
+          // data URL인 경우 S3 URL로 변환 필요
           if (uploadedImage.startsWith('data:')) {
             alert(
-              '카카오톡 공유를 위해서는 웹에서 접근 가능한 이미지 URL이 필요합니다. 사진 업로드 후 다시 시도해주세요.'
+              '카카오톡 공유를 위해서는 웹에서 접근 가능한 이미지 URL이 필요합니다. 사진이 업로드된 후 다시 시도해주세요.'
             );
-            break;
+            return;
           }
 
+          // 카카오 SDK 초기화 및 공유 API 호출
           const Kakao = await getKakao();
 
+          // 카카오톡 공유: 모든 환경에서 사용 (모바일, 데스크톱 모두 지원)
           Kakao.Share.sendDefault({
             objectType: 'feed',
             content: {
@@ -145,30 +177,55 @@ export default function PhotoUploadCompletePage() {
               description: '나의 순간을 Momentory에서 확인해보세요!',
               imageUrl: uploadedImage,
               link: {
-                mobileWebUrl: window.location.href,
-                webUrl: window.location.href,
+                mobileWebUrl: window.location.origin,
+                webUrl: window.location.origin,
               },
             },
             buttons: [
               {
-                title: '사진 보러가기',
+                title: 'Momentory 보러가기',
                 link: {
-                  mobileWebUrl: window.location.href,
-                  webUrl: window.location.href,
+                  mobileWebUrl: window.location.origin,
+                  webUrl: window.location.origin,
                 },
               },
             ],
           });
-        } catch (error) {
+        } catch (error: any) {
           console.error('카카오톡 공유 실패:', error);
-          alert(
-            '카카오톡 공유 중 오류가 발생했습니다. 앱 설정과 JavaScript 키를 확인해주세요.'
-          );
+
+          // 에러 메시지에 따라 다른 처리
+          const errorMessage = error?.message || '';
+
+          if (errorMessage.includes('키') || errorMessage.includes('key')) {
+            alert(
+              '카카오톡 공유 설정이 필요합니다. 관리자에게 문의해주세요.\n(JavaScript 키 확인 필요)'
+            );
+          } else if (
+            errorMessage.includes('도메인') ||
+            errorMessage.includes('domain')
+          ) {
+            alert(
+              '카카오톡 공유 설정이 필요합니다. 관리자에게 문의해주세요.\n(도메인 등록 확인 필요)'
+            );
+          } else {
+            // 기타 에러 시 다운로드로 폴백
+            try {
+              const blob = await getImageBlob(uploadedImage);
+              downloadBlob(blob, `momentory-photo-${Date.now()}.jpg`);
+              alert(
+                '카카오톡 공유에 실패했습니다. 이미지를 다운로드했습니다. 카카오톡에서 직접 공유해주세요.'
+              );
+            } catch (downloadError) {
+              alert('카카오톡 공유에 실패했습니다. 다시 시도해주세요.');
+            }
+          }
         }
         break;
       }
 
       case 'facebook': {
+        // 페이스북은 URL 공유만 가능하므로 이미지 URL을 직접 공유
         const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;
         window.open(facebookUrl, '_blank', 'width=600,height=400');
         break;
@@ -360,52 +417,54 @@ export default function PhotoUploadCompletePage() {
         </div>
       </div>
 
-      <div className="w-full max-w-[480px] mx-auto bg-[#F8F1F1] rounded-xl p-4">
-        <p className="text-center text-[#B28B8B] font-bold mb-6">
-          공유할 채널을 선택하세요
-        </p>
-        <div className="flex justify-center gap-8 sm:gap-10 md:gap-12 flex-wrap">
-          <button
-            onClick={handleCopyLink}
-            className="flex flex-col items-center gap-1"
-          >
-            <LinkIcon className="w-10 h-10 text-gray-600" />
-            <span className="text-xs text-[#B28B8B]">링크 복사</span>
-          </button>
+      {showShareChannels && (
+        <div className="w-full max-w-[480px] mx-auto bg-[#F8F1F1] rounded-xl p-4 animate-in fade-in slide-in-from-bottom-4 duration-300">
+          <p className="text-center text-[#B28B8B] font-bold mb-6">
+            공유할 채널을 선택하세요
+          </p>
+          <div className="flex justify-center gap-8 sm:gap-10 md:gap-12 flex-wrap">
+            <button
+              onClick={handleCopyLink}
+              className="flex flex-col items-center gap-1"
+            >
+              <LinkIcon className="w-10 h-10 text-gray-600" />
+              <span className="text-xs text-[#B28B8B]">링크 복사</span>
+            </button>
 
-          <button
-            onClick={() => handleShare('kakaotalk')}
-            className="flex flex-col items-center gap-1"
-          >
-            <KakaoIcon className="w-10 h-10" />
-            <span className="text-xs text-[#B28B8B]">카카오톡</span>
-          </button>
+            <button
+              onClick={() => handleShare('kakaotalk')}
+              className="flex flex-col items-center gap-1"
+            >
+              <KakaoIcon className="w-10 h-10" />
+              <span className="text-xs text-[#B28B8B]">카카오톡</span>
+            </button>
 
-          <button
-            onClick={() => handleShare('instagram')}
-            className="flex flex-col items-center gap-1"
-          >
-            <InstaIcon className="w-10 h-10" />
-            <span className="text-xs text-[#B28B8B]">인스타그램</span>
-          </button>
+            <button
+              onClick={() => handleShare('instagram')}
+              className="flex flex-col items-center gap-1"
+            >
+              <InstaIcon className="w-10 h-10" />
+              <span className="text-xs text-[#B28B8B]">인스타그램</span>
+            </button>
 
-          <button
-            onClick={() => handleShare('tistory')}
-            className="flex flex-col items-center gap-1"
-          >
-            <HeartIcon className="w-10 h-10" />
-            <span className="text-xs text-[#B28B8B]">티스토리</span>
-          </button>
+            <button
+              onClick={() => handleShare('tistory')}
+              className="flex flex-col items-center gap-1"
+            >
+              <HeartIcon className="w-10 h-10" />
+              <span className="text-xs text-[#B28B8B]">티스토리</span>
+            </button>
 
-          <button
-            onClick={() => handleShare('facebook')}
-            className="flex flex-col items-center gap-1"
-          >
-            <FacebookIcon className="w-10 h-10" />
-            <span className="text-xs text-[#B28B8B]">페이스북</span>
-          </button>
+            <button
+              onClick={() => handleShare('facebook')}
+              className="flex flex-col items-center gap-1"
+            >
+              <FacebookIcon className="w-10 h-10" />
+              <span className="text-xs text-[#B28B8B]">페이스북</span>
+            </button>
+          </div>
         </div>
-      </div>
+      )}
 
       <div className="w-full max-w-[480px] mx-auto mb-20 pb-8">
         <div className="bg-[#FF7070] p-5 mb-4">
