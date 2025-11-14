@@ -50,31 +50,41 @@ const CharacterDisplay = forwardRef<HTMLDivElement, CharacterDisplayProps>(({
 
       <div
         ref={ref}
-        className="fixed inset-0 flex items-end justify-center px-16 max-w-[480px] mx-auto left-0 right-0 z-10 transition-all duration-300"
-        style={{ paddingBottom: `${bottomSheetHeight + 32}px` }}
+        className="fixed top-[116px] bottom-0 left-0 right-0 max-w-[480px] mx-auto z-10 transition-all duration-300 overflow-hidden bg-white"
+        style={{
+          bottom: `${bottomSheetHeight}px`,
+        }}
       >
-        <div className="relative w-full max-w-[300px] aspect-square">
-          <img src={characterImage} alt="character" className="w-full h-full object-contain" />
-          {equippedAccessories.map((id) => {
-            const acc = accessories.find((a) => a.id === id);
-            if (!acc || !acc.type) return null;
+        <div className="absolute inset-0 bg-white">
+          <img src={Bg} alt="background" className="w-full h-full object-cover" />
+        </div>
+        <div
+          className="absolute inset-0 flex items-end justify-center px-16"
+          style={{ paddingBottom: '32px' }}
+        >
+          <div className="relative w-full max-w-[300px] aspect-square">
+            <img src={characterImage} alt="character" className="w-full h-full object-contain" />
+            {equippedAccessories.map((id) => {
+              const acc = accessories.find((a) => a.id === id);
+              if (!acc || !acc.type) return null;
 
-            const itemTransform = getItemTransform(id, acc.type.toUpperCase());
-            const transformStyle = transformToCSS(itemTransform);
+              const itemTransform = getItemTransform(id, acc.type.toUpperCase());
+              const transformStyle = transformToCSS(itemTransform);
 
-            return (
-              <img
-                key={id}
-                src={acc.icon}
-                alt={acc.name}
-                style={{
-                  transform: transformStyle,
-                  mixBlendMode: acc.type.toUpperCase() === 'CLOTHING' ? 'multiply' : 'normal',
-                }}
-                className="absolute inset-0 w-full h-full object-contain pointer-events-none"
-              />
-            );
-          })}
+              return (
+                <img
+                  key={id}
+                  src={acc.icon}
+                  alt={acc.name}
+                  style={{
+                    transform: transformStyle,
+                    mixBlendMode: acc.type.toUpperCase() === 'CLOTHING' ? 'multiply' : 'normal',
+                  }}
+                  className="absolute inset-0 w-full h-full object-contain pointer-events-none"
+                />
+              );
+            })}
+          </div>
         </div>
       </div>
     </>

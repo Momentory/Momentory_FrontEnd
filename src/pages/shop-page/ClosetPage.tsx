@@ -14,6 +14,7 @@ import useBottomSheet from '../../hooks/shop/useBottomSheet';
 import { useUserPoint, useCurrentCharacter, useMyItems, useShopItems } from '../../hooks/shop/useShopQueries';
 import { useEquipItem, useUnequipItem } from '../../hooks/shop/useEquipItem';
 import type { ItemCategory } from '../../types/shop';
+import { toS3WebsiteUrl } from '../../utils/s3';
 
 const ClosetPage = () => {
   const navigate = useNavigate();
@@ -78,7 +79,7 @@ const ClosetPage = () => {
     const ownedAccessories = myItems.map(item => ({
       id: item.itemId,
       name: item.name,
-      icon: item.imageUrl,
+      icon: toS3WebsiteUrl(item.imageUrl),
       locked: false,
       type: item.category.toLowerCase()
     }));
@@ -88,7 +89,7 @@ const ClosetPage = () => {
       .map(item => ({
         id: item.itemId,
         name: item.name,
-        icon: item.imageUrl,
+        icon: toS3WebsiteUrl(item.imageUrl),
         locked: true,
         type: item.category.toLowerCase(),
         unlockLevel: item.unlockLevel
@@ -107,7 +108,7 @@ const ClosetPage = () => {
       equippedItems.push({
         id: equipped.clothing.itemId,
         name: equipped.clothing.name,
-        icon: equipped.clothing.imageUrl,
+        icon: toS3WebsiteUrl(equipped.clothing.imageUrl),
         locked: false,
         type: 'clothing'
       });
@@ -116,7 +117,7 @@ const ClosetPage = () => {
       equippedItems.push({
         id: equipped.expression.itemId,
         name: equipped.expression.name,
-        icon: equipped.expression.imageUrl,
+        icon: toS3WebsiteUrl(equipped.expression.imageUrl),
         locked: false,
         type: 'expression'
       });
@@ -125,7 +126,7 @@ const ClosetPage = () => {
       equippedItems.push({
         id: equipped.effect.itemId,
         name: equipped.effect.name,
-        icon: equipped.effect.imageUrl,
+        icon: toS3WebsiteUrl(equipped.effect.imageUrl),
         locked: false,
         type: 'effect'
       });
@@ -134,7 +135,7 @@ const ClosetPage = () => {
       equippedItems.push({
         id: equipped.decoration.itemId,
         name: equipped.decoration.name,
-        icon: equipped.decoration.imageUrl,
+        icon: toS3WebsiteUrl(equipped.decoration.imageUrl),
         locked: false,
         type: 'decoration'
       });
@@ -190,41 +191,31 @@ const ClosetPage = () => {
 
   const captureCharacter = async (): Promise<Blob | null> => {
     try {
-      const element = document.querySelector('.flex.flex-col.h-screen') as HTMLElement;
-      if (!element) return null;
+      if (!captureRef.current) {
+        throw new Error('캡처 대상을 찾을 수 없습니다.');
+      }
 
-      const canvas = await html2canvas(element, {
-        backgroundColor: null,
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      const canvas = await html2canvas(captureRef.current, {
+        backgroundColor: '#ffffff',
         scale: 2,
         logging: false,
         useCORS: true,
         allowTaint: true,
-        height: window.innerHeight - height - 15,
-        onclone: (clonedDoc) => {
-          const header = clonedDoc.querySelector('header');
-          if (header) {
-            (header as HTMLElement).style.display = 'none';
-          }
-
-          const pointInfo = clonedDoc.querySelector('.bg-black\\/15');
-          if (pointInfo) {
-            (pointInfo as HTMLElement).style.display = 'none';
-          }
-
-          const buttons = clonedDoc.querySelectorAll('button');
-          buttons.forEach((btn) => {
-            (btn as HTMLElement).style.display = 'none';
-          });
-          const bottomSheets = clonedDoc.querySelectorAll('[class*="bg-white"][class*="shadow"], [class*="rounded-t-"]');
-          bottomSheets.forEach((sheet) => {
-            (sheet as HTMLElement).style.display = 'none';
-          });
-        },
       });
 
-      return new Promise((resolve) => {
+      if (canvas.width === 0 || canvas.height === 0) {
+        throw new Error(`캔버스 크기가 0입니다: ${canvas.width}x${canvas.height}`);
+      }
+
+      return new Promise((resolve, reject) => {
         canvas.toBlob((blob) => {
-          resolve(blob);
+          if (blob && blob.size > 0) {
+            resolve(blob);
+          } else {
+            reject(new Error('Blob 생성 실패'));
+          }
         }, 'image/png');
       });
     } catch (error) {
