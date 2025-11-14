@@ -4,11 +4,9 @@ import map from '../../assets/gyeonggi-map.svg';
 import MarkerPopup from './MarkerPopup';
 import type { PublicMapViewProps } from '../../types/map';
 
-const BASE_MAP_SCALE = 1.1; // 지도 기본 크기
+const BASE_MAP_SCALE = 1.25; // 지도 기본 크기 (살짝 확대)
 const MAP_POSITION_X = -30; // 지도 X 위치 (픽셀 단위, 음수면 왼쪽, 양수면 오른쪽)
 const MAP_POSITION_Y = -15; // 지도 Y 위치 (픽셀 단위, 음수면 위쪽, 양수면 아래쪽)
-
-const markerAlbums: Array<{ id: number; imageUrl: string; title: string }> = [];
 
 export default function PublicMapView({
   markers,
@@ -17,6 +15,8 @@ export default function PublicMapView({
   originPosRef,
   containerRef,
   scale,
+  zoomInMarker,
+  zoomOutMarker,
   handleWheel,
   handleTouchStart,
   handleTouchMove,
@@ -45,6 +45,9 @@ export default function PublicMapView({
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
+      onClick={() => {
+        zoomOutMarker?.();
+      }}
     >
       <div
         className="absolute inset-0 w-full h-full transition-transform duration-600"
@@ -63,15 +66,20 @@ export default function PublicMapView({
 
         {markers.map((marker, index) => {
           const active = activeMarkerId === marker.id;
-          const album = markerAlbums.find((a) => a.id === marker.id);
           return (
             <MarkerPopup
-              key={`public-marker-${marker.id}-${marker.location}-${index}`}
+              key={`public-marker-${marker.id}-${marker.location ?? 'unknown'}-${index}`}
               marker={marker}
               active={active}
-              album={album}
               zoomed={zoomed}
-              onMarkerClick={(id, location) => onMarkerClick?.(id, location)}
+              mapScale={scale}
+              onMarkerClick={(id, location) => {
+                const selectedMarker = markers.find((m) => m.id === id);
+                if (selectedMarker) {
+                  zoomInMarker?.(selectedMarker);
+                }
+                onMarkerClick?.(id, location);
+              }}
             />
           );
         })}

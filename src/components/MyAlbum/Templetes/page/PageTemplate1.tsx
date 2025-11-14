@@ -16,7 +16,7 @@ const PageTemplate1: React.FC<TemplateProps> = ({ data, updateData, onEmptyAreaC
     <div className="w-full max-w-[480px] aspect-[9/16] mx-auto font-[inter] flex flex-col p-6 bg-white">
       <div className="flex justify-between items-start h-[35%] mb-[40px]">
         <div className="w-[30%] h-full relative bg-gray-100 overflow-hidden">
-          {data.image1 && <img src={data.image1} alt="Image 1" className="w-full h-full object-cover" />}
+          {data.image1 && <img src={data.image1} alt="Image 1" crossOrigin="anonymous" className="w-full h-full object-cover" />}
           <div 
             className={`absolute inset-0 flex items-center justify-center cursor-pointer transition-colors ${!data.image1 ? 'bg-[#D8D8D8]' : 'bg-transparent hover:bg-black/30'}`}
             onClick={() => onImageClick?.('image1')}
@@ -26,7 +26,7 @@ const PageTemplate1: React.FC<TemplateProps> = ({ data, updateData, onEmptyAreaC
         </div>
 
         <div className="w-[30%] h-full relative bg-gray-100 overflow-hidden mt-[40px]">
-          {data.image2 && <img src={data.image2} alt="Image 2" className="w-full h-full object-cover" />}
+          {data.image2 && <img src={data.image2} alt="Image 2" crossOrigin="anonymous" className="w-full h-full object-cover" />}
           <div 
             className={`absolute inset-0 flex items-center justify-center cursor-pointer transition-colors ${!data.image2 ? 'bg-[#D8D8D8]' : 'bg-transparent hover:bg-black/30'}`}
             onClick={() => onImageClick?.('image2')}
@@ -36,7 +36,7 @@ const PageTemplate1: React.FC<TemplateProps> = ({ data, updateData, onEmptyAreaC
         </div>
 
         <div className="w-[30%] h-full relative bg-gray-100 overflow-hidden">
-          {data.image3 && <img src={data.image3} alt="Image 3" className="w-full h-full object-cover" />}
+          {data.image3 && <img src={data.image3} alt="Image 3" crossOrigin="anonymous" className="w-full h-full object-cover" />}
           <div 
             className={`absolute inset-0 flex items-center justify-center cursor-pointer transition-colors ${!data.image3 ? 'bg-[#D8D8D8]' : 'bg-transparent hover:bg-black/30'}`}
             onClick={() => onImageClick?.('image3')}

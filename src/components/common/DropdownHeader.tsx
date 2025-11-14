@@ -55,7 +55,7 @@ const DropdownHeader = ({
 
   return (
     <div className="fixed top-[56px] left-1/2 -translate-x-1/2 w-full max-w-[480px] z-40">
-      <div className="relative bg-white shadow-md z-10 p-1.9">
+      <div className="relative bg-white shadow-[0px_6px_8px_0px_rgba(0,0,0,0.25)] z-[60]">
         <div className="relative flex items-center justify-center h-[60px] px-4">
           {LeftIcon !== null && (
             <button
@@ -90,8 +90,8 @@ const DropdownHeader = ({
           </div>
         </div>
         <div
-          className={`absolute left-0 top-full mt-2 w-full bg-white rounded-2xl shadow-[0px_4px_12px_0px_rgba(0,0,0,0.1)]
-          overflow-hidden transition-all duration-300 z-20 ${
+          className={`absolute left-0 top-full w-full bg-white rounded-2xl shadow-[0px_4px_12px_0px_rgba(0,0,0,0.1)]
+          overflow-hidden transition-all duration-300 z-[50] ${
             isOpen
               ? 'opacity-100 translate-y-0'
               : 'opacity-0 -translate-y-2 pointer-events-none'

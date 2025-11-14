@@ -11,6 +11,7 @@ const ProtectedLayout = () => {
 
   const isEditPage = location.pathname.startsWith('/edit/');
   const isAlbumPage = location.pathname.startsWith('/album/');
+  const isAlbumEditPage = location.pathname.startsWith('/myalbum/edit/');
   const isCreateAlbumPage = location.pathname.startsWith('/create-album');
   const isAlbumReadPage = location.pathname.includes('/read');
   const isShopPage = location.pathname.startsWith('/shop');
@@ -75,6 +76,7 @@ const ProtectedLayout = () => {
     isClosetPage ||
     isEditPage ||
     isAlbumPage ||
+    isAlbumEditPage ||
     isMyClosetPage ||
     isCreateAlbumPage;
 

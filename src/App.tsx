@@ -154,6 +154,7 @@ const protectedRoutes: RouteObject[] = [
       { path: 'album/:albumId', element: <AlbumDetailPage /> },
       { path: 'album/:albumId/read', element: <AlbumReadPage /> },
       { path: 'edit/:id', element: <EditAlbumPage /> },
+      { path: 'myalbum/edit/:albumId', element: <EditAlbumPage /> },
 
       { path: 'shop', element: <ShopPage /> },
       { path: 'closet', element: <ClosetPage /> },

@@ -185,7 +185,7 @@ export default function ShopBottomSheet({
       )}
 
       <div
-        className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] bg-white rounded-t-2xl shadow-lg z-500 overflow-hidden"
+        className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] bg-white rounded-t-2xl shadow-lg z-[500] overflow-hidden"
         style={{
           height: `${height}px`,
           transition: isDragging ? 'none' : 'height 0.3s ease-out',
@@ -282,8 +282,13 @@ export default function ShopBottomSheet({
         </div>
       </div>
 
-      <div className="px-6 pb-6">
-        <div className="grid grid-cols-4 gap-3 overflow-y-auto max-h-[360px]">
+      <div
+        className="px-6 pb-6 overflow-y-auto"
+        style={{
+          maxHeight: `${height - 120}px`
+        }}
+      >
+        <div className="grid grid-cols-4 gap-3">
           {accessories.map((accessory) => {
             const isOwned = ownedAccessories.includes(accessory.id);
             const isEquipped = equippedAccessories.includes(accessory.id);
@@ -301,7 +306,7 @@ export default function ShopBottomSheet({
                     }
                   }}
                   disabled={isOwned}
-                  className={`aspect-square w-full flex items-center justify-center rounded-xl transition-all relative ${
+                  className={`aspect-square w-full flex items-center justify-center rounded-xl transition-all relative overflow-hidden ${
                     isLocked
                       ? 'bg-white border-2 border-gray-300 cursor-pointer'
                       : isOwned
@@ -322,7 +327,7 @@ export default function ShopBottomSheet({
                       <img
                         src={accessory.icon}
                         alt={accessory.name}
-                        className={"object-contain"}
+                        className="max-w-[80%] max-h-[80%] object-contain"
                       />
                       {isOwned && (
                         <div className="absolute bottom-1 right-1 bg-[#FF7070] rounded-full w-5 h-5 flex items-center justify-center">

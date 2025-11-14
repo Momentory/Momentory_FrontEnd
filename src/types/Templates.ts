@@ -10,6 +10,9 @@ export type PageData = {
   bodyText1?: string;
   bodyText2?: string;
   subTitle2?: string;
+  readOnly?: boolean; // 기존 앨범 페이지 여부
+  imageUrl?: string; // 기존 앨범 페이지의 이미지 URL 또는 썸네일
+  thumbnail?: string; // 새 페이지의 미리보기 썸네일 (base64)
 };
 
 export interface TemplateProps {

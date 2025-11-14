@@ -81,7 +81,8 @@ export const album = {
     if (cursor) params.append('cursor', cursor);
     params.append('size', size.toString());
 
-    const res = await api.get<ApiResponse<MyPhotosResponse>>(`/api/mypage/photos?${params.toString()}`);
+    const url = `/api/mypage/photos?${params.toString()}`;
+    const res = await api.get<ApiResponse<MyPhotosResponse>>(url);
     return res.data;
   },
 };
