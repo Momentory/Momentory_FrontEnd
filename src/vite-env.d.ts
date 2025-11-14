@@ -11,3 +11,12 @@ declare module '*.svg?react' {
   const ReactComponent: React.FunctionComponent<React.SVGProps<SVGSVGElement>>;
   export default ReactComponent;
 }
+
+interface ImportMetaEnv {
+  readonly VITE_APP_TITLE: string
+}
+
+interface ImportMeta {
+  readonly env: ImportMetaEnv
+  glob<T = any>(pattern: string | string[], options?: { eager?: boolean; as?: string }): Record<string, T>
+}

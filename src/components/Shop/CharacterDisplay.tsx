@@ -1,8 +1,8 @@
 import { forwardRef } from 'react';
-import PointIcon from '../../assets/icons/pointIcon.svg?react';
 import Bg from '../../assets/accessories/bgImg.svg';
-import GemIcon from '../../assets/icons/gemIcon.svg?react';
-import { getItemTransform, transformToCSS } from '../../config/itemPositions';
+import { useCharacterItems } from '../../hooks/shop/useCharacterItems';
+import CharacterInfo from './CharacterInfo';
+import CharacterItems from './CharacterItems';
 
 interface Accessory {
   id: number;
@@ -30,23 +30,25 @@ const CharacterDisplay = forwardRef<HTMLDivElement, CharacterDisplayProps>(({
   equippedAccessories,
   accessories,
   characterImage,
+  characterType,
   bottomSheetHeight = 100,
 }, ref) => {
+  const {
+    clothingImageSrc,
+    effectImageSrc,
+    nofaceImageSrc,
+    expressionImageSrc,
+    effectAccessory,
+    expressionAccessory,
+  } = useCharacterItems(accessories, equippedAccessories, characterType);
+
   return (
     <>
       <div className="fixed inset-0 max-w-[480px] mx-auto left-0 right-0 z-0">
         <img src={Bg} alt="background" className="w-full h-full object-cover" />
       </div>
 
-      <div className="fixed top-[116px] left-0 right-0 max-w-[480px] mx-auto px-4 py-3 flex justify-between items-center z-[60] bg-black/15">
-        <span className="text-lg font-bold text-black">Level {level}</span>
-        <div className="flex items-center gap-2">
-          <GemIcon className="w-6 h-6"/>
-          <span className="text-lg font-bold text-black">{gem}</span>
-          <PointIcon className="w-6 h-6" />
-          <span className="text-lg font-bold text-black">{point}</span>
-        </div>
-      </div>
+      <CharacterInfo level={level} point={point} gem={gem} />
 
       <div
         ref={ref}
@@ -63,27 +65,23 @@ const CharacterDisplay = forwardRef<HTMLDivElement, CharacterDisplayProps>(({
           style={{ paddingBottom: '32px' }}
         >
           <div className="relative w-full max-w-[300px] aspect-square">
-            <img src={characterImage} alt="character" className="w-full h-full object-contain" />
-            {equippedAccessories.map((id) => {
-              const acc = accessories.find((a) => a.id === id);
-              if (!acc || !acc.type) return null;
+            {/* 의상 있으면 clothing 이미지, 표정 있으면 noface 이미지, 없으면 기본 캐릭터 */}
+            {clothingImageSrc ? (
+              <img src={clothingImageSrc} alt="character with clothing" className="w-full h-full object-contain" />
+            ) : nofaceImageSrc ? (
+              <img src={nofaceImageSrc} alt="character noface" className="w-full h-full object-contain" />
+            ) : (
+              <img src={characterImage} alt="character" className="w-full h-full object-contain" />
+            )}
 
-              const itemTransform = getItemTransform(id, acc.type.toUpperCase());
-              const transformStyle = transformToCSS(itemTransform);
-
-              return (
-                <img
-                  key={id}
-                  src={acc.icon}
-                  alt={acc.name}
-                  style={{
-                    transform: transformStyle,
-                    mixBlendMode: acc.type.toUpperCase() === 'CLOTHING' ? 'multiply' : 'normal',
-                  }}
-                  className="absolute inset-0 w-full h-full object-contain pointer-events-none"
-                />
-              );
-            })}
+            <CharacterItems
+              effectImageSrc={effectImageSrc}
+              effectAccessory={effectAccessory}
+              expressionImageSrc={expressionImageSrc}
+              expressionAccessory={expressionAccessory}
+              equippedAccessories={equippedAccessories}
+              accessories={accessories}
+            />
           </div>
         </div>
       </div>

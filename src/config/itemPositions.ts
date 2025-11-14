@@ -13,12 +13,12 @@ export const categoryDefaults: Record<string, ItemTransform> = {
     translateY: 0,
   },
   EXPRESSION: {
-    scale: 0.7,
+    scale: 0.45,
     translateX: 0,
     translateY: -10,
   },
   EFFECT: {
-    scale: 1.2,
+    scale: 0.9,
     translateX: 0,
     translateY: 0,
   },
@@ -36,6 +36,7 @@ export const categoryDefaults: Record<string, ItemTransform> = {
  */
 
 export const itemExceptions: Record<number, ItemTransform> = {
+  // 장식
   1: { scale: 0.3, translateX: -40, translateY: -90 }, // 리본
   3: { scale: 0.3, translateX: 70, translateY: -70 }, // 장미
   4: { scale: 0.2, translateX: 60, translateY: -150 }, // 깃털

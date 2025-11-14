@@ -161,6 +161,29 @@ const ClosetPage = () => {
       return;
     }
 
+    // 의상이 착용되어 있는지 확인
+    const hasClothing = currentCharacter.equipped.clothing !== null;
+    const isClothing = accessory.type.toUpperCase() === 'CLOTHING';
+
+    // 의상이 착용된 상태에서 다른 카테고리 아이템 착용 시도 시 경고
+    if (hasClothing && !isClothing && !equippedAccessories.includes(id)) {
+      alert('의상을 착용한 상태에서는 다른 아이템을 착용할 수 없습니다.');
+      return;
+    }
+
+    // 다른 카테고리 아이템이 있는 상태에서 의상 착용 시도 시 경고
+    if (isClothing && !equippedAccessories.includes(id)) {
+      const hasOtherItems =
+        currentCharacter.equipped.expression !== null ||
+        currentCharacter.equipped.effect !== null ||
+        currentCharacter.equipped.decoration !== null;
+
+      if (hasOtherItems) {
+        alert('다른 아이템을 착용한 상태에서는 의상을 착용할 수 없습니다.');
+        return;
+      }
+    }
+
     if (equippedAccessories.includes(id)) {
       console.log('아이템 해제 시도:', { characterId: currentCharacter.characterId, itemId: id });
       unequipMutation.mutate({ characterId: currentCharacter.characterId, itemId: id });
