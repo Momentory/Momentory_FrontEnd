@@ -144,7 +144,7 @@ export default function AllMyPhotosViewerPage() {
             <img
               src={photo.imageUrl}
               alt={photo.title}
-              className="absolute inset-0 h-full w-full object-cover"
+              className="absolute inset-0 h-full w-full object-contain"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
 

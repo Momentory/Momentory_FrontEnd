@@ -127,7 +127,7 @@ export default function BottomSheet({
     (e: React.MouseEvent, index: number) => {
       e.stopPropagation();
       if (!regionName || regionPhotos.length === 0) return;
-      // all-my-photos 페이지로 이동 (거기서 클릭하면 viewer로 이동)
+
       navigate('/all-my-photos', {
         state: {
           isPublic,
