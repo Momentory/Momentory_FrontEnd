@@ -94,7 +94,7 @@ const ShopPage = () => {
     id: item.itemId,
     name: item.name,
     icon: item.imageUrl,
-    locked: item.unlockLevel > level,
+    locked: !item.owned && item.unlockLevel > level,
     type: item.category,
     price: item.price,
     unlockLevel: item.unlockLevel,

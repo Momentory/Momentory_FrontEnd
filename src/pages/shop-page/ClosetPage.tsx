@@ -1,5 +1,6 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import html2canvas from 'html2canvas-pro';
 import DropdownHeader from '../../components/common/DropdownHeader';
 import StarIcon from '../../assets/icons/starIcon.svg?react';
 import ShareIcon from '../../assets/icons/albumShare.svg?react';
@@ -18,6 +19,7 @@ const ClosetPage = () => {
   const navigate = useNavigate();
   const [selectedCategory, setSelectedCategory] = useState<ItemCategory>('DECORATION');
   const { height, isExpanded, setHeight, setIsExpanded } = useBottomSheet();
+  const captureRef = useRef<HTMLDivElement>(null);
 
   const categoryDisplayMap: { [key in ItemCategory]: string } = {
     CLOTHING: '의상',
@@ -32,11 +34,23 @@ const ClosetPage = () => {
   const { data: shopItems = [] } = useShopItems(selectedCategory);
 
   const equipMutation = useEquipItem({
-    onError: (error) => console.error('아이템 착용 실패:', error),
+    onSuccess: () => {
+      console.log('아이템 착용 성공');
+    },
+    onError: (error) => {
+      console.error('아이템 착용 실패:', error);
+      alert(`아이템 착용에 실패했습니다: ${error.message || '알 수 없는 오류'}`);
+    },
   });
 
   const unequipMutation = useUnequipItem({
-    onError: (error) => console.error('아이템 해제 실패:', error),
+    onSuccess: () => {
+      console.log('아이템 해제 성공');
+    },
+    onError: (error) => {
+      console.error('아이템 해제 실패:', error);
+      alert(`아이템 해제에 실패했습니다: ${error.message || '알 수 없는 오류'}`);
+    },
   });
 
   const level = currentCharacter?.level || 1;
@@ -135,26 +149,139 @@ const ClosetPage = () => {
 
   const handleAccessoryClick = (id: number) => {
     const accessory = accessories.find((acc) => acc.id === id);
-    if (!accessory || accessory.locked || !currentCharacter) return;
+    console.log('아이템 클릭:', { id, accessory, currentCharacter });
+
+    if (!accessory || accessory.locked || !currentCharacter) {
+      console.log('클릭 무시:', {
+        hasAccessory: !!accessory,
+        isLocked: accessory?.locked,
+        hasCharacter: !!currentCharacter
+      });
+      return;
+    }
 
     if (equippedAccessories.includes(id)) {
+      console.log('아이템 해제 시도:', { characterId: currentCharacter.characterId, itemId: id });
       unequipMutation.mutate({ characterId: currentCharacter.characterId, itemId: id });
     } else {
       const categoryKey = accessory.type.toLowerCase() as keyof typeof currentCharacter.equipped;
       const currentEquippedItem = currentCharacter.equipped[categoryKey];
 
       if (currentEquippedItem) {
+        console.log('기존 아이템 해제 후 새 아이템 착용:', {
+          oldItemId: currentEquippedItem.itemId,
+          newItemId: id
+        });
         unequipMutation.mutate(
           { characterId: currentCharacter.characterId, itemId: currentEquippedItem.itemId },
           {
             onSuccess: () => {
+              console.log('기존 아이템 해제 완료, 새 아이템 착용 시작');
               equipMutation.mutate({ characterId: currentCharacter.characterId, itemId: id });
             },
           }
         );
       } else {
+        console.log('새 아이템 착용 시도:', { characterId: currentCharacter.characterId, itemId: id });
         equipMutation.mutate({ characterId: currentCharacter.characterId, itemId: id });
       }
+    }
+  };
+
+  const captureCharacter = async (): Promise<Blob | null> => {
+    try {
+      const element = document.querySelector('.flex.flex-col.h-screen') as HTMLElement;
+      if (!element) return null;
+
+      const canvas = await html2canvas(element, {
+        backgroundColor: null,
+        scale: 2,
+        logging: false,
+        useCORS: true,
+        allowTaint: true,
+        height: window.innerHeight - height - 15,
+        onclone: (clonedDoc) => {
+          const header = clonedDoc.querySelector('header');
+          if (header) {
+            (header as HTMLElement).style.display = 'none';
+          }
+
+          const pointInfo = clonedDoc.querySelector('.bg-black\\/15');
+          if (pointInfo) {
+            (pointInfo as HTMLElement).style.display = 'none';
+          }
+
+          const buttons = clonedDoc.querySelectorAll('button');
+          buttons.forEach((btn) => {
+            (btn as HTMLElement).style.display = 'none';
+          });
+          const bottomSheets = clonedDoc.querySelectorAll('[class*="bg-white"][class*="shadow"], [class*="rounded-t-"]');
+          bottomSheets.forEach((sheet) => {
+            (sheet as HTMLElement).style.display = 'none';
+          });
+        },
+      });
+
+      return new Promise((resolve) => {
+        canvas.toBlob((blob) => {
+          resolve(blob);
+        }, 'image/png');
+      });
+    } catch (error) {
+      console.error('캡처 실패:', error);
+      return null;
+    }
+  };
+
+  const handleDownload = async () => {
+    const blob = await captureCharacter();
+    if (!blob) {
+      alert('이미지 다운로드에 실패했습니다.');
+      return;
+    }
+
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `momentory-character-${Date.now()}.png`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleShare = async () => {
+    const blob = await captureCharacter();
+    if (!blob) {
+      alert('이미지 공유에 실패했습니다.');
+      return;
+    }
+
+    const file = new File([blob], `momentory-character-${Date.now()}.png`, { type: 'image/png' });
+
+    if (navigator.share && navigator.canShare({ files: [file] })) {
+      try {
+        await navigator.share({
+          files: [file],
+          title: 'Momentory 캐릭터',
+          text: 'Momentory에서 꾸민 나만의 캐릭터!',
+        });
+      } catch (error) {
+        if ((error as Error).name !== 'AbortError') {
+          console.error('공유 실패:', error);
+          alert('공유에 실패했습니다.');
+        }
+      }
+    } else {
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `momentory-character-${Date.now()}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      alert('이미지가 다운로드되었습니다.\n갤러리에서 인스타그램 스토리에 업로드해주세요!');
     }
   };
 
@@ -174,6 +301,7 @@ const ClosetPage = () => {
 
       <div className="flex-1 flex flex-col">
         <CharacterDisplay
+          ref={captureRef}
           level={level}
           point={point}
           gem={gem}
@@ -193,7 +321,11 @@ const ClosetPage = () => {
           <StarIcon className="w-6 h-6 text-white" />
         </button>
         <div className="flex flex-row gap-4">
-        <button className="w-12 h-12 rounded-full bg-[#FF7070] flex items-center justify-center shadow-lg cursor-pointer transition-colors">
+        <button
+          className="w-12 h-12 rounded-full bg-[#FF7070] flex items-center justify-center shadow-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          onClick={handleDownload}
+          disabled={isExpanded}
+        >
           <svg
             className="text-white w-6 h-6"
             fill="none"
@@ -209,8 +341,9 @@ const ClosetPage = () => {
           </svg>
         </button>
         <button
-              className="flex h-12 w-12 items-center justify-center rounded-full border border-gray-200 bg-white shadow-md transition cursor-pointer"
-              onClick={()=> alert('공유 기능 추후 구현.')}
+              className="flex h-12 w-12 items-center justify-center rounded-full border border-gray-200 bg-white shadow-md transition disabled:opacity-50 disabled:cursor-not-allowed"
+              onClick={handleShare}
+              disabled={isExpanded}
             >
               <ShareIcon className="h-6 w-6 text-gray-700" />
             </button>

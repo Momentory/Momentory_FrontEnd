@@ -1,6 +1,6 @@
 import React from 'react';
 import ChevronDown from '../../assets/icons/dropdown.svg?react';
-import LockIcon from '../../assets/icons/albumShare.svg?react';
+import LockIcon from '../../assets/icons/lockIcon.svg?react';
 import PointIcon from '../../assets/icons/pointIcon.svg?react';
 
 interface ShopAccessory {
@@ -322,9 +322,7 @@ export default function ShopBottomSheet({
                       <img
                         src={accessory.icon}
                         alt={accessory.name}
-                        className={`max-w-[60%] max-h-[60%] object-contain ${
-                          !canAfford ? 'opacity-40' : 'opacity-100'
-                        }`}
+                        className={"object-contain"}
                       />
                       {isOwned && (
                         <div className="absolute bottom-1 right-1 bg-[#FF7070] rounded-full w-5 h-5 flex items-center justify-center">

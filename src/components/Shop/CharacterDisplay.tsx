@@ -1,3 +1,4 @@
+import { forwardRef } from 'react';
 import PointIcon from '../../assets/icons/pointIcon.svg?react';
 import Bg from '../../assets/accessories/bgImg.svg';
 import GemIcon from '../../assets/icons/gemIcon.svg?react';
@@ -22,7 +23,7 @@ interface CharacterDisplayProps {
   bottomSheetHeight?: number;
 }
 
-const CharacterDisplay = ({
+const CharacterDisplay = forwardRef<HTMLDivElement, CharacterDisplayProps>(({
   level,
   point,
   gem,
@@ -30,7 +31,7 @@ const CharacterDisplay = ({
   accessories,
   characterImage,
   bottomSheetHeight = 100,
-}: CharacterDisplayProps) => {
+}, ref) => {
   return (
     <>
       <div className="fixed inset-0 max-w-[480px] mx-auto left-0 right-0 z-0">
@@ -48,6 +49,7 @@ const CharacterDisplay = ({
       </div>
 
       <div
+        ref={ref}
         className="fixed inset-0 flex items-end justify-center px-16 max-w-[480px] mx-auto left-0 right-0 z-10 transition-all duration-300"
         style={{ paddingBottom: `${bottomSheetHeight + 32}px` }}
       >
@@ -67,6 +69,7 @@ const CharacterDisplay = ({
                 alt={acc.name}
                 style={{
                   transform: transformStyle,
+                  mixBlendMode: acc.type.toUpperCase() === 'CLOTHING' ? 'multiply' : 'normal',
                 }}
                 className="absolute inset-0 w-full h-full object-contain pointer-events-none"
               />
@@ -76,7 +79,9 @@ const CharacterDisplay = ({
       </div>
     </>
   );
-};
+});
+
+CharacterDisplay.displayName = 'CharacterDisplay';
 
 export default CharacterDisplay;
 
