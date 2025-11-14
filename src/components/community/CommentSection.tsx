@@ -47,11 +47,13 @@ export default function CommentSection({ postId }: CommentSectionProps) {
   }, [postId]);
 
   /* ------------------- 댓글 작성 ------------------- */
+  // CommentSection.tsx
+
   const handleSubmit = async () => {
     if (!newComment.trim()) return;
 
     try {
-      await createComment(postId, { content: newComment });
+      await createComment(postId, newComment);   // ✅ 객체 말고 문자열만 전달
       setNewComment("");
 
       const { data } = await getComments(postId);
@@ -60,6 +62,7 @@ export default function CommentSection({ postId }: CommentSectionProps) {
       console.error("❌ 댓글 작성 실패:", error);
     }
   };
+
 
   /* ------------------- 댓글 삭제 ------------------- */
   const handleDelete = async (commentId: number) => {

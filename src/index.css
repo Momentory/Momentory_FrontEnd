@@ -62,13 +62,14 @@ h2 {
   font-weight: 300;
 }
 
-.scrollbar-hide {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
+/* 스크롤바 숨기기 */
+.hide-scrollbar {
+  -ms-overflow-style: none; /* IE, Edge */
+  scrollbar-width: none; /* Firefox */
 }
 
-.scrollbar-hide::-webkit-scrollbar {
-  display: none;
+.hide-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome, Safari */
 }
 
 
