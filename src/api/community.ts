@@ -14,6 +14,7 @@ export interface CommunityPost {
   title: string;
   time?: string;
   content: string;
+  thumbnailUrl?: string;
   imageUrl?: string | null;
   imageName?: string | null;
   regionId?: number;
