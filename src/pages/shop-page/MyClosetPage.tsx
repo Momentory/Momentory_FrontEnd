@@ -120,6 +120,7 @@ const MyClosetPage = () => {
                 key={wardrobe.wardrobeId}
                 wardrobe={wardrobe}
                 characterImage={characterImage}
+                characterType={currentCharacter?.characterType}
                 isSelected={selectedWardrobeId === wardrobe.wardrobeId}
                 isCurrent={isCurrentStyle(wardrobe)}
                 onClick={() => {
