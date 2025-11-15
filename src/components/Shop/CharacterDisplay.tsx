@@ -67,7 +67,12 @@ const CharacterDisplay = forwardRef<HTMLDivElement, CharacterDisplayProps>(({
           <div className="relative w-full max-w-[300px] aspect-square">
             {/* 의상 있으면 clothing 이미지, 표정 있으면 noface 이미지, 없으면 기본 캐릭터 */}
             {clothingImageSrc ? (
-              <img src={clothingImageSrc} alt="character with clothing" className="w-full h-full object-contain" />
+              <img
+                src={clothingImageSrc}
+                alt="character with clothing"
+                className="w-full h-full object-contain"
+                style={{ transform: 'scaleX(-1)' }}
+              />
             ) : nofaceImageSrc ? (
               <img src={nofaceImageSrc} alt="character noface" className="w-full h-full object-contain" />
             ) : (
