@@ -67,6 +67,7 @@ const ProtectedLayout = () => {
   const isHeaderHidden =
     location.pathname.startsWith('/settings') ||
     location.pathname.startsWith('/all-my-photos/viewer') ||
+    location.pathname.startsWith('/photo-upload-complete') ||
     isAlbumReadPage;
 
   const isNavbarHidden =
@@ -101,7 +102,6 @@ const ProtectedLayout = () => {
   const isUploadFlow = [
     '/photo-upload-progress',
     '/photo-upload-success',
-    '/photo-upload-complete',
     '/stamp-acquisition',
     '/question',
     '/authentication',

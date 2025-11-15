@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import {
   createBrowserRouter,
   RouterProvider,
@@ -22,6 +21,11 @@ import CommunityWritePage from './pages/community-page/CommunityWritePage';
 import CommunitySearchPage from './pages/community-page/CommunitySearchPage';
 import CommunityRegionPage from './pages/community-page/CommunityRegionPage';
 import UserProfilePage from './pages/community-page/UserProfilePage';
+import FollowListPage from "./pages/community-page/FollowListPage";
+import FollowingsPage from "./pages/community-page/FollowingsPage";
+import FollowersPage from "./pages/community-page/FollowersPage";
+
+
 
 import SplashPage from './pages/Auth/SplashPage';
 import LoginScreen from './pages/Auth/LoginScreen';
@@ -118,6 +122,10 @@ const protectedRoutes: RouteObject[] = [
       { path: 'community/search', element: <CommunitySearchPage /> },
       { path: 'community/region/:regionId', element: <CommunityRegionPage /> },
       { path: 'community/user/:userId', element: <UserProfilePage /> },
+      { path: 'community/follow/:type', element: <FollowListPage /> },
+      { path: 'community/followings', element: <FollowingsPage /> },
+      { path: 'community/followers', element: <FollowersPage /> },
+      
 
       { path: 'notifications', element: <NotificationListPage /> },
 
@@ -176,12 +184,6 @@ const protectedRoutes: RouteObject[] = [
 const router = createBrowserRouter([...publicRoutes, ...protectedRoutes]);
 
 function App() {
-  useEffect(() => {
-    if (window.Kakao && !window.Kakao.isInitialized()) {
-      window.Kakao.init(import.meta.env.VITE_KAKAO_JAVASCRIPT_KEY);
-    }
-  }, []);
-
   return (
     <QueryClientProvider client={queryClient}>
       <RouterProvider router={router} />

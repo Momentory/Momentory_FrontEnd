@@ -81,11 +81,7 @@ export default function AllMyPhotosViewerPage() {
             photo.imageName ||
             (regionName ? `${regionName}의 사진` : '지도 사진'),
           date: photo.createdAt ? formatDate(photo.createdAt) : '',
-          description:
-            photo.memo ||
-            (isPublic
-              ? '설명이 등록되지 않은 공개 사진입니다.'
-              : '설명이 등록되지 않은 나의 사진입니다.'),
+          description: photo.memo || '',
           location: photo.address || regionName || '경기도',
           author: isPublic ? '공개 사진' : '나의 사진',
         };
@@ -96,7 +92,7 @@ export default function AllMyPhotosViewerPage() {
         imageUrl: photo.url,
         title: photo.title || '사진',
         date: photo.date ?? '',
-        description: photo.description || '설명이 등록되지 않은 사진입니다.',
+        description: photo.description || '',
         location: photo.location || regionName || '경기도',
         author: photo.author || (isPublic ? '공개 사진' : '나의 사진'),
       };
@@ -148,31 +144,53 @@ export default function AllMyPhotosViewerPage() {
             <img
               src={photo.imageUrl}
               alt={photo.title}
-              className="absolute inset-0 h-full w-full object-cover"
+              className="absolute inset-0 h-full w-full object-contain"
             />
-            <div className="absolute inset-0 bg-linear-to-t from-black via-black/30 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
 
             <div className="relative z-10 mt-auto px-8 pb-10 text-white">
-              <div className="flex items-center gap-2.5 text-sm text-white/80">
+              <div className="flex items-center gap-2.5 text-sm">
                 <img
                   src={DefaultProfile}
                   alt="프로필"
-                  className="h-12 w-12 shrink-0"
+                  className="h-12 w-12 shrink-0 drop-shadow-lg"
                 />
                 <div className="space-y-[2px]">
-                  <h2 className="text-xl font-semibold leading-tight">
+                  <h2
+                    className="text-xl font-semibold leading-tight text-white"
+                    style={{
+                      textShadow: '0 2px 8px rgba(0, 0, 0, 0.8)',
+                    }}
+                  >
                     {photo.author}
                   </h2>
-                  <p className="text-sm font-medium leading-tight text-white/70">
+                  <p
+                    className="text-sm font-medium leading-tight text-white/90"
+                    style={{
+                      textShadow: '0 1px 4px rgba(0, 0, 0, 0.8)',
+                    }}
+                  >
                     {photo.date}
                   </p>
                 </div>
               </div>
 
-              <p className="mt-5 text-sm leading-6 text-white/90">
-                {photo.description}
-              </p>
-              <div className="mt-5 flex items-center gap-2 text-sm text-white/80">
+              {photo.description && (
+                <p
+                  className="mt-5 text-sm leading-6 text-white/95"
+                  style={{
+                    textShadow: '0 1px 4px rgba(0, 0, 0, 0.8)',
+                  }}
+                >
+                  {photo.description}
+                </p>
+              )}
+              <div
+                className="mt-5 flex items-center gap-2 text-sm text-white/90"
+                style={{
+                  textShadow: '0 1px 4px rgba(0, 0, 0, 0.8)',
+                }}
+              >
                 <img src={MapPinIcon} alt="위치" className="h-4 w-4" />
                 <span>{photo.location}</span>
               </div>

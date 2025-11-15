@@ -118,7 +118,7 @@ const Header = () => {
     <>
       {/* 공통 헤더 */}
       <header className="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] flex justify-between items-center px-4 py-3 bg-[#FF7070] shadow-[0px_4px_4px_rgba(0,0,0,0.15)] border-b-[1px] border-white z-50">
-        {/* 🔹 환경설정 페이지일 경우 */}
+        {/*환경설정 페이지일 경우 */}
         {isSettingsPage ? (
           <div className="relative flex items-center justify-center w-full">
             {/* 뒤로가기 버튼 */}
