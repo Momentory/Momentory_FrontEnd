@@ -1,7 +1,7 @@
 // 하단시트의 높이 & 확장 여부 관리
 import { useState } from 'react';
 
-export default function useBottomSheet(initialHeight = 100) {
+export default function useBottomSheet(initialHeight = 40) {
   const [height, setHeight] = useState(initialHeight);
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -10,18 +10,18 @@ export default function useBottomSheet(initialHeight = 100) {
     startExpanded: boolean,
     deltaY: number
   ) => {
-    setHeight(Math.max(100, Math.min(460, startHeight + deltaY)));
+    setHeight(Math.max(40, Math.min(516, startHeight + deltaY)));
     if (deltaY > 30) setIsExpanded(true);
     else if (deltaY < -30) setIsExpanded(false);
-    else setHeight(startExpanded ? 460 : 100);
+    else setHeight(startExpanded ? 516 : 40);
   };
 
   const toggle = () => {
     if (isExpanded) {
-      setHeight(100);
+      setHeight(40);
       setIsExpanded(false);
     } else {
-      setHeight(460);
+      setHeight(516);
       setIsExpanded(true);
     }
   };

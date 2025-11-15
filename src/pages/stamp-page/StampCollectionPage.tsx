@@ -5,6 +5,7 @@ import CultureStampContent from '../../components/stamp/CultureStampContent';
 import RegionStampContent from '../../components/stamp/RegionStampContent';
 
 export default function StampCollectionPage() {
+  const navigate = useNavigate();
   const { type } = useParams<{ type: 'culture' | 'region' }>();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'culture' | 'region'>(
