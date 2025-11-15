@@ -162,18 +162,12 @@ const ClosetPage = () => {
       });
       return;
     }
-
-    // 의상이 착용되어 있는지 확인
     const hasClothing = currentCharacter.equipped.clothing !== null;
     const isClothing = accessory.type.toUpperCase() === 'CLOTHING';
-
-    // 의상이 착용된 상태에서 다른 카테고리 아이템 착용 시도 시 경고
     if (hasClothing && !isClothing && !equippedAccessories.includes(id)) {
       alert('의상을 착용한 상태에서는 다른 아이템을 착용할 수 없습니다.');
       return;
     }
-
-    // 다른 카테고리 아이템이 있는 상태에서 의상 착용 시도 시 경고
     if (isClothing && !equippedAccessories.includes(id)) {
       const hasOtherItems =
         currentCharacter.equipped.expression !== null ||
@@ -363,18 +357,18 @@ const ClosetPage = () => {
         className="fixed max-w-[480px] mx-auto px-4 left-0 right-0 flex justify-between items-center gap-4 z-[100] pointer-events-auto transition-all duration-300"
         style={{ bottom: `${height + 16}px` }}
       >
-        <button className="w-12 h-12 rounded-full bg-[#FF7070] flex items-center justify-center shadow-lg cursor-pointer transition-colors" onClick={() => navigate('/my-closet')}
+        <button className="w-14 h-14 rounded-full bg-[#FF7070] flex items-center justify-center shadow-lg cursor-pointer transition-colors" onClick={() => navigate('/my-closet')}
 >
-          <StarIcon className="w-6 h-6 text-white" />
+          <StarIcon className="w-8 h-8 text-white" />
         </button>
         <div className="flex flex-row gap-4">
         <button
-          className="w-12 h-12 rounded-full bg-[#FF7070] flex items-center justify-center shadow-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-14 h-14 rounded-full bg-[#FF7070] flex items-center justify-center shadow-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           onClick={handleDownload}
           disabled={isExpanded}
         >
           <svg
-            className="text-white w-6 h-6"
+            className="text-white w-8 h-8"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -388,11 +382,11 @@ const ClosetPage = () => {
           </svg>
         </button>
         <button
-              className="flex h-12 w-12 items-center justify-center rounded-full border border-gray-200 bg-white shadow-md transition disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex w-14 h-14 items-center justify-center rounded-full border border-gray-200 bg-white shadow-md transition disabled:opacity-50 disabled:cursor-not-allowed"
               onClick={handleShare}
               disabled={isExpanded}
             >
-              <ShareIcon className="h-6 w-6 text-gray-700" />
+              <ShareIcon className="w-8 h-8 text-gray-700" />
             </button>
         </div>
       </div>

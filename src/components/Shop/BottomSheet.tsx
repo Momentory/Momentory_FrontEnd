@@ -45,11 +45,13 @@ export default function BottomSheet({
   const [isDragging, setIsDragging] = React.useState(false);
   const [hasMoved, setHasMoved] = React.useState(false);
   const [hoveredItem, setHoveredItem] = React.useState<number | null>(null);
+  const [tooltipPosition, setTooltipPosition] = React.useState<{ top: number; left: number } | null>(null);
 
   React.useEffect(() => {
     if (hoveredItem !== null) {
       const timer = setTimeout(() => {
         setHoveredItem(null);
+        setTooltipPosition(null);
       }, 3000);
       return () => clearTimeout(timer);
     }
@@ -172,60 +174,68 @@ export default function BottomSheet({
 
 
   return (
-    <div
-      className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] bg-white rounded-t-2xl shadow-lg z-[500] overflow-hidden"
-      style={{
-        height: `${height}px`,
-        transition: isDragging ? 'none' : 'height 0.3s ease-out',
-      }}
-    >
-      <div
-        className="cursor-grab active:cursor-grabbing select-none py-4"
-        onMouseDown={handleMouseDown}
-        onTouchStart={handleTouchStart}
-      >
-        <div className="w-20 h-1 bg-[#E2E2E2] rounded-full mx-auto" />
-      </div>
-
-      <div>
-        <div className="flex justify-between items-center px-6 pb-4">
-          <CategoryDropdown
-            selectedCategory={selectedCategory}
-            onCategoryChange={onCategoryChange}
-          />
-
-          <div className="flex items-center gap-2">
-            <CharacterSelectButton onSelectCharacter={onSelectCharacter} />
-            {onRemoveAll && (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onRemoveAll();
-                }}
-                onMouseDown={(e) => e.stopPropagation()}
-                onTouchStart={(e) => e.stopPropagation()}
-                className="flex items-center justify-center w-10 h-10 cursor-pointer"
-                aria-label="모든 아이템 벗기"
-              >
-                <RemoveIcon className="w-full h-full" />
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {hoveredItem && (
-        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 px-4 py-3 bg-black/90 text-white text-sm rounded-xl whitespace-nowrap z-[9999] shadow-xl max-w-[90%]">
-          <div className="font-bold text-base mb-1">
+    <>
+      {hoveredItem && tooltipPosition && (
+        <div
+          className="fixed px-4 py-3 bg-white text-sm rounded-2xl shadow-[3px_4px_4px_0px_rgba(0,0,0,0.25)] border-2 border-[#838383] whitespace-nowrap z-[9999] max-w-[90%]"
+          style={{
+            top: `${tooltipPosition.top}px`,
+            left: `${tooltipPosition.left}px`,
+            transform: 'translateX(-50%)',
+          }}
+        >
+          <div className="font-bold text-base mb-1 text-black">
             {accessories.find(a => a.id === hoveredItem)?.name}
           </div>
           {accessories.find(a => a.id === hoveredItem)?.unlockLevel && (
-            <div className="text-gray-300 text-xs">
+            <div className="text-gray-600 text-xs">
               Lv.{accessories.find(a => a.id === hoveredItem)?.unlockLevel} 일 때 획득할 수 있어요
             </div>
           )}
         </div>
       )}
+
+      <div
+        className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] bg-white rounded-t-2xl shadow-lg z-[500] overflow-hidden"
+        style={{
+          height: `${height}px`,
+          transition: isDragging ? 'none' : 'height 0.3s ease-out',
+        }}
+      >
+        <div
+          className="cursor-grab active:cursor-grabbing select-none py-4"
+          onMouseDown={handleMouseDown}
+          onTouchStart={handleTouchStart}
+        >
+          <div className="w-20 h-1 bg-[#E2E2E2] rounded-full mx-auto" />
+        </div>
+
+        <div>
+          <div className="flex justify-between items-center px-6 pb-4">
+            <CategoryDropdown
+              selectedCategory={selectedCategory}
+              onCategoryChange={onCategoryChange}
+            />
+
+            <div className="flex items-center gap-2">
+              <CharacterSelectButton onSelectCharacter={onSelectCharacter} />
+              {onRemoveAll && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onRemoveAll();
+                  }}
+                  onMouseDown={(e) => e.stopPropagation()}
+                  onTouchStart={(e) => e.stopPropagation()}
+                  className="flex items-center justify-center w-10 h-10 cursor-pointer"
+                  aria-label="모든 아이템 벗기"
+                >
+                  <RemoveIcon className="w-full h-full" />
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
 
       <div
         className="px-6 pb-6 overflow-y-auto"
@@ -249,9 +259,19 @@ export default function BottomSheet({
                   className="relative"
                 >
                   <button
-                    onClick={() => {
+                    onClick={(e) => {
                       if (accessory.locked) {
-                        setHoveredItem(hoveredItem === accessory.id ? null : accessory.id);
+                        if (hoveredItem === accessory.id) {
+                          setHoveredItem(null);
+                          setTooltipPosition(null);
+                        } else {
+                          const rect = e.currentTarget.getBoundingClientRect();
+                          setTooltipPosition({
+                            top: rect.bottom + 8,
+                            left: rect.left + rect.width / 2,
+                          });
+                          setHoveredItem(accessory.id);
+                        }
                       } else {
                         onAccessoryClick(accessory.id);
                       }
@@ -282,6 +302,7 @@ export default function BottomSheet({
           </div>
         )}
       </div>
-    </div>
+      </div>
+    </>
   );
 }
