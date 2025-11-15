@@ -396,3 +396,4 @@ export const searchPostsBySingleTag = async (tag: string) => {
   const res = await api.get(`/api/community/posts/tag/${tag}`);
   return res.data.result.posts || [];
 };
+
