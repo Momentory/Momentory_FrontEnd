@@ -8,10 +8,6 @@ import star5 from '../../assets/star5.svg';
 import star6 from '../../assets/star6.svg';
 import star7 from '../../assets/star7.svg';
 import star8 from '../../assets/star8.svg';
-import giftIcon from '../../assets/giftIcon.svg';
-import successIcon from '../../assets/success.svg';
-import failIcon from '../../assets/fail.svg';
-import ongoingIcon from '../../assets/ongoing.svg';
 import {
   getRouletteSlots,
   spinRoulette,
