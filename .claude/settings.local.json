@@ -7,7 +7,9 @@
       "Bash(npm install:*)",
       "Bash(pnpm build:*)",
       "Bash(pnpm install:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(pnpm remove:*)",
+      "Bash(pnpm dev)"
     ],
     "deny": [],
     "ask": []

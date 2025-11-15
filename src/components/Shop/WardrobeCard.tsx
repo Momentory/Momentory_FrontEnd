@@ -1,8 +1,12 @@
+import { useMemo } from 'react';
 import type { Wardrobe } from '../../types/shop';
+import { getItemTransform, transformToCSS } from '../../config/itemPositions';
+import { useCharacterItems } from '../../hooks/shop/useCharacterItems';
 
 interface WardrobeCardProps {
   wardrobe: Wardrobe;
   characterImage: string;
+  characterType?: string;
   isSelected: boolean;
   isCurrent?: boolean;
   onClick: () => void;
@@ -25,10 +29,63 @@ const CheckIcon = () => (
 const WardrobeCard = ({
   wardrobe,
   characterImage,
+  characterType,
   isSelected,
   onClick,
 }: WardrobeCardProps) => {
   const showAsSelected = isSelected;
+
+  const accessories = useMemo(() => {
+    const items = [];
+    if (wardrobe.clothing) {
+      items.push({
+        id: wardrobe.clothing.itemId,
+        name: wardrobe.clothing.name,
+        icon: wardrobe.clothing.imageUrl,
+        locked: false,
+        type: 'CLOTHING',
+      });
+    }
+    if (wardrobe.expression) {
+      items.push({
+        id: wardrobe.expression.itemId,
+        name: wardrobe.expression.name,
+        icon: wardrobe.expression.imageUrl,
+        locked: false,
+        type: 'EXPRESSION',
+      });
+    }
+    if (wardrobe.effect) {
+      items.push({
+        id: wardrobe.effect.itemId,
+        name: wardrobe.effect.name,
+        icon: wardrobe.effect.imageUrl,
+        locked: false,
+        type: 'EFFECT',
+      });
+    }
+    if (wardrobe.decoration) {
+      items.push({
+        id: wardrobe.decoration.itemId,
+        name: wardrobe.decoration.name,
+        icon: wardrobe.decoration.imageUrl,
+        locked: false,
+        type: 'DECORATION',
+      });
+    }
+    return items;
+  }, [wardrobe]);
+
+  const equippedAccessories = useMemo(() => {
+    return accessories.map(acc => acc.id);
+  }, [accessories]);
+
+  const {
+    clothingImageSrc,
+    effectImageSrc,
+    nofaceImageSrc,
+    expressionImageSrc,
+  } = useCharacterItems(accessories, equippedAccessories, characterType);
 
   return (
     <div className="relative">
@@ -47,37 +104,53 @@ const WardrobeCard = ({
         `}
       >
         <div className="relative w-full h-full">
-          <img
-            src={characterImage}
-            alt="character"
-            className="w-full h-full object-contain"
-          />
-          {wardrobe.clothing && (
+          {clothingImageSrc ? (
             <img
-              src={wardrobe.clothing.imageUrl}
-              alt={wardrobe.clothing.name}
-              className="absolute inset-0 w-full h-full object-contain"
+              src={clothingImageSrc}
+              alt="character with clothing"
+              className="w-full h-full object-contain"
+            />
+          ) : nofaceImageSrc ? (
+            <img
+              src={nofaceImageSrc}
+              alt="character noface"
+              className="w-full h-full object-contain"
+            />
+          ) : (
+            <img
+              src={characterImage}
+              alt="character"
+              className="w-full h-full object-contain"
             />
           )}
-          {wardrobe.expression && (
+          {effectImageSrc && wardrobe.effect && (
             <img
-              src={wardrobe.expression.imageUrl}
-              alt={wardrobe.expression.name}
-              className="absolute inset-0 w-full h-full object-contain"
-            />
-          )}
-          {wardrobe.effect && (
-            <img
-              src={wardrobe.effect.imageUrl}
+              src={effectImageSrc}
               alt={wardrobe.effect.name}
-              className="absolute inset-0 w-full h-full object-contain"
+              style={{
+                transform: transformToCSS(getItemTransform(wardrobe.effect.itemId, 'EFFECT')),
+              }}
+              className="absolute inset-0 w-full h-full object-contain pointer-events-none"
+            />
+          )}
+          {expressionImageSrc && wardrobe.expression && (
+            <img
+              src={expressionImageSrc}
+              alt={wardrobe.expression.name}
+              style={{
+                transform: transformToCSS(getItemTransform(wardrobe.expression.itemId, 'EXPRESSION')),
+              }}
+              className="absolute inset-0 w-full h-full object-contain pointer-events-none"
             />
           )}
           {wardrobe.decoration && (
             <img
               src={wardrobe.decoration.imageUrl}
               alt={wardrobe.decoration.name}
-              className="absolute inset-0 w-full h-full object-contain"
+              style={{
+                transform: transformToCSS(getItemTransform(wardrobe.decoration.itemId, 'DECORATION')),
+              }}
+              className="absolute inset-0 w-full h-full object-contain pointer-events-none"
             />
           )}
         </div>

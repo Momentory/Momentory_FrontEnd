@@ -1,6 +1,6 @@
 import React from 'react';
 import ChevronDown from '../../assets/icons/dropdown.svg?react';
-import LockIcon from '../../assets/icons/albumShare.svg?react';
+import LockIcon from '../../assets/icons/lockIcon.svg?react';
 import PointIcon from '../../assets/icons/pointIcon.svg?react';
 
 interface ShopAccessory {
@@ -10,6 +10,7 @@ interface ShopAccessory {
   locked: boolean;
   type: string;
   price: number;
+  unlockLevel?: number;
 }
 
 export interface ShopBottomSheetProps {
@@ -42,6 +43,16 @@ export default function ShopBottomSheet({
   const [isDragging, setIsDragging] = React.useState(false);
   const [hasMoved, setHasMoved] = React.useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
+  const [hoveredItem, setHoveredItem] = React.useState<number | null>(null);
+
+  React.useEffect(() => {
+    if (hoveredItem !== null) {
+      const timer = setTimeout(() => {
+        setHoveredItem(null);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [hoveredItem]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -56,7 +67,7 @@ export default function ShopBottomSheet({
       if (deltaY > 5) setHasMoved(true);
 
       const actualDeltaY = startY - e.clientY;
-      const newHeight = Math.max(100, Math.min(460, startHeight + actualDeltaY));
+      const newHeight = Math.max(100, Math.min(400, startHeight + actualDeltaY));
       setHeight(newHeight);
     };
 
@@ -71,20 +82,20 @@ export default function ShopBottomSheet({
             setHeight(100);
             setIsExpanded(false);
           } else {
-            setHeight(460);
+            setHeight(350);
             setIsExpanded(true);
           }
         }, 0);
       } else {
         if (deltaY > 50) {
-          setHeight(460);
+          setHeight(500);
           setIsExpanded(true);
         } else if (deltaY < -50) {
           setHeight(100);
           setIsExpanded(false);
         } else {
-          if (height > 280) {
-            setHeight(460);
+          if (height > 300) {
+            setHeight(350);
             setIsExpanded(true);
           } else {
             setHeight(100);
@@ -113,7 +124,7 @@ export default function ShopBottomSheet({
       const deltaY = Math.abs(startY - e.touches[0].clientY);
       if (deltaY > 10) setHasMoved(true);
       const actualDeltaY = startY - e.touches[0].clientY;
-      const newHeight = Math.max(100, Math.min(460, startHeight + actualDeltaY));
+      const newHeight = Math.max(100, Math.min(500, startHeight + actualDeltaY));
       setHeight(newHeight);
     };
 
@@ -128,20 +139,20 @@ export default function ShopBottomSheet({
             setHeight(100);
             setIsExpanded(false);
           } else {
-            setHeight(460);
+            setHeight(350);
             setIsExpanded(true);
           }
         }, 50);
       } else {
         if (deltaY > 50) {
-          setHeight(460);
+          setHeight(500);
           setIsExpanded(true);
         } else if (deltaY < -50) {
           setHeight(100);
           setIsExpanded(false);
         } else {
-          if (height > 280) {
-            setHeight(460);
+          if (height > 300) {
+            setHeight(350);
             setIsExpanded(true);
           } else {
             setHeight(100);
@@ -159,20 +170,34 @@ export default function ShopBottomSheet({
   };
 
   return (
-    <div
-      className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] bg-white rounded-t-2xl shadow-lg z-500 overflow-hidden"
-      style={{
-        height: `${height}px`,
-        transition: isDragging ? 'none' : 'height 0.3s ease-out',
-      }}
-    >
+    <>
+      {hoveredItem && (
+        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 px-4 py-3 bg-black/90 text-white text-sm rounded-xl whitespace-nowrap z-[9999] shadow-xl max-w-[90%]">
+          <div className="font-bold text-base mb-1">
+            {accessories.find(a => a.id === hoveredItem)?.name}
+          </div>
+          {accessories.find(a => a.id === hoveredItem)?.unlockLevel && (
+            <div className="text-gray-300 text-xs">
+              Lv.{accessories.find(a => a.id === hoveredItem)?.unlockLevel} 일 때 획득할 수 있어요
+            </div>
+          )}
+        </div>
+      )}
+
       <div
-        className="cursor-grab active:cursor-grabbing select-none py-4"
-        onMouseDown={handleMouseDown}
-        onTouchStart={handleTouchStart}
+        className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] bg-white rounded-t-2xl shadow-lg z-[500] overflow-hidden"
+        style={{
+          height: `${height}px`,
+          transition: isDragging ? 'none' : 'height 0.3s ease-out',
+        }}
       >
-        <div className="w-20 h-1 bg-[#E2E2E2] rounded-full mx-auto" />
-      </div>
+        <div
+          className="cursor-grab active:cursor-grabbing select-none py-4"
+          onMouseDown={handleMouseDown}
+          onTouchStart={handleTouchStart}
+        >
+          <div className="w-20 h-1 bg-[#E2E2E2] rounded-full mx-auto" />
+        </div>
 
       <div>
         <div className="flex justify-between items-center px-6 pb-4">
@@ -257,8 +282,13 @@ export default function ShopBottomSheet({
         </div>
       </div>
 
-      <div className="px-6 pb-6">
-        <div className="grid grid-cols-4 gap-3 overflow-y-auto max-h-[360px]">
+      <div
+        className="px-6 pb-6 overflow-y-auto"
+        style={{
+          maxHeight: `${height - 120}px`
+        }}
+      >
+        <div className="grid grid-cols-4 gap-3">
           {accessories.map((accessory) => {
             const isOwned = ownedAccessories.includes(accessory.id);
             const isEquipped = equippedAccessories.includes(accessory.id);
@@ -268,13 +298,19 @@ export default function ShopBottomSheet({
             return (
               <div key={accessory.id} className="flex flex-col items-center gap-1">
                 <button
-                  onClick={() => onAccessoryClick(accessory.id)}
-                  disabled={isLocked || isOwned}
-                  className={`aspect-square w-full flex items-center justify-center rounded-xl transition-all relative ${
+                  onClick={() => {
+                    if (isLocked) {
+                      setHoveredItem(hoveredItem === accessory.id ? null : accessory.id);
+                    } else if (!isOwned) {
+                      onAccessoryClick(accessory.id);
+                    }
+                  }}
+                  disabled={isOwned}
+                  className={`aspect-square w-full flex items-center justify-center rounded-xl transition-all relative overflow-hidden ${
                     isLocked
-                      ? 'bg-white border-2 border-gray-300 cursor-not-allowed'
+                      ? 'bg-white border-2 border-gray-300 cursor-pointer'
                       : isOwned
-                      ? 'bg-green-50 border-2 border-green-400 cursor-default'
+                      ? 'bg-white border-2 border-[#FF7070] cursor-default'
                       : isEquipped
                       ? 'bg-pink-50 border-2 border-[#FF7070]'
                       : canAfford
@@ -291,13 +327,13 @@ export default function ShopBottomSheet({
                       <img
                         src={accessory.icon}
                         alt={accessory.name}
-                        className={`max-w-[60%] max-h-[60%] object-contain ${
-                          !canAfford ? 'opacity-40' : 'opacity-100'
-                        }`}
+                        className="max-w-[80%] max-h-[80%] object-contain"
                       />
                       {isOwned && (
-                        <div className="absolute top-1 right-1 bg-green-500 text-white text-[10px] px-1.5 py-0.5 rounded">
-                          보유
+                        <div className="absolute bottom-1 right-1 bg-[#FF7070] rounded-full w-5 h-5 flex items-center justify-center">
+                          <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                          </svg>
                         </div>
                       )}
                     </>
@@ -320,7 +356,8 @@ export default function ShopBottomSheet({
           })}
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 }
 

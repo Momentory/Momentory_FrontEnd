@@ -55,7 +55,42 @@ const MyClosetPage = () => {
   const applyMutation = useApplyWardrobe();
 
   const handleSaveWardrobe = () => {
-    saveMutation.mutate();
+    if (!currentCharacter) {
+      alert('캐릭터 정보를 불러오는 중입니다.');
+      return;
+    }
+
+    const equipped = currentCharacter.equipped;
+    const payload: {
+      clothingId?: number;
+      expressionId?: number;
+      effectId?: number;
+      decorationId?: number;
+    } = {};
+
+    if (equipped.clothing?.itemId !== undefined) {
+      payload.clothingId = equipped.clothing.itemId;
+    }
+    if (equipped.expression?.itemId !== undefined) {
+      payload.expressionId = equipped.expression.itemId;
+    }
+    if (equipped.effect?.itemId !== undefined) {
+      payload.effectId = equipped.effect.itemId;
+    }
+    if (equipped.decoration?.itemId !== undefined) {
+      payload.decorationId = equipped.decoration.itemId;
+    }
+
+    console.log('옷장 저장 페이로드:', payload);
+    console.log('현재 장착된 아이템:', equipped);
+
+    // 아무것도 착용하지 않은 경우 체크
+    if (Object.keys(payload).length === 0) {
+      alert('저장할 아이템이 없습니다. 최소 하나의 아이템을 착용해주세요.');
+      return;
+    }
+
+    saveMutation.mutate(payload);
   };
 
   const handleApplyWardrobe = () => {
@@ -85,6 +120,7 @@ const MyClosetPage = () => {
                 key={wardrobe.wardrobeId}
                 wardrobe={wardrobe}
                 characterImage={characterImage}
+                characterType={currentCharacter?.characterType}
                 isSelected={selectedWardrobeId === wardrobe.wardrobeId}
                 isCurrent={isCurrentStyle(wardrobe)}
                 onClick={() => {

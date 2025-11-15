@@ -9,14 +9,34 @@ import NoItem from '../../assets/icons/noEvent.svg?react';
 import Bg from '../../assets/accessories/bgImg.svg';
 import PointIcon from '../../assets/icons/pointIcon.svg';
 import { getRecentItems } from '../../api/shop';
+import { useUserPoint, useCurrentCharacter } from '../../hooks/shop/useShopQueries';
+import { usePurchaseItem } from '../../hooks/shop/usePurchaseItem';
 
 const NewItemPage = () => {
-  const [point, setPoint] = useState(1500);
-  const [ownedAccessories, setOwnedAccessories] = useState<number[]>([1]);
+  const { data: pointData } = useUserPoint();
+  const { data: currentCharacter } = useCurrentCharacter();
+  const point = pointData?.userPoint.currentPoint || 0;
+  const level = currentCharacter?.level || 1;
+
   const [selectedItem, setSelectedItem] = useState<ShopAccessory | null>(null);
   const [toastMessage, setToastMessage] = useState('');
-  const [newItems, setNewItems] = useState<ShopAccessory[]>([]);
+  const [newItems, setNewItems] = useState<(ShopAccessory & { locked?: boolean; unlockLevel?: number; owned?: boolean })[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  const purchaseMutation = usePurchaseItem({
+    onSuccess: () => {
+      setToastMessage('구매가 성공적으로 완료되었습니다!');
+      setSelectedItem(null);
+      setTimeout(() => setToastMessage(''), 2000);
+    },
+    onError: (error: any) => {
+      console.error('구매 실패:', error);
+      const errorMessage = error.response?.data?.message || '구매에 실패했습니다.';
+      setToastMessage(errorMessage);
+      setSelectedItem(null);
+      setTimeout(() => setToastMessage(''), 2000);
+    },
+  });
 
   const categoryDisplayMap: { [key in ItemCategory]: string } = {
     CLOTHING: '의상',
@@ -40,6 +60,9 @@ const NewItemPage = () => {
           icon: item.imageUrl,
           type: item.category,
           price: item.price,
+          unlockLevel: item.unlockLevel,
+          locked: item.unlockLevel > level,
+          owned: item.owned,
         }));
         setNewItems(mappedItems);
       } catch (error) {
@@ -51,10 +74,15 @@ const NewItemPage = () => {
     };
 
     fetchRecentItems();
-  }, []);
+  }, [level]);
 
-  const handleItemClick = (item: ShopAccessory) => {
-    if (ownedAccessories.includes(item.id)) {
+  const handleItemClick = (item: ShopAccessory & { locked?: boolean; unlockLevel?: number; owned?: boolean }) => {
+    if (item.locked) {
+      setToastMessage(`Lv.${item.unlockLevel}에 획득할 수 있어요!`);
+      setTimeout(() => setToastMessage(''), 2000);
+      return;
+    }
+    if (item.owned) {
       setToastMessage('이미 보유한 아이템입니다.');
       setTimeout(() => setToastMessage(''), 2000);
       return;
@@ -64,15 +92,15 @@ const NewItemPage = () => {
 
   const handleConfirmPurchase = () => {
     if (!selectedItem) return;
+
     if (point < selectedItem.price) {
       setToastMessage('포인트가 부족합니다!');
-    } else {
-      setPoint(point - selectedItem.price);
-      setOwnedAccessories([...ownedAccessories, selectedItem.id]);
-      setToastMessage('구매가 성공적으로 완료되었습니다!');
+      setSelectedItem(null);
+      setTimeout(() => setToastMessage(''), 2000);
+      return;
     }
-    setSelectedItem(null);
-    setTimeout(() => setToastMessage(''), 2000);
+
+    purchaseMutation.mutate(selectedItem.id);
   };
 
   return (

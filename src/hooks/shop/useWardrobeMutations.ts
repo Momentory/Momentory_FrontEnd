@@ -5,14 +5,21 @@ export const useSaveWardrobe = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: saveWardrobe,
+    mutationFn: (payload: {
+      clothingId?: number;
+      expressionId?: number;
+      effectId?: number;
+      decorationId?: number;
+    }) => saveWardrobe(payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['wardrobes'] });
       alert('현재 스타일이 저장되었습니다!');
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.error('옷장 저장 실패:', error);
-      alert('옷장 저장에 실패했습니다.');
+      console.error('에러 응답:', error.response?.data);
+      const errorMessage = error.response?.data?.message || '옷장 저장에 실패했습니다.';
+      alert(errorMessage);
     },
   });
 };
