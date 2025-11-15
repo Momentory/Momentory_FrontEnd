@@ -1,57 +1,43 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import 광주 from '../../assets/stamp/광주.png';
-import 김포 from '../../assets/stamp/김포.png';
-import 시흥 from '../../assets/stamp/시흥.png';
-import 안성 from '../../assets/stamp/안성.png';
-import 연천 from '../../assets/stamp/연천.png';
-import 의정부 from '../../assets/stamp/의정부.png';
-import 파주 from '../../assets/stamp/파주.png';
-import 가평 from '../../assets/stamp/가평.png';
-import 고양 from '../../assets/stamp/고양.png';
-import 과천 from '../../assets/stamp/과천.png';
-import 광명 from '../../assets/stamp/광명.png';
-import 구리 from '../../assets/stamp/구리.png';
-import 군포 from '../../assets/stamp/군포.png';
-import 남양주 from '../../assets/stamp/남양주.png';
-import 동두천 from '../../assets/stamp/동두천.png';
-import 부천 from '../../assets/stamp/부천.png';
-import 성남 from '../../assets/stamp/성남.png';
-import 수원 from '../../assets/stamp/수원.png';
-import 안산 from '../../assets/stamp/안산.png';
-import 안양 from '../../assets/stamp/안양.png';
-import 양주 from '../../assets/stamp/양주.png';
-import 양평군 from '../../assets/stamp/양평군.png';
-import 여주 from '../../assets/stamp/여주.png';
-import 오산 from '../../assets/stamp/오산.png';
-import 용인 from '../../assets/stamp/용인.png';
-import 의왕 from '../../assets/stamp/의왕.png';
-import 이천 from '../../assets/stamp/이천.png';
-import 평택 from '../../assets/stamp/평택.png';
-import 포천 from '../../assets/stamp/포천.png';
-import 하남 from '../../assets/stamp/하남.png';
-import 화성 from '../../assets/stamp/화성.png';
+import { getMyStamps } from '../../api/stamp';
+import 광주 from '../../assets/stamp/regional/광주.png';
+import 김포 from '../../assets/stamp/regional/김포.png';
+import 시흥 from '../../assets/stamp/regional/시흥.png';
+import 안성 from '../../assets/stamp/regional/안성.png';
+import 연천 from '../../assets/stamp/regional/연천.png';
+import 의정부 from '../../assets/stamp/regional/의정부.png';
+import 파주 from '../../assets/stamp/regional/파주.png';
+import 가평 from '../../assets/stamp/regional/가평.png';
+import 고양 from '../../assets/stamp/regional/고양.png';
+import 과천 from '../../assets/stamp/regional/과천.png';
+import 광명 from '../../assets/stamp/regional/광명.png';
+import 구리 from '../../assets/stamp/regional/구리.png';
+import 군포 from '../../assets/stamp/regional/군포.png';
+import 남양주 from '../../assets/stamp/regional/남양주.png';
+import 동두천 from '../../assets/stamp/regional/동두천.png';
+import 부천 from '../../assets/stamp/regional/부천.png';
+import 성남 from '../../assets/stamp/regional/성남.png';
+import 수원 from '../../assets/stamp/regional/수원.png';
+import 안산 from '../../assets/stamp/regional/안산.png';
+import 안양 from '../../assets/stamp/regional/안양.png';
+import 양주 from '../../assets/stamp/regional/양주.png';
+import 양평군 from '../../assets/stamp/regional/양평군.png';
+import 여주 from '../../assets/stamp/regional/여주.png';
+import 오산 from '../../assets/stamp/regional/오산.png';
+import 용인 from '../../assets/stamp/regional/용인.png';
+import 의왕 from '../../assets/stamp/regional/의왕.png';
+import 이천 from '../../assets/stamp/regional/이천.png';
+import 평택 from '../../assets/stamp/regional/평택.png';
+import 포천 from '../../assets/stamp/regional/포천.png';
+import 하남 from '../../assets/stamp/regional/하남.png';
+import 화성 from '../../assets/stamp/regional/화성.png';
 
 export default function RegionStampContent() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'culture' | 'region'>('region');
   const [clickedBoxes, setClickedBoxes] = useState<Set<number>>(new Set());
-
-  const handleTabClick = (tab: 'culture' | 'region', path: string) => {
-    setActiveTab(tab);
-    setTimeout(() => {
-      navigate(path);
-    }, 300);
-  };
-
-  const handleBoxClick = (index: number) => {
-    // 모든 칸 클릭 가능 (31개 모두)
-    setClickedBoxes((prev) => {
-      const newSet = new Set(prev);
-      newSet.add(index);
-      return newSet;
-    });
-  };
+  const [isLoading, setIsLoading] = useState(true);
 
   const regionNames = [
     '광주',
@@ -86,6 +72,47 @@ export default function RegionStampContent() {
     '하남',
     '화성',
   ];
+
+  // API에서 내 스탬프 데이터 가져오기
+  useEffect(() => {
+    const fetchMyStamps = async () => {
+      try {
+        setIsLoading(true);
+        const response = await getMyStamps('REGIONAL');
+        if (response.isSuccess && response.result) {
+          const ownedRegions = new Set<number>();
+          response.result.forEach((stamp) => {
+            // "동두천시" -> "동두천" 변환 (시, 군 제거)
+            const regionName = stamp.region.replace(/(시|군)$/, '');
+            const index = regionNames.indexOf(regionName);
+            if (index !== -1) {
+              ownedRegions.add(index);
+            }
+          });
+          setClickedBoxes(ownedRegions);
+        }
+      } catch (error) {
+        console.error('스탬프 데이터 로딩 실패:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchMyStamps();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleTabClick = (tab: 'culture' | 'region', path: string) => {
+    setActiveTab(tab);
+    setTimeout(() => {
+      navigate(path);
+    }, 300);
+  };
+
+  const handleBoxClick = (index: number) => {
+    // 보유한 스탬프만 클릭 가능
+    // 클릭 시 효과는 없고 이미 획득한 것만 표시
+  };
 
   const regionImages: { [key: string]: string } = {
     광주: 광주,
@@ -127,7 +154,7 @@ export default function RegionStampContent() {
   };
 
   return (
-    <div className="w-full max-w-[480px] mx-auto bg-white min-h-screen pb-20 pt-3 relative z-50">
+    <div className="w-full max-w-[480px] mx-auto bg-white pt-3 relative z-50">
       {/* 선택 영역 */}
       <div>
         <div className="flex border-b-2 border-gray-300 relative">

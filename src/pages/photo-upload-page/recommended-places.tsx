@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import DropdownHeader from '../../components/common/DropdownHeader';
 import { useRecentStamps } from '../../hooks/stamp/useStampQueries';
 import { usePhotoNearby } from '../../hooks/photo/usePhotoMutations';
@@ -27,6 +27,7 @@ type RecentStampDisplay = {
 
 export default function RecommendedPlacesPage() {
   const location = useLocation();
+  const navigate = useNavigate();
   const {
     data,
     isLoading: isRecentLoading,
@@ -206,7 +207,10 @@ export default function RecommendedPlacesPage() {
           </div>
 
           <div className="flex justify-end mt-3">
-            <button className="text-sm text-white font-medium">
+            <button
+              onClick={() => navigate('/stamp-collection')}
+              className="text-sm text-white font-medium hover:underline cursor-pointer"
+            >
               내 스탬프 컬렉션 보러가기 &gt;
             </button>
           </div>

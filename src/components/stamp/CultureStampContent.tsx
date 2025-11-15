@@ -1,43 +1,27 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { getMyStamps } from '../../api/stamp';
 import stampEx from '../../assets/stampEx.svg';
-import 고양킨텍스 from '../../assets/stamp/고양킨텍스.png';
-import 서울대공원 from '../../assets/stamp/과천서울대공원.png';
-import 광명동굴 from '../../assets/stamp/광명동굴.png';
-import 한강유채꽃 from '../../assets/stamp/구리시한강유채꽃.png';
-import 물의정원 from '../../assets/stamp/남양주시물의정원.png';
-import 동두천계곡 from '../../assets/stamp/동두천계곡.png';
-import 만화박물관 from '../../assets/stamp/부천만화박물관.png';
-import 남한선성 from '../../assets/stamp/성남남한산성.png';
-import 수원화성 from '../../assets/stamp/수원화성.png';
-import 안산누에섬 from '../../assets/stamp/안산누에섬.png';
-import 안양천 from '../../assets/stamp/안양천.png';
-import 오산독산성 from '../../assets/stamp/오산독산성.png';
-import 평택항 from '../../assets/stamp/평택항.png';
-import 행복로 from '../../assets/stamp/행복로.png';
+import 고양킨텍스 from '../../assets/stamp/cultural/고양킨텍스.png';
+import 서울대공원 from '../../assets/stamp/cultural/과천서울대공원.png';
+import 광명동굴 from '../../assets/stamp/cultural/광명동굴.png';
+import 한강유채꽃 from '../../assets/stamp/cultural/구리시한강유채꽃.png';
+import 물의정원 from '../../assets/stamp/cultural/남양주시물의정원.png';
+import 동두천계곡 from '../../assets/stamp/cultural/동두천계곡.png';
+import 만화박물관 from '../../assets/stamp/cultural/부천만화박물관.png';
+import 남한선성 from '../../assets/stamp/cultural/성남남한산성.png';
+import 수원화성 from '../../assets/stamp/cultural/수원화성.png';
+import 안산누에섬 from '../../assets/stamp/regional/안산누에섬.png';
+import 안양천 from '../../assets/stamp/cultural/안양천.png';
+import 오산독산성 from '../../assets/stamp/cultural/오산독산성.png';
+import 평택항 from '../../assets/stamp/cultural/평택항.png';
+import 행복로 from '../../assets/stamp/cultural/행복로.png';
 
 export default function CultureStampContent() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'culture' | 'region'>('culture');
   const [clickedBoxes, setClickedBoxes] = useState<Set<number>>(new Set());
-
-  const handleTabClick = (tab: 'culture' | 'region', path: string) => {
-    setActiveTab(tab);
-    setTimeout(() => {
-      navigate(path);
-    }, 300);
-  };
-
-  const handleBoxClick = (index: number) => {
-    // 빈칸(14번 이후)은 클릭해도 반응 없음
-    if (index >= 14) return;
-
-    setClickedBoxes((prev) => {
-      const newSet = new Set(prev);
-      newSet.add(index);
-      return newSet;
-    });
-  };
+  const [isLoading, setIsLoading] = useState(true);
 
   const cultureNames = [
     '고양킨텍스',
@@ -73,6 +57,46 @@ export default function CultureStampContent() {
     '빈칸',
   ];
 
+  // API에서 내 스탬프 데이터 가져오기
+  useEffect(() => {
+    const fetchMyStamps = async () => {
+      try {
+        setIsLoading(true);
+        const response = await getMyStamps('CULTURAL');
+        if (response.isSuccess && response.result) {
+          const ownedCultures = new Set<number>();
+          response.result.forEach((stamp) => {
+            const spotName = stamp.spotName;
+            const index = cultureNames.indexOf(spotName);
+            if (index !== -1) {
+              ownedCultures.add(index);
+            }
+          });
+          setClickedBoxes(ownedCultures);
+        }
+      } catch (error) {
+        console.error('스탬프 데이터 로딩 실패:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchMyStamps();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleTabClick = (tab: 'culture' | 'region', path: string) => {
+    setActiveTab(tab);
+    setTimeout(() => {
+      navigate(path);
+    }, 300);
+  };
+
+  const handleBoxClick = (index: number) => {
+    // 보유한 스탬프만 클릭 가능
+    // 클릭 시 효과는 없고 이미 획득한 것만 표시
+  };
+
   const cultureImages: { [key: string]: string } = {
     고양킨텍스: 고양킨텍스,
     서울대공원: 서울대공원,
@@ -96,7 +120,7 @@ export default function CultureStampContent() {
   };
 
   return (
-    <div className="w-full max-w-[480px] mx-auto bg-white min-h-screen pb-20 pt-3 relative z-50">
+    <div className="w-full max-w-[480px] mx-auto bg-white pt-3 relative z-50">
       {/* 선택 영역 */}
       <div>
         <div className="flex border-b-2 border-gray-300 relative">

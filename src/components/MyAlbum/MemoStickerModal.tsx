@@ -1,5 +1,5 @@
 import Modal from '../common/Modal';
-import Sticker from '../../assets/stamp/남한산성.svg';
+import Sticker from '../../assets/stamp/cultural/남한산성.svg';
 import Lock from '../../assets/icons/lockIcon.svg?react';
 
 interface MemoStickerModalProps {

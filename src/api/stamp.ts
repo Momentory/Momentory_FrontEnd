@@ -37,3 +37,20 @@ export const getRecentStamps = async (): Promise<RecentStampsResponse> => {
     throw error;
   }
 };
+
+/**
+ * 내 스탬프 목록 조회 (타입별)
+ * @param type REGIONAL | CULTURAL (없으면 전체)
+ */
+export const getMyStamps = async (
+  type?: 'REGIONAL' | 'CULTURAL'
+): Promise<RecentStampsResponse> => {
+  try {
+    const url = type ? `/api/stamps/my?type=${type}` : '/api/stamps/my';
+    const res = await api.get<RecentStampsResponse>(url);
+    return res.data;
+  } catch (error) {
+    console.error('내 스탬프 조회 실패', error);
+    throw error;
+  }
+};
