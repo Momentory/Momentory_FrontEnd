@@ -15,15 +15,13 @@ interface LoginResponse {
 export interface SignupPayload {
   email: string;
   password: string;
-  nickName: string;
-
-  // Swagger 요구 필드
+  nickName: string;          // ← Swagger 기준: nickname
   name: string;
   phone: string;
   gender: 'MALE' | 'FEMALE';
   birthDate: string;
   agreeTerms: boolean;
-  characterType: string; 
+  characterType: string;     // "CAT" 등 백엔드 enum
 
   // 선택 필드
   imageName?: string;
@@ -31,11 +29,6 @@ export interface SignupPayload {
   bio?: string;
   externalLink?: string;
   [key: string]: unknown;
-}
-
-interface VerifyEmailResponse {
-  success: boolean;
-  message: string;
 }
 
 interface CheckResult {
@@ -59,7 +52,6 @@ export const login = async (payload: { email: string; password: string }) => {
     const { data }: { data: LoginResponse } = await api.post('/api/auth/login', payload);
     const { accessToken, refreshToken } = data.result;
 
-    // 저장
     tokenStore.set({ accessToken, refreshToken });
     api.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
 
@@ -106,27 +98,35 @@ export const reissue = async () => {
 
 /* ----------------------------- 이메일 / 닉네임 / 인증 관련 ----------------------------- */
 
+//이메일 전송
 export const sendEmail = async (email: string) => {
-  const res = await api.post('/api/auth/send-email', email, {
-    headers: { 'Content-Type': 'text/plain' },
+  return api.post('/api/auth/send-email', email, {
+    headers: { "Content-Type": "text/plain" },
   });
-  return res.data;
 };
 
+
+
+// 이메일 중복 체크
 export const checkEmail = async (email: string) => {
   const encoded = encodeURIComponent(email);
   const { data } = await api.get(`/api/auth/check-email?email=${encoded}`);
   return data;
 };
 
-export const verifyEmail = async (token: string): Promise<VerifyEmailResponse> => {
-  const res = await api.get(`/api/auth/verify-email?token=${token}`);
-  return res.data;
+// 이메일 인증 여부 확인
+export const checkEmailVerified = async (email: string) => {
+  const encoded = encodeURIComponent(email);
+  const { data } = await api.get(`/api/auth/check-email-verified?email=${encoded}`);
+  return data;
 };
 
-export const checkNickname = async (nickName: string): Promise<CheckResult> => {
+// 닉네임 중복 체크
+export const checkNickname = async (nickname: string): Promise<CheckResult> => {
   try {
-    const res = await api.get('/api/auth/check-nickname', { params: { nickName } });
+    const res = await api.get('/api/auth/check-nickname', {
+      params: { nickname },
+    });
     return { available: res.data.result === '중복 없음' };
   } catch (error) {
     console.error('닉네임 중복확인 실패:', error);
@@ -136,6 +136,7 @@ export const checkNickname = async (nickName: string): Promise<CheckResult> => {
 
 /* ----------------------------- 비밀번호 ----------------------------- */
 
+// 비밀번호 검증
 export const validatePassword = async (password: string) => {
   try {
     const { data } = await api.get('/api/auth/validate-password', {
@@ -148,6 +149,7 @@ export const validatePassword = async (password: string) => {
   }
 };
 
+// 비밀번호 변경
 export const changePassword = (payload: { email: string; newPassword: string }) =>
   api.patch('/api/auth/change-password', payload);
 

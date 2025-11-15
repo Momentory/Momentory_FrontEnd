@@ -324,11 +324,11 @@ export default function CommunityDetailPage() {
         )}
 
         {/* 좋아요 / 댓글 / 스크랩 */}
-        <div className="flex items-center gap-30 text-[14px] mt-6">
+        <div className="flex items-center gap-32 text-[14px] mt-6 ">
 
           {/* 좋아요 */}
           <div
-            className="flex items-center ml-6 gap-1 cursor-pointer active:scale-90 transition"
+            className="flex items-center ml-6 gap-1 cursor-pointer active:scale-95 transition"
             onClick={handleToggleLike}
           >
             <img src="/images/Heart.png" className="w-5" />
@@ -343,7 +343,7 @@ export default function CommunityDetailPage() {
 
           {/* 스크랩 */}
           <div
-            className="flex items-center mr-6 gap-1 cursor-pointer active:scale-90 transition"
+            className="flex items-center mr-2 gap-1 cursor-pointer active:scale-95 transition"
             onClick={handleToggleScrap}
           >
             <img src="/images/mark.png" className="w-5" />

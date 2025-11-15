@@ -44,8 +44,13 @@ export const getWardrobeList = async () => {
   return data.result;
 }
 
-export const saveWardrobe = async () => {
-  const { data } = await api.post<import('../types/shop').WardrobeSaveResponse>('/api/wardrobe');
+export const saveWardrobe = async (payload: {
+  clothingId?: number;
+  expressionId?: number;
+  effectId?: number;
+  decorationId?: number;
+}) => {
+  const { data } = await api.post<import('../types/shop').WardrobeSaveResponse>('/api/wardrobe', payload);
   return data.result;
 }
 

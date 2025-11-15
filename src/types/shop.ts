@@ -100,12 +100,12 @@ export interface WardrobeSaveResponse {
   isSuccess: boolean;
   code: string;
   message: string;
-  result: PurchasedItem;
+  result: Wardrobe;
 }
 
 export interface WardrobeApplyResponse {
   isSuccess: boolean;
   code: string;
   message: string;
-  result: PurchasedItem;
+  result: Wardrobe;
 }

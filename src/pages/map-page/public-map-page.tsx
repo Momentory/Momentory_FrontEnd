@@ -118,7 +118,7 @@ export default function PublicMapPage() {
     }
   };
 
-  const mapHeightClass = 'h-[calc(100vh-140px)]';
+  const mapHeightClass = 'h-[calc(100vh-200px)]';
 
   useEffect(() => {
     if (!selectedRegion && markers.length > 0) {
@@ -144,7 +144,7 @@ export default function PublicMapPage() {
           rightAction={
             <div className="relative">
               <button
-                className="cursor-pointer relative"
+                className="cursor-pointer relative translate-y-0.5"
                 onClick={() => navigate('/roulette')}
               >
                 <RouletteIcon className="w-10 h-10" />

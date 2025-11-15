@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Lock, Check, Mail } from "lucide-react";
-import { changePassword, sendEmail, verifyEmail } from "../../api/auth";
+import { changePassword, sendEmail, checkEmailVerified } from "../../api/auth";
 import { getMyProfile } from "../../api/mypage";
 
 export default function ChangePasswordPage() {
@@ -53,7 +53,7 @@ export default function ChangePasswordPage() {
         if (!token) return;
 
         try {
-            await verifyEmail(token);
+            await checkEmailVerified(token);
             setEmailVerified(true);
             alert("이메일 인증이 완료되었습니다!");
         } catch (error) {

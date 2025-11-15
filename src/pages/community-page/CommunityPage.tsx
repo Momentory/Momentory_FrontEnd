@@ -23,7 +23,7 @@ export default function CommunityPage() {
   const initialPosts: CommunityPost[] = [
     {
       postId: 99901,
-      userId: 0,
+      userId: 101,
       userNickname: "여행하는물고기",
       userProfileImageUrl: "/images/profile.png",
       imageUrl: "/images/image51.png",
@@ -38,7 +38,7 @@ export default function CommunityPage() {
     },
     {
       postId: 99902,
-      userId: 0,
+      userId: 102,
       userNickname: "여행하는물개",
       userProfileImageUrl: "/images/profile.png",
       imageUrl: "/images/image52.png",
