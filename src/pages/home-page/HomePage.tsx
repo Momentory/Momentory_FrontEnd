@@ -168,11 +168,13 @@ export default function HomePage() {
         </div>
 
         <div className="relative">
-          <div className="grid grid-cols-3 gap-3 pb-3">
-            {(events.length > 0 ? events : [1, 2, 3]).map((evt: any, i) => (
+          <div
+            className="flex gap-3 overflow-x-auto pb-3 scroll-smooth hide-scrollbar"
+          >
+            {(events.length > 0 ? events : [1, 2, 3, 4, 5]).map((evt: any, i) => (
               <div
                 key={i}
-                className="relative w-full h-[146px] rounded-[12px] overflow-hidden shadow-md bg-white"
+                className="flex-shrink-0 w-[140px] h-[150px] rounded-[12px] overflow-hidden shadow-md bg-white cursor-pointer hover:scale-[1.03] transition"
               >
                 <img
                   src={evt.imageUrl ?? `/images/event${i + 1}.png`}
@@ -180,17 +182,6 @@ export default function HomePage() {
                   className="w-full h-full object-cover"
                 />
               </div>
-            ))}
-          </div>
-
-          {/* 인디케이터 */}
-          <div className="flex justify-center items-center mt-2 gap-[6px]">
-            {[1, 2, 3].map((i) => (
-              <div
-                key={i}
-                className={`w-[7px] h-[7px] rounded-full ${i === 1 ? "bg-[#FF7070]" : "bg-gray-300"
-                  }`}
-              />
             ))}
           </div>
         </div>

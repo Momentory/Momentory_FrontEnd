@@ -20,6 +20,7 @@ import CommunityPage from './pages/community-page/CommunityPage';
 import CommunityMyPage from './pages/community-page/CommunityMyPage';
 import CommunityWritePage from './pages/community-page/CommunityWritePage';
 import CommunitySearchPage from './pages/community-page/CommunitySearchPage';
+import CommunityRegionPage from './pages/community-page/CommunityRegionPage';
 import UserProfilePage from './pages/community-page/UserProfilePage';
 
 import SplashPage from './pages/Auth/SplashPage';
@@ -110,10 +111,12 @@ const protectedRoutes: RouteObject[] = [
       { path: 'album', element: <MyAlbumPage /> },
 
       { path: 'community', element: <CommunityPage /> },
-      { path: 'community/detail/:id', element: <CommunityDetailPage /> },
+      { path: 'community/:id', element: <CommunityDetailPage /> },
       { path: 'community/write', element: <CommunityWritePage /> },
+      { path: "/community/edit/:postId", element: <CommunityWritePage /> },
       { path: 'community/mypage', element: <CommunityMyPage /> },
       { path: 'community/search', element: <CommunitySearchPage /> },
+      { path: 'community/region/:regionId', element: <CommunityRegionPage /> },
       { path: 'community/user/:userId', element: <UserProfilePage /> },
 
       { path: 'notifications', element: <NotificationListPage /> },
