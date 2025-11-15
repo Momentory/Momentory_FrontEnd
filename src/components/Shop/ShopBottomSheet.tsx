@@ -25,6 +25,7 @@ export interface ShopBottomSheetProps {
   onAccessoryClick: (id: number) => void;
   userPoints: number;
   onCategoryChange?: (category: string) => void;
+  isLoading?: boolean;
 }
 
 export default function ShopBottomSheet({
@@ -39,6 +40,7 @@ export default function ShopBottomSheet({
   onAccessoryClick,
   userPoints,
   onCategoryChange,
+  isLoading = false,
 }: ShopBottomSheetProps) {
   const [isDragging, setIsDragging] = React.useState(false);
   const [hasMoved, setHasMoved] = React.useState(false);
@@ -288,73 +290,84 @@ export default function ShopBottomSheet({
           maxHeight: `${height - 120}px`
         }}
       >
-        <div className="grid grid-cols-4 gap-3">
-          {accessories.map((accessory) => {
-            const isOwned = ownedAccessories.includes(accessory.id);
-            const isEquipped = equippedAccessories.includes(accessory.id);
-            const canAfford = userPoints >= accessory.price;
-            const isLocked = accessory.locked;
-
-            return (
-              <div key={accessory.id} className="flex flex-col items-center gap-1">
-                <button
-                  onClick={() => {
-                    if (isLocked) {
-                      setHoveredItem(hoveredItem === accessory.id ? null : accessory.id);
-                    } else if (!isOwned) {
-                      onAccessoryClick(accessory.id);
-                    }
-                  }}
-                  disabled={isOwned}
-                  className={`aspect-square w-full flex items-center justify-center rounded-xl transition-all relative overflow-hidden ${
-                    isLocked
-                      ? 'bg-white border-2 border-gray-300 cursor-pointer'
-                      : isOwned
-                      ? 'bg-white border-2 border-[#FF7070] cursor-default'
-                      : isEquipped
-                      ? 'bg-pink-50 border-2 border-[#FF7070]'
-                      : canAfford
-                      ? 'bg-white border-2 border-black hover:border-[#FF7070]'
-                      : 'bg-gray-50 border-2 border-gray-400 cursor-not-allowed'
-                  }`}
-                >
-                  {isLocked ? (
-                    <div className="flex items-center justify-center">
-                      <LockIcon className="w-8 h-8 text-gray-400" />
-                    </div>
-                  ) : (
-                    <>
-                      <img
-                        src={accessory.icon}
-                        alt={accessory.name}
-                        className="max-w-[80%] max-h-[80%] object-contain"
-                      />
-                      {isOwned && (
-                        <div className="absolute bottom-1 right-1 bg-[#FF7070] rounded-full w-5 h-5 flex items-center justify-center">
-                          <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                          </svg>
-                        </div>
-                      )}
-                    </>
-                  )}
-                </button>
-                {!isOwned && (
-                  <div className="flex items-center gap-0.5">
-                    <PointIcon className="w-4 h-4" />
-                    <span
-                      className={`text-xs font-bold ${
-                        isLocked ? 'text-gray-400' : canAfford ? 'text-black' : 'text-red-500'
-                      }`}
-                    >
-                      {isLocked ? '???' : accessory.price}
-                    </span>
-                  </div>
-                )}
+        {isLoading ? (
+          <div className="grid grid-cols-4 gap-3">
+            {Array.from({ length: 8 }).map((_, index) => (
+              <div key={index} className="flex flex-col items-center gap-1">
+                <div className="aspect-square w-full bg-gray-200 rounded-xl animate-pulse" />
+                <div className="w-12 h-4 bg-gray-200 rounded animate-pulse" />
               </div>
-            );
-          })}
-        </div>
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-4 gap-3">
+            {accessories.map((accessory) => {
+              const isOwned = ownedAccessories.includes(accessory.id);
+              const isEquipped = equippedAccessories.includes(accessory.id);
+              const canAfford = userPoints >= accessory.price;
+              const isLocked = accessory.locked;
+
+              return (
+                <div key={accessory.id} className="flex flex-col items-center gap-1">
+                  <button
+                    onClick={() => {
+                      if (isLocked) {
+                        setHoveredItem(hoveredItem === accessory.id ? null : accessory.id);
+                      } else if (!isOwned) {
+                        onAccessoryClick(accessory.id);
+                      }
+                    }}
+                    disabled={isOwned}
+                    className={`aspect-square w-full flex items-center justify-center rounded-xl transition-all relative overflow-hidden ${
+                      isLocked
+                        ? 'bg-white border-2 border-gray-300 cursor-pointer'
+                        : isOwned
+                        ? 'bg-white border-2 border-[#FF7070] cursor-default'
+                        : isEquipped
+                        ? 'bg-pink-50 border-2 border-[#FF7070]'
+                        : canAfford
+                        ? 'bg-white border-2 border-black hover:border-[#FF7070]'
+                        : 'bg-gray-50 border-2 border-gray-400 cursor-not-allowed'
+                    }`}
+                  >
+                    {isLocked ? (
+                      <div className="flex items-center justify-center">
+                        <LockIcon className="w-8 h-8 text-gray-400" />
+                      </div>
+                    ) : (
+                      <>
+                        <img
+                          src={accessory.icon}
+                          alt={accessory.name}
+                          className="max-w-[80%] max-h-[80%] object-contain"
+                        />
+                        {isOwned && (
+                          <div className="absolute bottom-1 right-1 bg-[#FF7070] rounded-full w-5 h-5 flex items-center justify-center">
+                            <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                            </svg>
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </button>
+                  {!isOwned && (
+                    <div className="flex items-center gap-0.5">
+                      <PointIcon className="w-4 h-4" />
+                      <span
+                        className={`text-xs font-bold ${
+                          isLocked ? 'text-gray-400' : canAfford ? 'text-black' : 'text-red-500'
+                        }`}
+                      >
+                        {isLocked ? '???' : accessory.price}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
       </div>
     </>

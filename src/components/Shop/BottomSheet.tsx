@@ -25,6 +25,7 @@ export interface BottomSheetProps {
   onCategoryChange?: (category: string) => void;
   onSelectCharacter?: (characterType: 'CAT' | 'DOG') => void;
   onRemoveAll?: () => void;
+  isLoading?: boolean;
 }
 
 export default function BottomSheet({
@@ -39,6 +40,7 @@ export default function BottomSheet({
   onCategoryChange,
   onSelectCharacter,
   onRemoveAll,
+  isLoading = false,
 }: BottomSheetProps) {
   const [isDragging, setIsDragging] = React.useState(false);
   const [hasMoved, setHasMoved] = React.useState(false);
@@ -231,46 +233,54 @@ export default function BottomSheet({
           maxHeight: `${height - 120}px`
         }}
       >
-        <div className="grid grid-cols-4 gap-3">
-          {accessories.map((accessory) => {
-            const isEquipped = equippedAccessories.includes(accessory.id);
-            return (
-              <div
-                key={accessory.id}
-                className="relative"
-              >
-                <button
-                  onClick={() => {
-                    if (accessory.locked) {
-                      setHoveredItem(hoveredItem === accessory.id ? null : accessory.id);
-                    } else {
-                      onAccessoryClick(accessory.id);
-                    }
-                  }}
-                  className={`aspect-square w-full flex items-center justify-center rounded-xl transition-all relative overflow-hidden ${
-                    accessory.locked
-                      ? 'bg-white border-2 border-gray-300 cursor-pointer'
-                      : isEquipped
-                      ? 'bg-white border-2 border-[#FF7070]'
-                      : 'bg-white border-2 border-black'
-                  }`}
+        {isLoading ? (
+          <div className="grid grid-cols-4 gap-3">
+            {Array.from({ length: 8 }).map((_, index) => (
+              <div key={index} className="aspect-square w-full bg-gray-200 rounded-xl animate-pulse" />
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-4 gap-3">
+            {accessories.map((accessory) => {
+              const isEquipped = equippedAccessories.includes(accessory.id);
+              return (
+                <div
+                  key={accessory.id}
+                  className="relative"
                 >
-                  {accessory.locked ? (
-                    <div className="flex items-center justify-center">
-                      <LockIcon className="w-8 h-8 text-gray-400" />
-                    </div>
-                  ) : (
-                    <img
-                      src={accessory.icon}
-                      alt={accessory.name}
-                      className="max-w-[80%] max-h-[80%] object-contain"
-                    />
-                  )}
-                </button>
-              </div>
-            );
-          })}
-        </div>
+                  <button
+                    onClick={() => {
+                      if (accessory.locked) {
+                        setHoveredItem(hoveredItem === accessory.id ? null : accessory.id);
+                      } else {
+                        onAccessoryClick(accessory.id);
+                      }
+                    }}
+                    className={`aspect-square w-full flex items-center justify-center rounded-xl transition-all relative overflow-hidden ${
+                      accessory.locked
+                        ? 'bg-white border-2 border-gray-300 cursor-pointer'
+                        : isEquipped
+                        ? 'bg-white border-2 border-[#FF7070]'
+                        : 'bg-white border-2 border-black'
+                    }`}
+                  >
+                    {accessory.locked ? (
+                      <div className="flex items-center justify-center">
+                        <LockIcon className="w-8 h-8 text-gray-400" />
+                      </div>
+                    ) : (
+                      <img
+                        src={accessory.icon}
+                        alt={accessory.name}
+                        className="max-w-[80%] max-h-[80%] object-contain"
+                      />
+                    )}
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -241,6 +241,7 @@ const ShopPage = () => {
         onAccessoryClick={handleAccessoryClick}
         userPoints={point}
         onCategoryChange={handleCategoryChange}
+        isLoading={isLoading}
       />
 
       {selectedItem && (

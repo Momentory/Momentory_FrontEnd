@@ -31,8 +31,10 @@ const ClosetPage = () => {
 
   const { data: pointData } = useUserPoint();
   const { data: currentCharacter } = useCurrentCharacter();
-  const { data: myItems = [] } = useMyItems(selectedCategory);
-  const { data: shopItems = [] } = useShopItems(selectedCategory);
+  const { data: myItems = [], isLoading: myItemsLoading } = useMyItems(selectedCategory);
+  const { data: shopItems = [], isLoading: shopItemsLoading } = useShopItems(selectedCategory);
+
+  const isLoading = myItemsLoading || shopItemsLoading;
 
   const equipMutation = useEquipItem({
     onSuccess: () => {
@@ -407,6 +409,7 @@ const ClosetPage = () => {
         onCategoryChange={handleCategoryChange}
         onSelectCharacter={handleSelectCharacter}
         onRemoveAll={handleRemoveAll}
+        isLoading={isLoading}
       />
       </div>
     </div>
