@@ -1,98 +1,205 @@
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import {
+  toggleLike,
+  toggleScrap,
+  type CommunityPost,
+} from "../../api/community";
 
 interface CommunityCardProps {
-  profileImage?: string;
-  userName?: string;
-  time: string;
-  imageUrl: string;
-  title: string;
-  content: string;
-  tags: string[];
-  likeCount?: number;
-  commentCount?: number;
-  userId?: number; 
+  post?: CommunityPost;   // 안전하게 optional 처리
+  onUpdate?: (updatedPost: Partial<CommunityPost>) => void;
 }
 
-export default function CommunityCard({
-  profileImage = "/images/profile.png",
-  userName = "여행하는물고기",
-  time,
-  imageUrl,
-  title,
-  content,
-  tags,
-  likeCount = 125,
-  commentCount = 15,
-  userId = 1, // 기본값
-}: CommunityCardProps) {
+export default function CommunityCard({ post, onUpdate }: CommunityCardProps) {
   const navigate = useNavigate();
 
+  /* ----------------------- post 기본값 처리 (Hook 위반 방지) ----------------------- */
+  const safePost: CommunityPost = post ?? {
+    postId: 0,
+    userId: 0,
+    userNickname: "알 수 없음",
+    userProfileImageUrl: "/images/profile.png",
+    imageUrl: "/images/default.png",
+    regionName: "",
+    title: "",
+    content: "",
+    tags: [],
+    liked: false,
+    scrapStatus: false,
+    likeCount: 0,
+    commentCount: 0,
+    createdAt: new Date().toISOString(),
+  };
+
+  /* ----------------------- 이미지 안전 처리 ----------------------- */
+  const safeImage = (url?: string | null) =>
+    !url || url === "string" || url.trim() === "" || url.startsWith("blob:")
+      ? "/images/default.png"
+      : url;
+
+  /* ----------------------- 상대 시간 계산 ----------------------- */
+  const getRelativeTime = (dateString?: string) => {
+    if (!dateString) return "방금 전";
+
+    const now = new Date();
+    const t = new Date(dateString);
+    const diff = (now.getTime() - t.getTime()) / 1000;
+
+    if (diff < 60) return "방금 전";
+    if (diff < 3600) return `${Math.floor(diff / 60)}분 전`;
+    if (diff < 86400) return `${Math.floor(diff / 3600)}시간 전`;
+    if (diff < 604800) return `${Math.floor(diff / 86400)}일 전`;
+    return `${Math.floor(diff / 604800)}주 전`;
+  };
+
+  /* ----------------------- 좋아요/스크랩 상태 (Hook 안전) ----------------------- */
+  const [liked, setLiked] = useState<boolean>(safePost.liked ?? false);
+  const [scrapped, setScrapped] = useState<boolean>(safePost.scrapStatus ?? false);
+  const [likeCount, setLikeCount] = useState<number>(safePost.likeCount ?? 0);
+
+  /* ----------------------- post가 없으면 여기서 null 처리 ----------------------- */
+  if (!post) return null;
+
+  /* ----------------------- 좋아요 토글 ----------------------- */
+  const handleLike = async (e: any) => {
+    e.stopPropagation();
+    try {
+      await toggleLike(safePost.postId);
+
+      const newLiked = !liked;
+      const newLikeCount = newLiked ? likeCount + 1 : likeCount - 1;
+
+      setLiked(newLiked);
+      setLikeCount(newLikeCount);
+
+      onUpdate?.({
+        postId: safePost.postId,
+        liked: newLiked,
+        likeCount: newLikeCount,
+      });
+    } catch (err) {
+      console.error("좋아요 토글 실패:", err);
+    }
+  };
+
+  /* ----------------------- 스크랩 토글 ----------------------- */
+  const handleScrap = async (e: any) => {
+    e.stopPropagation();
+    try {
+      await toggleScrap(safePost.postId);
+
+      const newScrapped = !scrapped;
+      setScrapped(newScrapped);
+
+      onUpdate?.({
+        postId: safePost.postId,
+        scrapStatus: newScrapped,
+      });
+    } catch (err) {
+      console.error("스크랩 토글 실패:", err);
+    }
+  };
+
+  const normalizedPost = {
+    ...safePost,
+    liked,
+    scrapStatus: scrapped,
+    likeCount,
+    time: getRelativeTime(safePost.createdAt),
+    userProfileImageUrl: safeImage(safePost.userProfileImageUrl),
+    imageUrl: safeImage(safePost.imageUrl),
+  };
+
   return (
-    <div className="bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-100">
-      {/* 작성자 정보 */}
+    <div className="bg-white rounded-2xl shadow-md overflow-hidden border border-gray-200">
+
+      {/* 프로필 영역 */}
       <div
-        className="flex items-center gap-2 px-4 pt-4 pb-2 cursor-pointer hover:opacity-80 transition"
-        onClick={() => navigate(`/community/user/${userId}`)} 
+        className="w-full bg-white px-4 py-3 border-b border-gray-200 cursor-pointer active:opacity-70"
+        onClick={(e) => {
+          e.stopPropagation();
+          navigate(`/community/user/${safePost.userId}`);
+        }}
       >
-        <img
-          src={profileImage}
-          alt="profile"
-          className="w-[32px] h-[32px] rounded-full border border-gray-200 object-cover"
-        />
-        <div className="flex flex-col">
-          <span className="text-[11px] font-medium text-black-800">{userName}</span>
-          <span className="text-[9px] text-gray-700">{time}</span>
+        <div className="flex items-center gap-3">
+          <img
+            src="/images/profile.png"
+            className="w-10 h-10 rounded-full object-cover"
+          />
+          <div className="flex flex-col">
+            <span className="text-[11px] font-semibold">
+              {safePost.userNickname}
+            </span>
+            <span className="text-[9px] text-gray-500">
+              {getRelativeTime(safePost.createdAt)}
+            </span>
+          </div>
         </div>
       </div>
 
-      {/* 게시글 이미지 */}
-      <img
-        src={imageUrl}
-        alt={title}
-        className="w-full h-[260px] object-cover"
-      />
+      {/* 이미지 클릭 → 상세 이동 */}
+      <div
+        className="cursor-pointer active:opacity-80"
+        onClick={() =>
+          navigate(`/community/${safePost.postId}`, {
+            state: { post: normalizedPost },
+          })
+        }
+      >
+        <img
+          src={safeImage(safePost.imageUrl)}
+          className="w-full h-[280px] object-cover"
+        />
+      </div>
 
-      {/* 본문 내용 */}
+      {/* 본문 */}
       <div className="p-4">
-        {/* 위치/카테고리 */}
-        <p className="text-[12px] text-gray-700 mb-1">고양시, 스타필드</p>
+        {safePost.regionName && (
+          <div className="text-[12px] text-black mb-1">📌 {safePost.regionName}</div>
+        )}
 
-        {/* 제목 */}
-        <h2 className="text-[16px] font-semibold text-gray-800 mb-1">{title}</h2>
+        <h2 className="text-[15px] font-semibold text-gray-900 mb-2">
+          {safePost.title}
+        </h2>
 
-        {/* 내용 */}
-        <p className="text-[14px] text-gray-600 leading-snug mb-3">{content}</p>
+        <p className="text-[11px] text-gray-700 line-clamp-2 mb-4">
+          {safePost.content}
+        </p>
 
         {/* 태그 */}
-        <div className="flex flex-wrap gap-2 mb-3">
-          {tags.map((tag, idx) => (
+        <div className="flex gap-2 flex-wrap mb-4">
+          {safePost.tags?.map((tag) => (
             <span
-              key={idx}
-              className="px-5 py-[4px] bg-[#FF7070] text-white text-[13px] rounded-lg"
+              key={tag}
+              className="px-3 py-[4px] bg-[#FF7070] text-white rounded-full text-[12px]"
             >
-              {tag}
+              #{tag}
             </span>
           ))}
         </div>
 
-        {/* 구분선 */}
-        <div className="w-full h-[1px] bg-gray-200 mb-3" />
-
-        {/* 하단 아이콘 영역 */}
-        <div className="flex items-center justify-between text-gray-400 text-[15px]">
-          <div className="flex items-center gap-5">
-            <div className="flex items-center gap-1 ml-[29px]">
-              <img src="/images/Heart.png" alt="like" className="w-[17px] h-[17px]" />
-              <span>{likeCount}</span>
-            </div>
-            <div className="flex items-center gap-1 ml-[50px] ">
-              <img src="/images/msg.png" alt="comment" className="w-[17px] h-[17px]" />
-              <span>{commentCount}</span>
-            </div>
+        {/* 좋아요 / 댓글 / 스크랩 */}
+        <div className="flex items-center justify-between text-[15px] text-gray-700">
+          <div
+            className="flex items-center gap-1 cursor-pointer active:scale-95 transition"
+            onClick={handleLike}
+          >
+            <img src="/images/Heart.png" className="w-4 h-4" />
+            <span>{likeCount}</span>
           </div>
-          <div className="flex items-center gap-1 mr-[24px]">
-            <img src="/images/mark.png" alt="save" className="w-[17px] h-[17px]" />
-            <span>저장</span>
+
+          <div className="flex items-center gap-1">
+            <img src="/images/msg.png" className="w-4 h-4" />
+            <span>{safePost.commentCount}</span>
+          </div>
+
+          <div
+            className="flex items-center gap-1 cursor-pointer active:scale-95 transition"
+            onClick={handleScrap}
+          >
+            <img src="/images/mark.png" className="w-4 h-4" />
+            <span>{scrapped ? "저장됨" : "저장"}</span>
           </div>
         </div>
       </div>
