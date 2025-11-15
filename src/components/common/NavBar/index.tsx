@@ -18,6 +18,7 @@ const Navbar = ({ onUploadClick }: NavbarProps) => {
         bottom: 0
       }}
     >
+
       <Navlink to="/home" Icon={Home} alt="홈" />
       <Navlink to="/myMap" Icon={Map} alt="탐색" />
       <div onClick={onUploadClick} className="cursor-pointer">

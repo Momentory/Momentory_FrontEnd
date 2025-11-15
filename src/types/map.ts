@@ -33,6 +33,8 @@ export interface MapViewProps {
   originPosRef: React.MutableRefObject<{ top: string; left: string } | null>;
   containerRef: React.RefObject<HTMLDivElement | null>;
   scale: number;
+  isPinching: boolean;
+  colorMap?: Record<string, string>; // 지역별 색상 맵
   zoomInMarker: (marker: Marker) => void;
   zoomOutMarker: () => void;
   handleWheel: (e: React.WheelEvent) => void;
@@ -50,6 +52,8 @@ export interface PublicMapViewProps {
   originPosRef: React.MutableRefObject<{ top: string; left: string } | null>;
   containerRef: React.RefObject<HTMLDivElement | null>;
   scale: number;
+  isPinching: boolean;
+  colorMap?: Record<string, string>; // 지역별 색상 맵
   zoomInMarker?: (marker: Marker) => void;
   zoomOutMarker?: () => void;
   handleWheel: (e: React.WheelEvent) => void;
