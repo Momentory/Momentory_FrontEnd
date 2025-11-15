@@ -1,8 +1,6 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import {
   getTopPlaces,
-  getRecentPhotos,
   getCharacterStatus,
   getEvents,
   getMyPoint,
@@ -11,25 +9,23 @@ import {
 import { getMyProfileSummary } from "../../api/mypage";
 import { X } from "lucide-react";
 import GyeonggiMap from './GyeonggiMap';
+import CharacterSection from '../../components/Home/CharacterSection';
+import EventSection from '../../components/Home/EventSection';
+import CategorySection from '../../components/Home/CategorySection';
+import TopPlacesSection from '../../components/Home/TopPlacesSection';
 
 export default function HomePage() {
-  const navigate = useNavigate();
-
-  // 유저 기본 데이터
-  const [userName, setUserName] = useState("Username");
+  const [userName, setUserName] = useState("");
   const [level, setLevel] = useState(0);
   const [points, setPoints] = useState(0);
 
-  // 상태
   const [isDropdownOpen, _setIsDropdownOpen] = useState(false);
   const [isMapModalOpen, setIsMapModalOpen] = useState(false);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [_isError, setIsError] = useState(false);
 
-  // API 데이터
   const [topPlaces, setTopPlaces] = useState<any[]>([]);
-  const [recentPhotos, setRecentPhotos] = useState<any[]>([]);
   const [events, setEvents] = useState<any[]>([]);
 
   const [mapColors, setMapColors] = useState<Record<string, string>>({});
@@ -39,10 +35,8 @@ export default function HomePage() {
       try {
         setIsLoading(true);
 
-        //병렬로 API 호출
         const [
           places,
-          photos,
           charStatus,
           evts,
           pointData,
@@ -50,7 +44,6 @@ export default function HomePage() {
           profileSummary
         ] = await Promise.all([
           getTopPlaces(),
-          getRecentPhotos(),
           getCharacterStatus(),
           getEvents(),
           getMyPoint(),
@@ -58,29 +51,22 @@ export default function HomePage() {
           getMyProfileSummary()
         ]);
 
-        // 여행지 / 사진
         setTopPlaces(Array.isArray(places) ? places : []);
-        setRecentPhotos(Array.isArray(photos) ? photos : []);
 
-        // 프로필 정보 (닉네임)
         if (profileSummary) {
-          setUserName(profileSummary.nickname ?? "User");
+          setUserName(profileSummary.nickname ?? "");
         }
 
-        // 캐릭터 상태 (레벨)
         if (charStatus) {
           setLevel(charStatus.level ?? 0);
         }
 
-        // 포인트
         if (pointData) {
           setPoints(pointData.userPoint?.currentPoint ?? 0);
         }
 
-        // 이벤트
         setEvents(Array.isArray(evts) ? evts : []);
 
-        // 지도 색깔 저장
         setMapColors(mapData ?? {});
 
       } catch (e) {
@@ -95,8 +81,7 @@ export default function HomePage() {
   }, []);
 
   return (
-    <div className="w-full min-h-screen bg-white overflow-y-auto relative mt-[60px]">
-      {/* 상단바 */}
+    <div className="w-full min-h-screen bg-white overflow-y-auto overflow-x-hidden relative mt-[60px]">
       <div className="w-full bg-white flex justify-between items-center px-6 py-2 border-b border-gray-200 sticky top-0 z-30">
         <p className="text-[14px] font-semibold text-gray-800">
           Level {level}
@@ -119,236 +104,14 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* 인사 + 캐릭터 */}
-      <div
-        className="relative w-full h-[380px] flex flex-col justify-start items-start px-6 pt-6"
-        style={{
-          backgroundImage: "url('/images/bgImage.png')",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-        }}
-      >
-        <div className="absolute inset-x-0 top-0 h-[86px] bg-black/35 z-[2] flex flex-col justify-center px-[20px]">
-          <p className="text-[15px] text-white font-medium">
-            안녕하세요 <span className="font-bold">{userName}</span>님
-          </p>
-          <p className="text-[14px] text-white mt-1 opacity-90">
-            오늘은 어떤 사진을 찍어볼까요?
-          </p>
-        </div>
+      <CharacterSection userName={userName} />
 
-        <img
-          src="/images/char1.png"
-          alt="캐릭터"
-          className="absolute left-1/2 -translate-x-1/4 z-1"
-          style={{ width: "380px", height: "430px", bottom: "-60px" }}
-        />
-        <img
-          src="/images/ribon.png"
-          alt="리본"
-          className="absolute z-4"
-          style={{
-            width: "76px",
-            height: "48px",
-            bottom: "118px",
-            left: "43%",
-          }}
-        />
-      </div>
+      <EventSection events={events} isLoading={isLoading} />
 
-      {/* 진행중인 이벤트 */}
-      <section className="px-6 mt-8">
-        <div className="flex justify-between items-center mb-3">
-          <h2 className="text-[23px] font-extrabold text-gray-900">
-            진행중인 이벤트
-          </h2>
-          <button className="text-[13px] text-gray-500 hover:text-[#FF7070]">
-            모두 보기 &gt;
-          </button>
-        </div>
+      <CategorySection />
 
-        <div className="relative">
-          <div
-            className="flex gap-3 overflow-x-auto pb-3 scroll-smooth hide-scrollbar"
-          >
-            {(events.length > 0 ? events : [1, 2, 3, 4, 5]).map((evt: any, i) => (
-              <div
-                key={i}
-                className="flex-shrink-0 w-[140px] h-[150px] rounded-[12px] overflow-hidden shadow-md bg-white cursor-pointer hover:scale-[1.03] transition"
-              >
-                <img
-                  src={evt.imageUrl ?? `/images/event${i + 1}.png`}
-                  alt={evt.title ?? `event${i + 1}`}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      <TopPlacesSection topPlaces={topPlaces} isLoading={isLoading} />
 
-      {/* 최신 업로드 사진 */}
-      {recentPhotos.length > 0 && (
-        <section className="px-6 mt-10">
-          <h2 className="text-[23px] font-semibold mb-3">최근 업로드된 사진</h2>
-          <div className="grid grid-cols-3 gap-3">
-            {recentPhotos.slice(0, 3).map((photo: any, idx: number) => (
-              <div
-                key={idx}
-                className="w-full h-[120px] rounded-[12px] overflow-hidden shadow-md bg-gray-100"
-              >
-                <img
-                  src={photo.imageUrl ?? "/images/default.png"}
-                  alt={`photo-${idx}`}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* 카테고리 */}
-      <section className="px-6 mt-10">
-        <div
-          className="rounded-[20px] px-5 py-4 shadow-md text-white"
-          style={{
-            backgroundImage:
-              "linear-gradient(to bottom, rgba(255,112,112,0.95), rgba(255,150,150,0.9))",
-          }}
-        >
-          <h2 className="text-[23px] font-extrabold mb-3">카테고리</h2>
-          <div className="flex justify-around">
-            {[
-              {
-                img: "/images/sprout.png",
-                label: "성장현황",
-                link: "/character",
-              },
-              {
-                img: "/images/location-pin.png",
-                label: "나의지도",
-                link: "/mymap"
-              },
-              {
-                img: "/images/roulette.png",
-                label: "여행지 추천",
-                link: "/roulette",
-              },
-              { img: "/images/star.png", label: "스탬프", link: "/stamp-collection" },
-            ].map((item) => (
-              <div
-                key={item.label}
-                className="flex flex-col items-center cursor-pointer active:scale-95 transition"
-                onClick={() => navigate(item.link)}
-              >
-                <div className="w-[58px] h-[58px] bg-white rounded-full flex items-center justify-center mb-2 shadow-md">
-                  <img
-                    src={item.img}
-                    alt={item.label}
-                    className="w-[28px] h-auto"
-                  />
-                </div>
-                <p className="text-[13px] text-white font-semibold">
-                  {item.label}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* 추천 여행지 */}
-      <section className="px-6 mt-10 mb-24">
-        <h2 className="text-[23px] font-semibold mb-3">이번 주 추천 장소</h2>
-
-        {isLoading && (
-          <div className="text-center text-gray-500 py-6">
-            추천 여행지를 불러오는 중이에요...
-          </div>
-        )}
-
-        {(topPlaces.length > 0
-          ? topPlaces
-          : [
-            {
-              id: 1,
-              name: "EVERLAND",
-              imageUrl: "/images/everland.jpg",
-              rating: 4.0,
-              reviewCount: 4321,
-              tags: ["#놀이공원", "#야경"],
-            },
-          ]
-        ).map((place, idx) => (
-          <div
-            key={idx}
-            className="bg-white rounded-2xl shadow-md overflow-hidden border border-gray-100 hover:shadow-lg transition-all duration-300 mb-4"
-          >
-            <img
-              src={place.imageUrl ?? "/images/default.png"}
-              alt={place.name}
-              className="w-full h-[140px] object-cover"
-            />
-
-            <div className="p-4">
-              <div className="flex justify-between items-start">
-                <p className="text-[15px] font-semibold text-gray-800 mt-2">
-                  {place.name}
-                </p>
-                <div
-                  className="flex items-center gap-[4px] text-white text-[11px] font-medium px-[7px] py-[3px] rounded-md"
-                  style={{
-                    backgroundImage:
-                      "linear-gradient(to bottom, rgba(255,112,112,0.95), rgba(255,150,150,0.9))",
-                  }}
-                >
-                  <img
-                    src="/images/star1.png"
-                    alt="별"
-                    className="w-[10px] h-[10px]"
-                  />
-                  <span>{place.rating?.toFixed(1) ?? "4.0"} / 5.0</span>
-                </div>
-              </div>
-
-              <div className="flex justify-between items-end mt-2">
-                <div className="flex items-center gap-1">
-                  <img
-                    src="/images/pencil.png"
-                    alt="리뷰 아이콘"
-                    className="w-[13px] h-[13px] opacity-80"
-                  />
-                  <span
-                    className="font-bold text-[13px]"
-                    style={{
-                      color: "#AE7C7C",
-                      fontFamily: "NanumSquareRound",
-                    }}
-                  >
-                    리뷰 {place.reviewCount?.toLocaleString() ?? 0}개
-                  </span>
-                </div>
-
-                <div className="flex flex-wrap justify-end gap-[6px]">
-                  {((place.tags ?? ["#놀이공원", "#야경"]) as string[]).map(
-                    (tag: string, idx: number) => (
-                      <span
-                        key={idx}
-                        className="text-[12px] text-gray-600 font-medium"
-                      >
-                        {tag}
-                      </span>
-                    )
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        ))}
-      </section>
-
-      {/* 지도 모달 */}
       {isMapModalOpen && (
         <div
           onClick={() => setIsMapModalOpen(false)}
@@ -372,7 +135,6 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* 사진 업로드 모달 */}
       {isUploadModalOpen && (
         <div
           onClick={() => setIsUploadModalOpen(false)}
