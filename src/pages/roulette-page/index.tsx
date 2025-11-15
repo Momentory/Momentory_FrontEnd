@@ -8,10 +8,6 @@ import star5 from '../../assets/star5.svg';
 import star6 from '../../assets/star6.svg';
 import star7 from '../../assets/star7.svg';
 import star8 from '../../assets/star8.svg';
-import giftIcon from '../../assets/giftIcon.svg';
-import successIcon from '../../assets/success.svg';
-import failIcon from '../../assets/fail.svg';
-import ongoingIcon from '../../assets/ongoing.svg';
 import {
   getRouletteSlots,
   spinRoulette,
@@ -21,8 +17,7 @@ import type { RouletteSlot, RouletteHistoryItem } from '../../types/roulette';
 
 export default function RoulettePage() {
   const [slots, setSlots] = useState<RouletteSlot[]>([]);
-  // const [recentWinners, setRecentWinners] = useState<RouletteHistoryItem[]>([]);
-  const [, setRecentWinners] = useState<RouletteHistoryItem[]>([]);
+  const [recentWinners, setRecentWinners] = useState<RouletteHistoryItem[]>([]);
   const [isSpinning, setIsSpinning] = useState(false);
   const [showResult, setShowResult] = useState(false);
   const [winner, setWinner] = useState<string | null>(null);
@@ -242,7 +237,7 @@ export default function RoulettePage() {
             <button
               onClick={handleSpin}
               disabled={isSpinning}
-              className={`w-full py-4 px-6 rounded-[25px] font-bold text-white text-lg ${
+              className={`w-full py-4 px-6 rounded-4xl font-bold text-white text-lg mb-4 ${
                 isSpinning
                   ? 'bg-[#EAEAEA]'
                   : 'bg-[#FF7070] hover:bg-[#ff6060] active:bg-[#ff5050] cursor-pointer'
@@ -250,6 +245,18 @@ export default function RoulettePage() {
             >
               ▶&nbsp;&nbsp;룰렛 돌리기
             </button>
+            <div className="bg-[#FFF5F5] border border-[#FF7070] rounded-xl p-4 mb-4">
+              <div className="flex flex-col gap-2 text-sm text-[#444444]">
+                <p className="flex items-start">
+                  <span className="text-[#FF7070] mr-2">•</span>
+                  <span>룰렛 돌리는데 한번씩 <strong className="text-[#FF7070]">200포인트</strong>가 차감됩니다!</span>
+                </p>
+                <p className="flex items-start">
+                  <span className="text-[#FF7070] mr-2">•</span>
+                  <span>만약 <strong>3일 이내</strong>에 해당 지역에 방문하여 사진을 업로드한다면 추가로 <strong className="text-[#FF7070]">500포인트</strong>가 주어집니다.</span>
+                </p>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -257,92 +264,51 @@ export default function RoulettePage() {
           <h2 className="text-[27px] font-bold text-[#444444] mb-4">
             최근 당첨된 지역
           </h2>
-          <div
-            style={{
-              width: '330px',
-              height: '470px',
-              flexShrink: 0,
-              borderRadius: '5px',
-              border: '2px solid #D2B3B3',
-              background: '#FFF',
-              zIndex: 10,
-            }}
-            className="shadow-md"
-          >
-            <div className="flex flex-col gap-[10px] items-center">
-              {[1, 2, 3, 4].map((item) => {
-                const boxData = {
-                  1: { city: '하남시', icon: successIcon },
-                  2: { city: '수원시', icon: failIcon },
-                  3: { city: '고양시', icon: ongoingIcon },
-                  4: { city: '김포시', icon: successIcon },
-                }[item];
-
-                return (
-                  <div
-                    key={item}
-                    style={{
-                      width: '325px',
-                      height: '109px',
-                      flexShrink: 0,
-                      borderRadius: '5px',
-                      background: item === 1 || item === 3 ? '#FFF' : '#F9EDED',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }}
-                  >
-                    <div
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        paddingLeft: '23px',
-                        paddingRight: '23px',
-                        width: '100%',
-                      }}
-                    >
-                      <div
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '12px',
-                        }}
-                      >
-                        <img src={giftIcon} alt="gift" />
-                        <div
-                          style={{ display: 'flex', flexDirection: 'column' }}
-                        >
-                          <span
-                            style={{
-                              fontFamily: 'NanumSquareRound',
-                              fontSize: '21px',
-                              fontStyle: 'normal',
-                              fontWeight: 700,
-                            }}
-                          >
-                            {boxData?.city}
-                          </span>
-                          <span
-                            style={{
-                              color: '#686868',
-                              fontFamily: 'NanumSquareRound',
-                              fontSize: '13px',
-                              fontStyle: 'normal',
-                              fontWeight: 700,
-                              lineHeight: 'normal',
-                              letterSpacing: '0.39px',
-                            }}
-                          >
-                            마감: 2025년 11월 15일
-                          </span>
-                        </div>
+          <div className="bg-white rounded-2xl shadow-md p-6 border border-2 border-[#DCA7A7]">
+            <div className="space-y-3">
+              {recentWinners.map((item, index) => (
+                <div
+                  key={item.rouletteId}
+                  className={`flex flex-col gap-1 p-4 rounded-lg w-full ${
+                    index % 2 === 1 ? 'bg-[#FFEDED]' : ''
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="text-2xl">🎁</span>
+                    <div className="flex flex-col gap-1 flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[18px] font-bold text-[#000000]">
+                          {item.reward}
+                        </span>
                       </div>
-                      <img src={boxData?.icon} alt="status" />
                     </div>
+                    {item.status === 'SUCCESS' && (
+                      <span className="ml-auto text-sm font-medium text-green-600 bg-green-100 px-2 py-1 rounded">
+                        완료
+                      </span>
+                    )}
+                    {(item.status === 'IN_PROGRESS' || item.status === null) && (
+                      <span className="ml-auto text-sm font-medium text-orange-600 bg-orange-100 px-2 py-1 rounded">
+                        진행 중
+                      </span>
+                    )}
+                    {item.status === 'FAILED' && (
+                      <span className="ml-auto text-sm font-medium text-red-600 bg-red-100 px-2 py-1 rounded">
+                        실패
+                      </span>
+                    )}
                   </div>
-                );
-              })}
+                  {item.deadline && (
+                    <div className="text-sm text-gray-600 pl-10">
+                      마감: {new Date(item.deadline).toLocaleDateString('ko-KR', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                      })}
+                    </div>
+                  )}
+                </div>
+              ))}
             </div>
           </div>
         </div>

@@ -104,8 +104,6 @@ const EditAlbumPage = () => {
         return toS3WebsiteUrl(photo.imageUrl);
       });
     });
-
-    console.log('✅ [EditAlbumPage] 최종 uploadedImages (Website Endpoint 적용):', images);
     return images;
   }, [photosData]);
 
