@@ -140,7 +140,7 @@ export default function PublicMapPage() {
     }
   };
 
-  const mapHeightClass = 'h-[calc(100vh-140px)]';
+  const mapHeightClass = 'h-[calc(100vh-200px)]';
 
   useEffect(() => {
     if (!selectedRegion && markers.length > 0) {

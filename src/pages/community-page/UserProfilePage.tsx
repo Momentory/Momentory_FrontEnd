@@ -1,223 +1,258 @@
-// src/pages/community-page/UserProfilePage.tsx
-
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 import {
   getUserProfile,
-  toggleFollowUser,
   getUserPosts,
+  toggleFollowUser,
+  // type CommunityPost,
 } from "../../api/community";
+import { initialCommunityPosts } from "./CommunityDummy";
 
 export default function UserProfilePage() {
   const navigate = useNavigate();
   const { userId } = useParams<{ userId: string }>();
   const numericUserId = Number(userId);
-
   const queryClient = useQueryClient();
 
-  /* ------------------------------- UI 상태 ------------------------------- */
-  const [activeTab, setActiveTab] = useState<"posts" | "albums">("posts");
-  const [backgroundImage, setBackgroundImage] = useState("/images/city.png");
-  const bgInputRef = useRef<HTMLInputElement | null>(null);
+  const [activeTab, setActiveTab] =
+    useState<"posts" | "albums" | "likes">("posts");
 
-  const handleBackgroundChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const imageUrl = URL.createObjectURL(file);
-      setBackgroundImage(imageUrl);
-    }
-  };
-
-  /* ------------------------------- API 호출 ------------------------------- */
-
-  // 사용자 프로필 조회
-  const {
-    data: userProfile,
-    isLoading: isProfileLoading,
-    error: profileError,
-  } = useQuery({
+  /* -------------------- API (Hooks) -------------------- */
+  const profileQuery = useQuery({
     queryKey: ["userProfile", numericUserId],
     queryFn: () => getUserProfile(numericUserId),
     enabled: !!numericUserId,
   });
 
-  // 사용자 게시물 조회
-  const {
-    data: userPosts,
-    isLoading: isPostsLoading,
-    error: postsError,
-  } = useQuery({
+  const postsQuery = useQuery({
     queryKey: ["userPosts", numericUserId],
     queryFn: () => getUserPosts(numericUserId),
     enabled: !!numericUserId,
   });
 
-  /* ------------------------------- 팔로우 ------------------------------- */
-
   const followMutation = useMutation({
     mutationFn: () => toggleFollowUser(numericUserId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["userProfile", numericUserId] });
-    },
-    onError: () => {
-      alert("팔로우 처리 중 오류가 발생했습니다.");
+      queryClient.invalidateQueries({
+        queryKey: ["userProfile", numericUserId],
+      });
     },
   });
 
-  /* ------------------------------ 로딩/에러 처리 ------------------------------ */
+  /* -------------------- 데이터 정리 -------------------- */
+  const dummyPosts = initialCommunityPosts.filter(
+    (p) => p.userId === numericUserId
+  );
 
-  const isLoading = isProfileLoading || isPostsLoading;
-  const isError = profileError || postsError;
+  const dummyProfile = {
+    memberId: numericUserId,
+    nickname:
+      dummyPosts[0]?.userNickname ??
+      profileQuery.data?.nickname ??
+      "알 수 없음",
+    profileImg: "/images/profile.png",
+    followerCount: 0,
+    followingCount: 0,
+    postCount: dummyPosts.length,
+    albumCount: 0,
+    isFollowing: false,
+  };
 
-  if (isLoading) {
-    return (
-      <div className="flex h-screen items-center justify-center">
-        로딩 중...
-      </div>
-    );
-  }
+  const userProfile =
+    !profileQuery.error && profileQuery.data
+      ? profileQuery.data
+      : dummyProfile;
 
-  if (isError || !userProfile) {
-    return (
-      <div className="flex h-screen items-center justify-center">
-        사용자 정보를 불러올 수 없습니다.
-      </div>
-    );
-  }
+  const userPosts =
+    !postsQuery.error &&
+      postsQuery.data &&
+      postsQuery.data.length > 0
+      ? postsQuery.data
+      : dummyPosts;
 
-  /* ------------------------------ 렌더링 ------------------------------ */
+  const defaultIntro =
+    "새로운 것과 낯선 곳에서의 새로운 발견을 즐깁니다.";
+  const defaultWebsite = "https://www.figma.com/domentory";
+
+  /* ============================================================== */
+  /* -------------------------- RENDER ----------------------------- */
+  /* ============================================================== */
 
   return (
-    <div className="w-full min-h-screen bg-[#F9FAFB] flex flex-col items-center">
-      {/* 헤더 */}
-      <header className="flex items-center justify-between bg-[#FF7070] text-white w-full max-w-[480px] px-5 py-3">
-        <button onClick={() => navigate(-1)}>
-          <ArrowLeft size={22} />
-        </button>
-      </header>
-
-      {/* 타이틀 */}
-      <div className="relative bg-white border-b border-gray-200 h-[55px] flex items-center justify-center w-full max-w-[480px] mt-5">
-        <img
-          src="/images/109618.png"
-          className="absolute left-[20px] w-[26px] h-[26px] cursor-pointer"
+    <div className="w-full min-h-screen bg-[#F9FAFB] flex flex-col items-center mt-[60px]">
+      {/* 공통헤더  */}
+      <div className="w-full max-w-[480px] bg-white h-[55px] border-b border-gray-200 flex items-center justify-center relative">
+        <button
           onClick={() => navigate(-1)}
-        />
-        <h1 className="text-[25px] font-semibold text-gray-800">
-          {userProfile.nickname}
-        </h1>
-      </div>
-
-      {/* 배경 이미지 */}
-      <div
-        className="relative w-full max-w-[480px] h-[180px] overflow-hidden cursor-pointer"
-        onClick={() => bgInputRef.current?.click()}
-      >
-        <img
-          src={backgroundImage}
-          className="absolute w-full h-full object-cover brightness-[0.5]"
-        />
-        <input
-          type="file"
-          accept="image/*"
-          ref={bgInputRef}
-          className="hidden"
-          onChange={handleBackgroundChange}
-        />
-      </div>
-
-      {/* 프로필 */}
-      <div className="w-full max-w-[480px] px-[15px] mt-[-35px] relative z-10 flex flex-col items-start">
-        <img
-          src={userProfile.profileImg || "/images/profile.png"}
-          className="w-[80px] h-[80px] rounded-full object-cover shadow-md bg-white"
-        />
-
-        <div className="flex items-center justify-between w-full mt-[10px] pr-4">
-          <h2 className="text-[17px] font-semibold text-gray-800">
-            {userProfile.nickname}
-          </h2>
-
-          <button
-            onClick={() => followMutation.mutate()}
-            disabled={followMutation.isPending}
-            className={`text-white text-[13px] px-4 py-[5px] rounded-full font-medium active:scale-95 transition ${
-              userProfile.isFollowing ? "bg-gray-400" : "bg-[#FF7070]"
-            }`}
-          >
-            {followMutation.isPending
-              ? "처리 중..."
-              : userProfile.isFollowing
-              ? "팔로잉"
-              : "팔로우"}
-          </button>
-        </div>
-
-        {/* 카운트 */}
-        <div className="flex items-center gap-6 mt-4">
-          <p className="text-[9px] text-gray-700">
-            <span className="font-semibold">{userProfile.followingCount}</span>{" "}
-            팔로잉
-          </p>
-          <p className="text-[9px] text-gray-700">
-            <span className="font-semibold">{userProfile.followerCount}</span>{" "}
-            팔로워
-          </p>
-        </div>
-      </div>
-
-      {/* 탭 */}
-      <div className="flex justify-center items-center gap-[120px] mt-[30px] mb-[2px]">
-        <button
-          onClick={() => setActiveTab("posts")}
-          className={`transition ${
-            activeTab === "posts" ? "opacity-100" : "opacity-40"
-          }`}
+          className="absolute left-5 flex items-center justify-center"
         >
-          <img src="/images/list.png" className="w-[25px] h-[25px]" />
+          <img
+            src="/images/109618.png"
+            className="w-[20px] h-[20px]"
+            alt="back"
+          />
         </button>
-
-        {/* 앨범은 Swagger에 없으므로 '빈 탭' 처리 */}
-        <button
-          onClick={() => setActiveTab("albums")}
-          className={`transition ${
-            activeTab === "albums" ? "opacity-100" : "opacity-40"
-          }`}
-        >
-          <img src="/images/mark.png" className="w-[25px] h-[25px]" />
-        </button>
+        <span className="text-[20px] font-semibold text-gray-900">
+          마이페이지
+        </span>
       </div>
 
-      {/* 탭 콘텐츠 */}
-      <div className="grid grid-cols-3 gap-[4px] mt-[20px] px-2 w-full max-w-[480px] mb-[80px]">
+      {/* 로딩 처리 */}
+      {profileQuery.isLoading || postsQuery.isLoading ? (
+        <div className="w-full h-[200px] flex items-center justify-center">
+          로딩 중...
+        </div>
+      ) : (
+        <>
+          {/* 상단 배경 */}
+          <div className="relative w-full max-w-[480px] h-[180px] overflow-hidden">
+            <img
+              src="/images/city.png"
+              className="absolute w-full h-full object-cover brightness-[0.5]"
+            />
+          </div>
 
-        {/* 게시글 */}
-        {activeTab === "posts" &&
-          (userPosts && userPosts.length > 0 ? (
-            userPosts.map((post: { postId: number; thumbnailUrl?: string; imageUrl?: string | null }) => (
-              <div key={post.postId} className="aspect-square">
-                <img
-                  src={post.thumbnailUrl || post.imageUrl || "/images/default.png"}
-                  className="w-full h-full object-cover rounded-[6px]"
-                />
-              </div>
-            ))
-          ) : (
-            <p className="col-span-3 text-center text-gray-500 mt-10">
-              게시물이 없습니다.
+          {/* 프로필 */}
+          <div className="w-full max-w-[480px] px-[15px] mt-[-35px] relative z-10">
+            <img
+              src={
+                !userProfile.profileImg ||
+                  userProfile.profileImg === "string"
+                  ? "/images/profile.png"
+                  : userProfile.profileImg
+              }
+              className="w-[80px] h-[80px] rounded-full bg-white object-cover shadow-md"
+            />
+
+            <div className="flex items-center justify-between w-full mt-[10px] pr-4">
+              <h2 className="text-[17px] font-semibold text-gray-800">
+                {userProfile.nickname}
+              </h2>
+
+              <button
+                onClick={() => followMutation.mutate()}
+                className={`text-white text-[13px] px-4 py-[5px] rounded-full font-medium ${userProfile.isFollowing
+                    ? "bg-gray-400"
+                    : "bg-[#FF7070]"
+                  }`}
+              >
+                {userProfile.isFollowing ? "팔로잉" : "팔로우"}
+              </button>
+            </div>
+
+            <p className="text-[13px] text-gray-700 mt-2">
+              {defaultIntro}
             </p>
-          ))}
 
-        {/* 앨범 (Swagger에 없음 → 항상 비어있다고 처리) */}
-        {activeTab === "albums" && (
-          <p className="col-span-3 text-center text-gray-500 mt-10">
-            앨범 기능은 준비 중입니다.
-          </p>
-        )}
-      </div>
+            <div className="flex items-center gap-2 mt-2">
+              <img
+                src="/images/link-icon.png"
+                className="w-[16px] h-[16px] rotate-45"
+              />
+              <a
+                href={defaultWebsite}
+                className="text-[13px] text-blue-600 underline"
+              >
+                {defaultWebsite}
+              </a>
+            </div>
+
+            <div className="flex items-center gap-6 mt-3 text-gray-700">
+              {/* 팔로잉 */}
+              <p
+                className="text-[12px] cursor-pointer"
+                onClick={() => navigate("/community/followings")}
+              >
+                <span className="font-semibold">
+                  {userProfile.followingCount}
+                </span>{" "}
+                팔로잉
+              </p>
+
+              {/* 팔로워 */}
+              <p
+                className="text-[12px] cursor-pointer"
+                onClick={() => navigate("/community/followers")}
+              >
+                <span className="font-semibold">
+                  {userProfile.followerCount}
+                </span>{" "}
+                팔로워
+              </p>
+            </div>
+
+          </div>
+
+          {/* 탭 */}
+          <div className="flex justify-center items-center gap-[100px] mt-[30px] mb-[5px]">
+            <button
+              onClick={() => setActiveTab("posts")}
+              className={
+                activeTab === "posts"
+                  ? "opacity-100"
+                  : "opacity-40"
+              }
+            >
+              <img src="/images/list.png" className="w-[25px] h-[25px]" />
+            </button>
+
+            <button
+              onClick={() => setActiveTab("albums")}
+              className={
+                activeTab === "albums"
+                  ? "opacity-100"
+                  : "opacity-40"
+              }
+            >
+              <img src="/images/mark.png" className="w-[25px] h-[25px]" />
+            </button>
+
+            <button
+              onClick={() => setActiveTab("likes")}
+              className={
+                activeTab === "likes"
+                  ? "opacity-100"
+                  : "opacity-40"
+              }
+            >
+              <img src="/images/Heart.png" className="w-[25px] h-[25px]" />
+            </button>
+          </div>
+
+          {/* 탭 콘텐츠 */}
+          <div className="grid grid-cols-3 gap-[4px] mt-[20px] px-2 w-full max-w-[480px] mb-[80px]">
+            {activeTab === "posts" &&
+              (userPosts.length > 0 ? (
+                userPosts.map((p: any) => (
+                  <div key={p.postId} className="aspect-square">
+                    <img
+                      src={p.imageUrl || "/images/default.png"}
+                      className="w-full h-full object-cover rounded-[6px]"
+                    />
+                  </div>
+                ))
+              ) : (
+                <p className="col-span-3 text-center text-gray-500 mt-10">
+                  게시물이 없습니다.
+                </p>
+              ))}
+
+            {activeTab === "albums" && (
+              <p className="col-span-3 text-center text-gray-500 mt-10">
+                앨범 기능은 준비 중입니다.
+              </p>
+            )}
+
+            {activeTab === "likes" && (
+              <p className="col-span-3 text-center text-gray-500 mt-10">
+                좋아요한 게시물 준비 중입니다.
+              </p>
+            )}
+          </div>
+        </>
+      )}
     </div>
   );
 }

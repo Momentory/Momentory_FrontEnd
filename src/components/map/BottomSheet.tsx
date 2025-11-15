@@ -1,6 +1,7 @@
 // 하단시트(드래그/토글) UI
 import React, { useCallback, useMemo, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ChevronRight } from 'lucide-react';
 import type { MapPhoto } from '../../types/map';
 import {
   useMyRegionPhotos,
@@ -155,12 +156,12 @@ export default function BottomSheet({
     (e: React.MouseEvent, index: number) => {
       e.stopPropagation();
       if (!regionName || regionPhotos.length === 0) return;
-      navigate('/all-my-photos/viewer', {
+
+      navigate('/all-my-photos', {
         state: {
           isPublic,
           regionName,
-          photos: regionPhotos,
-          startIndex: index,
+          initialPhotoIndex: index, // 선택된 사진 인덱스 전달
         },
       });
     },
@@ -257,7 +258,6 @@ export default function BottomSheet({
           }}
         />
       )}
-
       <div
         className="fixed left-1/2 -translate-x-1/2 w-full max-w-[480px] overflow-hidden rounded-t-2xl bg-white shadow-lg transition-all duration-300 z-50"
         style={{ height: `${height}px`, bottom: `${BOTTOM_BAR_HEIGHT}px` }}
@@ -285,13 +285,14 @@ export default function BottomSheet({
           {regionPhotos.length > 0 && (
             <button
               type="button"
-              className="text-sm font-medium text-[#FF7070] underline-offset-4 hover:underline"
+              className="flex items-center hover:opacity-80 transition-opacity"
+              style={{ color: '#C8B6B6' }}
               onClick={(e) => {
                 e.stopPropagation();
                 handleNavigateList();
               }}
             >
-              모두 보기
+              <ChevronRight className="w-5 h-5" />
             </button>
           )}
         </div>

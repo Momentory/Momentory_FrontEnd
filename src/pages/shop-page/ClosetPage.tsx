@@ -1,5 +1,6 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import html2canvas from 'html2canvas-pro';
 import DropdownHeader from '../../components/common/DropdownHeader';
 import StarIcon from '../../assets/icons/starIcon.svg?react';
 import ShareIcon from '../../assets/icons/albumShare.svg?react';
@@ -13,11 +14,13 @@ import useBottomSheet from '../../hooks/shop/useBottomSheet';
 import { useUserPoint, useCurrentCharacter, useMyItems, useShopItems } from '../../hooks/shop/useShopQueries';
 import { useEquipItem, useUnequipItem } from '../../hooks/shop/useEquipItem';
 import type { ItemCategory } from '../../types/shop';
+import { toS3WebsiteUrl } from '../../utils/s3';
 
 const ClosetPage = () => {
   const navigate = useNavigate();
   const [selectedCategory, setSelectedCategory] = useState<ItemCategory>('DECORATION');
   const { height, isExpanded, setHeight, setIsExpanded } = useBottomSheet();
+  const captureRef = useRef<HTMLDivElement>(null);
 
   const categoryDisplayMap: { [key in ItemCategory]: string } = {
     CLOTHING: '의상',
@@ -32,11 +35,23 @@ const ClosetPage = () => {
   const { data: shopItems = [] } = useShopItems(selectedCategory);
 
   const equipMutation = useEquipItem({
-    onError: (error) => console.error('아이템 착용 실패:', error),
+    onSuccess: () => {
+      console.log('아이템 착용 성공');
+    },
+    onError: (error) => {
+      console.error('아이템 착용 실패:', error);
+      alert(`아이템 착용에 실패했습니다: ${error.message || '알 수 없는 오류'}`);
+    },
   });
 
   const unequipMutation = useUnequipItem({
-    onError: (error) => console.error('아이템 해제 실패:', error),
+    onSuccess: () => {
+      console.log('아이템 해제 성공');
+    },
+    onError: (error) => {
+      console.error('아이템 해제 실패:', error);
+      alert(`아이템 해제에 실패했습니다: ${error.message || '알 수 없는 오류'}`);
+    },
   });
 
   const level = currentCharacter?.level || 1;
@@ -64,7 +79,7 @@ const ClosetPage = () => {
     const ownedAccessories = myItems.map(item => ({
       id: item.itemId,
       name: item.name,
-      icon: item.imageUrl,
+      icon: toS3WebsiteUrl(item.imageUrl),
       locked: false,
       type: item.category.toLowerCase()
     }));
@@ -74,9 +89,10 @@ const ClosetPage = () => {
       .map(item => ({
         id: item.itemId,
         name: item.name,
-        icon: item.imageUrl,
+        icon: toS3WebsiteUrl(item.imageUrl),
         locked: true,
-        type: item.category.toLowerCase()
+        type: item.category.toLowerCase(),
+        unlockLevel: item.unlockLevel
       }));
 
     return [...ownedAccessories, ...lockedAccessories];
@@ -92,7 +108,7 @@ const ClosetPage = () => {
       equippedItems.push({
         id: equipped.clothing.itemId,
         name: equipped.clothing.name,
-        icon: equipped.clothing.imageUrl,
+        icon: toS3WebsiteUrl(equipped.clothing.imageUrl),
         locked: false,
         type: 'clothing'
       });
@@ -101,7 +117,7 @@ const ClosetPage = () => {
       equippedItems.push({
         id: equipped.expression.itemId,
         name: equipped.expression.name,
-        icon: equipped.expression.imageUrl,
+        icon: toS3WebsiteUrl(equipped.expression.imageUrl),
         locked: false,
         type: 'expression'
       });
@@ -110,7 +126,7 @@ const ClosetPage = () => {
       equippedItems.push({
         id: equipped.effect.itemId,
         name: equipped.effect.name,
-        icon: equipped.effect.imageUrl,
+        icon: toS3WebsiteUrl(equipped.effect.imageUrl),
         locked: false,
         type: 'effect'
       });
@@ -119,7 +135,7 @@ const ClosetPage = () => {
       equippedItems.push({
         id: equipped.decoration.itemId,
         name: equipped.decoration.name,
-        icon: equipped.decoration.imageUrl,
+        icon: toS3WebsiteUrl(equipped.decoration.imageUrl),
         locked: false,
         type: 'decoration'
       });
@@ -134,26 +150,183 @@ const ClosetPage = () => {
 
   const handleAccessoryClick = (id: number) => {
     const accessory = accessories.find((acc) => acc.id === id);
-    if (!accessory || accessory.locked || !currentCharacter) return;
+    console.log('아이템 클릭:', { id, accessory, currentCharacter });
+
+    if (!accessory || accessory.locked || !currentCharacter) {
+      console.log('클릭 무시:', {
+        hasAccessory: !!accessory,
+        isLocked: accessory?.locked,
+        hasCharacter: !!currentCharacter
+      });
+      return;
+    }
+
+    // 의상이 착용되어 있는지 확인
+    const hasClothing = currentCharacter.equipped.clothing !== null;
+    const isClothing = accessory.type.toUpperCase() === 'CLOTHING';
+
+    // 의상이 착용된 상태에서 다른 카테고리 아이템 착용 시도 시 경고
+    if (hasClothing && !isClothing && !equippedAccessories.includes(id)) {
+      alert('의상을 착용한 상태에서는 다른 아이템을 착용할 수 없습니다.');
+      return;
+    }
+
+    // 다른 카테고리 아이템이 있는 상태에서 의상 착용 시도 시 경고
+    if (isClothing && !equippedAccessories.includes(id)) {
+      const hasOtherItems =
+        currentCharacter.equipped.expression !== null ||
+        currentCharacter.equipped.effect !== null ||
+        currentCharacter.equipped.decoration !== null;
+
+      if (hasOtherItems) {
+        alert('다른 아이템을 착용한 상태에서는 의상을 착용할 수 없습니다.');
+        return;
+      }
+    }
 
     if (equippedAccessories.includes(id)) {
+      console.log('아이템 해제 시도:', { characterId: currentCharacter.characterId, itemId: id });
       unequipMutation.mutate({ characterId: currentCharacter.characterId, itemId: id });
     } else {
       const categoryKey = accessory.type.toLowerCase() as keyof typeof currentCharacter.equipped;
       const currentEquippedItem = currentCharacter.equipped[categoryKey];
 
       if (currentEquippedItem) {
+        console.log('기존 아이템 해제 후 새 아이템 착용:', {
+          oldItemId: currentEquippedItem.itemId,
+          newItemId: id
+        });
         unequipMutation.mutate(
           { characterId: currentCharacter.characterId, itemId: currentEquippedItem.itemId },
           {
             onSuccess: () => {
+              console.log('기존 아이템 해제 완료, 새 아이템 착용 시작');
               equipMutation.mutate({ characterId: currentCharacter.characterId, itemId: id });
             },
           }
         );
       } else {
+        console.log('새 아이템 착용 시도:', { characterId: currentCharacter.characterId, itemId: id });
         equipMutation.mutate({ characterId: currentCharacter.characterId, itemId: id });
       }
+    }
+  };
+
+  const captureCharacter = async (): Promise<Blob | null> => {
+    try {
+      if (!captureRef.current) {
+        throw new Error('캡처 대상을 찾을 수 없습니다.');
+      }
+
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      const canvas = await html2canvas(captureRef.current, {
+        backgroundColor: '#ffffff',
+        scale: 2,
+        logging: false,
+        useCORS: true,
+        allowTaint: true,
+      });
+
+      if (canvas.width === 0 || canvas.height === 0) {
+        throw new Error(`캔버스 크기가 0입니다: ${canvas.width}x${canvas.height}`);
+      }
+
+      return new Promise((resolve, reject) => {
+        canvas.toBlob((blob) => {
+          if (blob && blob.size > 0) {
+            resolve(blob);
+          } else {
+            reject(new Error('Blob 생성 실패'));
+          }
+        }, 'image/png');
+      });
+    } catch (error) {
+      console.error('캡처 실패:', error);
+      return null;
+    }
+  };
+
+  const handleDownload = async () => {
+    const blob = await captureCharacter();
+    if (!blob) {
+      alert('이미지 다운로드에 실패했습니다.');
+      return;
+    }
+
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `momentory-character-${Date.now()}.png`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleShare = async () => {
+    const blob = await captureCharacter();
+    if (!blob) {
+      alert('이미지 공유에 실패했습니다.');
+      return;
+    }
+
+    const file = new File([blob], `momentory-character-${Date.now()}.png`, { type: 'image/png' });
+
+    if (navigator.share && navigator.canShare({ files: [file] })) {
+      try {
+        await navigator.share({
+          files: [file],
+          title: 'Momentory 캐릭터',
+          text: 'Momentory에서 꾸민 나만의 캐릭터!',
+        });
+      } catch (error) {
+        if ((error as Error).name !== 'AbortError') {
+          console.error('공유 실패:', error);
+          alert('공유에 실패했습니다.');
+        }
+      }
+    } else {
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `momentory-character-${Date.now()}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      alert('이미지가 다운로드되었습니다.\n갤러리에서 인스타그램 스토리에 업로드해주세요!');
+    }
+  };
+
+  const handleSelectCharacter = (characterType: 'CAT' | 'DOG') => {
+    // TODO: 캐릭터 변경 API 연결
+    console.log('캐릭터 변경:', characterType);
+    alert(`${characterType === 'CAT' ? '고양이' : '강아지'}로 변경됩니다.`);
+  };
+
+  const handleRemoveAll = async () => {
+    if (!currentCharacter) return;
+    const equipped = currentCharacter.equipped;
+    const itemsToUnequip = [];
+
+    if (equipped.clothing) itemsToUnequip.push(equipped.clothing.itemId);
+    if (equipped.expression) itemsToUnequip.push(equipped.expression.itemId);
+    if (equipped.effect) itemsToUnequip.push(equipped.effect.itemId);
+    if (equipped.decoration) itemsToUnequip.push(equipped.decoration.itemId);
+
+    if (itemsToUnequip.length === 0) {
+      alert('착용 중인 아이템이 없습니다.');
+      return;
+    }
+    try {
+      for (const itemId of itemsToUnequip) {
+        await unequipMutation.mutateAsync({ characterId: currentCharacter.characterId, itemId });
+      }
+      console.log('모든 아이템 해제 완료');
+    } catch (error) {
+      console.error('아이템 해제 실패:', error);
+      alert('아이템 해제에 실패했습니다.');
     }
   };
 
@@ -173,12 +346,15 @@ const ClosetPage = () => {
 
       <div className="flex-1 flex flex-col">
         <CharacterDisplay
+          ref={captureRef}
           level={level}
           point={point}
           gem={gem}
           equippedAccessories={equippedAccessories}
           accessories={allEquippedAccessories}
           characterImage={characterImage}
+          characterType={currentCharacter?.characterType}
+          bottomSheetHeight={height}
         />
 
       <div
@@ -190,7 +366,11 @@ const ClosetPage = () => {
           <StarIcon className="w-6 h-6 text-white" />
         </button>
         <div className="flex flex-row gap-4">
-        <button className="w-12 h-12 rounded-full bg-[#FF7070] flex items-center justify-center shadow-lg cursor-pointer transition-colors">
+        <button
+          className="w-12 h-12 rounded-full bg-[#FF7070] flex items-center justify-center shadow-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          onClick={handleDownload}
+          disabled={isExpanded}
+        >
           <svg
             className="text-white w-6 h-6"
             fill="none"
@@ -206,8 +386,9 @@ const ClosetPage = () => {
           </svg>
         </button>
         <button
-              className="flex h-12 w-12 items-center justify-center rounded-full border border-gray-200 bg-white shadow-md transition cursor-pointer"
-              onClick={()=> alert('공유 기능 추후 구현.')}
+              className="flex h-12 w-12 items-center justify-center rounded-full border border-gray-200 bg-white shadow-md transition disabled:opacity-50 disabled:cursor-not-allowed"
+              onClick={handleShare}
+              disabled={isExpanded}
             >
               <ShareIcon className="h-6 w-6 text-gray-700" />
             </button>
@@ -224,6 +405,8 @@ const ClosetPage = () => {
         equippedAccessories={equippedAccessories}
         onAccessoryClick={handleAccessoryClick}
         onCategoryChange={handleCategoryChange}
+        onSelectCharacter={handleSelectCharacter}
+        onRemoveAll={handleRemoveAll}
       />
       </div>
     </div>

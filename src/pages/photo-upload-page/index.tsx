@@ -33,12 +33,11 @@ export default function PhotoUploadPage() {
   const [isPrivate, setIsPrivate] = useState(false);
   const [markerColor, setMarkerColor] = useState('#FFB7B7');
   const [showColorPicker, setShowColorPicker] = useState(false);
-  const [markerLocation, setMarkerLocation] = useState({
-    address: '부천시 역곡동',
-    lat: 37.5665,
-    lng: 126.978,
-    cityName: '부천시',
-  });
+  const [markerLocation, setMarkerLocation] = useState<{
+    address: string;
+    lat: number;
+    lng: number;
+  } | null>(null);
   const [gpsCoords, setGpsCoords] = useState<{
     lat: number;
     lng: number;
@@ -153,26 +152,40 @@ export default function PhotoUploadPage() {
       return;
     }
 
-    // API 응답에서 받은 cityName을 직접 사용
+    // GPS 정보가 있을 때만 마커 추가
+    if (markerLocation) {
     const cityName = markerLocation.cityName;
     const position = gpsToMapPosition(markerLocation.lat, markerLocation.lng);
 
-    if (cityName) {
-      addMarker({
-        top: position.top,
-        left: position.left,
-        image: marker1,
-        location: cityName,
-        lat: markerLocation.lat,
-        lng: markerLocation.lng,
-        color: markerColor,
-      });
+      if (cityName) {
+        addMarker({
+          top: position.top,
+          left: position.left,
+          image: marker1,
+          location: cityName,
+          lat: markerLocation.lat,
+          lng: markerLocation.lng,
+          color: markerColor,
+        });
+      }
     }
 
     if (!uploadedInfo || isUploadingS3) {
       alert('이미지를 업로드하는 중입니다. 잠시 후 다시 시도해주세요.');
       return;
     }
+
+    console.log('Navigating to /photo-edit with state:', {
+      imageUrl: imageToSend,
+      uploadResult: uploadedInfo,
+      uploadContext: {
+        description,
+        isPrivate,
+        markerColor,
+        markerLocation,
+        cityName: markerLocation ? extractCityName(markerLocation.address) || '미확인' : '미확인',
+      },
+    });
 
     navigate('/photo-edit', {
       state: {
@@ -183,7 +196,7 @@ export default function PhotoUploadPage() {
           isPrivate,
           markerColor,
           markerLocation,
-          cityName: cityName || '미확인',
+          cityName: markerLocation ? extractCityName(markerLocation.address) || '미확인' : '미확인',
         },
       },
     });
@@ -324,6 +337,7 @@ export default function PhotoUploadPage() {
         hasDropdown={false}
         rightAction={
           <button
+            type="button"
             onClick={handleNext}
             disabled={isLocationFetching}
             className={`text-[15px] font-semibold ${

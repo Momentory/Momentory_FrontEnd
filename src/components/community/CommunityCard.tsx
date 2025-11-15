@@ -1,5 +1,6 @@
+// src/components/community/CommunityCard.tsx
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import {
   toggleLike,
   toggleScrap,
@@ -7,36 +8,40 @@ import {
 } from "../../api/community";
 
 interface CommunityCardProps {
-  post?: CommunityPost;   // 안전하게 optional 처리
+  post?: CommunityPost; // 안전하게 optional
   onUpdate?: (updatedPost: Partial<CommunityPost>) => void;
 }
 
 export default function CommunityCard({ post, onUpdate }: CommunityCardProps) {
   const navigate = useNavigate();
 
-  /* ----------------------- post 기본값 처리 (Hook 위반 방지) ----------------------- */
-  const safePost: CommunityPost = post ?? {
-    postId: 0,
-    userId: 0,
-    userNickname: "알 수 없음",
-    userProfileImageUrl: "/images/profile.png",
-    imageUrl: "/images/default.png",
-    regionName: "",
-    title: "",
-    content: "",
-    tags: [],
-    liked: false,
-    scrapStatus: false,
-    likeCount: 0,
-    commentCount: 0,
-    createdAt: new Date().toISOString(),
-  };
-
-  /* ----------------------- 이미지 안전 처리 ----------------------- */
-  const safeImage = (url?: string | null) =>
-    !url || url === "string" || url.trim() === "" || url.startsWith("blob:")
-      ? "/images/default.png"
-      : url;
+  /* ----------------------- 안전한 초기값 ----------------------- */
+  const safePost: CommunityPost = useMemo(
+    () => ({
+      postId: post?.postId ?? 0,
+      userId: post?.userId ?? 0,
+      userNickname: post?.userNickname ?? "알 수 없음",
+      userProfileImageUrl:
+        !post?.userProfileImageUrl ||
+          post.userProfileImageUrl === "string"
+          ? "/images/profile.png"
+          : post.userProfileImageUrl,
+      title: post?.title ?? "",
+      content: post?.content ?? "",
+      regionName: post?.regionName ?? "",
+      createdAt: post?.createdAt ?? "",
+      tags: post?.tags ?? [],
+      likeCount: post?.likeCount ?? 0,
+      commentCount: post?.commentCount ?? 0,
+      scrapStatus: post?.scrapStatus ?? false,
+      liked: post?.liked ?? false,
+      imageUrl:
+        !post?.imageUrl || post.imageUrl === "string"
+          ? "/images/default.png"
+          : post.imageUrl,
+    }),
+    [post]
+  );
 
   /* ----------------------- 상대 시간 계산 ----------------------- */
   const getRelativeTime = (dateString?: string) => {
@@ -53,13 +58,14 @@ export default function CommunityCard({ post, onUpdate }: CommunityCardProps) {
     return `${Math.floor(diff / 604800)}주 전`;
   };
 
-  /* ----------------------- 좋아요/스크랩 상태 (Hook 안전) ----------------------- */
+  /* ----------------------- 좋아요 / 스크랩 상태 ----------------------- */
   const [liked, setLiked] = useState<boolean>(safePost.liked ?? false);
-  const [scrapped, setScrapped] = useState<boolean>(safePost.scrapStatus ?? false);
-  const [likeCount, setLikeCount] = useState<number>(safePost.likeCount ?? 0);
-
-  /* ----------------------- post가 없으면 여기서 null 처리 ----------------------- */
-  if (!post) return null;
+  const [scrapped, setScrapped] = useState<boolean>(
+    safePost.scrapStatus ?? false
+  );
+  const [likeCount, setLikeCount] = useState<number>(
+    safePost.likeCount ?? 0
+  );
 
   /* ----------------------- 좋아요 토글 ----------------------- */
   const handleLike = async (e: any) => {
@@ -101,16 +107,16 @@ export default function CommunityCard({ post, onUpdate }: CommunityCardProps) {
     }
   };
 
+  /* ----------------------- 상세에 전달할 데이터 ----------------------- */
   const normalizedPost = {
     ...safePost,
     liked,
     scrapStatus: scrapped,
     likeCount,
     time: getRelativeTime(safePost.createdAt),
-    userProfileImageUrl: safeImage(safePost.userProfileImageUrl),
-    imageUrl: safeImage(safePost.imageUrl),
   };
 
+  /* ----------------------- 렌더링 ----------------------- */
   return (
     <div className="bg-white rounded-2xl shadow-md overflow-hidden border border-gray-200">
 
@@ -124,7 +130,7 @@ export default function CommunityCard({ post, onUpdate }: CommunityCardProps) {
       >
         <div className="flex items-center gap-3">
           <img
-            src="/images/profile.png"
+            src={safePost.userProfileImageUrl ?? "/images/profile.png"}
             className="w-10 h-10 rounded-full object-cover"
           />
           <div className="flex flex-col">
@@ -138,7 +144,7 @@ export default function CommunityCard({ post, onUpdate }: CommunityCardProps) {
         </div>
       </div>
 
-      {/* 이미지 클릭 → 상세 이동 */}
+      {/* 이미지 클릭 */}
       <div
         className="cursor-pointer active:opacity-80"
         onClick={() =>
@@ -148,7 +154,7 @@ export default function CommunityCard({ post, onUpdate }: CommunityCardProps) {
         }
       >
         <img
-          src={safeImage(safePost.imageUrl)}
+          src={safePost.imageUrl ?? "/images/default.png"}
           className="w-full h-[280px] object-cover"
         />
       </div>
@@ -156,7 +162,9 @@ export default function CommunityCard({ post, onUpdate }: CommunityCardProps) {
       {/* 본문 */}
       <div className="p-4">
         {safePost.regionName && (
-          <div className="text-[12px] text-black mb-1">📌 {safePost.regionName}</div>
+          <div className="text-[12px] text-black mb-1">
+            📌 {safePost.regionName}
+          </div>
         )}
 
         <h2 className="text-[15px] font-semibold text-gray-900 mb-2">
@@ -181,6 +189,8 @@ export default function CommunityCard({ post, onUpdate }: CommunityCardProps) {
 
         {/* 좋아요 / 댓글 / 스크랩 */}
         <div className="flex items-center justify-between text-[15px] text-gray-700">
+
+          {/* 좋아요 */}
           <div
             className="flex items-center gap-1 cursor-pointer active:scale-95 transition"
             onClick={handleLike}
@@ -189,11 +199,13 @@ export default function CommunityCard({ post, onUpdate }: CommunityCardProps) {
             <span>{likeCount}</span>
           </div>
 
+          {/* 댓글 */}
           <div className="flex items-center gap-1">
             <img src="/images/msg.png" className="w-4 h-4" />
             <span>{safePost.commentCount}</span>
           </div>
 
+          {/* 스크랩 */}
           <div
             className="flex items-center gap-1 cursor-pointer active:scale-95 transition"
             onClick={handleScrap}

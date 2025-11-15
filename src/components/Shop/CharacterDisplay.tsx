@@ -1,6 +1,8 @@
-import PointIcon from '../../assets/icons/pointIcon.svg?react';
+import { forwardRef } from 'react';
 import Bg from '../../assets/accessories/bgImg.svg';
-import GemIcon from '../../assets/icons/gemIcon.svg?react'
+import { useCharacterItems } from '../../hooks/shop/useCharacterItems';
+import CharacterInfo from './CharacterInfo';
+import CharacterItems from './CharacterItems';
 
 interface Accessory {
   id: number;
@@ -17,52 +19,77 @@ interface CharacterDisplayProps {
   equippedAccessories: number[];
   accessories: Accessory[];
   characterImage: string;
+  characterType?: string;
+  bottomSheetHeight?: number;
 }
 
-const CharacterDisplay = ({
+const CharacterDisplay = forwardRef<HTMLDivElement, CharacterDisplayProps>(({
   level,
   point,
   gem,
   equippedAccessories,
   accessories,
   characterImage,
-}: CharacterDisplayProps) => {
+  characterType,
+  bottomSheetHeight = 100,
+}, ref) => {
+  const {
+    clothingImageSrc,
+    effectImageSrc,
+    nofaceImageSrc,
+    expressionImageSrc,
+    effectAccessory,
+    expressionAccessory,
+  } = useCharacterItems(accessories, equippedAccessories, characterType);
+
   return (
-    <div className="relative flex-1 h-full overflow-hidden pt-[60px]">
-      <div className="absolute inset-0">
+    <>
+      <div className="fixed inset-0 max-w-[480px] mx-auto left-0 right-0 z-0">
         <img src={Bg} alt="background" className="w-full h-full object-cover" />
       </div>
 
-      <div className="fixed top-[116px] left-0 right-0 max-w-[480px] mx-auto px-4 py-3 flex justify-between items-center z-[60] bg-black/15">
-        <span className="text-lg font-bold text-black">Level {level}</span>
-        <div className="flex items-center gap-2">
-          <GemIcon className="w-6 h-6"/>
-          <span className="text-lg font-bold text-black">{gem}</span>
-          <PointIcon className="w-6 h-6" />
-          <span className="text-lg font-bold text-black">{point}</span>
-        </div>
-      </div>
+      <CharacterInfo level={level} point={point} gem={gem} />
 
-      <div className="absolute inset-0 flex items-center justify-center px-16">
-        <div className="relative w-full h-full">
-          <img src={characterImage} alt="character" className="w-full h-full object-contain" />
-          {equippedAccessories.map((id) => {
-            const acc = accessories.find((a) => a.id === id);
-            if (!acc) return null;
-            return (
-              <img
-                key={id}
-                src={acc.icon}
-                alt={acc.name}
-                className="absolute inset-0 w-full h-full object-contain pointer-events-none"
-              />
-            );
-          })}
+      <div
+        ref={ref}
+        className="fixed top-[116px] bottom-0 left-0 right-0 max-w-[480px] mx-auto z-10 transition-all duration-300 overflow-hidden bg-white"
+        style={{
+          bottom: `${bottomSheetHeight}px`,
+        }}
+      >
+        <div className="absolute inset-0 bg-white">
+          <img src={Bg} alt="background" className="w-full h-full object-cover" />
+        </div>
+        <div
+          className="absolute inset-0 flex items-end justify-center px-16"
+          style={{ paddingBottom: '32px' }}
+        >
+          <div className="relative w-full max-w-[300px] aspect-square">
+            {/* 의상 있으면 clothing 이미지, 표정 있으면 noface 이미지, 없으면 기본 캐릭터 */}
+            {clothingImageSrc ? (
+              <img src={clothingImageSrc} alt="character with clothing" className="w-full h-full object-contain" />
+            ) : nofaceImageSrc ? (
+              <img src={nofaceImageSrc} alt="character noface" className="w-full h-full object-contain" />
+            ) : (
+              <img src={characterImage} alt="character" className="w-full h-full object-contain" />
+            )}
+
+            <CharacterItems
+              effectImageSrc={effectImageSrc}
+              effectAccessory={effectAccessory}
+              expressionImageSrc={expressionImageSrc}
+              expressionAccessory={expressionAccessory}
+              equippedAccessories={equippedAccessories}
+              accessories={accessories}
+            />
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
-};
+});
+
+CharacterDisplay.displayName = 'CharacterDisplay';
 
 export default CharacterDisplay;
 

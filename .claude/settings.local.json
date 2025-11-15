@@ -6,6 +6,14 @@
       "Bash(python analyze_svg.py:*)",
       "Bash(dir \"C:\\Users\\haeun\\OneDrive\\Desktop\\FEProject\\Momentory_FrontEnd\\src\\utils\")",
       "Bash(dir:*)"
+      "Bash(npm run dev:*)",
+      "Bash(npm uninstall:*)",
+      "Bash(npm install:*)",
+      "Bash(pnpm build:*)",
+      "Bash(pnpm install:*)",
+      "Bash(git add:*)",
+      "Bash(pnpm remove:*)",
+      "Bash(pnpm dev)"
     ],
     "deny": [],
     "ask": []

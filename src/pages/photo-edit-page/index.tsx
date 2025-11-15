@@ -18,7 +18,7 @@ type UploadContext = {
     address: string;
     lat: number;
     lng: number;
-  };
+  } | null;
   cityName: string;
 };
 

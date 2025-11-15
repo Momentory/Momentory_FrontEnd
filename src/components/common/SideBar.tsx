@@ -25,7 +25,6 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
   const [email, setEmail] = useState("example@email.com");
   const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
 
-  // 프로필 정보 조회
   useEffect(() => {
     if (isOpen) {
       const fetchProfile = async () => {
@@ -50,7 +49,7 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
     try {
       await logout();
       alert("로그아웃되었습니다.");
-      navigate("/auth/login");
+      navigate("/login");
     } catch (error) {
       console.error("로그아웃 실패:", error);
       alert("로그아웃 중 오류가 발생했습니다.");
@@ -63,12 +62,12 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
     <>
       <div
         onClick={onClose}
-        className={`fixed inset-0 bg-stone-700/60 z-40 transition-opacity duration-300 ${isOpen ? "opacity-100 visible" : "opacity-0 invisible"
+        className={`fixed inset-0 bg-stone-700/60 z-[9999] transition-opacity duration-300 ${isOpen ? "opacity-100 visible" : "opacity-0 invisible"
           }`}
       ></div>
 
       <aside
-        className={`fixed top-0 left-0 h-screen w-[280px] max-w-[80vw] bg-white shadow-lg z-50 transition-transform duration-300 ease-in-out flex flex-col
+        className={`fixed top-0 left-0 h-screen w-[300px] max-w-[80vw] bg-white shadow-lg z-[10000] transition-transform duration-300 ease-in-out flex flex-col
         ${isOpen ? "translate-x-0" : "-translate-x-full"}`}
       >
         <div className="bg-[#FF7070] text-white px-5 py-6">

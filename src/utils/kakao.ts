@@ -29,9 +29,28 @@ export async function getKakao(): Promise<typeof window.Kakao> {
           reject(new Error('Kakao JavaScript 키가 설정되지 않았습니다.'));
           return;
         }
-        if (!window.Kakao?.isInitialized?.()) {
-          window.Kakao.init(key);
+
+        // SDK가 로드되었는지 확인
+        if (!window.Kakao) {
+          reject(new Error('카카오 SDK가 로드되지 않았습니다.'));
+          return;
         }
+
+        // 초기화되지 않았거나 다른 키로 초기화된 경우 재초기화
+        if (!window.Kakao.isInitialized()) {
+          try {
+            window.Kakao.init(key);
+            // 초기화 후 다시 확인
+            if (!window.Kakao.isInitialized()) {
+              reject(new Error('카카오 SDK 초기화에 실패했습니다. JavaScript 키를 확인해주세요.'));
+              return;
+            }
+          } catch (initError) {
+            reject(new Error(`카카오 SDK 초기화 중 오류 발생: ${initError}`));
+            return;
+          }
+        }
+
         resolve(window.Kakao);
       };
 

@@ -143,7 +143,7 @@ export default function MyMapPage() {
     }
   };
 
-  const mapHeightClass = 'h-[calc(100vh-140px)]';
+  const mapHeightClass = 'h-[calc(100vh-200px)]';
 
   return (
     <div className="relative flex justify-center items-center bg-gray-50 font-Pretendard">

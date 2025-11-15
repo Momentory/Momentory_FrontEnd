@@ -9,7 +9,7 @@ export type UploadCtx = {
     address: string;
     lat: number;
     lng: number;
-  };
+  } | null;
   cityName: string;
 };
 
