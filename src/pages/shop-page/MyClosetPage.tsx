@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect, useCallback } from 'react';
 import DropdownHeader from '../../components/common/DropdownHeader';
 import WardrobeCard from '../../components/Shop/WardrobeCard';
 import AddWardrobeCard from '../../components/Shop/AddWardrobeCard';
+import WardrobeCardSkeleton from '../../components/Shop/WardrobeCardSkeleton';
 import { useCurrentCharacter } from '../../hooks/shop/useShopQueries';
 import { useWardrobeList } from '../../hooks/shop/useWardrobeQueries';
 import { useSaveWardrobe, useApplyWardrobe } from '../../hooks/shop/useWardrobeMutations';
@@ -110,9 +111,11 @@ const MyClosetPage = () => {
 
       <main className="grid grid-cols-2 gap-4 p-4 pb-40 pt-[140px]">
         {isLoading ? (
-          <div className="col-span-2 flex items-center justify-center py-20">
-            <p className="text-gray-500">로딩중...</p>
-          </div>
+          <>
+            {Array.from({ length: 4 }).map((_, index) => (
+              <WardrobeCardSkeleton key={index} />
+            ))}
+          </>
         ) : (
           <>
             {wardrobes.map((wardrobe) => (

@@ -124,8 +124,6 @@ const ShopPage = () => {
     purchaseMutation.mutate(selectedItem.id);
   };
 
-
-  // 캐릭터에 착용된 모든 아이템 정보 (모든 카테고리)
   const allEquippedAccessories = useMemo(() => {
     if (!currentCharacter) return [];
     const equipped = currentCharacter.equipped;
@@ -208,23 +206,23 @@ const ShopPage = () => {
         style={{ bottom: `${height + 16}px` }}
       >
         <button
-          className="w-12 h-12 rounded-full bg-[#FF7070] flex items-center justify-center shadow-lg cursor-pointer transition-colors"
+          className="w-14 h-14 rounded-full bg-[#FF7070] flex items-center justify-center shadow-lg cursor-pointer transition-colors"
           onClick={() => navigate('/my-closet')}
         >
-          <StarIcon className="w-6 h-6 text-white" />
+          <StarIcon className="w-8 h-8 text-white" />
         </button>
         <div className="flex flex-row gap-4">
           <button
-            className="w-12 h-12 rounded-full bg-[#FF7070] flex items-center justify-center shadow-lg cursor-pointer transition-colors hover:bg-[#FF5555]"
+            className="w-14 h-14 rounded-full bg-[#FF7070] flex items-center justify-center shadow-lg cursor-pointer transition-colors hover:bg-[#FF5555]"
             onClick={() => navigate('new')}
           >
-            <RecentIcon className="w-6 h-6" />
+            <RecentIcon className="w-8 h-8" />
           </button>
           <button
-            className="flex h-12 w-12 items-center justify-center rounded-full border border-gray-200 bg-white shadow-md transition cursor-pointer"
+            className="flex w-14 h-14 items-center justify-center rounded-full border border-gray-200 bg-white shadow-md transition cursor-pointer"
             onClick={() => navigate('event')}
           >
-            <EventIcon className="h-6 w-6" />
+            <EventIcon className="w-8 h-8 " />
           </button>
         </div>
       </div>
@@ -241,6 +239,7 @@ const ShopPage = () => {
         onAccessoryClick={handleAccessoryClick}
         userPoints={point}
         onCategoryChange={handleCategoryChange}
+        isLoading={isLoading}
       />
 
       {selectedItem && (

@@ -25,6 +25,7 @@ export interface BottomSheetProps {
   onCategoryChange?: (category: string) => void;
   onSelectCharacter?: (characterType: 'CAT' | 'DOG') => void;
   onRemoveAll?: () => void;
+  isLoading?: boolean;
 }
 
 export default function BottomSheet({
@@ -39,15 +40,18 @@ export default function BottomSheet({
   onCategoryChange,
   onSelectCharacter,
   onRemoveAll,
+  isLoading = false,
 }: BottomSheetProps) {
   const [isDragging, setIsDragging] = React.useState(false);
   const [hasMoved, setHasMoved] = React.useState(false);
   const [hoveredItem, setHoveredItem] = React.useState<number | null>(null);
+  const [tooltipPosition, setTooltipPosition] = React.useState<{ top: number; left: number } | null>(null);
 
   React.useEffect(() => {
     if (hoveredItem !== null) {
       const timer = setTimeout(() => {
         setHoveredItem(null);
+        setTooltipPosition(null);
       }, 3000);
       return () => clearTimeout(timer);
     }
@@ -170,55 +174,21 @@ export default function BottomSheet({
 
 
   return (
-    <div
-      className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] bg-white rounded-t-2xl shadow-lg z-[500] overflow-hidden"
-      style={{
-        height: `${height}px`,
-        transition: isDragging ? 'none' : 'height 0.3s ease-out',
-      }}
-    >
-      <div
-        className="cursor-grab active:cursor-grabbing select-none py-4"
-        onMouseDown={handleMouseDown}
-        onTouchStart={handleTouchStart}
-      >
-        <div className="w-20 h-1 bg-[#E2E2E2] rounded-full mx-auto" />
-      </div>
-
-      <div>
-        <div className="flex justify-between items-center px-6 pb-4">
-          <CategoryDropdown
-            selectedCategory={selectedCategory}
-            onCategoryChange={onCategoryChange}
-          />
-
-          <div className="flex items-center gap-2">
-            <CharacterSelectButton onSelectCharacter={onSelectCharacter} />
-            {onRemoveAll && (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onRemoveAll();
-                }}
-                onMouseDown={(e) => e.stopPropagation()}
-                onTouchStart={(e) => e.stopPropagation()}
-                className="flex items-center justify-center w-10 h-10 cursor-pointer"
-                aria-label="모든 아이템 벗기"
-              >
-                <RemoveIcon className="w-full h-full" />
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {hoveredItem && (
-        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 px-4 py-3 bg-black/90 text-white text-sm rounded-xl whitespace-nowrap z-[9999] shadow-xl max-w-[90%]">
-          <div className="font-bold text-base mb-1">
+    <>
+      {hoveredItem && tooltipPosition && (
+        <div
+          className="fixed px-4 py-3 bg-white text-sm rounded-2xl shadow-[3px_4px_4px_0px_rgba(0,0,0,0.25)] border-2 border-[#838383] whitespace-nowrap z-[9999] max-w-[90%]"
+          style={{
+            top: `${tooltipPosition.top}px`,
+            left: `${tooltipPosition.left}px`,
+            transform: 'translateX(-50%)',
+          }}
+        >
+          <div className="font-bold text-base mb-1 text-black">
             {accessories.find(a => a.id === hoveredItem)?.name}
           </div>
           {accessories.find(a => a.id === hoveredItem)?.unlockLevel && (
-            <div className="text-gray-300 text-xs">
+            <div className="text-gray-600 text-xs">
               Lv.{accessories.find(a => a.id === hoveredItem)?.unlockLevel} 일 때 획득할 수 있어요
             </div>
           )}
@@ -226,52 +196,113 @@ export default function BottomSheet({
       )}
 
       <div
+        className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] bg-white rounded-t-2xl shadow-lg z-[500] overflow-hidden"
+        style={{
+          height: `${height}px`,
+          transition: isDragging ? 'none' : 'height 0.3s ease-out',
+        }}
+      >
+        <div
+          className="cursor-grab active:cursor-grabbing select-none py-4"
+          onMouseDown={handleMouseDown}
+          onTouchStart={handleTouchStart}
+        >
+          <div className="w-20 h-1 bg-[#E2E2E2] rounded-full mx-auto" />
+        </div>
+
+        <div>
+          <div className="flex justify-between items-center px-6 pb-4">
+            <CategoryDropdown
+              selectedCategory={selectedCategory}
+              onCategoryChange={onCategoryChange}
+            />
+
+            <div className="flex items-center gap-2">
+              <CharacterSelectButton onSelectCharacter={onSelectCharacter} />
+              {onRemoveAll && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onRemoveAll();
+                  }}
+                  onMouseDown={(e) => e.stopPropagation()}
+                  onTouchStart={(e) => e.stopPropagation()}
+                  className="flex items-center justify-center w-10 h-10 cursor-pointer"
+                  aria-label="모든 아이템 벗기"
+                >
+                  <RemoveIcon className="w-full h-full" />
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+
+      <div
         className="px-6 pb-6 overflow-y-auto"
         style={{
           maxHeight: `${height - 120}px`
         }}
       >
-        <div className="grid grid-cols-4 gap-3">
-          {accessories.map((accessory) => {
-            const isEquipped = equippedAccessories.includes(accessory.id);
-            return (
-              <div
-                key={accessory.id}
-                className="relative"
-              >
-                <button
-                  onClick={() => {
-                    if (accessory.locked) {
-                      setHoveredItem(hoveredItem === accessory.id ? null : accessory.id);
-                    } else {
-                      onAccessoryClick(accessory.id);
-                    }
-                  }}
-                  className={`aspect-square w-full flex items-center justify-center rounded-xl transition-all relative overflow-hidden ${
-                    accessory.locked
-                      ? 'bg-white border-2 border-gray-300 cursor-pointer'
-                      : isEquipped
-                      ? 'bg-white border-2 border-[#FF7070]'
-                      : 'bg-white border-2 border-black'
-                  }`}
+        {isLoading ? (
+          <div className="grid grid-cols-4 gap-3">
+            {Array.from({ length: 8 }).map((_, index) => (
+              <div key={index} className="aspect-square w-full bg-gray-200 rounded-xl animate-pulse" />
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-4 gap-3">
+            {accessories.map((accessory) => {
+              const isEquipped = equippedAccessories.includes(accessory.id);
+              return (
+                <div
+                  key={accessory.id}
+                  className="relative"
                 >
-                  {accessory.locked ? (
-                    <div className="flex items-center justify-center">
-                      <LockIcon className="w-8 h-8 text-gray-400" />
-                    </div>
-                  ) : (
-                    <img
-                      src={accessory.icon}
-                      alt={accessory.name}
-                      className="max-w-[80%] max-h-[80%] object-contain"
-                    />
-                  )}
-                </button>
-              </div>
-            );
-          })}
-        </div>
+                  <button
+                    onClick={(e) => {
+                      if (accessory.locked) {
+                        if (hoveredItem === accessory.id) {
+                          setHoveredItem(null);
+                          setTooltipPosition(null);
+                        } else {
+                          const rect = e.currentTarget.getBoundingClientRect();
+                          setTooltipPosition({
+                            top: rect.bottom + 8,
+                            left: rect.left + rect.width / 2,
+                          });
+                          setHoveredItem(accessory.id);
+                        }
+                      } else {
+                        onAccessoryClick(accessory.id);
+                      }
+                    }}
+                    className={`aspect-square w-full flex items-center justify-center rounded-xl transition-all relative overflow-hidden ${
+                      accessory.locked
+                        ? 'bg-white border-2 border-gray-300 cursor-pointer'
+                        : isEquipped
+                        ? 'bg-white border-2 border-[#FF7070]'
+                        : 'bg-white border-2 border-black'
+                    }`}
+                  >
+                    {accessory.locked ? (
+                      <div className="flex items-center justify-center">
+                        <LockIcon className="w-8 h-8 text-gray-400" />
+                      </div>
+                    ) : (
+                      <img
+                        src={accessory.icon}
+                        alt={accessory.name}
+                        className="max-w-[80%] max-h-[80%] object-contain"
+                      />
+                    )}
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
-    </div>
+      </div>
+    </>
   );
 }
