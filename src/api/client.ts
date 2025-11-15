@@ -29,6 +29,7 @@ const noAuthUrls = [
   "/api/auth/send-email",
   "/api/auth/verify-email",
   "/api/auth/check-email",
+  "/api/auth/check-email-verified",
   "/api/auth/check-nickname",
   "/api/auth/kakao/callback",
   "/api/auth/reissue",
