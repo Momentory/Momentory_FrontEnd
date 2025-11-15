@@ -177,10 +177,10 @@ export default function CommunityPage() {
       <header className="flex items-center justify-between bg-[#FF7070] text-white px-3 py-3">
         <div className="flex items-center gap-3">
           <img src="/images/menuIcon.png" className="w-[22px] h-[22px]" />
-          <img src="/images/notificationIcon.png" className="w-[20px] h-[20px]" />
+          <img src="/images/notificationIcon.png" className="w-[22px] h-[22px]" />
         </div>
 
-        <div className="flex items-center gap-1 bg-white text-[#FF7070] px-3 py-[6px] rounded-full">
+        <div className="flex items-center gap-1 bg-white text-[#FF7070] px-3 py-[6px] ">
           <img src="/images/User.png" className="w-5 h-5" />
           <span className="text-[13px] font-medium">홍홍홍</span>
         </div>
