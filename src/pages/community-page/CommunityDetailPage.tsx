@@ -82,7 +82,7 @@ export default function CommunityDetailPage() {
           setLikeCount(initialPost.likeCount ?? 0);
         }
       } catch (err) {
-        console.error("❌ 상세 불러오기 오류:", err);
+        console.error("상세 불러오기 오류:", err);
       }
     };
 
@@ -101,7 +101,7 @@ export default function CommunityDetailPage() {
 
         setComments(list);
       } catch (err) {
-        console.error("❌ 댓글 불러오기 실패:", err);
+        console.error("댓글 불러오기 실패:", err);
       }
     };
 
@@ -159,7 +159,7 @@ export default function CommunityDetailPage() {
       setEditCommentId(null);
       setEditContent("");
     } catch (err) {
-      console.error("❌ 댓글 수정 실패:", err);
+      console.error("댓글 수정 실패:", err);
     }
   };
 
@@ -182,7 +182,7 @@ export default function CommunityDetailPage() {
         return newCount;
       });
     } catch (err) {
-      console.error("❌ 좋아요 토글 실패:", err);
+      console.error("좋아요 토글 실패:", err);
     }
   };
 
@@ -198,7 +198,7 @@ export default function CommunityDetailPage() {
         scrapped: !scrapped,
       }));
     } catch (err) {
-      console.error("❌ 스크랩 토글 실패:", err);
+      console.error("스크랩 토글 실패:", err);
     }
   };
 
@@ -211,7 +211,7 @@ export default function CommunityDetailPage() {
       alert("게시글 삭제됨");
       navigate("/community");
     } catch (err) {
-      console.error("❌ 삭제 실패:", err);
+      console.error(" 삭제 실패:", err);
       alert("삭제 실패");
     }
   };

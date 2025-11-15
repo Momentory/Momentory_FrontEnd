@@ -126,18 +126,18 @@ export const deletePost = async (postId: number) => {
     const res = await api.delete(`/api/community/posts/${postId}`);
     return res.data?.result;
   } catch (err: any) {
-    console.error(`❌ 게시글 삭제 실패(postId=${postId})`, err);
+    console.error(`게시글 삭제 실패(postId=${postId})`, err);
 
-    // 🔥 추가: 실제 요청 URL 출력 (여기가 제일 중요함)
+    //  실제 요청 URL 출력 
     if (err.config) {
-      console.log("📌 실제 요청 URL:", err.config.url);
-      console.log("📌 요청 method:", err.config.method);
+      console.log(" 실제 요청 URL:", err.config.url);
+      console.log(" 요청 method:", err.config.method);
     }
 
-    // 🔥 추가: 백엔드에서 준 에러 메시지 출력
+    // 백엔드에서 준 에러 메시지 출력
     if (err.response) {
-      console.log("📌 서버 응답:", err.response.data);
-      console.log("📌 status:", err.response.status);
+      console.log(" 서버 응답:", err.response.data);
+      console.log(" status:", err.response.status);
     }
 
     throw err;
@@ -265,14 +265,14 @@ export interface UserProfile {
   isFollowing: boolean;
 }
 
-/* ------------------------------ 1) 사용자 프로필 조회 ------------------------------ */
+/* ------------------------------ 사용자 프로필 조회 ------------------------------ */
 /* GET /api/community/users/{userId}/info */
 export const getUserProfile = async (userId: number): Promise<UserProfile> => {
   try {
     const res = await api.get(`/api/community/users/${userId}/info`);
     const data = res.data?.result;
 
-    // ⭐ 데이터 안전 처리
+    // 데이터 안전 처리
     return (
       data ?? {
         memberId: userId,
@@ -301,7 +301,7 @@ export const getUserProfile = async (userId: number): Promise<UserProfile> => {
   }
 };
 
-/* ------------------------------ 2) 팔로우 / 언팔로우 토글 ------------------------------ */
+/* ------------------------------ 팔로우 / 언팔로우 토글 ------------------------------ */
 /* POST /api/community/follow/{userId} */
 export const toggleFollowUser = async (userId: number) => {
   try {
@@ -313,7 +313,7 @@ export const toggleFollowUser = async (userId: number) => {
   }
 };
 
-/* ------------------------------ 3) 내 팔로워 목록 조회 ------------------------------ */
+/* ----------------------------- 내 팔로워 목록 조회 ------------------------------ */
 /* GET /api/community/followers/me */
 export const getFollowers = async () => {
   try {
@@ -325,7 +325,7 @@ export const getFollowers = async () => {
   }
 };
 
-/* ------------------------------ 4) 내 팔로잉 목록 조회 ------------------------------ */
+/* ------------------------------  내 팔로잉 목록 조회 ------------------------------ */
 /* GET /api/community/followings/me */
 export const getFollowings = async () => {
   try {
@@ -372,9 +372,7 @@ export const getMyScraps = async () => {
 };
 
 /* -------------------------------------------------------------------------- */
-/*                                📌 추가된 부분                                */
-/* -------------------------------------------------------------------------- */
-/*                    ⭐ 특정 사용자 게시글 목록 조회 API ⭐                    */
+/*                     특정 사용자 게시글 목록 조회 API                   */
 /* -------------------------------------------------------------------------- */
 
 export const getUserPosts = async (userId: number) => {

@@ -180,14 +180,14 @@ export default function CommunityWritePage() {
     let imageName = editPost?.imageName || "";
 
     try {
-      // 1) 새 이미지 업로드가 있으면 S3 업로드
+      // 새 이미지 업로드가 있으면 S3 업로드
       if (imageFile) {
         const uploaded = await uploadFile(imageFile);
         imageUrl = uploaded.result.imageUrl;
         imageName = uploaded.result.imageName;
       }
 
-      // 2) 공통 payload
+      //  공통 payload
       const payload = {
         title,
         content,
@@ -218,11 +218,6 @@ export default function CommunityWritePage() {
       const res = await postCommunity(payload);
 
       alert("게시글이 등록되었습니다!");
-
-      // 백엔드가 생성된 postId 를 준다면 여기서 꺼내서 상세로 이동해도 됨
-      // const newId = res.data?.result?.postId;
-      // if (newId) navigate(`/community/${newId}`);
-      // else navigate("/community");
 
       navigate("/community", {
         state: {
