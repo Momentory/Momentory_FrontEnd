@@ -17,7 +17,7 @@ import useBottomSheet from '../../hooks/map/useBottomSheet';
 import { captureMap } from '../../utils/screenshot';
 import { dataUrlToFile } from '../../utils/image';
 import { uploadFile } from '../../api/S3';
-import { gpsToMapPosition } from '../../utils/mapCoordinates';
+import { getRegionMapPosition, REGION_REPRESENTATIVE_COORDS } from '../../utils/mapCoordinates';
 import type { Marker } from '../../types/map';
 import { useMyMapColors, useMyMapLatestPhotos } from '../../hooks/map/useMap';
 
@@ -30,6 +30,7 @@ export default function MyMapPage() {
   const navigate = useNavigate();
   const [isCapturing, setIsCapturing] = useState(false);
   const [selectedRegion, setSelectedRegion] = useState<string>('');
+  const [showRouletteTooltip, setShowRouletteTooltip] = useState(false);
 
   const { data: colorMap } = useMyMapColors();
 
@@ -50,18 +51,16 @@ export default function MyMapPage() {
           return acc;
         }
 
-        const { latitude, longitude } = photo;
+        // 지역명으로 지도 상의 정확한 위치 가져오기
+        const position = getRegionMapPosition(regionName);
 
-        if (
-          typeof latitude !== 'number' ||
-          Number.isNaN(latitude) ||
-          typeof longitude !== 'number' ||
-          Number.isNaN(longitude)
-        ) {
+        if (!position) {
+          console.warn(`${regionName}의 지도 위치를 찾을 수 없습니다.`);
           return acc;
         }
 
-        const position = gpsToMapPosition(latitude, longitude);
+        // GPS 좌표는 대표 좌표 사용 (백엔드 통신용)
+        const coords = REGION_REPRESENTATIVE_COORDS[regionName];
         const icon = markerIcons[index % markerIcons.length];
 
         acc.push({
@@ -70,8 +69,8 @@ export default function MyMapPage() {
           left: position.left,
           image: icon,
           location: regionName,
-          lat: latitude,
-          lng: longitude,
+          lat: coords?.lat || 37.5,
+          lng: coords?.lng || 127.0,
           color: colorMap?.[regionName],
           photo,
         });
@@ -88,6 +87,7 @@ export default function MyMapPage() {
     originPosRef,
     containerRef,
     scale,
+    isPinching,
     zoomIn: zoomInMarker, // alias 사용
     zoomOut: zoomOutMarker, // alias 사용
     handleWheel,
@@ -109,6 +109,14 @@ export default function MyMapPage() {
       setSelectedRegion(markers[0].location ?? '');
     }
   }, [markers, selectedRegion]);
+
+  const handleRouletteClick = () => {
+    if (!showRouletteTooltip) {
+      setShowRouletteTooltip(true);
+    } else {
+      navigate('/roulette');
+    }
+  };
 
   const handleShareClick = async () => {
     try {
@@ -149,24 +157,32 @@ export default function MyMapPage() {
           rightAction={
             <div className="relative">
               <button
-                className="cursor-pointer relative translate-y-0.5"
-                onClick={() => navigate('/roulette')}
+                className="cursor-pointer relative"
+                onClick={handleRouletteClick}
               >
                 <RouletteIcon className="w-10 h-10" />
               </button>
-              <div className="absolute right-0 top-full mt-2 w-[140px] bg-white text-[#AE8D8D] text-xs font-bold border border-[#FF7070] px-3 py-2 rounded-lg z-30 animate-[fadeIn_0.2s_ease-out] text-center leading-relaxed">
-                아직 방문하지 않은
-                <br />
-                지역이 있다면?
-                <br />
-                룰렛으로 골라봐요~!
-                <div className="absolute -top-2 right-4">
-                  <div className="w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-b-8 border-b-[#FF7070]"></div>
-                  <div className="absolute top-px left-1/2 -translate-x-1/2">
-                    <div className="w-0 h-0 border-l-[5px] border-l-transparent border-r-[5px] border-r-transparent border-b-[7px] border-b-white"></div>
+              {showRouletteTooltip && (
+                <div className="absolute right-0 top-full mt-2 w-[140px] bg-white text-[#AE8D8D] text-xs font-bold border border-[#FF7070] px-3 py-2 rounded-lg z-30 animate-[fadeIn_0.2s_ease-out] text-center leading-relaxed">
+                  아직 방문하지 않은
+                  <br />
+                  지역이 있다면?
+                  <br />
+                  룰렛으로 골라봐요~!
+                  <button
+                    onClick={() => navigate('/roulette')}
+                    className="mt-2 w-full bg-[#FF7070] text-white text-xs font-bold py-1.5 px-3 rounded-md hover:bg-[#ff5555] transition-colors"
+                  >
+                    룰렛 돌리러 가기!
+                  </button>
+                  <div className="absolute -top-2 right-4">
+                    <div className="w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-b-8 border-b-[#FF7070]"></div>
+                    <div className="absolute top-px left-1/2 -translate-x-1/2">
+                      <div className="w-0 h-0 border-l-[5px] border-l-transparent border-r-[5px] border-r-transparent border-b-[7px] border-b-white"></div>
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
             </div>
           }
         />
@@ -179,6 +195,8 @@ export default function MyMapPage() {
           originPosRef={originPosRef}
           containerRef={containerRef}
           scale={scale}
+          isPinching={isPinching}
+          colorMap={colorMap}
           zoomInMarker={zoomInMarker}
           zoomOutMarker={zoomOutMarker}
           handleWheel={handleWheel}
@@ -208,7 +226,7 @@ export default function MyMapPage() {
           className={`absolute right-4 w-14 h-14 shadow-lg z-20 transition-all duration-300 ${
             isCapturing ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105'
           }`}
-          style={{ bottom: `${height + 16}px` }}
+          style={{ bottom: `${height + 16 + 80}px` }}
         >
           <img src={shareButton} alt="공유" />
         </button>
