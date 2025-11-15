@@ -3,6 +3,8 @@ import type {
   CulturalStampRequest,
   CulturalStampResponse,
   RecentStampsResponse,
+  MyStampsResponse,
+  StampType,
 } from '../types/stamp';
 
 /**
@@ -34,6 +36,23 @@ export const getRecentStamps = async (): Promise<RecentStampsResponse> => {
     return res.data;
   } catch (error) {
     console.error('최근 스탬프 조회 실패', error);
+    throw error;
+  }
+};
+
+/**
+ * 나의 스탬프 조회
+ * @param type 스탬프 타입 (REGIONAL | CULTURAL). 없으면 모든 타입을 그룹으로 반환
+ */
+export const getMyStamps = async (
+  type?: StampType
+): Promise<MyStampsResponse> => {
+  try {
+    const params = type ? { type } : undefined;
+    const res = await api.get<MyStampsResponse>('/api/stamps/my', { params });
+    return res.data;
+  } catch (error) {
+    console.error('나의 스탬프 조회 실패', error);
     throw error;
   }
 };
