@@ -5,7 +5,7 @@ import ColorPickerModal from '../../components/PhotoUpload/ColorPickerModal';
 import MapMarkerSection from '../../components/PhotoUpload/MapMarkerSection';
 import { extractGPSFromImage } from '../../utils/imageMetadata';
 import { useMarkerStore } from '../../stores/markerStore';
-import { gpsToMapPosition } from '../../utils/mapCoordinates';
+import { gpsToMapPosition, extractCityName } from '../../utils/mapCoordinates';
 import marker1 from '../../assets/map-marker1.svg';
 import { useLocationToAddress } from '../../hooks/photo/usePhotoQueries';
 import { uploadFile } from '../../api/S3';
@@ -154,8 +154,8 @@ export default function PhotoUploadPage() {
 
     // GPS 정보가 있을 때만 마커 추가
     if (markerLocation) {
-    const cityName = markerLocation.cityName;
-    const position = gpsToMapPosition(markerLocation.lat, markerLocation.lng);
+      const cityName = extractCityName(markerLocation.address);
+      const position = gpsToMapPosition(markerLocation.lat, markerLocation.lng);
 
       if (cityName) {
         addMarker({
@@ -465,11 +465,12 @@ export default function PhotoUploadPage() {
                   <input
                     type="number"
                     step="0.0001"
-                    value={markerLocation.lat}
+                    value={markerLocation?.lat ?? ''}
                     onChange={(e) =>
                       setMarkerLocation((prev) => ({
-                        ...prev,
+                        address: prev?.address ?? '',
                         lat: parseFloat(e.target.value) || 0,
+                        lng: prev?.lng ?? 0,
                       }))
                     }
                     className="w-full px-3 py-2 rounded-lg border-2 border-gray-300 focus:outline-none focus:border-orange-400 text-sm"
@@ -483,10 +484,11 @@ export default function PhotoUploadPage() {
                   <input
                     type="number"
                     step="0.0001"
-                    value={markerLocation.lng}
+                    value={markerLocation?.lng ?? ''}
                     onChange={(e) =>
                       setMarkerLocation((prev) => ({
-                        ...prev,
+                        address: prev?.address ?? '',
+                        lat: prev?.lat ?? 0,
                         lng: parseFloat(e.target.value) || 0,
                       }))
                     }
@@ -497,7 +499,7 @@ export default function PhotoUploadPage() {
               </div>
               <button
                 onClick={() =>
-                  setGpsCoords({
+                  markerLocation && setGpsCoords({
                     lat: markerLocation.lat,
                     lng: markerLocation.lng,
                   })
