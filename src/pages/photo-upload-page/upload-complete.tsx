@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { MapPin } from 'lucide-react';
+import { MapPin, ChevronRight } from 'lucide-react';
 import SaveIcon from '../../assets/save.svg?react';
 import Share2Icon from '../../assets/share2.svg?react';
 import LinkIcon from '../../assets/link.svg?react';
@@ -673,10 +673,24 @@ export default function PhotoUploadCompletePage() {
       )}
 
       <div className="w-full max-w-[480px] mx-auto mb-20 pb-8">
-        <div className="bg-[#FF7070] p-5 mb-4">
+        <div
+          className="bg-[#FF7070] p-5 mb-4 cursor-pointer hover:bg-[#ff6060] transition-colors flex items-center justify-between"
+          onClick={() => {
+            const photoId = location.state?.photoId as number | undefined;
+            const nearbySpots = location.state?.nearbySpots;
+            navigate('/recommended-places', {
+              state: {
+                ...location.state,
+                photoId,
+                nearbySpots,
+              },
+            });
+          }}
+        >
           <h2 className="text-white font-bold text-lg text-left px-5">
             추가로 이런 관광지는 어떠세요?
           </h2>
+          <ChevronRight className="w-6 h-6 text-white flex-shrink-0" />
         </div>
         {recommendedPlaces.length ? (
           <div className="flex flex-wrap justify-center gap-5">

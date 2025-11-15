@@ -7,9 +7,17 @@ export default function PhotoUploadSuccessPage() {
   const location = useLocation();
 
   useEffect(() => {
+    console.log('[UploadSuccess] location.state:', location.state);
+    console.log('[UploadSuccess] photoId:', location.state?.photoId);
+
     const timer = setTimeout(() => {
       navigate('/stamp-acquisition', {
-        state: location.state,
+        state: {
+          ...location.state,
+          // photoId와 nearbySpots가 확실히 포함되도록
+          photoId: location.state?.photoId,
+          nearbySpots: location.state?.nearbySpots,
+        },
       });
     }, 1500);
 
