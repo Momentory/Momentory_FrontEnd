@@ -9,7 +9,7 @@ import {
   toggleFollowUser,
   type CommunityPost,
 } from "../../api/community";
-import { initialCommunityPosts } from "./communityDummy";
+import { initialCommunityPosts } from "./CommunityDummy";
 
 export default function UserProfilePage() {
   const navigate = useNavigate();
