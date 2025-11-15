@@ -8,6 +8,10 @@ import star5 from '../../assets/star5.svg';
 import star6 from '../../assets/star6.svg';
 import star7 from '../../assets/star7.svg';
 import star8 from '../../assets/star8.svg';
+import giftIcon from '../../assets/giftIcon.svg';
+import successIcon from '../../assets/success.svg';
+import failIcon from '../../assets/fail.svg';
+import ongoingIcon from '../../assets/ongoing.svg';
 import {
   getRouletteSlots,
   spinRoulette,
@@ -17,9 +21,8 @@ import type { RouletteSlot, RouletteHistoryItem } from '../../types/roulette';
 
 export default function RoulettePage() {
   const [slots, setSlots] = useState<RouletteSlot[]>([]);
-  const [recentWinners, setRecentWinners] = useState<RouletteHistoryItem[]>(
-    []
-  );
+  // const [recentWinners, setRecentWinners] = useState<RouletteHistoryItem[]>([]);
+  const [, setRecentWinners] = useState<RouletteHistoryItem[]>([]);
   const [isSpinning, setIsSpinning] = useState(false);
   const [showResult, setShowResult] = useState(false);
   const [winner, setWinner] = useState<string | null>(null);
@@ -149,17 +152,17 @@ export default function RoulettePage() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#E7D1D1] relative overflow-hidden">
+    <div className="min-h-screen bg-white relative overflow-hidden">
       <DropdownHeader title="룰렛" />
 
-      <div className="pt-[40px] pb-6">
+      <div className="pt-[40px] pb-20">
         <div
-          className="bg-white rounded-3xl mb-12 mx-4"
+          className="bg-white rounded-3xl mb-12 mx-[25px] border-[3px] border-[#DFD5D5]"
           style={{
-            boxShadow: '4px 4px 12px rgba(0, 0, 0, 0.3)',
+            boxShadow: '4px 4px 5px rgba(0, 0, 0, 0.2)',
           }}
         >
-          <div className="flex justify-center pt-7 pb-0">
+          <div className="flex justify-center pt-7 pb-0 mb-[5px]">
             <div
               className="w-0 h-0 border-l-[18px] border-l-transparent border-r-[18px] border-r-transparent border-t-[35px] border-t-[#FF7070]"
               style={{
@@ -172,7 +175,7 @@ export default function RoulettePage() {
             className="relative flex justify-center items-center"
             style={{
               width: '100%',
-              padding: '10px',
+              padding: '0px',
               paddingTop: '0px',
               marginTop: '-50px',
               minHeight: '450px',
@@ -194,13 +197,13 @@ export default function RoulettePage() {
                 src={bigRouletteImage}
                 alt="룰렛"
                 style={{
-                  width: '450px',
-                  height: '450px',
+                  width: '410px',
+                  height: '410px',
                   objectFit: 'contain',
                   display: 'block',
                   position: 'absolute',
-                  top: 0,
-                  left: 0,
+                  top: '5px',
+                  left: '22.6px',
                 }}
               />
 
@@ -235,7 +238,7 @@ export default function RoulettePage() {
             </div>
           </div>
 
-          <div className="px-6 pb-6">
+          <div className="px-6 pb-6 -mt-6">
             <button
               onClick={handleSpin}
               disabled={isSpinning}
@@ -245,7 +248,7 @@ export default function RoulettePage() {
                   : 'bg-[#FF7070] hover:bg-[#ff6060] active:bg-[#ff5050] cursor-pointer'
               } transition-colors`}
             >
-              ▶ 룰렛 돌리기
+              ▶&nbsp;&nbsp;룰렛 돌리기
             </button>
             <div className="bg-[#FFF5F5] border border-[#FF7070] rounded-xl p-4 mb-4">
               <div className="flex flex-col gap-2 text-sm text-[#444444]">
@@ -283,34 +286,11 @@ export default function RoulettePage() {
                           {item.reward}
                         </span>
                       </div>
+                      <img src={boxData?.icon} alt="status" />
                     </div>
-                    {item.status === 'SUCCESS' && (
-                      <span className="ml-auto text-sm font-medium text-green-600 bg-green-100 px-2 py-1 rounded">
-                        완료
-                      </span>
-                    )}
-                    {(item.status === 'IN_PROGRESS' || item.status === null) && (
-                      <span className="ml-auto text-sm font-medium text-orange-600 bg-orange-100 px-2 py-1 rounded">
-                        진행 중
-                      </span>
-                    )}
-                    {item.status === 'FAILED' && (
-                      <span className="ml-auto text-sm font-medium text-red-600 bg-red-100 px-2 py-1 rounded">
-                        실패
-                      </span>
-                    )}
                   </div>
-                  {item.deadline && (
-                    <div className="text-sm text-gray-600 pl-10">
-                      마감: {new Date(item.deadline).toLocaleDateString('ko-KR', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric',
-                      })}
-                    </div>
-                  )}
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </div>
