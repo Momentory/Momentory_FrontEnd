@@ -7,17 +7,17 @@ export default function LoginScreen() {
   const handleTempKakaoLogin = () => {
     console.log("카카오 로그인 건너뛰기 (임시)");
     alert("임시 로그인 성공! 캐릭터 선택 페이지로 이동합니다.");
-    
+
     // 1. 임시 토큰을 저장 (로그인 된 척)
     localStorage.setItem("accessToken", "dummy-token-for-ui-test");
-    
+
     // 2. 캐릭터 선택 페이지로 강제 이동
     navigate("/auth/select-character");
   };
 
   return (
     <div className="flex flex-col items-center justify-center h-screen bg-white">
-      <div className="flex flex-col items-center mb-28">
+      <div className="flex flex-col items-center mb-40 mt-40">
         <p
           style={{
             fontSize: "13px",
@@ -44,42 +44,46 @@ export default function LoginScreen() {
         </div>
       </div>
 
-      <Link
-        to="/signinscreen"
-        className="w-[330px] h-[70px] bg-[#FF7070] text-white text-[16px] font-medium flex items-center justify-center rounded-[25px] mb-4 shadow-sm transition active:scale-95"
-      >
-        로그인
-      </Link>
 
-      <Link
-        to="/signup"
-        className="w-[330px] h-[70px] bg-gray-200 text-gray-600 text-[16px] font-medium flex items-center justify-center rounded-[25px] mb-10 shadow-sm transition active:scale-95"
-      >
-        회원가입
-      </Link>
 
-      <div className="w-[330px] h-[1px] bg-gray-300 mb-6"></div>
+      <div className="mt-40">
+        <Link
+          to="/signinscreen"
+          className="w-[330px] h-[70px] bg-[#FF7070] text-white text-[16px] font-medium flex items-center justify-center rounded-[25px] mb-4 shadow-sm transition active:scale-95"
+        >
+          로그인
+        </Link>
 
-      <div className="flex justify-center space-x-5">
-        {/* ✅ 카카오 로그인 onClick 수정 */}
-        <img
-          src="/images/kakao-logo.png"
-          alt="카카오 로그인"
-          onClick={handleTempKakaoLogin} // 여기서 임시 함수를 호출
-          className="w-10 h-10 rounded-full hover:scale-110 transition cursor-pointer"
-        />
+        <Link
+          to="/signup"
+          className="w-[330px] h-[70px] bg-gray-200 text-gray-600 text-[16px] font-medium flex items-center justify-center rounded-[25px] mb-10 shadow-sm transition active:scale-95"
+        >
+          회원가입
+        </Link>
 
-        <img
-          src="/images/naver-logo.png"
-          alt="네이버 로그인"
-          className="w-10 h-10 rounded-full hover:scale-110 transition"
-        />
+        <div className="w-[330px] h-[1px] bg-gray-300 mb-6"></div>
 
-        <img
-          src="/images/google-logo.png"
-          alt="구글 로그인"
-          className="w-10 h-10 rounded-full hover:scale-110 transition"
-        />
+        <div className="flex justify-center space-x-5 gap-3">
+          {/* 카카오 로그인 onClick 수정 */}
+          <img
+            src="/images/kakao-logo.png"
+            alt="카카오 로그인"
+            onClick={handleTempKakaoLogin}
+            className="w-10 h-10 rounded-full hover:scale-110 transition cursor-pointer"
+          />
+
+          <img
+            src="/images/naver-logo.png"
+            alt="네이버 로그인"
+            className="w-10 h-10 rounded-full hover:scale-110 transition"
+          />
+
+          <img
+            src="/images/google-logo.png"
+            alt="구글 로그인"
+            className="w-10 h-10 rounded-full hover:scale-110 transition"
+          />
+        </div>
       </div>
     </div>
   );
