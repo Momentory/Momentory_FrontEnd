@@ -247,7 +247,7 @@ export default function RoulettePage() {
             >
               ▶ 룰렛 돌리기
             </button>
-          <div className="bg-[#FFF5F5] border border-[#FF7070] rounded-xl p-4 mb-4">
+            <div className="bg-[#FFF5F5] border border-[#FF7070] rounded-xl p-4 mb-4">
               <div className="flex flex-col gap-2 text-sm text-[#444444]">
                 <p className="flex items-start">
                   <span className="text-[#FF7070] mr-2">•</span>
