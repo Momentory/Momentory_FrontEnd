@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import map from '../../assets/gyeonggi-map.svg';
 import { gpsToMapPosition, extractCityName } from '../../utils/mapCoordinates';
 
@@ -17,19 +17,30 @@ export default function MapMarkerSection({
   markerLocation,
   onMarkerClick,
 }: MapMarkerSectionProps) {
-  const [mapPosition, setMapPosition] = useState({ top: '50%', left: '50%' });
+  // GPS 정보가 없을 때 사용할 기본 GPS 좌표 (경기도 내부 - 남양주시)
+  const defaultLat = 37.6367;
+  const defaultLng = 127.2165;
+  const defaultPosition = useMemo(
+    () => gpsToMapPosition(defaultLat, defaultLng),
+    []
+  );
+
+  const [mapPosition, setMapPosition] = useState(defaultPosition);
   const [_cityName, setCityName] = useState<string | null>(null);
 
   useEffect(() => {
     if (!markerLocation) {
+      // GPS 정보가 없으면 기본 위치 사용
+      setMapPosition(defaultPosition);
       return;
     }
+    // GPS 정보가 있으면 실제 GPS 좌표로 위치 계산
     const position = gpsToMapPosition(markerLocation.lat, markerLocation.lng);
     setMapPosition(position);
 
     const city = extractCityName(markerLocation.address);
     setCityName(city);
-  }, [markerLocation]);
+  }, [markerLocation, defaultPosition]);
 
   const hexToRgb = (hex: string) => {
     const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
@@ -61,10 +72,11 @@ export default function MapMarkerSection({
 
       <div
         id="upload-map-container"
-        className="relative w-full h-64 rounded-lg overflow-hidden bg-white"
+        className="relative w-full h-64 rounded-lg overflow-hidden bg-white cursor-pointer"
         style={{
           border: '2px solid #CECECE',
         }}
+        onClick={onMarkerClick}
       >
         <div className="relative w-full h-full">
           <img
@@ -73,16 +85,14 @@ export default function MapMarkerSection({
             className="absolute inset-0 w-full h-full object-contain"
           />
 
-          {markerLocation && (
-            <div
-              className="absolute cursor-pointer z-10 drop-shadow-lg transition-all duration-200"
-              style={{
-                top: mapPosition.top,
-                left: mapPosition.left,
-                transform: 'translate(-50%, -100%)',
-              }}
-              onClick={onMarkerClick}
-            >
+          <div
+            className="absolute cursor-pointer z-[5] drop-shadow-lg transition-all duration-200"
+            style={{
+              top: mapPosition.top,
+              left: mapPosition.left,
+              transform: 'translate(-50%, -100%)',
+            }}
+          >
               <svg
                 width="33"
                 height="34"
@@ -115,7 +125,6 @@ export default function MapMarkerSection({
                 </defs>
               </svg>
             </div>
-          )}
         </div>
       </div>
     </div>

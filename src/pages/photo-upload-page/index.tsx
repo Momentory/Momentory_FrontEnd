@@ -175,6 +175,18 @@ export default function PhotoUploadPage() {
       return;
     }
 
+    console.log('Navigating to /photo-edit with state:', {
+      imageUrl: imageToSend,
+      uploadResult: uploadedInfo,
+      uploadContext: {
+        description,
+        isPrivate,
+        markerColor,
+        markerLocation,
+        cityName: markerLocation ? extractCityName(markerLocation.address) || '미확인' : '미확인',
+      },
+    });
+
     navigate('/photo-edit', {
       state: {
         imageUrl: imageToSend,
@@ -339,6 +351,7 @@ export default function PhotoUploadPage() {
         hasDropdown={false}
         rightAction={
           <button
+            type="button"
             onClick={handleNext}
             disabled={isLocationFetching}
             className={`text-[15px] font-semibold ${

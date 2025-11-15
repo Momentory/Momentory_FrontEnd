@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import {
   createBrowserRouter,
   RouterProvider,
@@ -185,12 +184,6 @@ const protectedRoutes: RouteObject[] = [
 const router = createBrowserRouter([...publicRoutes, ...protectedRoutes]);
 
 function App() {
-  useEffect(() => {
-    if (window.Kakao && !window.Kakao.isInitialized()) {
-      window.Kakao.init(import.meta.env.VITE_KAKAO_JAVASCRIPT_KEY);
-    }
-  }, []);
-
   return (
     <QueryClientProvider client={queryClient}>
       <RouterProvider router={router} />
