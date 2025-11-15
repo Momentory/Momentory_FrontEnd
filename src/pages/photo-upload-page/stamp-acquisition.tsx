@@ -9,7 +9,7 @@ export default function StampAcquisitionPage() {
   const location = useLocation();
   const [showAnimation, setShowAnimation] = useState(false);
 
-  const stampType = location.state?.stampType || 'regional';
+  const stampType = location.state?.stampType ?? null;
   const rawRegionName = location.state?.regionName || '하남시';
   const regionName = extractRegionName(rawRegionName);
   const points = location.state?.points || 50;
@@ -18,16 +18,39 @@ export default function StampAcquisitionPage() {
   const [imageError, setImageError] = useState(false);
 
   useEffect(() => {
+    if (!stampType) {
+      navigate('/photo-upload-complete', {
+        replace: true,
+        state: location.state,
+      });
+      return;
+    }
     setShowAnimation(true);
-  }, []);
+  }, [stampType, navigate, location.state]);
 
   const handleClick = () => {
+    const photoId = location.state?.photoId as number | undefined;
+    const nearbySpots = location.state?.nearbySpots;
+
+    console.log('[StampAcquisition] handleClick - photoId:', photoId);
+    console.log('[StampAcquisition] handleClick - location.state:', location.state);
+
     if (stampType === 'cultural') {
-      navigate('/recommended-places');
+      // 문화 스탬프는 추천 여행지 페이지로 이동
+      navigate('/recommended-places', {
+        state: {
+          ...location.state,
+          photoId, // 명시적으로 photoId 포함
+          nearbySpots, // nearbySpots도 명시적으로 포함
+        },
+      });
     } else {
+      // 지역 스탬프는 피그마 디자인대로 photo-upload-complete로 이동
       navigate('/photo-upload-complete', {
         state: {
           ...location.state,
+          photoId, // 명시적으로 photoId 포함
+          nearbySpots, // nearbySpots도 명시적으로 포함
           regionName,
           points,
         },
@@ -38,6 +61,10 @@ export default function StampAcquisitionPage() {
   const handleContentClick = (e: React.MouseEvent) => {
     e.stopPropagation();
   };
+
+  if (!stampType) {
+    return null;
+  }
 
   return (
     <div

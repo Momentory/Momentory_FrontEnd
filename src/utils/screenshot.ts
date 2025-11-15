@@ -1,32 +1,32 @@
-import html2canvas from 'html2canvas';
+import * as htmlToImage from 'html-to-image';
 
 /**
  * HTML 요소를 이미지로 캡처
  * @param element 캡처할 HTML 요소
- * @param options html2canvas 옵션
+ * @param options html-to-image 옵션
  * @returns data URL
  */
 export async function captureElement(
   element: HTMLElement,
   options?: {
     backgroundColor?: string;
-    scale?: number;
-    useCORS?: boolean;
-    allowTaint?: boolean;
+    quality?: number;
   }
 ): Promise<string> {
   const defaultOptions = {
     backgroundColor: '#ffffff',
-    scale: 2,
-    useCORS: true,
-    allowTaint: true,
-    logging: false,
+    quality: 1,
+    style: {
+      transform: 'none', // scale, zoom 영향 제거
+      zoom: '1',
+    },
     ...options,
   };
 
   try {
-    const canvas = await html2canvas(element, defaultOptions);
-    return canvas.toDataURL('image/png', 1);
+    // 보이는 비율 그대로 캡처
+    const dataUrl = await htmlToImage.toPng(element, defaultOptions);
+    return dataUrl;
   } catch (error) {
     console.error('캡처 실패:', error);
     throw new Error('지도 캡처 실패');
@@ -41,6 +41,7 @@ export async function captureElement(
 async function addDateToImage(imageDataUrl: string): Promise<string> {
   return new Promise((resolve, reject) => {
     const img = new Image();
+    img.crossOrigin = 'anonymous';
     img.onload = () => {
       const canvas = document.createElement('canvas');
       canvas.width = img.width;
@@ -62,19 +63,18 @@ async function addDateToImage(imageDataUrl: string): Promise<string> {
         day: '2-digit',
       }).format(new Date());
 
-      const fontSize = Math.floor(img.height * 0.035); // 이미지 높이의 3.5%로 증가
+      const fontSize = Math.floor(img.height * 0.035);
       ctx.font = `bold ${fontSize}px Arial, sans-serif`;
       ctx.textAlign = 'right';
       ctx.textBaseline = 'bottom';
 
-      // 텍스트 위치 (오른쪽 하단 모서리에 더 가깝게)
+      // 텍스트 위치
       const padding = fontSize * 0.5;
       const x = img.width - padding;
       const y = img.height - padding;
 
-      // 4방향 외곽선으로 그림자 효과 (#AAAAAA)
+      // 외곽선 그림자 효과
       ctx.fillStyle = '#AAAAAA';
-      ctx.lineWidth = 4;
       for (let i = -2; i <= 2; i++) {
         for (let j = -2; j <= 2; j++) {
           if (i !== 0 || j !== 0) {
@@ -83,7 +83,7 @@ async function addDateToImage(imageDataUrl: string): Promise<string> {
         }
       }
 
-      // 텍스트 채우기 (흰색)
+      // 본문 텍스트 (흰색)
       ctx.fillStyle = '#FFFFFF';
       ctx.fillText(today, x, y);
 
@@ -105,7 +105,6 @@ export async function captureMap(mapElementId: string): Promise<string> {
 
   const imageDataUrl = await captureElement(mapEl, {
     backgroundColor: '#f9fafb',
-    scale: 2,
   });
 
   // 날짜 추가

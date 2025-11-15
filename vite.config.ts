@@ -1,24 +1,14 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-import tailwindcss from '@tailwindcss/vite';
 import svgr from 'vite-plugin-svgr';
 
-// https://vite.dev/config/
 export default defineConfig({
-  plugins: [react(), tailwindcss(), svgr()],
+  plugins: [react(), svgr()],
   define: {
     global: 'globalThis',
   },
   server: {
-    proxy: {
-      '/api': {
-        target: 'https://www.momentory.store',
-        changeOrigin: true,
-        secure: false,
-      },
-    },
+    host: '0.0.0.0', // 모든 네트워크 인터페이스에서 접근 허용
+    port: 5173,
   },
 });
-
-
-

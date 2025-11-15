@@ -1,18 +1,18 @@
-import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import { login } from "../../api/auth";
-import { tokenStore } from "../../lib/token";
+import { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { login } from '../../api/auth';
+import { tokenStore } from '../../lib/token';
 
 export default function LoginPage() {
   const navigate = useNavigate();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) {
-      alert("이메일과 비밀번호를 모두 입력해주세요.");
+      alert('이메일과 비밀번호를 모두 입력해주세요.');
       return;
     }
 
@@ -20,17 +20,21 @@ export default function LoginPage() {
     try {
       const data = await login({ email, password });
       tokenStore.set({
-        accessToken: data.accessToken,
-        refreshToken: data.refreshToken,
+        accessToken: data.result.accessToken,
+        refreshToken: data.result.refreshToken,
       });
-      alert("로그인 성공!");
-      navigate("/splash"); // 로그인 성공 시 이동할 페이지
-    } catch (err: any) {
-      console.error("로그인 에러 전체:", err);
-      console.error("응답 데이터:", err.response?.data);
-      console.error("상태 코드:", err.response?.status);
 
-      const errorMessage = err.response?.data?.message || "이메일 또는 비밀번호가 올바르지 않습니다.";
+      alert('로그인 성공!');
+
+      navigate('/home'); // 로그인 성공 시 이동할 페이지
+    } catch (err: any) {
+      console.error('로그인 에러 전체:', err);
+      console.error('응답 데이터:', err.response?.data);
+      console.error('상태 코드:', err.response?.status);
+
+      const errorMessage =
+        err.response?.data?.message ||
+        '이메일 또는 비밀번호가 올바르지 않습니다.';
       alert(errorMessage);
     } finally {
       setLoading(false);
@@ -72,10 +76,10 @@ export default function LoginPage() {
             type="submit"
             disabled={loading}
             className={`w-full h-[55px] text-white text-[16px] font-semibold rounded-[15px] ${
-              loading ? "bg-gray-400" : "bg-[#FF7070]"
+              loading ? 'bg-gray-400' : 'bg-[#FF7070]'
             } transition active:scale-95`}
           >
-            {loading ? "로그인중..." : "로그인"}
+            {loading ? '로그인중...' : '로그인'}
           </button>
         </form>
 
@@ -83,8 +87,8 @@ export default function LoginPage() {
         <div className="mt-5 text-[13px] text-gray-500">
           <Link to="/find-id" className="hover:underline">
             아이디 찾기
-          </Link>{" "}
-          |{" "}
+          </Link>{' '}
+          |{' '}
           <Link to="/find-password" className="hover:underline">
             비밀번호 찾기
           </Link>

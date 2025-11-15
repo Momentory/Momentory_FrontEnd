@@ -138,7 +138,7 @@ export default function PublicBottomSheet({
     <div
       ref={bottomSheetRef}
       data-bottom-sheet
-      className={`absolute bottom-0 left-1/2 -translate-x-1/2 w-[450px] bg-white rounded-t-2xl shadow-lg z-30 overflow-hidden ${
+      className={`absolute bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[450px] bg-white rounded-t-2xl shadow-lg z-30 overflow-hidden ${
         isExpanded ? 'flex flex-col' : ''
       } ${!isDragging ? 'transition-all duration-300' : ''}`}
       style={{ height: `${height}px` }}

@@ -1,7 +1,8 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import ChevronDown from '../../assets/icons/dropdown.svg?react';
-import LockIcon from '../../assets/icons/albumShare.svg?react';
+import LockIcon from '../../assets/icons/lockIcon.svg?react';
+import RemoveIcon from '../../assets/accessories/remove.svg?react';
+import CategoryDropdown from './CategoryDropdown';
+import CharacterSelectButton from './CharacterSelectButton';
 
 export interface Accessory {
   id: number;
@@ -9,6 +10,7 @@ export interface Accessory {
   icon: string;
   locked: boolean;
   type: string;
+  unlockLevel?: number;
 }
 
 export interface BottomSheetProps {
@@ -20,6 +22,10 @@ export interface BottomSheetProps {
   selectedCategory: string;
   equippedAccessories: number[];
   onAccessoryClick: (id: number) => void;
+  onCategoryChange?: (category: string) => void;
+  onSelectCharacter?: (characterType: 'CAT' | 'DOG') => void;
+  onRemoveAll?: () => void;
+  isLoading?: boolean;
 }
 
 export default function BottomSheet({
@@ -31,10 +37,25 @@ export default function BottomSheet({
   selectedCategory,
   equippedAccessories,
   onAccessoryClick,
+  onCategoryChange,
+  onSelectCharacter,
+  onRemoveAll,
+  isLoading = false,
 }: BottomSheetProps) {
-  const navigate = useNavigate();
   const [isDragging, setIsDragging] = React.useState(false);
   const [hasMoved, setHasMoved] = React.useState(false);
+  const [hoveredItem, setHoveredItem] = React.useState<number | null>(null);
+  const [tooltipPosition, setTooltipPosition] = React.useState<{ top: number; left: number } | null>(null);
+
+  React.useEffect(() => {
+    if (hoveredItem !== null) {
+      const timer = setTimeout(() => {
+        setHoveredItem(null);
+        setTooltipPosition(null);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [hoveredItem]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -49,7 +70,7 @@ export default function BottomSheet({
       if (deltaY > 5) setHasMoved(true);
 
       const actualDeltaY = startY - e.clientY;
-      const newHeight = Math.max(100, Math.min(460, startHeight + actualDeltaY));
+      const newHeight = Math.max(100, Math.min(400, startHeight + actualDeltaY));
       setHeight(newHeight);
     };
 
@@ -64,20 +85,20 @@ export default function BottomSheet({
             setHeight(100);
             setIsExpanded(false);
           } else {
-            setHeight(460);
+            setHeight(350);
             setIsExpanded(true);
           }
         }, 0);
       } else {
         if (deltaY > 50) {
-          setHeight(460);
+          setHeight(350);
           setIsExpanded(true);
         } else if (deltaY < -50) {
           setHeight(100);
           setIsExpanded(false);
         } else {
-          if (height > 280) {
-            setHeight(460);
+          if (height > 225) {
+            setHeight(350);
             setIsExpanded(true);
           } else {
             setHeight(100);
@@ -94,138 +115,194 @@ export default function BottomSheet({
     document.addEventListener('mouseup', onUp);
   };
 
-const handleTouchStart = (e: React.TouchEvent) => {
-  e.preventDefault();
-  setIsDragging(true);
-  setHasMoved(false);
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setIsDragging(true);
+    setHasMoved(false);
 
-  const startY = e.touches[0].clientY;
-  const startHeight = height;
+    const startY = e.touches[0].clientY;
+    const startHeight = height;
 
-  const onMove = (e: TouchEvent) => {
-    const deltaY = Math.abs(startY - e.touches[0].clientY);
-    if (deltaY > 10) setHasMoved(true); 
-    const actualDeltaY = startY - e.touches[0].clientY;
-    const newHeight = Math.max(100, Math.min(460, startHeight + actualDeltaY));
-    setHeight(newHeight);
-  };
+    const onMove = (e: TouchEvent) => {
+      e.preventDefault();
+      const deltaY = Math.abs(startY - e.touches[0].clientY);
+      if (deltaY > 10) setHasMoved(true);
+      const actualDeltaY = startY - e.touches[0].clientY;
+      const newHeight = Math.max(100, Math.min(500, startHeight + actualDeltaY));
+      setHeight(newHeight);
+    };
 
-  const onEnd = (e: TouchEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
+    const onEnd = (e: TouchEvent) => {
+      setIsDragging(false);
 
-    const deltaY = startY - (e.changedTouches[0]?.clientY || startY);
+      const deltaY = startY - (e.changedTouches[0]?.clientY || startY);
 
-    if (!hasMoved && Math.abs(deltaY) < 10) {
-      setTimeout(() => {
-        if (isExpanded) {
-          setHeight(100);
-          setIsExpanded(false);
-        } else {
-          setHeight(460);
-          setIsExpanded(true);
-        }
-      }, 50);
-    } else {
-      if (deltaY > 50) {
-        setHeight(460);
-        setIsExpanded(true);
-      } else if (deltaY < -50) {
-        setHeight(100);
-        setIsExpanded(false);
+      if (!hasMoved && Math.abs(deltaY) < 10) {
+        setTimeout(() => {
+          if (isExpanded) {
+            setHeight(100);
+            setIsExpanded(false);
+          } else {
+            setHeight(500);
+            setIsExpanded(true);
+          }
+        }, 50);
       } else {
-        if (height > 280) {
-          setHeight(460);
+        if (deltaY > 50) {
+          setHeight(500);
           setIsExpanded(true);
-        } else {
+        } else if (deltaY < -50) {
           setHeight(100);
           setIsExpanded(false);
+        } else {
+          if (height > 300) {
+            setHeight(500);
+            setIsExpanded(true);
+          } else {
+            setHeight(100);
+            setIsExpanded(false);
+          }
         }
       }
-    }
 
-    document.removeEventListener('touchmove', onMove);
-    document.removeEventListener('touchend', onEnd);
+      document.removeEventListener('touchmove', onMove);
+      document.removeEventListener('touchend', onEnd);
+    };
+
+    document.addEventListener('touchmove', onMove, { passive: false });
+    document.addEventListener('touchend', onEnd);
   };
-
-  document.addEventListener('touchmove', onMove, { passive: false });
-  document.addEventListener('touchend', onEnd);
-};
 
 
   return (
-    <div
-      className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] bg-white rounded-t-2xl shadow-lg z-50 overflow-hidden"
-      style={{
-        height: `${height}px`,
-        transition: isDragging ? 'none' : 'height 0.3s ease-out',
-      }}
-    >
-      <div
-        className="cursor-grab active:cursor-grabbing select-none"
-        onMouseDown={handleMouseDown}
-        onTouchStart={handleTouchStart}
-      >
-        <div className="w-20 h-1 bg-[#E2E2E2] rounded-full mx-auto mt-4" />
-
-        <div className="flex justify-between items-center px-6 py-4">
-          <div className="flex items-center gap-1">
-            <span className="text-[25px] font-bold text-gray-800">
-              {selectedCategory}
-            </span>
-            <ChevronDown className="w-5 h-5" />
+    <>
+      {hoveredItem && tooltipPosition && (
+        <div
+          className="fixed px-4 py-3 bg-white text-sm rounded-2xl shadow-[3px_4px_4px_0px_rgba(0,0,0,0.25)] border-2 border-[#838383] whitespace-nowrap z-[9999] max-w-[90%]"
+          style={{
+            top: `${tooltipPosition.top}px`,
+            left: `${tooltipPosition.left}px`,
+            transform: 'translateX(-50%)',
+          }}
+        >
+          <div className="font-bold text-base mb-1 text-black">
+            {accessories.find(a => a.id === hoveredItem)?.name}
           </div>
-          <button
-            className="text-sm font-medium text-gray-600 pointer-events-auto cursor-pointer"
-            onClick={(e) => {
-              e.stopPropagation();
-              navigate('/shop');
-            }}
-          >
-            상점 둘러보기 &gt;
-          </button>
+          {accessories.find(a => a.id === hoveredItem)?.unlockLevel && (
+            <div className="text-gray-600 text-xs">
+              Lv.{accessories.find(a => a.id === hoveredItem)?.unlockLevel} 일 때 획득할 수 있어요
+            </div>
+          )}
         </div>
-      </div>
+      )}
 
-      <div className="px-6 pb-6">
-        <div className="grid grid-cols-4 gap-3 overflow-y-auto max-h-[360px]">
-          {accessories.map((accessory) => {
-            const isEquipped = equippedAccessories.includes(accessory.id);
-            return (
-              <button
-                key={accessory.id}
-                onClick={() => onAccessoryClick(accessory.id)}
-                className={`flex flex-col items-center gap-2 p-3 rounded-xl transition-all ${
-                  accessory.locked
-                    ? 'bg-gray-100 border-2 border-gray-300 cursor-not-allowed'
-                    : isEquipped
-                    ? 'border-2 border-[#FF7070]'
-                    : 'bg-white border-2 border-black'
-                }`}
-              >
-                <div className="w-16 h-16 flex items-center justify-center overflow-hidden relative">
-                  <img
-                    src={accessory.icon}
-                    alt={accessory.name}
-                    className={`max-w-full max-h-full object-contain ${
-                      accessory.locked ? 'opacity-40' : 'opacity-100'
-                    }`}
-                    style={{
-                      transform: 'scale(0.5)',
-                      transformOrigin: 'center',
-                    }}
-                  />
-                  {accessory.locked && (
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <LockIcon/>
-                    </div>
-                  )}
-                </div>
-              </button>
-            );
-          })}
+      <div
+        className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] bg-white rounded-t-2xl shadow-lg z-[500] overflow-hidden"
+        style={{
+          height: `${height}px`,
+          transition: isDragging ? 'none' : 'height 0.3s ease-out',
+        }}
+      >
+        <div
+          className="cursor-grab active:cursor-grabbing select-none py-4"
+          onMouseDown={handleMouseDown}
+          onTouchStart={handleTouchStart}
+        >
+          <div className="w-20 h-1 bg-[#E2E2E2] rounded-full mx-auto" />
         </div>
+
+        <div>
+          <div className="flex justify-between items-center px-6 pb-4">
+            <CategoryDropdown
+              selectedCategory={selectedCategory}
+              onCategoryChange={onCategoryChange}
+            />
+
+            <div className="flex items-center gap-2">
+              <CharacterSelectButton onSelectCharacter={onSelectCharacter} />
+              {onRemoveAll && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onRemoveAll();
+                  }}
+                  onMouseDown={(e) => e.stopPropagation()}
+                  onTouchStart={(e) => e.stopPropagation()}
+                  className="flex items-center justify-center w-10 h-10 cursor-pointer"
+                  aria-label="모든 아이템 벗기"
+                >
+                  <RemoveIcon className="w-full h-full" />
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+
+      <div
+        className="px-6 pb-6 overflow-y-auto"
+        style={{
+          maxHeight: `${height - 120}px`
+        }}
+      >
+        {isLoading ? (
+          <div className="grid grid-cols-4 gap-3">
+            {Array.from({ length: 8 }).map((_, index) => (
+              <div key={index} className="aspect-square w-full bg-gray-200 rounded-xl animate-pulse" />
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-4 gap-3">
+            {accessories.map((accessory) => {
+              const isEquipped = equippedAccessories.includes(accessory.id);
+              return (
+                <div
+                  key={accessory.id}
+                  className="relative"
+                >
+                  <button
+                    onClick={(e) => {
+                      if (accessory.locked) {
+                        if (hoveredItem === accessory.id) {
+                          setHoveredItem(null);
+                          setTooltipPosition(null);
+                        } else {
+                          const rect = e.currentTarget.getBoundingClientRect();
+                          setTooltipPosition({
+                            top: rect.bottom + 8,
+                            left: rect.left + rect.width / 2,
+                          });
+                          setHoveredItem(accessory.id);
+                        }
+                      } else {
+                        onAccessoryClick(accessory.id);
+                      }
+                    }}
+                    className={`aspect-square w-full flex items-center justify-center rounded-xl transition-all relative overflow-hidden ${
+                      accessory.locked
+                        ? 'bg-white border-2 border-gray-300 cursor-pointer'
+                        : isEquipped
+                        ? 'bg-white border-2 border-[#FF7070]'
+                        : 'bg-white border-2 border-black'
+                    }`}
+                  >
+                    {accessory.locked ? (
+                      <div className="flex items-center justify-center">
+                        <LockIcon className="w-8 h-8 text-gray-400" />
+                      </div>
+                    ) : (
+                      <img
+                        src={accessory.icon}
+                        alt={accessory.name}
+                        className="max-w-[80%] max-h-[80%] object-contain"
+                      />
+                    )}
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
-    </div>
+      </div>
+    </>
   );
 }

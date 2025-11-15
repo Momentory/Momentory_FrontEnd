@@ -1,29 +1,39 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import DropdownHeader from '../../components/common/DropdownHeader';
 import Modal from '../../components/common/Modal';
 import Bg from '../../assets/accessories/bgImg.svg';
-import SparkleIcon from '../../assets/accessories/sparkle.svg';
 import PointIcon from '../../assets/icons/pointIcon.svg';
-import type { ShopAccessory } from '../../types/shop';
+import type { ShopItem } from '../../types/shop';
 import EventCard from '../../components/Shop/EventCard';
+import { getShopEvents, purchaseItem } from '../../api/shop';
 
 const EventPage = () => {
   const [point, setPoint] = useState(1500);
   const [ownedAccessories, setOwnedAccessories] = useState<number[]>([]);
-  const [selectedItem, setSelectedItem] = useState<ShopAccessory | null>(null);
+  const [selectedItem, setSelectedItem] = useState<ShopItem | null>(null);
   const [toastMessage, setToastMessage] = useState('');
+  const [eventItems, setEventItems] = useState<ShopItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const eventItem: ShopAccessory = {
-    id: 101,
-    name: '빛 이벤트',
-    icon: SparkleIcon,
-    type: '장식',
-    price: 999,
-    description: '한정 기간! D-7 남음',
+  useEffect(() => {
+    fetchEventItems();
+  }, []);
+
+  const fetchEventItems = async () => {
+    try {
+      setIsLoading(true);
+      const items = await getShopEvents();
+      setEventItems(items || []);
+    } catch (error) {
+      console.error('이벤트 아이템 불러오기 실패:', error);
+      setEventItems([]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleItemClick = (item: ShopAccessory) => {
-    if (ownedAccessories.includes(item.id)) {
+  const handleItemClick = (item: ShopItem) => {
+    if (ownedAccessories.includes(item.itemId)) {
       setToastMessage('이미 보유한 아이템입니다.');
       setTimeout(() => setToastMessage(''), 2000);
       return;
@@ -31,7 +41,7 @@ const EventPage = () => {
     setSelectedItem(item);
   };
 
-  const handleConfirmPurchase = () => {
+  const handleConfirmPurchase = async () => {
     if (!selectedItem) return;
 
     if (point < selectedItem.price) {
@@ -41,32 +51,51 @@ const EventPage = () => {
       return;
     }
 
-    setPoint(point - selectedItem.price);
-    setOwnedAccessories([...ownedAccessories, selectedItem.id]);
-    setToastMessage('구매가 성공적으로 완료되었습니다!');
-    setSelectedItem(null);
-    setTimeout(() => setToastMessage(''), 2000);
+    try {
+      await purchaseItem(selectedItem.itemId);
+      setPoint(point - selectedItem.price);
+      setOwnedAccessories([...ownedAccessories, selectedItem.itemId]);
+      setToastMessage('구매가 성공적으로 완료되었습니다!');
+      setSelectedItem(null);
+      setTimeout(() => setToastMessage(''), 2000);
+    } catch (error) {
+      console.error('구매 실패:', error);
+      setToastMessage('구매에 실패했습니다. 다시 시도해주세요.');
+      setSelectedItem(null);
+      setTimeout(() => setToastMessage(''), 2000);
+    }
   };
 
   return (
     <div
-      className="min-h-screen bg-cover bg-center bg-fixed"
+      className="h-screen bg-cover bg-center overflow-hidden flex flex-col"
       style={{ backgroundImage: `url(${Bg})` }}
     >
       <DropdownHeader title="이벤트" />
 
-      <main className="flex items-center justify-center p-4 pt-10">
-        <EventCard
-          item={eventItem}
-          onClick={() => handleItemClick(eventItem)}
-        />
+      <main className="flex-1 flex items-center justify-center p-4 overflow-y-auto">
+        {isLoading ? (
+          <div className="text-white text-lg">로딩중...</div>
+        ) : eventItems && eventItems.length > 0 ? (
+          <div className="flex flex-col gap-4">
+            {eventItems.map((item) => (
+              <EventCard
+                key={item.itemId}
+                item={item}
+                onClick={() => handleItemClick(item)}
+              />
+            ))}
+          </div>
+        ) : (
+          <EventCard item={null} onClick={() => {}} />
+        )}
       </main>
 
       {selectedItem && (
         <Modal title="아이템 구입" onClose={() => setSelectedItem(null)}>
           <div className="flex flex-col items-center text-center px-3.5">
             <img
-              src={selectedItem.icon}
+              src={selectedItem.imageUrl}
               alt={selectedItem.name}
               className="w-20 h-20 mb-4 rounded-xl border border-gray-200"
             />
@@ -75,7 +104,7 @@ const EventPage = () => {
                 <span className="text-[#FF7070] font-semibold">
                   [{selectedItem.name}]
                 </span>{' '}
-                {selectedItem.type}을(를)
+                {selectedItem.category}을(를)
               </span>
               <span className="w-1.5"></span>
               <span className="whitespace-nowrap inline-flex items-center">

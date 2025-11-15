@@ -24,7 +24,7 @@ const TitleTemplate3: React.FC<TemplateProps> = ({ data, updateData, onEmptyArea
         />
       </div>
       <div className="relative w-full aspect-3/4 bg-[#D8D8D8] overflow-hidden">
-        {data.image && <img src={data.image} alt="preview" className="w-full h-full object-cover" />}
+        {data.image && <img src={data.image} alt="preview" crossOrigin="anonymous" className="w-full h-full object-cover" />}
         <div 
           className="group absolute inset-0 flex items-center justify-center text-sm text-white cursor-pointer transition-colors hover:bg-black/40"
           onClick={() => onImageClick?.('image')}

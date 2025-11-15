@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
-import { tokenStore } from "../lib/token";
-import { api } from "../api/client";
-import { logout } from "../api/auth";
+import { useEffect, useState } from 'react';
+import { tokenStore } from '../lib/token';
+import { api } from '../api/client';
+import { logout } from '../api/auth';
 
 export function useAuth() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
@@ -22,13 +22,17 @@ export function useAuth() {
 
       try {
         // Access 토큰으로 간단한 인증 확인 API 호출
-        await api.get("/api/auth/check-email", { params: { email: "ping@check" } });
+        await api.get('/api/auth/check-email', {
+          params: { email: 'ping@check' },
+        });
         setIsAuthenticated(true);
       } catch (err: any) {
         // AccessToken이 만료된 경우 자동 재발급 시도
         if (refresh) {
           try {
-            const { data } = await api.post("/api/auth/reissue", { refreshToken: refresh });
+            const { data } = await api.post('/api/auth/reissue', {
+              refreshToken: refresh,
+            });
             tokenStore.set({
               accessToken: data.accessToken,
               refreshToken: data.refreshToken ?? refresh,
@@ -56,7 +60,7 @@ export function useAuth() {
     } finally {
       tokenStore.clear();
       setIsAuthenticated(false);
-      window.location.href = "/login";
+      window.location.href = '/login';
     }
   };
 

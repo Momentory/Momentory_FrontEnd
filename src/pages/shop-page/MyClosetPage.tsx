@@ -1,107 +1,155 @@
-import { useState } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import DropdownHeader from '../../components/common/DropdownHeader';
-import StarIcon from '../../assets/icons/starIcon.svg?react';
-import ShareIcon from '../../assets/icons/albumShare.svg?react';
-import RoseIcon from '../../assets/accessories/장미.svg';
-import RibbonIcon from '../../assets/accessories/리본.svg';
-import FeatherIcon from '../../assets/accessories/깃털.svg';
-import HatIcon from '../../assets/accessories/모자.svg';
-import BottomSheet from '../../components/Shop/BottomSheet';
-import CharacterDisplay from '../../components/Shop/CharacterDisplay';
-import useBottomSheet from '../../hooks/shop/useBottomSheet';
-
-interface Accessory {
-  id: number;
-  name: string;
-  icon: string;
-  locked: boolean;
-  type: string;
-}
+import WardrobeCard from '../../components/Shop/WardrobeCard';
+import AddWardrobeCard from '../../components/Shop/AddWardrobeCard';
+import WardrobeCardSkeleton from '../../components/Shop/WardrobeCardSkeleton';
+import { useCurrentCharacter } from '../../hooks/shop/useShopQueries';
+import { useWardrobeList } from '../../hooks/shop/useWardrobeQueries';
+import { useSaveWardrobe, useApplyWardrobe } from '../../hooks/shop/useWardrobeMutations';
+import CatImage from '../../assets/accessories/cat.svg';
+import DogImage from '../../assets/accessories/dog.svg';
+import ClosetBg from '../../assets/accessories/closetBg.svg';
 
 const MyClosetPage = () => {
-  const [level] = useState(35);
-  const [point] = useState(1500);
-  const [gem] = useState(2000);
-  const [selectedCategory] = useState('장식');
-  const { height, isExpanded, setHeight, setIsExpanded } = useBottomSheet();
-  const [equippedAccessories, setEquippedAccessories] = useState<number[]>([]);
+  const [selectedWardrobeId, setSelectedWardrobeId] = useState<number | null>(null);
 
-  const accessories: Accessory[] = [
-    { id: 1, name: '장미', icon: RoseIcon, locked: false, type: 'head' },
-    { id: 2, name: '리본', icon: RibbonIcon, locked: false, type: 'head' },
-    { id: 3, name: '깃털', icon: FeatherIcon, locked: true, type: 'body' },
-    { id: 4, name: '모자', icon: HatIcon, locked: true, type: 'head' },
-  ];
+  const { data: currentCharacter } = useCurrentCharacter();
+  const { data: wardrobes = [], isLoading } = useWardrobeList();
 
-  const handleAccessoryClick = (id: number) => {
-    const accessory = accessories.find((acc) => acc.id === id);
-    if (!accessory || accessory.locked) return;
 
-    if (equippedAccessories.includes(id)) {
-      setEquippedAccessories(equippedAccessories.filter((accId) => accId !== id));
-    } else {
-      // 같은 타입 액세서리는 하나만 착용
-      const newEquipped = equippedAccessories.filter(
-        (accId) => accessories.find((acc) => acc.id === accId)?.type !== accessory.type
-      );
-      setEquippedAccessories([...newEquipped, id]);
+  // 현재 착용 중인 스타일 === 옷장 스타일 확인
+  const isCurrentStyle = useCallback((wardrobe: typeof wardrobes[0]) => {
+    if (!currentCharacter) return false;
+
+    const equipped = currentCharacter.equipped;
+    const clothingMatch =
+      (wardrobe.clothing?.itemId === equipped.clothing?.itemId) ||
+      (!wardrobe.clothing && !equipped.clothing);
+    const expressionMatch =
+      (wardrobe.expression?.itemId === equipped.expression?.itemId) ||
+      (!wardrobe.expression && !equipped.expression);
+    const effectMatch =
+      (wardrobe.effect?.itemId === equipped.effect?.itemId) ||
+      (!wardrobe.effect && !equipped.effect);
+    const decorationMatch =
+      (wardrobe.decoration?.itemId === equipped.decoration?.itemId) ||
+      (!wardrobe.decoration && !equipped.decoration);
+
+    return clothingMatch && expressionMatch && effectMatch && decorationMatch;
+  }, [currentCharacter]);
+
+  const characterImage = useMemo(() => {
+    if (!currentCharacter) return CatImage;
+    return currentCharacter.characterType === 'CAT' ? CatImage : DogImage;
+  }, [currentCharacter]);
+
+  useEffect(() => {
+    if (currentCharacter && wardrobes.length > 0 && selectedWardrobeId === null) {
+      const currentWardrobe = wardrobes.find(w => isCurrentStyle(w));
+      if (currentWardrobe) {
+        setSelectedWardrobeId(currentWardrobe.wardrobeId);
+      }
     }
+  }, [currentCharacter, wardrobes, selectedWardrobeId, isCurrentStyle]);
+
+  const saveMutation = useSaveWardrobe();
+  const applyMutation = useApplyWardrobe();
+
+  const handleSaveWardrobe = () => {
+    if (!currentCharacter) {
+      alert('캐릭터 정보를 불러오는 중입니다.');
+      return;
+    }
+
+    const equipped = currentCharacter.equipped;
+    const payload: {
+      clothingId?: number;
+      expressionId?: number;
+      effectId?: number;
+      decorationId?: number;
+    } = {};
+
+    if (equipped.clothing?.itemId !== undefined) {
+      payload.clothingId = equipped.clothing.itemId;
+    }
+    if (equipped.expression?.itemId !== undefined) {
+      payload.expressionId = equipped.expression.itemId;
+    }
+    if (equipped.effect?.itemId !== undefined) {
+      payload.effectId = equipped.effect.itemId;
+    }
+    if (equipped.decoration?.itemId !== undefined) {
+      payload.decorationId = equipped.decoration.itemId;
+    }
+
+    console.log('옷장 저장 페이로드:', payload);
+    console.log('현재 장착된 아이템:', equipped);
+
+    // 아무것도 착용하지 않은 경우 체크
+    if (Object.keys(payload).length === 0) {
+      alert('저장할 아이템이 없습니다. 최소 하나의 아이템을 착용해주세요.');
+      return;
+    }
+
+    saveMutation.mutate(payload);
+  };
+
+  const handleApplyWardrobe = () => {
+    if (selectedWardrobeId === null) {
+      alert('적용할 스타일을 선택해주세요.');
+      return;
+    }
+    applyMutation.mutate(selectedWardrobeId);
   };
 
   return (
-    <div className="flex flex-col h-screen bg-white overflow-hidden">
-      <DropdownHeader title="캐릭터 옷장" />
+    <div
+      className="relative min-h-screen bg-repeat"
+      style={{ backgroundImage: `url(${ClosetBg})` }}
+    >
+      <DropdownHeader title="나의 옷장" />
 
-      <CharacterDisplay
-        level={level}
-        gem={gem}
-        point={point}
-        equippedAccessories={equippedAccessories}
-        accessories={accessories}
-      />
+      <main className="grid grid-cols-2 gap-4 p-4 pb-40 pt-[140px]">
+        {isLoading ? (
+          <>
+            {Array.from({ length: 4 }).map((_, index) => (
+              <WardrobeCardSkeleton key={index} />
+            ))}
+          </>
+        ) : (
+          <>
+            {wardrobes.map((wardrobe) => (
+              <WardrobeCard
+                key={wardrobe.wardrobeId}
+                wardrobe={wardrobe}
+                characterImage={characterImage}
+                characterType={currentCharacter?.characterType}
+                isSelected={selectedWardrobeId === wardrobe.wardrobeId}
+                isCurrent={isCurrentStyle(wardrobe)}
+                onClick={() => {
+                  if (selectedWardrobeId === wardrobe.wardrobeId) {
+                    setSelectedWardrobeId(null);
+                  } else {
+                    setSelectedWardrobeId(wardrobe.wardrobeId);
+                  }
+                }}
+              />
+            ))}
 
-      <div
-        className="fixed max-w-[480px] mx-auto px-4 left-0 right-0 flex justify-between items-center gap-4 z-[100] pointer-events-auto transition-all duration-300"
-        style={{ bottom: `${height + 16}px` }}
-      >
-        <button className="w-12 h-12 rounded-full bg-[#FF7070] flex items-center justify-center shadow-lg cursor-pointer transition-colors">
-          <StarIcon className="w-6 h-6 text-white" />
-        </button>
-        <div className="flex flex-row gap-4">
-        <button className="w-12 h-12 rounded-full bg-[#FF7070] flex items-center justify-center shadow-lg cursor-pointer transition-colors">
-          <svg
-            className="text-white w-6 h-6"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-            />
-          </svg>
-        </button>
+            <AddWardrobeCard onClick={handleSaveWardrobe} />
+          </>
+        )}
+      </main>
+
+      <footer className="fixed bottom-0 left-0 right-0 max-w-[480px] mx-auto bg-white px-7 py-2">
         <button
-              className="flex h-12 w-12 items-center justify-center rounded-full border border-gray-200 bg-white shadow-md transition cursor-pointer"
-              onClick={()=> alert('공유 기능 추후 구현.')}
-            >
-              <ShareIcon className="h-6 w-6 text-gray-700" />
-            </button>
-        </div>
-      </div>
-
-      <BottomSheet
-        height={height}
-        setHeight={setHeight}
-        isExpanded={isExpanded}
-        setIsExpanded={setIsExpanded}
-        accessories={accessories}
-        selectedCategory={selectedCategory}
-        equippedAccessories={equippedAccessories}
-        onAccessoryClick={handleAccessoryClick}
-      />
+          onClick={handleApplyWardrobe}
+          disabled={selectedWardrobeId === null || applyMutation.isPending}
+          className="flex w-full items-center justify-center rounded-xl bg-[#ff7070] py-[18px] text-xl font-bold text-white shadow-md transition cursor-pointer"
+        >
+          {applyMutation.isPending ? '적용 중...' : '스타일 변경하기'}
+        </button>
+      </footer>
     </div>
   );
 };

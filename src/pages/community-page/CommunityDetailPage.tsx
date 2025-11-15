@@ -1,133 +1,454 @@
-import { useNavigate } from "react-router-dom";
-import { useState } from "react";
-import { motion } from "framer-motion";
-import { ArrowLeft, Heart, MessageCircle, Bookmark } from "lucide-react";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
+import { useEffect, useState } from "react";
+import {
+  getCommunityPostDetail,
+  getComments,
+  createComment,
+  deleteComment,
+  updateComment,
+  toggleLike,
+  toggleScrap,
+  deletePost,
+} from "../../api/community";
+
+/* 상대 시간 계산 */
+function getRelativeTime(dateString: string) {
+  if (!dateString) return "방금 전";
+
+  const now = new Date();
+  const past = new Date(dateString);
+  const diff = (now.getTime() - past.getTime()) / 1000;
+
+  if (diff < 60) return "방금 전";
+  if (diff < 3600) return `${Math.floor(diff / 60)}분 전`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)}시간 전`;
+  if (diff < 604800) return `${Math.floor(diff / 86400)}일 전`;
+  if (diff < 2592000) return `${Math.floor(diff / 604800)}주 전`;
+  return `${Math.floor(diff / 2592000)}달 전`;
+}
 
 export default function CommunityDetailPage() {
   const navigate = useNavigate();
+  const { id } = useParams();
+  const location = useLocation();
+  const postId = Number(id);
 
-  // 임시 상태
-  const [liked, setLiked] = useState(false);
-  const [scrapped, setScrapped] = useState(false);
-  const [comments, setComments] = useState([
-    { id: 1, user: "여행자 민지", text: "와 분위기 너무 좋아요 " },
-    { id: 2, user: "Traveler J", text: "사진 구도 대박이에요!" },
-  ]);
+  const initialPost = location.state?.post || null;
+
+  const [post, setPost] = useState<any>(initialPost);
+  const [showMenu, setShowMenu] = useState(false);
+
+  /* 좋아요/스크랩 상태 */
+  const [liked, setLiked] = useState<boolean>(post?.liked ?? false);
+  const [scrapped, setScrapped] = useState<boolean>(post?.scrapped ?? false);
+  const [likeCount, setLikeCount] = useState<number>(post?.likeCount ?? 0);
+
+  /* 댓글 */
+  const [comments, setComments] = useState<any[]>([]);
   const [newComment, setNewComment] = useState("");
+  const [editCommentId, setEditCommentId] = useState<number | null>(null);
+  const [editContent, setEditContent] = useState("");
 
-  const handleLike = () => setLiked((prev) => !prev);
-  const handleScrap = () => setScrapped((prev) => !prev);
+  const safe = (url?: string | null) =>
+    !url || url === "string" || url.startsWith("blob:")
+      ? "/images/default.png"
+      : url;
 
-  const handleAddComment = () => {
+  /* 게시글 상세 불러오기 */
+  useEffect(() => {
+    const fetchDetail = async () => {
+      try {
+        if (!initialPost) {
+          const data = await getCommunityPostDetail(postId);
+
+          setPost({
+            ...data,
+            imageUrl: safe(data.imageUrl),
+            userProfileImageUrl: safe(data.userProfileImageUrl),
+          });
+
+          setLiked(data.liked ?? false);
+          setScrapped(data.scrapped ?? false);
+          setLikeCount(data.likeCount ?? 0);
+        } else {
+          setPost({
+            ...initialPost,
+            imageUrl: safe(initialPost.imageUrl),
+            userProfileImageUrl: safe(initialPost.userProfileImageUrl),
+          });
+
+          setLiked(initialPost.liked ?? false);
+          setScrapped(initialPost.scrapped ?? false);
+          setLikeCount(initialPost.likeCount ?? 0);
+        }
+      } catch (err) {
+        console.error("상세 불러오기 오류:", err);
+      }
+    };
+
+    fetchDetail();
+  }, [postId]);
+
+  /* 댓글 불러오기 */
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const res = await getComments(postId);
+
+        let list: any[] = [];
+        if (Array.isArray(res)) list = res;
+        else if (Array.isArray(res?.result)) list = res.result;
+
+        setComments(list);
+      } catch (err) {
+        console.error("댓글 불러오기 실패:", err);
+      }
+    };
+
+    load();
+  }, [postId]);
+
+  if (!post) return <div className="h-screen bg-white"></div>;
+
+  /* 댓글 작성 */
+  const handleAddComment = async () => {
     if (!newComment.trim()) return;
-    const newCmt = { id: Date.now(), user: "나", text: newComment };
-    setComments([...comments, newCmt]);
+
+    const created = await createComment(postId, newComment);
+
+    if (created) {
+      setComments((prev) => [...prev, created]);
+      setPost((prev: any) => ({
+        ...prev,
+        commentCount: prev.commentCount + 1,
+      }));
+    }
+
     setNewComment("");
   };
 
-  //  프로필 페이지로 이동
-  const handleProfileClick = (userId: string) => {
-    navigate(`/profile/${userId}`);
+  /* 댓글 삭제 */
+  const handleDeleteComment = async (commentId: number) => {
+    await deleteComment(commentId);
+
+    setComments((prev) => prev.filter((c) => c.commentId !== commentId));
+    setPost((prev: any) => ({
+      ...prev,
+      commentCount: prev.commentCount - 1,
+    }));
+  };
+
+  /* 댓글 수정 */
+  const handleEditStart = (commentId: number, content: string) => {
+    setEditCommentId(commentId);
+    setEditContent(content);
+  };
+
+  const handleEditSave = async (commentId: number) => {
+    if (!editContent.trim()) return;
+
+    try {
+      await updateComment(commentId, editContent);
+
+      setComments((prev) =>
+        prev.map((c) =>
+          c.commentId === commentId ? { ...c, content: editContent } : c
+        )
+      );
+
+      setEditCommentId(null);
+      setEditContent("");
+    } catch (err) {
+      console.error("댓글 수정 실패:", err);
+    }
+  };
+
+  /* 좋아요 토글 */
+  const handleToggleLike = async () => {
+    try {
+      await toggleLike(postId);
+
+      setLiked((prev) => !prev);
+
+      setLikeCount((prev) => {
+        const newCount = liked ? prev - 1 : prev + 1;
+
+        setPost((p: any) => ({
+          ...p,
+          likeCount: newCount,
+          liked: !liked,
+        }));
+
+        return newCount;
+      });
+    } catch (err) {
+      console.error("좋아요 토글 실패:", err);
+    }
+  };
+
+  /* 스크랩 토글 */
+  const handleToggleScrap = async () => {
+    try {
+      await toggleScrap(postId);
+
+      setScrapped((prev) => !prev);
+
+      setPost((p: any) => ({
+        ...p,
+        scrapped: !scrapped,
+      }));
+    } catch (err) {
+      console.error("스크랩 토글 실패:", err);
+    }
+  };
+
+  /* 게시글 삭제 */
+  const handleDeletePost = async () => {
+    if (!window.confirm("정말 삭제하시겠습니까?")) return;
+
+    try {
+      await deletePost(postId);
+      alert("게시글 삭제됨");
+      navigate("/community");
+    } catch (err) {
+      console.error(" 삭제 실패:", err);
+      alert("삭제 실패");
+    }
+  };
+
+  /* 게시글 수정 */
+  const handleEditPost = () => {
+    navigate("/community/write", {
+      state: { post, isEdit: true },
+    });
+  };
+
+  /* 뒤로가기: 목록으로 좋아요/스크랩 반영 */
+  const goBackWithSync = () => {
+    navigate("/community", {
+      state: {
+        updatedPost: {
+          postId,
+          likeCount,
+          scrapStatus: scrapped,
+        },
+      },
+    });
   };
 
   return (
-    <motion.div
-      className="w-full min-h-screen bg-white flex flex-col items-center"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6 }}
-    >
+    <div className="w-full max-w-[480px] mx-auto min-h-screen bg-[#F9FAFB] pb-[200px] pt-[64px]">
+
       {/* 헤더 */}
-      <div className="sticky top-0 w-full bg-white flex items-center justify-between px-4 py-3 border-b shadow-sm z-10">
-        <button
-          onClick={() => navigate(-1)}
-          className="w-[38px] h-[38px] flex items-center justify-center rounded-full hover:bg-gray-100 transition"
-        >
-          <ArrowLeft size={20} className="text-gray-700" />
-        </button>
-        <h1 className="text-[17px] font-semibold text-gray-800">여행자 커뮤니티</h1>
-        <div className="w-[38px]" />
+      <div className="flex items-center justify-between bg-white px-4 py-4 border-b">
+        <div className="flex items-center gap-3">
+          <button onClick={goBackWithSync}>
+            <img src="/images/109618.png" className="w-[24px]" />
+          </button>
+
+          <img
+            src="/images/profile.png"
+            className="w-10 h-10 rounded-full object-cover"
+          />
+
+          <div className="flex flex-col">
+            <span className="font-semibold">{post.userNickname}</span>
+            <span className="text-[10px] text-gray-700">
+              {getRelativeTime(post.createdAt)}
+            </span>
+          </div>
+        </div>
+
+        {/* 메뉴 */}
+        <div className="relative">
+          <button onClick={() => setShowMenu(!showMenu)}>
+            <img src="/images/more.png" className="w-6" />
+          </button>
+
+          {showMenu && (
+            <div className="absolute right-0 mt-2 w-[160px] bg-white rounded-xl shadow-xl border p-2 z-50">
+
+              <button
+                className="flex items-center gap-2 w-full px-2 py-2 text-left hover:bg-gray-100 rounded-lg"
+                onClick={handleEditPost}
+              >
+                <img src="/images/edit-icon.png" className="w-4 h-4" />
+                <span>게시글 수정</span>
+              </button>
+
+              <button
+                className="flex items-center gap-2 w-full px-2 py-2 text-left text-red-500 hover:bg-gray-100 rounded-lg"
+                onClick={handleDeletePost}
+              >
+                <img src="/images/delete.png" className="w-4 h-4" />
+                <span>게시글 삭제</span>
+              </button>
+
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* 게시글 본문 */}
-      <div className="w-[90%] mt-4 mb-24">
-        {/* 작성자 정보 */}
-        <div className="flex items-center justify-between mb-3">
-          {/* 작성자 이름 클릭 시 프로필로 이동 */}
-          <button
-            onClick={() => handleProfileClick("user-minji")} // userId를 API 데이터에 맞게 변경 가능
-            className="text-[15px] font-semibold text-gray-800 hover:text-[#FF7070] transition"
+      {/* 이미지 */}
+      <img
+        src={post.imageUrl}
+        className="h-[280px] object-cover my-6 mx-6 shadow-sm rounded-xl"
+        style={{ width: "calc(100% - 48px)" }}
+      />
+
+      {/* 본문 */}
+      <div className="bg-white px-3 py-1 mt-2">
+
+        <span className="text-[12px]">📌 {post.regionName}</span>
+
+        <h2 className="text-[15px] text-black-800 font-semibold mt-1">
+          {post.title}
+        </h2>
+
+        <p className="text-[11px] text-gray-700 whitespace-pre-line mt-2">
+          {post.content}
+        </p>
+
+        {/* 태그 */}
+        {Array.isArray(post.tags) && post.tags.length > 0 && (
+          <div className="flex gap-2 flex-wrap mt-2 mb-2">
+            {post.tags.map((tag: string) => (
+              <span
+                key={tag}
+                className="px-3 py-[4px] bg-[#FF7070] text-white rounded-full text-[12px]"
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
+
+        {/* 좋아요 / 댓글 / 스크랩 */}
+        <div className="flex items-center gap-32 text-[14px] mt-6 ">
+
+          {/* 좋아요 */}
+          <div
+            className="flex items-center ml-6 gap-1 cursor-pointer active:scale-95 transition"
+            onClick={handleToggleLike}
           >
-            여행자 민지
-          </button>
-          <button className="text-[13px] text-[#FF7070] font-medium">
-            팔로우
-          </button>
+            <img src="/images/Heart.png" className="w-5" />
+            {likeCount}
+          </div>
+
+          {/* 댓글 */}
+          <div className="flex items-center gap-1">
+            <img src="/images/msg.png" className="w-4" />
+            {post.commentCount ?? 0}
+          </div>
+
+          {/* 스크랩 */}
+          <div
+            className="flex items-center mr-2 gap-1 cursor-pointer active:scale-95 transition"
+            onClick={handleToggleScrap}
+          >
+            <img src="/images/mark.png" className="w-5" />
+            저장
+          </div>
         </div>
-
-        {/* 게시글 이미지 */}
-        <img
-          src="/images/sample-travel.jpg"
-          alt="게시글 이미지"
-          className="w-full h-[320px] object-cover rounded-[14px] mb-3"
-        />
-
-        {/* 좋아요/댓글/스크랩 아이콘 */}
-        <div className="flex items-center gap-6 mb-3">
-          <button onClick={handleLike}>
-            <Heart
-              size={24}
-              className={liked ? "fill-[#FF7070] text-[#FF7070]" : "text-gray-600"}
-            />
-          </button>
-          <MessageCircle size={24} className="text-gray-600" />
-          <button onClick={handleScrap}>
-            <Bookmark
-              size={22}
-              className={scrapped ? "fill-[#FF7070] text-[#FF7070]" : "text-gray-600"}
-            />
-          </button>
-        </div>
-
-        {/* 제목 및 내용 */}
-        <p className="font-semibold text-[15px] text-gray-900 mb-1">
-          남한산성 단풍 너무 예뻐요
-        </p>
-        <p className="text-[14px] text-gray-700 leading-relaxed">
-          주말에 남한산성 다녀왔는데 진짜 색감이 예술이에요.
-          단풍이랑 하늘이 너무 예뻐서 사진 엄청 찍었어요!
-        </p>
       </div>
 
-      {/* 댓글 영역 */}
-      <div className="w-[90%] mb-28">
-        <p className="font-semibold text-[15px] mb-3">
-          댓글 {comments.length}개
-        </p>
+      {/* 댓글 */}
+      <div className="px-4 mt-6">
+
+        <div className="flex justify-between mb-3">
+          <h3 className="text-[12px] text-gray-400 font-semibold">
+            모든 댓글
+          </h3>
+
+          <span className="text-[12px] text-gray-400">
+            저장 {post.viewCount ?? 0}회
+          </span>
+        </div>
+
         {comments.map((c) => (
-          <div key={c.id} className="border-b pb-2 mb-2">
-            <p className="text-[14px] font-semibold text-gray-800">{c.user}</p>
-            <p className="text-[14px] text-gray-600">{c.text}</p>
+          <div key={c.commentId} className="bg-white p-4 rounded-xl shadow mb-3">
+
+            <div className="flex justify-between items-center">
+              <div className="flex items-center gap-2">
+                <img
+                  src="/images/profile.png"
+                  className="w-7 h-7 rounded-full object-cover"
+                />
+                <span className="text-[11px] font-medium">
+                  {c.userNickname}
+                </span>
+                <span className="text-[8px] text-gray-400">
+                  {getRelativeTime(c.createdAt)}
+                </span>
+              </div>
+
+              <div className="flex flex-col items-center text-gray-400">
+                <img src="/images/Heart.png" className="w-5" />
+                <span className="text-[11px]">{c.likeCount ?? 0}</span>
+              </div>
+            </div>
+
+            {/* 수정 모드 */}
+            {editCommentId === c.commentId ? (
+              <>
+                <textarea
+                  value={editContent}
+                  onChange={(e) => setEditContent(e.target.value)}
+                  className="w-full border rounded-lg px-3 py-2 text-[14px] mt-2"
+                />
+
+                <div className="flex gap-4 mt-2 text-[12px]">
+                  <button
+                    className="text-[#FF7070] font-medium"
+                    onClick={() => handleEditSave(c.commentId)}
+                  >
+                    저장
+                  </button>
+
+                  <button
+                    className="text-gray-500"
+                    onClick={() => setEditCommentId(null)}
+                  >
+                    취소
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <p className="text-gray-700 mt-2">{c.content}</p>
+
+                <div className="flex gap-4 mt-2 text-[12px] text-gray-500">
+                  <button>답글 달기</button>
+                  <button onClick={() => handleEditStart(c.commentId, c.content)}>
+                    수정
+                  </button>
+                  <button onClick={() => handleDeleteComment(c.commentId)}>
+                    삭제
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         ))}
       </div>
 
-      {/* 댓글 입력창 */}
-      <div className="fixed bottom-20 w-full max-w-[480px] bg-white border-t flex items-center px-3 py-2">
+      {/* 댓글 입력 */}
+      <div className="fixed bottom-[70px] left-1/2 -translate-x-1/2 w-full max-w-[480px] px-4 py-3 bg-white flex items-center gap-3 border-t shadow-lg">
+
         <input
-          type="text"
-          placeholder="댓글을 입력하세요..."
           value={newComment}
           onChange={(e) => setNewComment(e.target.value)}
-          className="flex-1 text-[14px] border rounded-[10px] px-3 py-2 outline-none"
+          placeholder="댓글을 작성하세요…"
+          className="flex-1 border rounded-full px-4 py-2 text-[10px]"
         />
+
         <button
           onClick={handleAddComment}
-          className="ml-2 px-4 py-2 text-[14px] bg-[#FF7070] text-white rounded-[10px] hover:bg-[#ff5a5a] transition"
+          className="w-10 h-10 bg-[#FF7070] rounded-full flex items-center justify-center text-white active:scale-95"
         >
-          등록
+          <img src="/images/BackIcon.png" className="w-4 h-4" />
         </button>
       </div>
-    </motion.div>
+    </div>
   );
 }

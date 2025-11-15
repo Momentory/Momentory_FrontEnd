@@ -1,95 +1,159 @@
-import { api } from "./client";
-import { tokenStore } from "../lib/token";
-// --- 명세에 있는 엔드포인트들 ---
+import { api } from './client';
+import { tokenStore } from '../lib/token';
 
-export const signup = (payload: {
+/* ----------------------------- 타입 정의 ----------------------------- */
+
+// 로그인 응답 타입
+interface LoginResponse {
+  result: {
+    accessToken: string;
+    refreshToken: string;
+  };
+}
+
+// 회원가입 Payload 
+export interface SignupPayload {
   email: string;
   password: string;
-  nickname: string;
-  name?: string;
-  phone?: string;
-  birth?: string;
-}) => api.post("/api/auth/userSignup", payload);
+  nickName: string;          // ← Swagger 기준: nickname
+  name: string;
+  phone: string;
+  gender: 'MALE' | 'FEMALE';
+  birthDate: string;
+  agreeTerms: boolean;
+  characterType: string;     // "CAT" 등 백엔드 enum
 
+  // 선택 필드
+  imageName?: string;
+  imageUrl?: string;
+  bio?: string;
+  externalLink?: string;
+  [key: string]: unknown;
+}
+
+interface CheckResult {
+  available: boolean;
+  valid?: boolean;
+  message?: string;
+}
+
+/* ----------------------------- 회원가입 / 로그인 ----------------------------- */
+
+// 회원가입
+export const signup = (payload: SignupPayload) => {
+  return api.post('/api/auth/userSignup', payload, {
+    headers: { 'Content-Type': 'application/json' },
+  });
+};
+
+// 로그인
 export const login = async (payload: { email: string; password: string }) => {
-  const { data }: { data: { result: { accessToken: string; refreshToken: string } } } =
-    await api.post("/auth/login", payload);
-
-  const { accessToken, refreshToken } = data.result;
-
-  // 토큰 저장
-  tokenStore.set({ accessToken, refreshToken });
-
-  // Axios 인스턴스에도 즉시 반영
-  api.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
-
-  return data.result;
-};
-
-
-export const logout = async () => {
-  await api.delete("/api/auth/logout");
-  tokenStore.clear();
-};
-
-export const reissue = async () => {
-  const { data }: { data: { result: { accessToken: string; refreshToken: string } } } =
-    await api.post("/api/auth/reissue", {
-      refreshToken: tokenStore.getRefresh(),
-    });
-  tokenStore.set({ accessToken: data.result.accessToken, refreshToken: data.result.refreshToken });
-  return data.result;
-};
-
-
-// 검증/중복확인/이메일 관련
-export const checkEmail = (email: string) =>
-  api.get("/auth/check-email", { params: { email} });
-
-// 닉네임 중복 확인
-export const checkNickname = async (nickname: string) => {
   try {
-    const res = await api.get("/api/auth/check-nickname", {
-      params: { nickname },
-    });
-    console.log("서버 응답 전체:", res);
+    const { data }: { data: LoginResponse } = await api.post('/api/auth/login', payload);
+    const { accessToken, refreshToken } = data.result;
 
-    //백엔드가 data 없이 200만 주는 경우 true로 처리
-    if (res.status === 200 && !res.data) {
-      return { available: true };
-    }
+    tokenStore.set({ accessToken, refreshToken });
+    api.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
 
-    // axios 구조에서는 res.data가 실제 body
-    return res.data; // body만 리턴
+    return data;
   } catch (error) {
-    console.error("닉네임 중복확인 실패:", error);
+    console.error('Login Failed:', error);
     throw error;
   }
 };
 
+// 로그아웃
+export const logout = async () => {
+  try {
+    await api.delete('/api/auth/logout');
+  } catch (err) {
+    console.error('로그아웃 요청 실패:', err);
+  } finally {
+    tokenStore.clear();
+    delete api.defaults.headers.common['Authorization'];
+  }
+};
 
-export const sendEmail = (email: string) =>
-  api.post("/auth/send-email", { email });
+// 토큰 재발급
+export const reissue = async () => {
+  try {
+    const { data }: { data: LoginResponse } = await api.post('/api/auth/reissue', {
+      refreshToken: tokenStore.getRefresh(),
+    });
 
-export const checkEmailVerified = (email: string) =>
-  api.get("/auth/check-email-verified", { params: { email } });
+    tokenStore.set({
+      accessToken: data.result.accessToken,
+      refreshToken: data.result.refreshToken,
+    });
 
-// 비밀번호 유효성 검사
-export const validatePassword = async (
-  password: string
-): Promise<{ valid: boolean; message?: string }> => {
-  const { data } = await api.get("/api/auth/validate-password", {
-    params: { password },
+    api.defaults.headers.common['Authorization'] = `Bearer ${data.result.accessToken}`;
+
+    return data.result;
+  } catch (error) {
+    console.error('토큰 재발급 실패:', error);
+    tokenStore.clear();
+    throw error;
+  }
+};
+
+/* ----------------------------- 이메일 / 닉네임 / 인증 관련 ----------------------------- */
+
+//이메일 전송
+export const sendEmail = async (email: string) => {
+  return api.post('/api/auth/send-email', email, {
+    headers: { "Content-Type": "text/plain" },
   });
-  return data;
 };
 
 
+
+// 이메일 중복 체크
+export const checkEmail = async (email: string) => {
+  const encoded = encodeURIComponent(email);
+  const { data } = await api.get(`/api/auth/check-email?email=${encoded}`);
+  return data;
+};
+
+// 이메일 인증 여부 확인
+export const checkEmailVerified = async (email: string) => {
+  const encoded = encodeURIComponent(email);
+  const { data } = await api.get(`/api/auth/check-email-verified?email=${encoded}`);
+  return data;
+};
+
+// 닉네임 중복 체크
+export const checkNickname = async (nickname: string): Promise<CheckResult> => {
+  try {
+    const res = await api.get('/api/auth/check-nickname', {
+      params: { nickname },
+    });
+    return { available: res.data.result === '중복 없음' };
+  } catch (error) {
+    console.error('닉네임 중복확인 실패:', error);
+    return { available: false };
+  }
+};
+
+/* ----------------------------- 비밀번호 ----------------------------- */
+
+// 비밀번호 검증
+export const validatePassword = async (password: string) => {
+  try {
+    const { data } = await api.get('/api/auth/validate-password', {
+      params: { password },
+    });
+    return data;
+  } catch (error) {
+    console.error('비밀번호 유효성 검사 실패:', error);
+    throw error;
+  }
+};
+
+// 비밀번호 변경
 export const changePassword = (payload: { email: string; newPassword: string }) =>
-  api.patch("/api/auth/change-password", payload);
+  api.patch('/api/auth/change-password', payload);
 
-// (선택) 카카오 프로필 설정 (isProfileComplete 플로우용)
-export const setKakaoProfile = (payload: Record<string, any>) =>
-  api.post("/api/auth/kakao/profile", payload);
+/* ----------------------------- 카카오 프로필 ----------------------------- */
 
-
+export const setKakaoProfile = (payload: Record<string, unknown>) =>
+  api.post('/api/auth/kakao/profile', payload);

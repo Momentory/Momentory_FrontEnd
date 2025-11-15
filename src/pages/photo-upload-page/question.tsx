@@ -1,11 +1,14 @@
 import { useNavigate, useLocation } from 'react-router-dom';
 import defaultImage from '../../assets/p-4.svg';
+import { useCulturalStamp } from '../../hooks/stamp/useStampMutations';
+import { mapCulturalSpotName } from '../../utils/stampUtils';
 
 export default function QuestionPage() {
   const navigate = useNavigate();
   const location = useLocation();
 
   const question = location.state?.question || '경기 아트센터를 방문하셨나요?';
+  // upload-complete.tsx에서 전달하는 이미지 우선 확인
   const questionImage =
     location.state?.questionImage ||
     location.state?.selectedImage ||
@@ -32,15 +35,48 @@ export default function QuestionPage() {
   };
 
   const { keyword, particle, remainingText } = parseQuestion(question);
+  const rawSpotName = location.state?.nearbyPlace || keyword;
+  const {
+    canonicalName: culturalSpotName,
+    stampDisplayName,
+    isSupported: isSupportedSpot,
+  } = mapCulturalSpotName(rawSpotName);
+
+  const { mutate: issueCulturalStamp, isPending } = useCulturalStamp({
+    onSuccess: (response) => {
+      navigate('/authentication', {
+        state: {
+          ...location.state,
+          question,
+          questionImage,
+          culturalStampResult: response.result,
+          stampType: 'cultural',
+          stampName: stampDisplayName,
+        },
+      });
+    },
+    onError: () => {
+      alert('문화 스탬프 발급에 실패했습니다. 다시 시도해주세요.');
+    },
+  });
 
   const handleYes = () => {
-    navigate('/authentication', {
-      state: {
-        ...location.state,
-        question,
-        questionImage,
-      },
-    });
+    if (!culturalSpotName || isPending) {
+      return;
+    }
+
+    if (!isSupportedSpot) {
+      alert('문화 스탬프 지급 대상이 아닌 장소입니다.');
+      navigate('/photo-upload-complete', {
+        replace: true,
+        state: {
+          ...location.state,
+        },
+      });
+      return;
+    }
+
+    issueCulturalStamp({ spotName: culturalSpotName });
   };
 
   const handleNo = () => {
@@ -64,7 +100,7 @@ export default function QuestionPage() {
           <div className="w-60 h-60 bg-white border-2 border-[#B3B3B3] overflow-hidden shadow-xl p-5">
             <img
               src={questionImage}
-              alt="Question"
+              alt="질문 사진"
               className="w-full aspect-194/166 object-cover"
             />
           </div>
@@ -73,7 +109,8 @@ export default function QuestionPage() {
         <div className="space-y-3">
           <button
             onClick={handleYes}
-            className="w-full py-4 px-6 rounded-[25px] bg-[#FF7070] text-white font-semibold text-lg hover:bg-[#ff6060] transition-colors cursor-pointer"
+            disabled={isPending || !isSupportedSpot}
+            className="w-full py-4 px-6 rounded-[25px] bg-[#FF7070] text-white font-semibold text-lg hover:bg-[#ff6060] transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
           >
             네, 방문했어요
           </button>

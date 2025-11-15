@@ -1,6 +1,5 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 
 export default function KakaoCallback() {
   const navigate = useNavigate();
@@ -8,25 +7,12 @@ export default function KakaoCallback() {
   useEffect(() => {
     const code = new URL(window.location.href).searchParams.get("code");
 
-    if (!code) {
-      alert("카카오 로그인 실패");
-      navigate("/login");
-      return;
-    }
+    console.log("카카오 로그인 코드:", code);
+    alert("임시 로그인 성공! 캐릭터 선택 페이지로 이동합니다.");
 
-    // 카카오 인가 코드를 백엔드로 전송
-    axios
-      .get(`https://www.momentory.store/api/auth/kakao/callback?code=${code}`)
-      .then((res) => {
-        // 로그인 성공 시 토큰 저장
-        localStorage.setItem("accessToken", res.data.accessToken);
-
-        // 캐릭터 선택 페이지로 이동
-        navigate("/auth/select-character");
-      })
-      .catch(() => {
-        navigate("/login?error");
-      });
+    // 임시 로그인 처리
+    localStorage.setItem("accessToken", "dummy-token");
+    navigate("/auth/select-character");
   }, [navigate]);
 
   return (

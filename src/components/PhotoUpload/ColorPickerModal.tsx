@@ -143,8 +143,8 @@ export default function ColorPickerModal({
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-500 px-5">
-      <div className="w-64 relative bg-white rounded-2xl shadow-lg px-4 py-3 flex flex-col">
+    <div className="fixed inset-0 flex items-end justify-center z-[100] px-5 pb-32">
+      <div className="w-full max-w-[256px] relative bg-white rounded-2xl shadow-lg px-4 py-3 flex flex-col">
         {/* 헤더 */}
         <div className="relative flex items-center justify-center w-full mb-3">
           <button
