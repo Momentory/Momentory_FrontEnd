@@ -2,6 +2,7 @@ import { useState, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import html2canvas from 'html2canvas-pro';
 import DropdownHeader from '../../components/common/DropdownHeader';
+import Modal from '../../components/common/Modal';
 import StarIcon from '../../assets/icons/starIcon.svg?react';
 import ShareIcon from '../../assets/icons/albumShare.svg?react';
 import ShopIcon from '../../assets/accessories/shop.svg?react';
@@ -21,6 +22,8 @@ const ClosetPage = () => {
   const [selectedCategory, setSelectedCategory] = useState<ItemCategory>('DECORATION');
   const { height, isExpanded, setHeight, setIsExpanded } = useBottomSheet();
   const captureRef = useRef<HTMLDivElement>(null);
+  const [showRemoveAllModal, setShowRemoveAllModal] = useState(false);
+  const [showNoItemsModal, setShowNoItemsModal] = useState(false);
 
   const categoryDisplayMap: { [key in ItemCategory]: string } = {
     CLOTHING: '의상',
@@ -301,7 +304,7 @@ const ClosetPage = () => {
     alert(`${characterType === 'CAT' ? '고양이' : '강아지'}로 변경됩니다.`);
   };
 
-  const handleRemoveAll = async () => {
+  const handleRemoveAll = () => {
     if (!currentCharacter) return;
     const equipped = currentCharacter.equipped;
     const itemsToUnequip = [];
@@ -312,17 +315,33 @@ const ClosetPage = () => {
     if (equipped.decoration) itemsToUnequip.push(equipped.decoration.itemId);
 
     if (itemsToUnequip.length === 0) {
-      alert('착용 중인 아이템이 없습니다.');
+      setShowNoItemsModal(true);
       return;
     }
+
+    setShowRemoveAllModal(true);
+  };
+
+  const confirmRemoveAll = async () => {
+    if (!currentCharacter) return;
+    const equipped = currentCharacter.equipped;
+    const itemsToUnequip = [];
+
+    if (equipped.clothing) itemsToUnequip.push(equipped.clothing.itemId);
+    if (equipped.expression) itemsToUnequip.push(equipped.expression.itemId);
+    if (equipped.effect) itemsToUnequip.push(equipped.effect.itemId);
+    if (equipped.decoration) itemsToUnequip.push(equipped.decoration.itemId);
+
     try {
       for (const itemId of itemsToUnequip) {
         await unequipMutation.mutateAsync({ characterId: currentCharacter.characterId, itemId });
       }
       console.log('모든 아이템 해제 완료');
+      setShowRemoveAllModal(false);
     } catch (error) {
       console.error('아이템 해제 실패:', error);
       alert('아이템 해제에 실패했습니다.');
+      setShowRemoveAllModal(false);
     }
   };
 
@@ -405,6 +424,50 @@ const ClosetPage = () => {
         onRemoveAll={handleRemoveAll}
         isLoading={isLoading}
       />
+
+      {showRemoveAllModal && (
+        <Modal title="아이템 모두 벗기" onClose={() => setShowRemoveAllModal(false)}>
+          <div className="flex flex-col items-center text-center px-3.5 w-full">
+            <p className="text-gray-700 mb-6">
+              착용 중인<br/> 모든 아이템을 벗으시겠습니까?
+            </p>
+
+            <div className="flex w-full gap-4 justify-between">
+              <button
+                onClick={confirmRemoveAll}
+                className="flex-1 whitespace-nowrap px-6 py-2 bg-[#FF7070] text-white rounded-lg font-semibold"
+              >
+                벗기
+              </button>
+              <button
+                onClick={() => setShowRemoveAllModal(false)}
+                className="whitespace-nowrap px-6 py-2 bg-[#EAEAEA] text-[#8D8D8D] rounded-lg font-semibold"
+              >
+                취소
+              </button>
+            </div>
+          </div>
+        </Modal>
+      )}
+
+      {showNoItemsModal && (
+        <Modal title="알림" onClose={() => setShowNoItemsModal(false)}>
+          <div className="flex flex-col items-center text-center px-3.5 w-full">
+            <p className="text-gray-700 mb-4">
+              착용 중인 아이템이 없습니다.
+            </p>
+
+            <div className="flex w-full justify-center">
+              <button
+                onClick={() => setShowNoItemsModal(false)}
+                className="whitespace-nowrap px-6 py-2 bg-[#FF7070] text-white rounded-lg font-semibold w-full"
+              >
+                확인
+              </button>
+            </div>
+          </div>
+        </Modal>
+      )}
       </div>
     </div>
   );
