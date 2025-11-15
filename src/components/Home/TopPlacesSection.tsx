@@ -40,7 +40,7 @@ const TopPlacesSection = ({ topPlaces, isLoading }: TopPlacesSectionProps) => {
 
   return (
     <section className="mt-10 mb-24 overflow-hidden">
-      <h2 className="text-2xl font-extrabold mb-3 px-6">이번 주 추천 장소</h2>
+      <h2 className="text-2xl font-bold mb-3 px-6">이번 주 추천 장소</h2>
 
       {isLoading ? (
         <div className="px-6">

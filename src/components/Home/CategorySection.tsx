@@ -35,7 +35,7 @@ const CategorySection = () => {
             "linear-gradient(to bottom, rgba(255,112,112,0.95), rgba(255,150,150,0.9))",
         }}
       >
-        <h2 className="text-[23px] font-extrabold mb-3">카테고리</h2>
+        <h2 className="text-2xl font-bold mb-3">카테고리</h2>
         <div className="flex justify-around">
           {categories.map((item) => (
             <div

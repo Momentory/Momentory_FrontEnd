@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import {
   getTopPlaces,
-  getRecentPhotos,
   getCharacterStatus,
   getEvents,
   getMyPoint,
@@ -45,7 +44,6 @@ export default function HomePage() {
           profileSummary
         ] = await Promise.all([
           getTopPlaces(),
-          getRecentPhotos(),
           getCharacterStatus(),
           getEvents(),
           getMyPoint(),

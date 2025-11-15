@@ -59,7 +59,7 @@ const EventSection = ({ events, isLoading = false }: EventSectionProps) => {
   return (
     <section className="px-6 mt-8">
       <div className="flex justify-between items-center mb-3">
-        <h2 className="text-[23px] font-extrabold text-gray-900">
+        <h2 className="text-2xl font-bold text-gray-900">
           진행중인 이벤트
         </h2>
         <button
