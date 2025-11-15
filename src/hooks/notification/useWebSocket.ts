@@ -74,8 +74,8 @@ export const useWebSocket = ({
               // 콜백 실행 (ref 사용)
               onNotificationRef.current?.(notification);
 
-              // 브라우저 알림
-              if (Notification.permission === 'granted') {
+              // 브라우저 알림 (Notification API가 지원되는 경우에만)
+              if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
                 new Notification('새 알림', {
                   body: notification.message,
                   icon: '/logo.png',
@@ -106,8 +106,8 @@ export const useWebSocket = ({
     client.activate();
     stompClientRef.current = client;
 
-    // 브라우저 알림 권한 요청
-    if (Notification.permission === 'default') {
+    // 브라우저 알림 권한 요청 (Notification API가 지원되는 경우에만)
+    if (typeof Notification !== 'undefined' && Notification.permission === 'default') {
       Notification.requestPermission();
     }
 
