@@ -27,10 +27,10 @@ export interface CommunityPost {
   liked?: boolean;
 }
 
-/* ---------------------- 서버 응답 타입 (전체 조회용) ---------------------- */
-interface PageableResponse<T> {
-  content: T[];
-}
+// /* ---------------------- 서버 응답 타입 (전체 조회용) ---------------------- */
+// interface PageableResponse<T> {
+//   content: T[];
+// }
 
 interface GetPostsResponse {
   isSuccess: boolean;

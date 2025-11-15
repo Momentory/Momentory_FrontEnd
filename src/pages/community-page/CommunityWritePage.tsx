@@ -215,7 +215,7 @@ export default function CommunityWritePage() {
       }
 
       // 4) 작성 모드
-      const res = await postCommunity(payload);
+       await postCommunity(payload);
 
       alert("게시글이 등록되었습니다!");
 
