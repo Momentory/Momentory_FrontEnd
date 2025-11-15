@@ -1,4 +1,5 @@
 // 마커와 이미지 팝업 UI
+import { memo } from 'react';
 import type { Marker } from '../../types/map';
 import defaultMarkerIcon from '../../assets/map-pin.svg';
 
@@ -11,7 +12,7 @@ interface Props {
   style?: React.CSSProperties;
 }
 
-export default function MarkerPopup({
+const MarkerPopup = memo(function MarkerPopup({
   marker,
   active,
   zoomed,
@@ -101,4 +102,6 @@ export default function MarkerPopup({
       )}
     </div>
   );
-}
+});
+
+export default MarkerPopup;

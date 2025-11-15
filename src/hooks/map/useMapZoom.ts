@@ -1,5 +1,5 @@
 // 지도 확대/축소 및 마커 활성 상태 관리
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import type { Marker } from '../../types/map';
 
 interface UseMapZoomOptions {
@@ -70,16 +70,20 @@ export default function useMapZoom({ markers }: UseMapZoomOptions) {
   }, [markers]);
 
   const updateZoomState = useCallback(
-    (nextScale: number) => {
+    (nextScale: number, skipMarkerUpdate = false) => {
       scaleRef.current = nextScale;
       setScale(nextScale);
       const isZoomed = nextScale > 1.02;
       setZoomed(isZoomed);
-      if (isZoomed) {
-        const nearest = pickNearestMarker();
-        setActiveMarkerId(nearest);
-      } else {
-        setActiveMarkerId(null);
+
+      // 핀칭 중이 아닐 때만 마커 업데이트 (성능 최적화)
+      if (!skipMarkerUpdate) {
+        if (isZoomed) {
+          const nearest = pickNearestMarker();
+          setActiveMarkerId(nearest);
+        } else {
+          setActiveMarkerId(null);
+        }
       }
     },
     [pickNearestMarker]
@@ -99,26 +103,11 @@ export default function useMapZoom({ markers }: UseMapZoomOptions) {
   );
 
   const handleTouchMove = useCallback(
-    (e: React.TouchEvent) => {
-      if (!isPinchingRef.current || e.touches.length !== 2) return;
-      e.preventDefault();
-
-      // requestAnimationFrame으로 성능 최적화
-      if (rafIdRef.current) {
-        cancelAnimationFrame(rafIdRef.current);
-      }
-
-      const currentDist = getDistance(e.touches[0], e.touches[1]);
-      const startDist = pinchStartDistRef.current || currentDist;
-      const ratio = currentDist / startDist;
-      const next = Math.max(1, Math.min(2, pinchBaseScaleRef.current * ratio));
-
-      rafIdRef.current = requestAnimationFrame(() => {
-        updateZoomState(next);
-        setOriginFromMidpoint(e.touches[0], e.touches[1]);
-      });
+    (_e: React.TouchEvent) => {
+      // 네이티브 이벤트 리스너에서 처리하므로 여기서는 아무것도 안함
+      // (passive: false 경고 방지)
     },
-    [getDistance, setOriginFromMidpoint, updateZoomState]
+    []
   );
 
   const handleTouchEnd = useCallback(() => {
@@ -129,7 +118,16 @@ export default function useMapZoom({ markers }: UseMapZoomOptions) {
     isPinchingRef.current = false;
     setIsPinching(false);
     pinchStartDistRef.current = null;
-  }, []);
+
+    // 핀칭 종료 후 마커 업데이트 (성능 최적화)
+    const currentScale = scaleRef.current;
+    if (currentScale > 1.02) {
+      const nearest = pickNearestMarker();
+      setActiveMarkerId(nearest);
+    } else {
+      setActiveMarkerId(null);
+    }
+  }, [pickNearestMarker]);
 
   const handleWheel = useCallback(
     (e: React.WheelEvent) => {
@@ -169,6 +167,41 @@ export default function useMapZoom({ markers }: UseMapZoomOptions) {
     setScale(1);
     setTimeout(() => (originPosRef.current = null), 600);
   }, []);
+
+  // 터치 이벤트를 passive: false로 등록 (성능 최적화)
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const handleTouchMoveNative = (e: TouchEvent) => {
+      if (!isPinchingRef.current || e.touches.length !== 2) return;
+      e.preventDefault();
+
+      // requestAnimationFrame으로 성능 최적화
+      if (rafIdRef.current) {
+        cancelAnimationFrame(rafIdRef.current);
+      }
+
+      const currentDist = getDistance(e.touches[0], e.touches[1]);
+      const startDist = pinchStartDistRef.current || currentDist;
+      const ratio = currentDist / startDist;
+      const next = Math.max(1, Math.min(2, pinchBaseScaleRef.current * ratio));
+
+      rafIdRef.current = requestAnimationFrame(() => {
+        // 핀칭 중에는 마커 업데이트 스킵 (성능 최적화)
+        updateZoomState(next, true);
+      });
+    };
+
+    // passive: false로 등록하여 preventDefault 가능하게 함
+    container.addEventListener('touchmove', handleTouchMoveNative, {
+      passive: false,
+    });
+
+    return () => {
+      container.removeEventListener('touchmove', handleTouchMoveNative);
+    };
+  }, [getDistance, updateZoomState]);
 
   return {
     zoomed,

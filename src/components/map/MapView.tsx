@@ -1,4 +1,5 @@
 // 지도 UI 및 마커 렌더링
+import { memo, useCallback } from 'react';
 import type { MapViewProps } from '../../types/map';
 import mapBack from '../../assets/map-back.svg';
 import map from '../../assets/gyeonggi-map.svg';
@@ -10,7 +11,7 @@ const BASE_MAP_SCALE = 1.25; // 지도 기본 크기 (살짝 확대)
 const MAP_POSITION_X = -30; // 지도 X 위치 (픽셀 단위, 음수면 왼쪽, 양수면 오른쪽)
 const MAP_POSITION_Y = -15; // 지도 Y 위치 (픽셀 단위, 음수면 위쪽, 양수면 아래쪽)
 
-export default function MapView({
+const MapView = memo(function MapView({
   markers,
   zoomed,
   activeMarkerId,
@@ -30,6 +31,18 @@ export default function MapView({
 }: MapViewProps) {
   // 지도 위치는 MAP_POSITION_X, MAP_POSITION_Y 상수로 조절
   const position = { x: MAP_POSITION_X, y: MAP_POSITION_Y };
+
+  // 마커 클릭 핸들러 메모이제이션 (성능 최적화)
+  const handleMarkerClick = useCallback(
+    (markerId: number, location?: string) => {
+      const selectedMarker = markers.find((m) => m.id === markerId);
+      if (selectedMarker) {
+        zoomInMarker(selectedMarker);
+      }
+      onMarkerClick?.(markerId, location);
+    },
+    [markers, zoomInMarker, onMarkerClick]
+  );
 
   return (
     <main
@@ -77,17 +90,13 @@ export default function MapView({
               active={active}
               zoomed={zoomed}
               mapScale={scale}
-              onMarkerClick={(markerId, location) => {
-                const selectedMarker = markers.find((m) => m.id === markerId);
-                if (selectedMarker) {
-                  zoomInMarker(selectedMarker);
-                }
-                onMarkerClick?.(markerId, location);
-              }}
+              onMarkerClick={handleMarkerClick}
             />
           );
         })}
       </div>
     </main>
   );
-}
+});
+
+export default MapView;
