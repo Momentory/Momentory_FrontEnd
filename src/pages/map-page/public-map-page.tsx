@@ -67,7 +67,7 @@ export default function PublicMapPage() {
           location: regionName,
           lat: coords?.lat || 37.5,
           lng: coords?.lng || 127.0,
-          color: '#FF7070',
+          color: 'rgba(250, 186, 184, 1)',
           photo,
         });
 
@@ -76,6 +76,20 @@ export default function PublicMapPage() {
       []
     );
   }, [latestPhotos, markerIcons]);
+
+  const colorMap = useMemo(() => {
+    if (!latestPhotos) return {};
+
+    return Object.entries(latestPhotos).reduce<Record<string, string>>(
+      (acc, [regionName, photo]) => {
+        if (photo) {
+          acc[regionName] = 'rgba(250, 186, 184, 1)';
+        }
+        return acc;
+      },
+      {}
+    );
+  }, [latestPhotos]);
 
   const {
     zoomed,
@@ -174,6 +188,7 @@ export default function PublicMapPage() {
           containerRef={containerRef}
           scale={scale}
           isPinching={isPinching}
+          colorMap={colorMap}
           zoomInMarker={zoomInMarker}
           zoomOutMarker={zoomOutMarker}
           handleWheel={handleWheel}

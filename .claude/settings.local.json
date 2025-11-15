@@ -4,7 +4,8 @@
       "Bash(dir /b \"C:\\Users\\haeun\\Downloads\")",
       "Bash(findstr:*)",
       "Bash(python analyze_svg.py:*)",
-      "Bash(dir \"C:\\Users\\haeun\\OneDrive\\Desktop\\FEProject\\Momentory_FrontEnd\\src\\utils\")"
+      "Bash(dir \"C:\\Users\\haeun\\OneDrive\\Desktop\\FEProject\\Momentory_FrontEnd\\src\\utils\")",
+      "Bash(dir:*)"
     ],
     "deny": [],
     "ask": []
