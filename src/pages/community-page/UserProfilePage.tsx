@@ -1,4 +1,3 @@
-// src/pages/community-page/UserProfilePage.tsx
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -7,7 +6,7 @@ import {
   getUserProfile,
   getUserPosts,
   toggleFollowUser,
-  type CommunityPost,
+  // type CommunityPost,
 } from "../../api/community";
 import { initialCommunityPosts } from "./CommunityDummy";
 
@@ -83,7 +82,7 @@ export default function UserProfilePage() {
 
   return (
     <div className="w-full min-h-screen bg-[#F9FAFB] flex flex-col items-center mt-[60px]">
-      {/* 🔥 공통헤더 아래 나오는 "뒤로가기 바" */}
+      {/* 공통헤더  */}
       <div className="w-full max-w-[480px] bg-white h-[55px] border-b border-gray-200 flex items-center justify-center relative">
         <button
           onClick={() => navigate(-1)}
@@ -100,7 +99,7 @@ export default function UserProfilePage() {
         </span>
       </div>
 
-      {/* 🔥 로딩 처리 (hooks 아래, return 내부에서만 처리) */}
+      {/* 로딩 처리 */}
       {profileQuery.isLoading || postsQuery.isLoading ? (
         <div className="w-full h-[200px] flex items-center justify-center">
           로딩 중...
