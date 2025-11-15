@@ -21,7 +21,8 @@ import type { RouletteSlot, RouletteHistoryItem } from '../../types/roulette';
 
 export default function RoulettePage() {
   const [slots, setSlots] = useState<RouletteSlot[]>([]);
-  const [recentWinners, setRecentWinners] = useState<RouletteHistoryItem[]>([]);
+  // const [recentWinners, setRecentWinners] = useState<RouletteHistoryItem[]>([]);
+  const [, setRecentWinners] = useState<RouletteHistoryItem[]>([]);
   const [isSpinning, setIsSpinning] = useState(false);
   const [showResult, setShowResult] = useState(false);
   const [winner, setWinner] = useState<string | null>(null);
