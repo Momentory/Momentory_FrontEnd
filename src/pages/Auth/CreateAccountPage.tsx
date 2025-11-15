@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { checkEmail, sendEmail, verifyEmail, signup } from "../../api/auth";
+import { checkEmail, sendEmail, checkEmailVerified, signup } from "../../api/auth";
 
 export default function CreateAccountPage() {
   const navigate = useNavigate();
@@ -69,36 +69,41 @@ export default function CreateAccountPage() {
   };
 
   /* --------------------------- 이메일 인증 --------------------------- */
-  const handleEmailClick = async () => {
+
+  // 1) 인증 메일 발송
+  const handleSendEmail = async () => {
     if (!email) return alert("이메일을 입력해주세요.");
 
     try {
       const checkRes: any = await checkEmail(email);
 
-      if (checkRes?.result === "중복임" || checkRes?.result === "중복 있음") {
+      if (checkRes?.result === "중복 있음" || checkRes?.result === "중복임") {
         alert("이미 가입된 이메일입니다.");
         return;
       }
 
       await sendEmail(email);
       setEmailSent(true);
-      alert("인증 메일을 발송했습니다.");
-    } catch (error: any) {
+      alert("인증 메일을 발송했습니다!\n메일함에서 인증 링크를 클릭해주세요.");
+    } catch (error) {
       alert("이메일 전송 오류");
       console.error(error);
     }
   };
 
-  const handleVerifyClick = async () => {
-    const token = prompt("이메일로 받은 인증 토큰을 입력해주세요:");
-    if (!token) return;
-
+  // 2) 인증 여부 확인
+  const handleCheckVerified = async () => {
     try {
-      await verifyEmail(token);
-      setEmailVerified(true);
-      alert("이메일 인증이 완료되었습니다!");
+      const res: any = await checkEmailVerified(email);
+
+      if (res?.result === true) {
+        setEmailVerified(true);
+        alert("이메일 인증이 완료되었습니다!");
+      } else {
+        alert("아직 인증되지 않았습니다.\n메일의 인증 링크를 클릭해주세요.");
+      }
     } catch (error) {
-      alert("인증 실패");
+      alert("인증 상태 확인 실패");
       console.error(error);
     }
   };
@@ -119,7 +124,7 @@ export default function CreateAccountPage() {
       await signup({
         email,
         password,
-        nickName: nickname,   // ✅ 백엔드 정확한 필드명
+        nickName:nickname,       // ← Swagger 기준 정확함
         name,
         phone,
         gender,
@@ -134,8 +139,8 @@ export default function CreateAccountPage() {
         characterType: "CAT"
       });
 
-      alert("회원가입 완료!");
-      navigate("/account-created");
+      alert("회원가입이 완료되었습니다!");
+      navigate("/create-profile");
     } catch (err) {
       console.error("회원가입 오류:", err);
       alert("회원가입 실패");
@@ -145,7 +150,6 @@ export default function CreateAccountPage() {
   /* ----------------------------- UI ----------------------------- */
   return (
     <div className="flex flex-col items-center min-h-screen bg-white px-[28px] pt-[120px]">
-
       {/* 헤더 */}
       <div className="relative w-full mb-8">
         <img
@@ -153,11 +157,10 @@ export default function CreateAccountPage() {
           className="absolute top-[-80px] left-[2px] w-[35px] h-[35px] cursor-pointer"
           onClick={() => navigate(-1)}
         />
-        <h1 className="text-[24px] font-semibold ml-10">회원가입</h1>
+        <h1 className="text-[24px] font-semibold ml-5">회원가입</h1>
       </div>
 
       <form onSubmit={handleSubmit} className="flex flex-col w-[332px] space-y-4">
-
         {/* 이름 */}
         <div>
           <label className="text-[15px] font-semibold mb-1 block">이름</label>
@@ -227,11 +230,13 @@ export default function CreateAccountPage() {
               <option>2002</option>
               <option>2003</option>
             </select>
+
             <select value={birthMonth} onChange={(e) => setBirthMonth(e.target.value)} className="border rounded-2xl px-6 py-2">
               {[...Array(12)].map((_, i) => (
                 <option key={i}>{String(i + 1).padStart(2, "0")}</option>
               ))}
             </select>
+
             <select value={birthDay} onChange={(e) => setBirthDay(e.target.value)} className="border rounded-2xl px-6 py-2">
               {[...Array(31)].map((_, i) => (
                 <option key={i}>{String(i + 1).padStart(2, "0")}</option>
@@ -252,15 +257,25 @@ export default function CreateAccountPage() {
               className="flex-1 h-[50px] rounded-2xl border px-4"
             />
 
-            <button
-              type="button"
-              onClick={emailSent ? handleVerifyClick : handleEmailClick}
-              className={`w-[90px] h-[50px] rounded-2xl text-white ${
-                emailVerified ? "bg-green-400" : emailSent ? "bg-gray-400" : "bg-[#FF7070]"
-              }`}
-            >
-              {emailVerified ? "완료" : emailSent ? "인증" : "발송"}
-            </button>
+            {!emailSent ? (
+              <button
+                type="button"
+                onClick={handleSendEmail}
+                className="w-[90px] h-[50px] rounded-2xl text-white bg-[#FF7070]"
+              >
+                발송
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={handleCheckVerified}
+                className={`w-[90px] h-[50px] rounded-2xl text-white ${
+                  emailVerified ? "bg-green-400" : "bg-gray-400"
+                }`}
+              >
+                {emailVerified ? "완료" : "확인"}
+              </button>
+            )}
           </div>
         </div>
 
