@@ -18,5 +18,5 @@ export const effectNameMap: Record<string, string> = {
 export const expressionNameMap: Record<string, string> = {
   '감은눈': '감은눈',
   '깜찍': '깜찍',
-  '초롱눈': '초롱눈',
+  '초롱': '초롱눈',
 };

@@ -61,12 +61,36 @@ const MyClosetPage = () => {
     }
 
     const equipped = currentCharacter.equipped;
-    saveMutation.mutate({
-      clothingId: equipped.clothing?.itemId,
-      expressionId: equipped.expression?.itemId,
-      effectId: equipped.effect?.itemId,
-      decorationId: equipped.decoration?.itemId,
-    });
+    const payload: {
+      clothingId?: number;
+      expressionId?: number;
+      effectId?: number;
+      decorationId?: number;
+    } = {};
+
+    if (equipped.clothing?.itemId !== undefined) {
+      payload.clothingId = equipped.clothing.itemId;
+    }
+    if (equipped.expression?.itemId !== undefined) {
+      payload.expressionId = equipped.expression.itemId;
+    }
+    if (equipped.effect?.itemId !== undefined) {
+      payload.effectId = equipped.effect.itemId;
+    }
+    if (equipped.decoration?.itemId !== undefined) {
+      payload.decorationId = equipped.decoration.itemId;
+    }
+
+    console.log('옷장 저장 페이로드:', payload);
+    console.log('현재 장착된 아이템:', equipped);
+
+    // 아무것도 착용하지 않은 경우 체크
+    if (Object.keys(payload).length === 0) {
+      alert('저장할 아이템이 없습니다. 최소 하나의 아이템을 착용해주세요.');
+      return;
+    }
+
+    saveMutation.mutate(payload);
   };
 
   const handleApplyWardrobe = () => {

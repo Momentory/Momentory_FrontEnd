@@ -207,7 +207,10 @@ const ShopPage = () => {
         className="fixed max-w-[480px] mx-auto px-4 left-0 right-0 flex justify-between items-center gap-4 z-[100] pointer-events-auto transition-all duration-300"
         style={{ bottom: `${height + 16}px` }}
       >
-        <button className="w-12 h-12 rounded-full bg-[#FF7070] flex items-center justify-center shadow-lg cursor-pointer transition-colors">
+        <button
+          className="w-12 h-12 rounded-full bg-[#FF7070] flex items-center justify-center shadow-lg cursor-pointer transition-colors"
+          onClick={() => navigate('/my-closet')}
+        >
           <StarIcon className="w-6 h-6 text-white" />
         </button>
         <div className="flex flex-row gap-4">

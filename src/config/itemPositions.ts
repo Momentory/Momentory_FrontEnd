@@ -15,7 +15,7 @@ export const categoryDefaults: Record<string, ItemTransform> = {
   EXPRESSION: {
     scale: 0.45,
     translateX: 0,
-    translateY: -10,
+    translateY: -20,
   },
   EFFECT: {
     scale: 0.9,

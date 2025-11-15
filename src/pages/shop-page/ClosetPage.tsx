@@ -299,6 +299,37 @@ const ClosetPage = () => {
     }
   };
 
+  const handleSelectCharacter = (characterType: 'CAT' | 'DOG') => {
+    // TODO: 캐릭터 변경 API 연결
+    console.log('캐릭터 변경:', characterType);
+    alert(`${characterType === 'CAT' ? '고양이' : '강아지'}로 변경됩니다.`);
+  };
+
+  const handleRemoveAll = async () => {
+    if (!currentCharacter) return;
+    const equipped = currentCharacter.equipped;
+    const itemsToUnequip = [];
+
+    if (equipped.clothing) itemsToUnequip.push(equipped.clothing.itemId);
+    if (equipped.expression) itemsToUnequip.push(equipped.expression.itemId);
+    if (equipped.effect) itemsToUnequip.push(equipped.effect.itemId);
+    if (equipped.decoration) itemsToUnequip.push(equipped.decoration.itemId);
+
+    if (itemsToUnequip.length === 0) {
+      alert('착용 중인 아이템이 없습니다.');
+      return;
+    }
+    try {
+      for (const itemId of itemsToUnequip) {
+        await unequipMutation.mutateAsync({ characterId: currentCharacter.characterId, itemId });
+      }
+      console.log('모든 아이템 해제 완료');
+    } catch (error) {
+      console.error('아이템 해제 실패:', error);
+      alert('아이템 해제에 실패했습니다.');
+    }
+  };
+
   return (
     <div className="flex flex-col h-screen bg-white overflow-hidden">
       <DropdownHeader
@@ -374,6 +405,8 @@ const ClosetPage = () => {
         equippedAccessories={equippedAccessories}
         onAccessoryClick={handleAccessoryClick}
         onCategoryChange={handleCategoryChange}
+        onSelectCharacter={handleSelectCharacter}
+        onRemoveAll={handleRemoveAll}
       />
       </div>
     </div>
