@@ -21,8 +21,7 @@ import type { RouletteSlot, RouletteHistoryItem } from '../../types/roulette';
 
 export default function RoulettePage() {
   const [slots, setSlots] = useState<RouletteSlot[]>([]);
-  // const [recentWinners, setRecentWinners] = useState<RouletteHistoryItem[]>([]);
-  const [, setRecentWinners] = useState<RouletteHistoryItem[]>([]);
+  const [recentWinners, setRecentWinners] = useState<RouletteHistoryItem[]>([]);
   const [isSpinning, setIsSpinning] = useState(false);
   const [showResult, setShowResult] = useState(false);
   const [winner, setWinner] = useState<string | null>(null);
@@ -286,11 +285,34 @@ export default function RoulettePage() {
                           {item.reward}
                         </span>
                       </div>
-                      <img src={boxData?.icon} alt="status" />
                     </div>
+                    {item.status === 'SUCCESS' && (
+                      <span className="ml-auto text-sm font-medium text-green-600 bg-green-100 px-2 py-1 rounded">
+                        완료
+                      </span>
+                    )}
+                    {(item.status === 'IN_PROGRESS' || item.status === null) && (
+                      <span className="ml-auto text-sm font-medium text-orange-600 bg-orange-100 px-2 py-1 rounded">
+                        진행 중
+                      </span>
+                    )}
+                    {item.status === 'FAILED' && (
+                      <span className="ml-auto text-sm font-medium text-red-600 bg-red-100 px-2 py-1 rounded">
+                        실패
+                      </span>
+                    )}
                   </div>
-                );
-              })}
+                  {item.deadline && (
+                    <div className="text-sm text-gray-600 pl-10">
+                      마감: {new Date(item.deadline).toLocaleDateString('ko-KR', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                      })}
+                    </div>
+                  )}
+                </div>
+              ))}
             </div>
           </div>
         </div>
