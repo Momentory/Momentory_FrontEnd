@@ -23,7 +23,7 @@ export default function StampCollectionPage() {
       />
 
       {/* 조건부 컨텐츠 렌더링 */}
-      <div className="pt-2">
+      <div>
         {activeTab === 'culture' ? (
           <CultureStampContent />
         ) : (
