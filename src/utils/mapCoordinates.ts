@@ -18,7 +18,7 @@ export const REGION_MAP_POSITIONS: Record<
 > = {
   // 북부 지역 - 부천/성남 기준 위쪽
   연천군: { top: '20%', left: '50%' },
-  동두천시: { top: '40%', left: '50%' },
+  동두천시: { top: '39%', left: '50%' },
   포천시: { top: '28%', left: '67%' },
   파주시: { top: '32%', left: '27%' },
   양주시: { top: '35%', left: '50%' },
@@ -27,7 +27,7 @@ export const REGION_MAP_POSITIONS: Record<
   // 중북부 지역 - 부천 위쪽/왼쪽
   김포시: { top: '43%', left: '20%' },
   고양시: { top: '46%', left: '34%' },
-  가평군: { top: '44%', left: '67%' },
+  가평군: { top: '44%', left: '67%' }, //기준점 5 
 
   // 중앙 지역 - 성남 주변
   남양주시: { top: '48%', left: '64%' },
@@ -46,7 +46,7 @@ export const REGION_MAP_POSITIONS: Record<
   시흥시: { top: '59%', left: '32%' },
   군포시: { top: '61%', left: '45%' },
   안산시: { top: '63%', left: '30%' },
-  수원시: { top: '60%', left: '47%' },
+  수원시: { top: '60%', left: '47%' }, //기준점 4
   용인시: { top: '65%', left: '59%' },
 
   // 남부 지역 - 수원 아래

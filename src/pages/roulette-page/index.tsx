@@ -239,7 +239,7 @@ export default function RoulettePage() {
             <button
               onClick={handleSpin}
               disabled={isSpinning}
-              className={`w-full py-4 px-6 rounded-4xl font-bold text-white text-lg ${
+              className={`w-full py-4 px-6 rounded-4xl font-bold text-white text-lg mb-4 ${
                 isSpinning
                   ? 'bg-[#EAEAEA]'
                   : 'bg-[#FF7070] hover:bg-[#ff6060] active:bg-[#ff5050] cursor-pointer'
@@ -247,6 +247,18 @@ export default function RoulettePage() {
             >
               ▶ 룰렛 돌리기
             </button>
+          <div className="bg-[#FFF5F5] border border-[#FF7070] rounded-xl p-4 mb-4">
+              <div className="flex flex-col gap-2 text-sm text-[#444444]">
+                <p className="flex items-start">
+                  <span className="text-[#FF7070] mr-2">•</span>
+                  <span>룰렛 돌리는데 한번씩 <strong className="text-[#FF7070]">200포인트</strong>가 차감됩니다!</span>
+                </p>
+                <p className="flex items-start">
+                  <span className="text-[#FF7070] mr-2">•</span>
+                  <span>만약 <strong>3일 이내</strong>에 해당 지역에 방문하여 사진을 업로드한다면 추가로 <strong className="text-[#FF7070]">500포인트</strong>가 주어집니다.</span>
+                </p>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -269,9 +281,6 @@ export default function RoulettePage() {
                       <div className="flex items-center gap-2">
                         <span className="text-[18px] font-bold text-[#000000]">
                           {item.reward}
-                        </span>
-                        <span className="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-0.5 rounded">
-                          {item.type === 'TRAVEL' ? '여행' : '일반'}
                         </span>
                       </div>
                     </div>

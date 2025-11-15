@@ -1,5 +1,5 @@
 // 하단시트(드래그/토글) UI
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { MapPhoto } from '../../types/map';
 import {
@@ -29,8 +29,8 @@ export default function BottomSheet({
   const navigate = useNavigate();
 
   const MAX_HEIGHT = 516;
-  const MIN_HEIGHT = 100;
-  const BOTTOM_BAR_HEIGHT = 80; // bottom navigation bar 높이
+  const MIN_HEIGHT = 40; // 슬라이드바가 살짝만 보이도록 조정
+  const BOTTOM_BAR_HEIGHT = 70; // bottom navigation bar 높이
 
   const {
     data: myRegionPhotos,
@@ -67,44 +67,72 @@ export default function BottomSheet({
       .replace(/\.\s?/g, '.');
   }, [recentPhoto, regionPhotos]);
 
-  const thumbnails = useMemo(() => regionPhotos.slice(0, 5), [regionPhotos]);
-  const remainingCount = Math.max(regionPhotos.length - thumbnails.length, 0);
+  const thumbnails = useMemo(() => {
+    if (regionPhotos.length >= 6) {
+      return regionPhotos.slice(0, 5);
+    }
+    return regionPhotos;
+  }, [regionPhotos]);
 
-  const handleDrag = (e: React.MouseEvent) => {
-    e.preventDefault();
-    const startY = e.clientY;
-    const startHeight = height;
-    const startExpanded = isExpanded;
+  const remainingCount = Math.max(regionPhotos.length - 5, 0);
+  const shouldShowViewAll = regionPhotos.length >= 6;
 
-    const onMove = (event: MouseEvent) => {
-      event.preventDefault();
-      const deltaY = startY - event.clientY;
-      setHeight(
-        Math.max(MIN_HEIGHT, Math.min(MAX_HEIGHT, startHeight + deltaY))
-      );
+  const dragHandleRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const dragHandle = dragHandleRef.current;
+    if (!dragHandle) return;
+
+    const handleStart = (e: MouseEvent | TouchEvent) => {
+      e.preventDefault();
+      const startY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+      const startHeight = height;
+      const startExpanded = isExpanded;
+
+      const onMove = (event: MouseEvent | TouchEvent) => {
+        event.preventDefault();
+        const clientY = 'touches' in event ? event.touches[0].clientY : event.clientY;
+        const deltaY = startY - clientY;
+        setHeight(
+          Math.max(MIN_HEIGHT, Math.min(MAX_HEIGHT, startHeight + deltaY))
+        );
+      };
+
+      const onEnd = (event: MouseEvent | TouchEvent) => {
+        event.preventDefault();
+        const clientY = 'changedTouches' in event ? event.changedTouches[0].clientY : (event as MouseEvent).clientY;
+        const deltaY = startY - clientY;
+
+        if (deltaY > 30) {
+          setHeight(MAX_HEIGHT);
+          setIsExpanded(true);
+        } else if (deltaY < -30) {
+          setHeight(MIN_HEIGHT);
+          setIsExpanded(false);
+        } else {
+          setHeight(startExpanded ? MAX_HEIGHT : MIN_HEIGHT);
+        }
+
+        document.removeEventListener('mousemove', onMove);
+        document.removeEventListener('mouseup', onEnd);
+        document.removeEventListener('touchmove', onMove);
+        document.removeEventListener('touchend', onEnd);
+      };
+
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup', onEnd);
+      document.addEventListener('touchmove', onMove, { passive: false });
+      document.addEventListener('touchend', onEnd);
     };
 
-    const onUp = (event: MouseEvent) => {
-      event.preventDefault();
-      const deltaY = startY - event.clientY;
+    dragHandle.addEventListener('mousedown', handleStart);
+    dragHandle.addEventListener('touchstart', handleStart, { passive: false });
 
-      if (deltaY > 30) {
-        setHeight(MAX_HEIGHT);
-        setIsExpanded(true);
-      } else if (deltaY < -30) {
-        setHeight(MIN_HEIGHT);
-        setIsExpanded(false);
-      } else {
-        setHeight(startExpanded ? MAX_HEIGHT : MIN_HEIGHT);
-      }
-
-      document.removeEventListener('mousemove', onMove);
-      document.removeEventListener('mouseup', onUp);
+    return () => {
+      dragHandle.removeEventListener('mousedown', handleStart);
+      dragHandle.removeEventListener('touchstart', handleStart);
     };
-
-    document.addEventListener('mousemove', onMove);
-    document.addEventListener('mouseup', onUp);
-  };
+  }, [height, isExpanded, setHeight, setIsExpanded]);
 
   const handleClick = () => {
     if (isExpanded) {
@@ -200,16 +228,18 @@ export default function BottomSheet({
           </button>
         ))}
 
-        <button
-          type="button"
-          className="flex h-[106px] items-center justify-center rounded-lg bg-[#C8B6B6] text-lg font-bold text-white transition hover:bg-[#b79f9f]"
-          onClick={(e) => {
-            e.stopPropagation();
-            handleNavigateList();
-          }}
-        >
-          {remainingCount > 0 ? `+${remainingCount}` : '전체 보기'}
-        </button>
+        {shouldShowViewAll && (
+          <button
+            type="button"
+            className="flex h-[106px] items-center justify-center rounded-lg bg-[#C8B6B6] text-lg font-bold text-white transition hover:bg-[#b79f9f]"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleNavigateList();
+            }}
+          >
+            +{remainingCount}
+          </button>
+        )}
       </div>
     );
   };
@@ -229,12 +259,12 @@ export default function BottomSheet({
       )}
 
       <div
-        className="absolute left-1/2 -translate-x-1/2 w-[450px] overflow-hidden rounded-t-2xl bg-white shadow-lg transition-all duration-300 z-50"
+        className="fixed left-1/2 -translate-x-1/2 w-full max-w-[480px] overflow-hidden rounded-t-2xl bg-white shadow-lg transition-all duration-300 z-50"
         style={{ height: `${height}px`, bottom: `${BOTTOM_BAR_HEIGHT}px` }}
       >
         <div
+          ref={dragHandleRef}
           className="mx-auto mt-4 h-1 w-20 cursor-pointer rounded-full bg-[#E2E2E2]"
-          onMouseDown={handleDrag}
           onClick={handleClick}
         />
 
