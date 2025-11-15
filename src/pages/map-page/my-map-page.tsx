@@ -135,7 +135,7 @@ export default function MyMapPage() {
     }
   };
 
-  const mapHeightClass = 'h-[calc(100vh-140px)]';
+  const mapHeightClass = 'h-[calc(100vh-200px)]';
 
   return (
     <div className="relative flex justify-center items-center bg-gray-50 font-Pretendard">
@@ -149,7 +149,7 @@ export default function MyMapPage() {
           rightAction={
             <div className="relative">
               <button
-                className="cursor-pointer relative"
+                className="cursor-pointer relative translate-y-0.5"
                 onClick={() => navigate('/roulette')}
               >
                 <RouletteIcon className="w-10 h-10" />
