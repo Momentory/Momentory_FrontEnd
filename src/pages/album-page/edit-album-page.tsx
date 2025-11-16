@@ -556,9 +556,10 @@ const EditAlbumPage = () => {
         />
 
         <div
-          className="flex items-center justify-center bg-gray-50 p-4"
+          className="flex items-center justify-center bg-gray-50 p-4 overflow-y-auto pt-[112px]"
           style={{
-            height: `calc(100vh - ${bottomSheetHeight}px)`,
+            height: `100vh`,
+            marginBottom: `${bottomSheetHeight}px`,
           }}
         >
           {pages.length > 0 && (
