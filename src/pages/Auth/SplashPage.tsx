@@ -13,7 +13,7 @@ export default function SplashPage() {
 
   return (
     <div className="flex items-center justify-center h-screen bg-white">
-      <div className="flex flex-col items-center leading-none scale-[1.3]"> {/* ← 여기서 크기 키움 */}
+      <div className="flex flex-col items-center leading-none scale-[1.3]">
         <p
           style={{
             fontSize: "13px",

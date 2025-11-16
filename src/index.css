@@ -79,14 +79,48 @@ h2 {
   display: none; /* Chrome, Safari */
 }
 
-
 @keyframes fade-in {
-  0% { opacity: 0; transform: translateY(10px); }
-  20% { opacity: 1; transform: translateY(0); }
-  80% { opacity: 1; transform: translateY(0); }
-  100% { opacity: 0; transform: translateY(10px); }
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  20% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  80% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
 }
 
 .animate-fade-in {
   animation: fade-in 2s ease-in-out forwards;
+}
+
+/* 가로 스크롤바 스타일: 필터 탭 전용 */
+.filter-scrollbar {
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: #d1d1d1 transparent; /* thumb, track */
+}
+
+.filter-scrollbar::-webkit-scrollbar {
+  height: 8px; /* horizontal scrollbar height */
+}
+
+.filter-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.filter-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #d1d1d1;
+  border-radius: 9999px;
+}
+
+.filter-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: #bdbdbd;
 }

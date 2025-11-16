@@ -48,8 +48,16 @@ export function getStampImagePath(regionName: string): string {
 }
 
 export function getCulturalStampImagePath(stampName: string): string {
-  const name = stampName.trim();
-  return `/cultural-stamps/${name}.svg`;
+  // 파일명 규칙: 공백 제거 + 일부 예외 매핑
+  const trimmed = stampName.trim();
+  let fileKey = trimmed.replace(/\s+/g, '');
+
+  // 예외: 실제 파일은 '동두천시계곡.svg'
+  if (fileKey === '동두천계곡') {
+    fileKey = '동두천시계곡';
+  }
+
+  return `/cultural-stamps/${fileKey}.svg`;
 }
 
 /* 경기도 시·군 여부 체크 */

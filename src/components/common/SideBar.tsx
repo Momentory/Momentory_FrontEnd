@@ -4,7 +4,6 @@ import Profile from "../../assets/icons/defaultProfile.svg?react";
 import ShareIcon from "../../assets/icons/shareIcon.svg?react";
 import MapIcon from "../../assets/icons/mapIcon.svg?react";
 import AlbumIcon from "../../assets/icons/bookmarkIcon.svg?react";
-import EditIcon from "../../assets/icons/editIcon.svg?react";
 import CharacterIcon from "../../assets/icons/heartIcon.svg?react";
 import CollectionIcon from "../../assets/icons/bookIcon.svg?react";
 import AccessoryIcon from "../../assets/icons/accessoriesIcon.svg?react";
@@ -103,9 +102,6 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
               <li className="flex items-center gap-3 cursor-pointer hover:text-[#FF7070]" onClick={() => handleNavigate("/album")}>
                 <AlbumIcon className="w-4 h-4" /> 내 앨범
               </li>
-              <li className="flex items-center gap-3 cursor-pointer hover:text-[#FF7070]" onClick={() => handleNavigate("/photo-edit")}>
-                <EditIcon className="w-4 h-4" /> 사진 꾸미기 / 사진 편집
-              </li>
             </ul>
           </section>
 
@@ -117,7 +113,7 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
               <li className="flex items-center gap-3 cursor-pointer hover:text-[#FF7070]" onClick={() => handleNavigate("/closet")}>
                 <CharacterIcon className="w-4 h-4" /> 내 캐릭터
               </li>
-              <li className="flex items-center gap-3 cursor-pointer hover:text-[#FF7070]" onClick={() => handleNavigate("/collection")}>
+              <li className="flex items-center gap-3 cursor-pointer hover:text-[#FF7070]" onClick={() => handleNavigate("/character")}>
                 <CollectionIcon className="w-4 h-4" /> 캐릭터 컬렉션
               </li>
               <li className="flex items-center gap-3 cursor-pointer hover:text-[#FF7070]" onClick={() => handleNavigate("/shop")}>
