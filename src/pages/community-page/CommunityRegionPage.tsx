@@ -26,19 +26,13 @@ export default function CommunityRegionPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await getPostsByRegion(Number(regionId));
+        // getPostsByRegion은 이미 매핑된 posts 배열을 반환합니다
+        const posts = await getPostsByRegion(Number(regionId));
 
-        const raw = res?.data?.result?.posts || [];
-
-        const normalized = raw.map((p: any) => ({
-          ...p,
-          imageUrl: p.imageUrl ?? p.image_url ?? "",
-          userProfileImageUrl: p.userProfileImageUrl ?? p.user_profile_image_url ?? "",
-        }));
-
-        setPosts(normalized);
+        setPosts(posts || []);
       } catch (err) {
         console.error("지역 게시글 불러오기 실패:", err);
+        setPosts([]);
       } finally {
         setLoading(false);
       }
