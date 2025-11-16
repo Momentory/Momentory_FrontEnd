@@ -71,7 +71,6 @@ const CharacterDisplay = forwardRef<HTMLDivElement, CharacterDisplayProps>(({
                 src={clothingImageSrc}
                 alt="character with clothing"
                 className="w-full h-full object-contain"
-                style={{ transform: 'scaleX(-1)' }}
               />
             ) : nofaceImageSrc ? (
               <img src={nofaceImageSrc} alt="character noface" className="w-full h-full object-contain" />

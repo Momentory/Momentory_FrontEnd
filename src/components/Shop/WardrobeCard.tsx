@@ -109,7 +109,6 @@ const WardrobeCard = ({
               src={clothingImageSrc}
               alt="character with clothing"
               className="w-full h-full object-contain"
-              style={{ transform: 'scaleX(-1)' }}
             />
           ) : nofaceImageSrc ? (
             <img
