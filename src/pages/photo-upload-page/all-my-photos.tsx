@@ -106,7 +106,7 @@ export default function RegionPhotosPage() {
             </p>
           </div>
         ) : photos.length > 0 ? (
-          <div className="bg-[#EDE2E2] px-5 py-6">
+          <div className="bg-[#EDE2E2] px-5 py-6 min-h-[calc(100vh-112px-80px)]">
             <div className="grid grid-cols-2 gap-4">
               {photos.map((photo, index) => (
                 <button
