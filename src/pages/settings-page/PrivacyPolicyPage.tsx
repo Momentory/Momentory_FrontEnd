@@ -19,12 +19,12 @@ export default function PrivacyPolicyPage() {
       </div>
 
       {/* 본문 */}
-      <div className="pb-10 whitespace-pre-line leading-relaxed text-black-400 text-[12px] mt-15">
+      <div className="pb-10 whitespace-pre-line leading-relaxed text-black-400 text-[12px] mt-20">
         <h2 className="text-[29px] font-bold mb-15">📜 개인정보 및 저작권 안내</h2>
 
         <div className="space-y-6">
           <div>
-            <h3 className="text-[15px] font-semibold mb-1">📌 개인정보 처리방침</h3>
+            <h3 className="text-[15px] font-semibold mb-1 mt-10">📌 개인정보 처리방침</h3>
             <p>
               모멘토리는 회원가입 시 닉네임, 이메일, 생년월일 등 최소한의 정보만을 수집하며,
               서비스 제공 및 캐릭터 성장 시스템 운영을 위해서만 이용합니다.

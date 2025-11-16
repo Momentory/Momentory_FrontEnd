@@ -13,6 +13,7 @@ export default function CreateProfilePage() {
   const [checkingNickname, setCheckingNickname] = useState(false);
 
   const maxIntroLength = 100;
+  
 
   /* ------------------- 닉네임 자동 중복 확인 ------------------- */
   useEffect(() => {

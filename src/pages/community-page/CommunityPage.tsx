@@ -11,6 +11,21 @@ export default function CommunityPage() {
   const location = useLocation();
   const isPostAdded = useRef(false);
 
+  /* ---------------- 상대 시간 계산 함수 ---------------- */
+  function getRelativeTime(dateString?: string) {
+    if (!dateString) return "방금 전";
+
+    const now = new Date();
+    const past = new Date(dateString);
+    const diff = Math.floor((now.getTime() - past.getTime()) / 1000);
+
+    if (diff < 60) return "방금 전";
+    if (diff < 3600) return `${Math.floor(diff / 60)}분 전`;
+    if (diff < 86400) return `${Math.floor(diff / 3600)}시간 전`;
+    if (diff < 604800) return `${Math.floor(diff / 86400)}일 전`;
+    return `${Math.floor(diff / 604800)}주 전`;
+  }
+
   /* ---------------- 안전 이미지 처리 ---------------- */
   const safeImage = (url?: string | null) => {
     if (!url || url === "string" || url.trim() === "" || url.startsWith("blob:")) {
@@ -29,12 +44,11 @@ export default function CommunityPage() {
       imageUrl: "/images/image51.png",
       regionName: "고양 시, 스타필드",
       title: "이번 주말 다녀온 고양시 스타필드!",
-      content:
-        "경기도 고양시 덕양구에 위치한 스타필드에 다녀왔어요.",
-      tags: ["#고양시", "#핫플", "#야경"],
+      content: "경기도 고양시 덕양구에 위치한 스타필드에 다녀왔어요.",
+      tags: ["고양시", "핫플", "야경"],
       likeCount: 125,
       commentCount: 15,
-      time: "12분 전",
+      time: "12분 전", // 유지됨
     },
     {
       postId: 99902,
@@ -45,7 +59,7 @@ export default function CommunityPage() {
       regionName: "고양 시, 스타필드",
       title: "이번 주말 다녀온 스타필드 & 꽃 축제!",
       content: "화사한 꽃들과 함께 산책",
-      tags: ["#고양시", "#핫플", "#꽃길"],
+      tags: ["고양시", "핫플", "꽃길"],
       likeCount: 94,
       commentCount: 8,
       time: "1시간 전",
@@ -92,9 +106,12 @@ export default function CommunityPage() {
           tags: p.tags ?? [],
           likeCount: p.likeCount,
           commentCount: p.commentCount,
-          time: "방금 전",
+
+
+          time: getRelativeTime(p.createdAt),
         }));
 
+        // clean된 서버 데이터 + 더미 데이터 추가
         setPosts([...cleaned, ...initialPosts]);
       } catch (err) {
         console.error("게시글 불러오기 실패:", err);
@@ -126,6 +143,7 @@ export default function CommunityPage() {
         likeCount: 0,
         commentCount: 0,
         regionId: 1,
+        time: "방금 전",
       };
 
       setPosts((prev) => [newFormatted, ...prev]);
@@ -138,7 +156,6 @@ export default function CommunityPage() {
       isPostAdded.current = false;
     };
   }, [location.state]);
-
 
   /* ---------------- 상세 → 목록 좋아요/스크랩 상태 반영 ---------------- */
   useEffect(() => {
@@ -157,7 +174,6 @@ export default function CommunityPage() {
       )
     );
   }, [location.state?.updatedPost]);
-
 
   /* ---------------- 지역 데이터 ---------------- */
   const regionList = [
@@ -260,7 +276,7 @@ export default function CommunityPage() {
                   onClick={() =>
                     navigate(`/community/region/${city.regionId}`)
                   }
-                  className="relative rounded-2xl overflow-hidden shadow-sm active:scale-[0.98] transition"
+                  className="relative rounded-2xl overflow-hidden shadow-sm active:scale-[0.98] transition brightness-150"
                 >
                   <img
                     src={city.img}
@@ -282,10 +298,13 @@ export default function CommunityPage() {
 
       {/* 토스트 */}
       {showToast && (
-        <div className="fixed bottom-[85px] left-1/2 -translate-x-1/2 bg-[#3D3D3D] text-white px-6 py-3 rounded-full">
+        <div className="fixed bottom-[85px] left-1/2 -translate-x-1/2 
+                  bg-[#3D3D3D] text-white px-8 py-3 rounded-full 
+                  min-w-[345px] text-center whitespace-nowrap">
           게시물이 업로드 되었어요.
         </div>
       )}
+
     </div>
   );
 }
