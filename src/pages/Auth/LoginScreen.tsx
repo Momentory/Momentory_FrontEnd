@@ -1,4 +1,3 @@
-// src/pages/Auth/LoginScreen.tsx
 import { Link } from "react-router-dom";
 
 export default function LoginScreen() {
@@ -15,13 +14,12 @@ export default function LoginScreen() {
     
     console.log("localStorage 초기화 완료");
     
-    // 백엔드 OAuth 시작 엔드포인트로 리다이렉트
-    // 백엔드가 카카오 인증 후 /auth/kakao/callback으로 리다이렉트할 것임
-    const backendOAuthUrl = "https://www.momentory.store/oauth2/authorization/kakao";
+    const backendOAuthUrl = "https://www.momentory.store/oauth/authorization/kakao";
     console.log("이동할 URL:", backendOAuthUrl);
     
     window.location.href = backendOAuthUrl;
   };
+
   const handleNaverLogin = () => {
     console.log("네이버 로그인 - 아직 미구현");
     alert("네이버 로그인은 준비 중입니다.");
@@ -30,6 +28,7 @@ export default function LoginScreen() {
   const handleGoogleLogin = () => {
     console.log("구글 로그인 - 아직 미구현");
     alert("구글 로그인은 준비 중입니다.");
+  };
 
   return (
     <div className="flex flex-col items-center justify-center h-screen bg-white px-6">
