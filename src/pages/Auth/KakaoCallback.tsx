@@ -19,7 +19,7 @@ export default function KakaoCallback() {
         
         // 모든 파라미터 출력
         console.log("=== 받은 파라미터 목록 ===");
-        for (let [key, value] of params.entries()) {
+        for (const [key, value] of params.entries()) {
           console.log(`${key}:`, value);
         }
 
