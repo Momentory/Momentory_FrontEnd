@@ -11,14 +11,15 @@ export default function StampAcquisitionPage() {
 
   const stampType = location.state?.stampType ?? null;
   // stampName (문화 스탬프)와 regionName (지역 스탬프) 우선순위 처리
-  const rawRegionName = location.state?.stampName || location.state?.regionName || '하남시';
-  const regionName = extractRegionName(rawRegionName);
+  const rawStampName = location.state?.stampName || location.state?.regionName || '하남시';
+  const culturalStampName = location.state?.stampName; // 문화 스탬프 원본 이름
+  const regionName = extractRegionName(rawStampName); // 지역명 추출 (표시용)
   const points = location.state?.points || 50;
 
   // 스탬프 타입에 따라 이미지 경로 결정
   const stampImagePath = location.state?.stampImagePath ||
     (stampType === 'cultural'
-      ? getCulturalStampImagePath(regionName)
+      ? getCulturalStampImagePath(culturalStampName || regionName) // 문화 스탬프는 원본 이름 사용
       : getStampImagePath(regionName));
 
   const [imageError, setImageError] = useState(false);

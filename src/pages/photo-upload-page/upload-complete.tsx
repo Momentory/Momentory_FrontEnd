@@ -10,7 +10,6 @@ import HeartIcon from '../../assets/heart.svg?react';
 import FacebookIcon from '../../assets/facebook.svg?react';
 import Modal from '../../components/common/Modal';
 import { getImageBlob, downloadBlob } from '../../utils/image';
-import { mapCulturalSpotName } from '../../utils/stampUtils';
 import { getKakao } from '../../utils/kakao';
 import { toS3WebsiteUrl } from '../../utils/s3';
 
@@ -29,19 +28,25 @@ export default function PhotoUploadCompletePage() {
 
   useEffect(() => {
     const rouletteGranted = location.state?.rouletteRewardGranted;
-    if (rouletteGranted) {
-      setShowRouletteModal(true);
-      return;
-    }
     const nearbyPlaceName = location.state?.nearbyPlace;
+
+    // 룰렛이 있으면 2초 후 룰렛 모달 띄우기
+    if (rouletteGranted) {
+      const timer = setTimeout(() => {
+        setShowRouletteModal(true);
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+
+    // 룰렛이 없고 문화 스탬프가 있으면 2초 후 문화 스탬프 모달 띄우기
     if (nearbyPlaceName) {
-      const { isSupported } = mapCulturalSpotName(nearbyPlaceName);
-      if (isSupported) {
+      const timer = setTimeout(() => {
         setNearbyPlace(nearbyPlaceName);
         setShowNearbyPlaceModal(true);
-        return;
-      }
+      }, 2000);
+      return () => clearTimeout(timer);
     }
+
     setNearbyPlace(null);
     setShowNearbyPlaceModal(false);
   }, [location.state]);
@@ -325,11 +330,11 @@ export default function PhotoUploadCompletePage() {
     setShowRouletteModal(false);
     const nearbyPlaceName = location.state?.nearbyPlace;
     if (nearbyPlaceName) {
-      const { isSupported } = mapCulturalSpotName(nearbyPlaceName);
-      if (isSupported) {
+      // 룰렛을 닫은 후 2초 후에 문화 스탬프 모달 띄우기
+      setTimeout(() => {
         setNearbyPlace(nearbyPlaceName);
         setShowNearbyPlaceModal(true);
-      }
+      }, 2000);
     }
   };
 
