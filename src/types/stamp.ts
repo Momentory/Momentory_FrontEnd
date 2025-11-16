@@ -25,3 +25,18 @@ export interface RecentStampsResponse {
   totalRegionalCount?: number;
   totalCulturalCount?: number;
 }
+
+export interface MyStampsResult {
+  REGIONAL?: RecentStampItem[];
+  CULTURAL?: RecentStampItem[];
+  [key: string]: RecentStampItem[] | undefined;
+}
+
+export interface MyStampsResponse {
+  isSuccess: boolean;
+  code: string;
+  message: string;
+  result: MyStampsResult;
+}
+
+export type StampType = 'REGIONAL' | 'CULTURAL';

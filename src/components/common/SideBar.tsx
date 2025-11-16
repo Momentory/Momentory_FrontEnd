@@ -25,7 +25,6 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
   const [email, setEmail] = useState("example@email.com");
   const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
 
-  // 프로필 정보 조회
   useEffect(() => {
     if (isOpen) {
       const fetchProfile = async () => {
@@ -47,13 +46,15 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
   };
 
   const handleLogoutClick = async () => {
+    if (!confirm("로그아웃 하시겠습니까?")) {
+      return;
+    }
+
     try {
       await logout();
-      alert("로그아웃되었습니다.");
-      navigate("/auth/login");
+      navigate("/login");
     } catch (error) {
       console.error("로그아웃 실패:", error);
-      alert("로그아웃 중 오류가 발생했습니다.");
     } finally {
       onClose();
     }

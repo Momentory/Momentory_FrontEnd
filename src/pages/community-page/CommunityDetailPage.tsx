@@ -1,5 +1,6 @@
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { Bookmark, Heart } from "lucide-react";
 import {
   getCommunityPostDetail,
   getComments,
@@ -40,7 +41,7 @@ export default function CommunityDetailPage() {
 
   /* 좋아요/스크랩 상태 */
   const [liked, setLiked] = useState<boolean>(post?.liked ?? false);
-  const [scrapped, setScrapped] = useState<boolean>(post?.scrapped ?? false);
+  const [scrapped, setScrapped] = useState<boolean>(post?.scrapStatus ?? false);
   const [likeCount, setLikeCount] = useState<number>(post?.likeCount ?? 0);
 
   /* 댓글 */
@@ -68,7 +69,7 @@ export default function CommunityDetailPage() {
           });
 
           setLiked(data.liked ?? false);
-          setScrapped(data.scrapped ?? false);
+          setScrapped(data.scrapStatus ?? false);
           setLikeCount(data.likeCount ?? 0);
         } else {
           setPost({
@@ -78,7 +79,7 @@ export default function CommunityDetailPage() {
           });
 
           setLiked(initialPost.liked ?? false);
-          setScrapped(initialPost.scrapped ?? false);
+          setScrapped(initialPost.scrapStatus ?? false);
           setLikeCount(initialPost.likeCount ?? 0);
         }
       } catch (err) {
@@ -195,7 +196,7 @@ export default function CommunityDetailPage() {
 
       setPost((p: any) => ({
         ...p,
-        scrapped: !scrapped,
+        scrapStatus: !scrapped,
       }));
     } catch (err) {
       console.error("스크랩 토글 실패:", err);
@@ -229,6 +230,7 @@ export default function CommunityDetailPage() {
       state: {
         updatedPost: {
           postId,
+          liked,
           likeCount,
           scrapStatus: scrapped,
         },
@@ -331,10 +333,14 @@ export default function CommunityDetailPage() {
             className="flex items-center ml-6 gap-1 cursor-pointer active:scale-95 transition"
             onClick={handleToggleLike}
           >
-            <img src="/images/Heart.png" className="w-5" />
-            <span className="text-gray-500 font-semibold text-[15px]">
-              {likeCount}
-            </span>
+            <Heart
+              className={`w-5 h-5 transition-colors ${
+                liked
+                  ? "fill-red-500 text-red-500"
+                  : "fill-none text-gray-700"
+              }`}
+            />
+            {likeCount}
           </div>
 
           {/* 댓글 */}
@@ -350,10 +356,13 @@ export default function CommunityDetailPage() {
             className="flex items-center mr-2 gap-1 cursor-pointer active:scale-95 transition"
             onClick={handleToggleScrap}
           >
-            <img src="/images/mark.png" className="w-5" />
-            <span className="text-gray-500 font-semibold text-[15px]">
-              저장
-            </span>
+            <Bookmark
+              className={`w-5 h-5 transition-colors ${
+                scrapped
+                  ? "fill-yellow-400 text-yellow-400"
+                  : "fill-none text-gray-700"
+              }`}
+            />
           </div>
         </div>
 

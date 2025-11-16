@@ -29,16 +29,28 @@ export default function StampAcquisitionPage() {
   }, [stampType, navigate, location.state]);
 
   const handleClick = () => {
+    const photoId = location.state?.photoId as number | undefined;
+    const nearbySpots = location.state?.nearbySpots;
+
+    console.log('[StampAcquisition] handleClick - photoId:', photoId);
+    console.log('[StampAcquisition] handleClick - location.state:', location.state);
+
     if (stampType === 'cultural') {
+      // 문화 스탬프는 추천 여행지 페이지로 이동
       navigate('/recommended-places', {
         state: {
           ...location.state,
+          photoId, // 명시적으로 photoId 포함
+          nearbySpots, // nearbySpots도 명시적으로 포함
         },
       });
     } else {
+      // 지역 스탬프는 피그마 디자인대로 photo-upload-complete로 이동
       navigate('/photo-upload-complete', {
         state: {
           ...location.state,
+          photoId, // 명시적으로 photoId 포함
+          nearbySpots, // nearbySpots도 명시적으로 포함
           regionName,
           points,
         },

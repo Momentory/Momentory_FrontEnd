@@ -24,8 +24,6 @@ export default function LoginPage() {
         refreshToken: data.result.refreshToken,
       });
 
-      alert('로그인 성공!');
-
       navigate('/home'); // 로그인 성공 시 이동할 페이지
     } catch (err: any) {
       console.error('로그인 에러 전체:', err);

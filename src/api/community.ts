@@ -1,4 +1,4 @@
-import { api } from "./client";
+import { api } from './client';
 
 /* -------------------------------------------------------------------------- */
 /*                                   타입들                                   */
@@ -24,8 +24,11 @@ export interface CommunityPost {
   commentCount: number;
   createdAt?: string;
   updatedAt?: string;
-  scrapStatus?: boolean;
+  isLiked?: boolean;      // 백엔드 응답 필드명
+  isScrapped?: boolean;   // 백엔드 응답 필드명
+  // 하위 호환성을 위한 별칭
   liked?: boolean;
+  scrapStatus?: boolean;
 }
 
 // /* ---------------------- 서버 응답 타입 (전체 조회용) ---------------------- */
@@ -49,17 +52,20 @@ interface GetPostsResponse {
 /* ----------------------------- 전체 게시글 조회 ----------------------------- */
 export const getCommunityPosts = async (): Promise<CommunityPost[]> => {
   try {
-    const res = await api.get<GetPostsResponse>("/api/community/posts");
+    const res = await api.get<GetPostsResponse>('/api/community/posts');
     const posts = res.data?.result?.posts ?? [];
 
     return posts.map((p) => ({
       ...p,
-      imageUrl: p.imageUrl === "string" ? null : p.imageUrl,
+      imageUrl: p.imageUrl === 'string' ? null : p.imageUrl,
       userProfileImageUrl:
-        p.userProfileImageUrl === "string" ? null : p.userProfileImageUrl,
+        p.userProfileImageUrl === 'string' ? null : p.userProfileImageUrl,
+      // 백엔드 응답 필드를 컴포넌트가 사용하는 필드명으로 매핑
+      liked: p.isLiked ?? p.liked ?? false,
+      scrapStatus: p.isScrapped ?? p.scrapStatus ?? false,
     }));
   } catch (err) {
-    console.error("전체 게시글 조회 실패:", err);
+    console.error('전체 게시글 조회 실패:', err);
     return [];
   }
 };
@@ -74,11 +80,12 @@ export const getCommunityPostDetail = async (postId: number) => {
 
     return {
       ...data,
-      imageUrl: data.imageUrl === "string" ? null : data.imageUrl,
+      imageUrl: data.imageUrl === 'string' ? null : data.imageUrl,
       userProfileImageUrl:
-        data.userProfileImageUrl === "string"
-          ? null
-          : data.userProfileImageUrl,
+        data.userProfileImageUrl === 'string' ? null : data.userProfileImageUrl,
+      // 백엔드 응답 필드를 컴포넌트가 사용하는 필드명으로 매핑
+      liked: data.isLiked ?? data.liked ?? false,
+      scrapStatus: data.isScrapped ?? data.scrapStatus ?? false,
     };
   } catch (err) {
     console.error(`게시글 상세 조회 실패(postId=${postId})`, err);
@@ -98,12 +105,12 @@ export interface CommunityPostPayload {
 
 export const postCommunity = async (payload: CommunityPostPayload) => {
   try {
-    const res = await api.post("/api/community/posts", payload, {
-      headers: { "Content-Type": "application/json" },
+    const res = await api.post('/api/community/posts', payload, {
+      headers: { 'Content-Type': 'application/json' },
     });
     return res.data;
   } catch (err) {
-    console.error("게시글 작성 실패:", err);
+    console.error('게시글 작성 실패:', err);
     throw err;
   }
 };
@@ -111,12 +118,12 @@ export const postCommunity = async (payload: CommunityPostPayload) => {
 /* ----------------------------- 게시글 작성 (FormData) ----------------------------- */
 export const postCommunityFormData = async (formData: FormData) => {
   try {
-    const res = await api.post("/api/community/posts", formData, {
-      headers: { "Content-Type": "multipart/form-data" },
+    const res = await api.post('/api/community/posts', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
     });
     return res.data;
   } catch (err) {
-    console.error("게시글 작성 실패(FormData):", err);
+    console.error('게시글 작성 실패(FormData):', err);
     throw err;
   }
 };
@@ -129,22 +136,21 @@ export const deletePost = async (postId: number) => {
   } catch (err: any) {
     console.error(`게시글 삭제 실패(postId=${postId})`, err);
 
-    //  실제 요청 URL 출력 
+    //  실제 요청 URL 출력
     if (err.config) {
-      console.log(" 실제 요청 URL:", err.config.url);
-      console.log(" 요청 method:", err.config.method);
+      console.log(' 실제 요청 URL:', err.config.url);
+      console.log(' 요청 method:', err.config.method);
     }
 
     // 백엔드에서 준 에러 메시지 출력
     if (err.response) {
-      console.log(" 서버 응답:", err.response.data);
-      console.log(" status:", err.response.status);
+      console.log(' 서버 응답:', err.response.data);
+      console.log(' status:', err.response.status);
     }
 
     throw err;
   }
 };
-
 
 /* ----------------------------- 게시글 수정 ----------------------------- */
 export const updatePost = async (
@@ -153,11 +159,11 @@ export const updatePost = async (
 ) => {
   try {
     const res = await api.put(`/api/community/posts/${postId}`, payload, {
-      headers: { "Content-Type": "application/json" },
+      headers: { 'Content-Type': 'application/json' },
     });
     return res.data?.result;
   } catch (err) {
-    console.error("게시글 수정 실패:", err);
+    console.error('게시글 수정 실패:', err);
     throw err;
   }
 };
@@ -168,17 +174,17 @@ export const toggleLike = async (postId: number) => {
     const res = await api.post(`/api/community/posts/${postId}/like`);
     return res.data;
   } catch (err) {
-    console.error("좋아요 실패:", err);
+    console.error('좋아요 실패:', err);
     throw err;
   }
 };
 
 export const toggleScrap = async (postId: number) => {
   try {
-    const res = await api.post(`/api/community/posts/${postId}/scrap`);
+    const res = await api.post(`/api/community/posts/posts/${postId}/scrap`);
     return res.data;
   } catch (err) {
-    console.error("스크랩 실패:", err);
+    console.error('스크랩 실패:', err);
     throw err;
   }
 };
@@ -187,14 +193,19 @@ export const toggleScrap = async (postId: number) => {
 export const getPostsByRegion = async (regionId: number) => {
   try {
     const res = await api.get(`/api/community/posts/region/${regionId}`);
-    return res.data?.result?.posts ?? [];
+    const posts = res.data?.result?.posts ?? [];
+
+    return posts.map((p: any) => ({
+      ...p,
+      // 백엔드 응답 필드를 컴포넌트가 사용하는 필드명으로 매핑
+      liked: p.isLiked ?? p.liked ?? false,
+      scrapStatus: p.isScrapped ?? p.scrapStatus ?? false,
+    }));
   } catch (err) {
-    console.error("지역별 게시글 조회 실패:", err);
+    console.error('지역별 게시글 조회 실패:', err);
     throw err;
   }
 };
-
-
 
 /* -------------------------------------------------------------------------- */
 /*                                댓글 API                                   */
@@ -205,7 +216,7 @@ export const getComments = async (postId: number) => {
     const res = await api.get(`/api/community/posts/${postId}/comments`);
     return res.data?.result?.comments ?? [];
   } catch (err) {
-    console.error("댓글 목록 조회 실패:", err);
+    console.error('댓글 목록 조회 실패:', err);
     return [];
   }
 };
@@ -217,35 +228,29 @@ export const createComment = async (postId: number, content: string) => {
     });
     return res.data?.result;
   } catch (err) {
-    console.error("댓글 생성 실패:", err);
+    console.error('댓글 생성 실패:', err);
     throw err;
   }
 };
 
-export const updateComment = async (
-  commentId: number,
-  content: string
-) => {
+export const updateComment = async (commentId: number, content: string) => {
   try {
-    const res = await api.put(
-      `/api/community/posts/comments/${commentId}`,
-      { content }
-    );
+    const res = await api.put(`/api/community/posts/comments/${commentId}`, {
+      content,
+    });
     return res.data?.result;
   } catch (err) {
-    console.error("댓글 수정 실패:", err);
+    console.error('댓글 수정 실패:', err);
     throw err;
   }
 };
 
 export const deleteComment = async (commentId: number) => {
   try {
-    const res = await api.delete(
-      `/api/community/posts/comments/${commentId}`
-    );
+    const res = await api.delete(`/api/community/posts/comments/${commentId}`);
     return res.data?.result;
   } catch (err) {
-    console.error("댓글 삭제 실패:", err);
+    console.error('댓글 삭제 실패:', err);
     throw err;
   }
 };
@@ -266,7 +271,80 @@ export interface UserProfile {
   isFollowing: boolean;
 }
 
-/* ------------------------------ 사용자 프로필 조회 ------------------------------ */
+/* ------------------------------ 커뮤니티 사용자 프로필 (배경사진 포함) ------------------------------ */
+export interface CommunityUserProfile {
+  userId: number;
+  nickname: string;
+  imageUrl: string | null;
+  backgroundImageUrl: string | null;
+  bio: string | null;
+  externalLink: string | null;
+  followerCount: number;
+  followingCount: number;
+  isFollowing: boolean | null; // 본인이면 null
+  isMe: boolean; // 내 프로필인지 여부
+}
+
+interface CommunityUserProfileResponse {
+  isSuccess: boolean;
+  code: string;
+  message: string;
+  result: CommunityUserProfile;
+}
+
+/* ------------------------------ 사용자 프로필 조회 (커뮤니티) ------------------------------ */
+/* GET /api/community/users/profile?userId={userId} */
+export const getCommunityUserProfile = async (
+  userId?: number
+): Promise<CommunityUserProfile | null> => {
+  try {
+    const params = userId ? { userId } : {};
+    const res = await api.get<CommunityUserProfileResponse>(
+      '/api/community/users/profile',
+      { params }
+    );
+    return res.data?.result ?? null;
+  } catch (err) {
+    console.error('커뮤니티 사용자 프로필 조회 실패:', err);
+    return null;
+  }
+};
+
+/* ------------------------------ 사용자 프로필 수정 ------------------------------ */
+/* PUT /api/mypage/profile */
+export interface UpdateProfilePayload {
+  nickName?: string;
+  bio?: string;
+  externalLink?: string;
+  imageName?: string;
+  imageUrl?: string;
+  backgroundImageName?: string;
+  backgroundImageUrl?: string;
+}
+
+export const updateUserProfile = async (payload: UpdateProfilePayload) => {
+  try {
+    const body: any = {};
+
+    if (payload.nickName) body.nickName = payload.nickName;
+    if (payload.bio) body.bio = payload.bio;
+    if (payload.externalLink) body.externalLink = payload.externalLink;
+    if (payload.imageName) body.imageName = payload.imageName;
+    if (payload.imageUrl) body.imageUrl = payload.imageUrl;
+    if (payload.backgroundImageName) body.backgroundImageName = payload.backgroundImageName;
+    if (payload.backgroundImageUrl) body.backgroundImageUrl = payload.backgroundImageUrl;
+
+    const res = await api.put('/api/mypage/profile', body, {
+      headers: { 'Content-Type': 'application/json' },
+    });
+    return res.data?.result;
+  } catch (err) {
+    console.error('프로필 수정 실패:', err);
+    throw err;
+  }
+};
+
+/* ------------------------------ 사용자 프로필 조회 (구버전) ------------------------------ */
 /* GET /api/community/users/{userId}/info */
 export const getUserProfile = async (userId: number): Promise<UserProfile> => {
   try {
@@ -277,8 +355,8 @@ export const getUserProfile = async (userId: number): Promise<UserProfile> => {
     return (
       data ?? {
         memberId: userId,
-        nickname: "알 수 없음",
-        profileImg: "/images/profile.png",
+        nickname: '알 수 없음',
+        profileImg: '/images/profile.png',
         postCount: 0,
         albumCount: 0,
         followerCount: 0,
@@ -287,12 +365,12 @@ export const getUserProfile = async (userId: number): Promise<UserProfile> => {
       }
     );
   } catch (err) {
-    console.error("사용자 프로필 조회 실패:", err);
+    console.error('사용자 프로필 조회 실패:', err);
 
     return {
       memberId: userId,
-      nickname: "알 수 없음",
-      profileImg: "/images/profile.png",
+      nickname: '알 수 없음',
+      profileImg: '/images/profile.png',
       postCount: 0,
       albumCount: 0,
       followerCount: 0,
@@ -309,7 +387,7 @@ export const toggleFollowUser = async (userId: number) => {
     const res = await api.post(`/api/community/follow/${userId}`);
     return res.data;
   } catch (err) {
-    console.error("팔로우/언팔로우 실패:", err);
+    console.error('팔로우/언팔로우 실패:', err);
     throw err;
   }
 };
@@ -321,7 +399,7 @@ export const getFollowers = async () => {
     const res = await api.get(`/api/community/followers/me`);
     return res.data?.result ?? [];
   } catch (err) {
-    console.error("팔로워 조회 실패:", err);
+    console.error('팔로워 조회 실패:', err);
     return [];
   }
 };
@@ -333,7 +411,7 @@ export const getFollowings = async () => {
     const res = await api.get(`/api/community/followings/me`);
     return res.data?.result ?? [];
   } catch (err) {
-    console.error("팔로잉 조회 실패:", err);
+    console.error('팔로잉 조회 실패:', err);
     return [];
   }
 };
@@ -342,47 +420,107 @@ export const getFollowings = async () => {
 /*                                내 활동 조회                                */
 /* -------------------------------------------------------------------------- */
 
-export const getMyPosts = async () => {
+/* ------------------------------ 타입 정의 ------------------------------ */
+export interface MyPostItem {
+  postId: number;
+  imageUrl: string;
+}
+
+interface MyPostsResponse {
+  isSuccess: boolean;
+  code: string;
+  message: string;
+  result: MyPostItem[];
+}
+
+/* ------------------------------ 페이지네이션 응답 타입 ------------------------------ */
+export interface PaginatedPostsResult {
+  posts: MyPostItem[];
+  nextCursor: string | null;
+  hasNext: boolean;
+}
+
+interface PaginatedPostsResponse {
+  isSuccess: boolean;
+  code: string;
+  message: string;
+  result: PaginatedPostsResult;
+}
+
+/* ------------------------------ 사용자 게시글 조회 (페이지네이션 지원) ------------------------------ */
+export const getUserPosts = async (
+  userId?: number,
+  cursor?: string,
+  size: number = 20
+): Promise<PaginatedPostsResult> => {
   try {
-    const res = await api.get(`/api/community/users/me/posts`);
-    return res.data;
+    const params: any = { size };
+    if (userId) params.userId = userId;
+    if (cursor) params.cursor = cursor;
+
+    const res = await api.get<PaginatedPostsResponse>(
+      '/api/community/users/posts',
+      { params }
+    );
+    return res.data?.result ?? { posts: [], nextCursor: null, hasNext: false };
   } catch (err) {
-    console.error("내 게시글 조회 실패:", err);
-    throw err;
+    console.error('게시글 조회 실패:', err);
+    return { posts: [], nextCursor: null, hasNext: false };
   }
 };
 
-export const getMyComments = async () => {
+/* ------------------------------ 내가 댓글 단 글 조회 ------------------------------ */
+export const getMyComments = async (): Promise<MyPostItem[]> => {
   try {
-    const res = await api.get(`/api/community/users/me/comments`);
-    return res.data;
+    const res = await api.get<MyPostsResponse>(`/api/community/users/me/comments`);
+    return res.data?.result ?? [];
   } catch (err) {
-    console.error("내 댓글 조회 실패:", err);
-    throw err;
-  }
-};
-
-export const getMyScraps = async () => {
-  try {
-    const res = await api.get(`/api/community/users/me/scraps`);
-    return res.data;
-  } catch (err) {
-    console.error("내 스크랩 조회 실패:", err);
-    throw err;
-  }
-};
-
-/* -------------------------------------------------------------------------- */
-/*                     특정 사용자 게시글 목록 조회 API                   */
-/* -------------------------------------------------------------------------- */
-
-export const getUserPosts = async (userId: number) => {
-  try {
-    const res = await api.get(`/api/community/users/${userId}/posts`);
-    return res.data?.result?.posts ?? [];
-  } catch (err) {
-    console.error("특정 유저 게시글 조회 실패:", err);
+    console.error('내 댓글 조회 실패:', err);
     return [];
+  }
+};
+
+/* ------------------------------ 사용자 스크랩 조회 (페이지네이션 지원) ------------------------------ */
+export const getUserScraps = async (
+  userId?: number,
+  cursor?: string,
+  size: number = 20
+): Promise<PaginatedPostsResult> => {
+  try {
+    const params: any = { size };
+    if (userId) params.userId = userId;
+    if (cursor) params.cursor = cursor;
+
+    const res = await api.get<PaginatedPostsResponse>(
+      '/api/community/users/scraps',
+      { params }
+    );
+    return res.data?.result ?? { posts: [], nextCursor: null, hasNext: false };
+  } catch (err) {
+    console.error('스크랩 조회 실패:', err);
+    return { posts: [], nextCursor: null, hasNext: false };
+  }
+};
+
+/* ------------------------------ 사용자 좋아요 조회 (페이지네이션 지원) ------------------------------ */
+export const getUserLikes = async (
+  userId?: number,
+  cursor?: string,
+  size: number = 20
+): Promise<PaginatedPostsResult> => {
+  try {
+    const params: any = { size };
+    if (userId) params.userId = userId;
+    if (cursor) params.cursor = cursor;
+
+    const res = await api.get<PaginatedPostsResponse>(
+      '/api/community/users/likes',
+      { params }
+    );
+    return res.data?.result ?? { posts: [], nextCursor: null, hasNext: false };
+  } catch (err) {
+    console.error('좋아요 조회 실패:', err);
+    return { posts: [], nextCursor: null, hasNext: false };
   }
 };
 
@@ -392,7 +530,14 @@ export const searchPostsByKeyword = async (keyword: string) => {
   const res = await api.get(`/api/community/posts/search`, {
     params: { keyword },
   });
-  return res.data.result.posts;
+  const posts = res.data.result.posts;
+
+  return posts.map((p: any) => ({
+    ...p,
+    // 백엔드 응답 필드를 컴포넌트가 사용하는 필드명으로 매핑
+    liked: p.isLiked ?? p.liked ?? false,
+    scrapStatus: p.isScrapped ?? p.scrapStatus ?? false,
+  }));
 };
 
 /* ----------------------------- 태그 검색 (단일/다중) ----------------------------- */
@@ -400,12 +545,26 @@ export const searchPostsByTags = async (tags: string[]) => {
   const res = await api.get(`/api/community/posts/search`, {
     params: { tags }, // 배열 그대로
   });
-  return res.data.result.posts;
+  const posts = res.data.result.posts;
+
+  return posts.map((p: any) => ({
+    ...p,
+    // 백엔드 응답 필드를 컴포넌트가 사용하는 필드명으로 매핑
+    liked: p.isLiked ?? p.liked ?? false,
+    scrapStatus: p.isScrapped ?? p.scrapStatus ?? false,
+  }));
 };
 
 /* ----------------------------- 단일 태그 검색 ----------------------------- */
 export const searchPostsBySingleTag = async (tag: string) => {
   const res = await api.get(`/api/community/posts/tag/${tag}`);
-  return res.data.result.posts || [];
+  const posts = res.data.result.posts || [];
+
+  return posts.map((p: any) => ({
+    ...p,
+    // 백엔드 응답 필드를 컴포넌트가 사용하는 필드명으로 매핑
+    liked: p.isLiked ?? p.liked ?? false,
+    scrapStatus: p.isScrapped ?? p.scrapStatus ?? false,
+  }));
 };
 

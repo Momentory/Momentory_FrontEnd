@@ -87,7 +87,6 @@ export default function CommunityPage() {
         setLoading(true);
 
         const serverPosts = await getCommunityPosts();
-        console.log("서버 전체 게시글:", serverPosts);
 
         if (!serverPosts || !Array.isArray(serverPosts)) {
           setPosts(initialPosts);
@@ -106,8 +105,8 @@ export default function CommunityPage() {
           tags: p.tags ?? [],
           likeCount: p.likeCount,
           commentCount: p.commentCount,
-
-
+          liked: p.liked ?? false,
+          scrapStatus: p.scrapStatus ?? false,
           time: getRelativeTime(p.createdAt),
         }));
 
@@ -167,6 +166,7 @@ export default function CommunityPage() {
         post.postId === updated.postId
           ? {
             ...post,
+            liked: updated.liked ?? post.liked,
             likeCount: updated.likeCount ?? post.likeCount,
             scrapStatus: updated.scrapStatus ?? post.scrapStatus,
           }

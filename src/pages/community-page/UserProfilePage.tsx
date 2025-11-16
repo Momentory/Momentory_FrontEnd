@@ -1,80 +1,98 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Pencil } from "lucide-react";
 
 import {
-  getUserProfile,
+  getCommunityUserProfile,
   getUserPosts,
+  getUserLikes,
+  getUserScraps,
   toggleFollowUser,
-  // type CommunityPost,
+  updateUserProfile,
 } from "../../api/community";
-import { initialCommunityPosts } from "./CommunityDummy";
+import EditProfileModal from "../../components/community/EditProfileModal";
 
 export default function UserProfilePage() {
   const navigate = useNavigate();
   const { userId } = useParams<{ userId: string }>();
-  const numericUserId = Number(userId);
+  const numericUserId = userId ? Number(userId) : undefined;
   const queryClient = useQueryClient();
 
   const [activeTab, setActiveTab] =
-    useState<"posts" | "albums" | "likes">("posts");
+    useState<"posts" | "scraps" | "likes">("posts");
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   /* -------------------- API (Hooks) -------------------- */
   const profileQuery = useQuery({
-    queryKey: ["userProfile", numericUserId],
-    queryFn: () => getUserProfile(numericUserId),
-    enabled: !!numericUserId,
+    queryKey: ["communityUserProfile", numericUserId],
+    queryFn: () => getCommunityUserProfile(numericUserId),
+    enabled: numericUserId !== undefined,
   });
 
   const postsQuery = useQuery({
     queryKey: ["userPosts", numericUserId],
     queryFn: () => getUserPosts(numericUserId),
-    enabled: !!numericUserId,
+    enabled: numericUserId !== undefined,
+  });
+
+  const scrapsQuery = useQuery({
+    queryKey: ["userScraps", numericUserId],
+    queryFn: () => getUserScraps(numericUserId),
+    enabled: numericUserId !== undefined,
+  });
+
+  const likesQuery = useQuery({
+    queryKey: ["userLikes", numericUserId],
+    queryFn: () => getUserLikes(numericUserId),
+    enabled: numericUserId !== undefined,
   });
 
   const followMutation = useMutation({
-    mutationFn: () => toggleFollowUser(numericUserId),
+    mutationFn: () => {
+      if (numericUserId === undefined) throw new Error('userId is required');
+      return toggleFollowUser(numericUserId);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["userProfile", numericUserId],
+        queryKey: ["communityUserProfile", numericUserId],
       });
     },
   });
 
   /* -------------------- 데이터 정리 -------------------- */
-  const dummyPosts = initialCommunityPosts.filter(
-    (p) => p.userId === numericUserId
-  );
+  const userProfile = profileQuery.data;
+  const userPosts = postsQuery.data?.posts || [];
+  const userScraps = scrapsQuery.data?.posts || [];
+  const userLikes = likesQuery.data?.posts || [];
 
-  const dummyProfile = {
-    memberId: numericUserId,
-    nickname:
-      dummyPosts[0]?.userNickname ??
-      profileQuery.data?.nickname ??
-      "알 수 없음",
-    profileImg: "/images/profile.png",
-    followerCount: 0,
-    followingCount: 0,
-    postCount: dummyPosts.length,
-    albumCount: 0,
-    isFollowing: false,
+  // 프로필 수정 모달에서 저장
+  const handleSaveProfile = async (data: {
+    nickName?: string;
+    bio?: string;
+    externalLink?: string;
+    imageName?: string;
+    imageUrl?: string;
+    backgroundImageName?: string;
+    backgroundImageUrl?: string;
+  }) => {
+    try {
+      console.log('프로필 수정 중...', data);
+
+      // API 호출
+      await updateUserProfile(data);
+
+      // 성공 시 프로필 데이터 새로고침
+      queryClient.invalidateQueries({
+        queryKey: ["communityUserProfile", numericUserId],
+      });
+
+      console.log('✅ 프로필 수정 완료');
+    } catch (error) {
+      console.error('❌ 프로필 수정 실패:', error);
+      throw error;
+    }
   };
-
-  const userProfile =
-    !profileQuery.error && profileQuery.data
-      ? profileQuery.data
-      : dummyProfile;
-
-  const userPosts =
-    !postsQuery.error &&
-      postsQuery.data &&
-      postsQuery.data.length > 0
-      ? postsQuery.data
-      : dummyPosts;
-
-  const defaultIntro =
-    "새로운 것과 낯선 곳에서의 새로운 발견을 즐깁니다.";
-  const defaultWebsite = "https://www.figma.com/domentory";
 
   /* ============================================================== */
   /* -------------------------- RENDER ----------------------------- */
@@ -109,75 +127,91 @@ export default function UserProfilePage() {
           {/* 상단 배경 */}
           <div className="relative w-full max-w-[480px] h-[180px] overflow-hidden">
             <img
-              src="/images/city.png"
+              src={userProfile?.backgroundImageUrl || "/images/city.png"}
               className="absolute w-full h-full object-cover brightness-[0.5]"
             />
           </div>
 
           {/* 프로필 */}
           <div className="w-full max-w-[480px] px-[15px] mt-[-35px] relative z-10">
-            <img
-              src={
-                !userProfile.profileImg ||
-                  userProfile.profileImg === "string"
-                  ? "/images/profile.png"
-                  : userProfile.profileImg
-              }
-              className="w-[80px] h-[80px] rounded-full bg-white object-cover shadow-md"
-            />
-
-            <div className="flex items-center justify-between w-full mt-[10px] pr-4">
-              <h2 className="text-[17px] font-semibold text-gray-800">
-                {userProfile.nickname}
-              </h2>
-
-              <button
-                onClick={() => followMutation.mutate()}
-                className={`text-white text-[13px] px-4 py-[5px] rounded-full font-medium ${userProfile.isFollowing
-                    ? "bg-gray-400"
-                    : "bg-[#FF7070]"
-                  }`}
-              >
-                {userProfile.isFollowing ? "팔로잉" : "팔로우"}
-              </button>
-            </div>
-
-            <p className="text-[13px] text-gray-700 mt-2">
-              {defaultIntro}
-            </p>
-
-            <div className="flex items-center gap-2 mt-2">
+            {/* 프로필 이미지와 버튼 */}
+            <div className="flex items-center gap-2">
               <img
-                src="/images/link-icon.png"
-                className="w-[16px] h-[16px] rotate-45"
+                src={
+                  !userProfile?.imageUrl ||
+                    userProfile.imageUrl === "string"
+                    ? "/images/profile.png"
+                    : userProfile.imageUrl
+                }
+                className="w-[80px] h-[80px] rounded-full bg-white object-cover shadow-md"
               />
-              <a
-                href={defaultWebsite}
-                className="text-[13px] text-blue-600 underline"
-              >
-                {defaultWebsite}
-              </a>
+
+              {/* 수정 또는 팔로우 버튼 */}
+              {userProfile?.isMe ? (
+                <button
+                  onClick={() => setIsEditModalOpen(true)}
+                  className="p-2 bg-white hover:bg-gray-50 rounded-full transition-colors shadow-md mt-6"
+                  aria-label="프로필 수정"
+                >
+                  <Pencil size={18} className="text-gray-700" />
+                </button>
+              ) : (
+                <button
+                  onClick={() => followMutation.mutate()}
+                  className={`text-white text-[13px] px-4 py-[5px] rounded-full font-medium shadow-md mt-6 ${userProfile?.isFollowing
+                      ? "bg-gray-400"
+                      : "bg-[#FF7070]"
+                    }`}
+                >
+                  {userProfile?.isFollowing ? "팔로잉" : "팔로우"}
+                </button>
+              )}
             </div>
+
+            <div className="mt-[10px]">
+              <h2 className="text-[17px] font-semibold text-gray-800">
+                {userProfile?.nickname || "사용자"}
+              </h2>
+            </div>
+
+            {userProfile?.bio && (
+              <p className="text-[13px] text-gray-700 mt-2 w-[282px] leading-snug">
+                {userProfile.bio}
+              </p>
+            )}
+
+            {/* 링크 표시 */}
+            {userProfile?.externalLink && (
+              <div className="flex items-center gap-2 mt-2">
+                <img
+                  src="/images/link-icon.png"
+                  className="w-[14px] h-[14px] rotate-45"
+                  alt="link"
+                />
+                <a
+                  href={userProfile.externalLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[13px] text-blue-600 underline hover:text-blue-700"
+                >
+                  {userProfile.externalLink}
+                </a>
+              </div>
+            )}
 
             <div className="flex items-center gap-6 mt-3 text-gray-700">
               {/* 팔로잉 */}
-              <p
-                className="text-[12px] cursor-pointer"
-                onClick={() => navigate("/community/followings")}
-              >
+              <p className="text-[12px]">
                 <span className="font-semibold">
-                  {userProfile.followingCount}
+                  {userProfile?.followingCount || 0}
                 </span>{" "}
                 팔로잉
               </p>
 
               {/* 팔로워 */}
-              <p
-                className="text-[12px] cursor-pointer"
-                onClick={() => navigate("/community/followers")}
-              >
+              <p className="text-[12px]">
                 <span className="font-semibold">
-                  {userProfile.followerCount}
+                  {userProfile?.followerCount || 0}
                 </span>{" "}
                 팔로워
               </p>
@@ -199,9 +233,9 @@ export default function UserProfilePage() {
             </button>
 
             <button
-              onClick={() => setActiveTab("albums")}
+              onClick={() => setActiveTab("scraps")}
               className={
-                activeTab === "albums"
+                activeTab === "scraps"
                   ? "opacity-100"
                   : "opacity-40"
               }
@@ -226,7 +260,11 @@ export default function UserProfilePage() {
             {activeTab === "posts" &&
               (userPosts.length > 0 ? (
                 userPosts.map((p: any) => (
-                  <div key={p.postId} className="aspect-square">
+                  <div
+                    key={p.postId}
+                    className="aspect-square cursor-pointer active:scale-[0.98] transition"
+                    onClick={() => navigate(`/community/${p.postId}`)}
+                  >
                     <img
                       src={p.imageUrl || "/images/default.png"}
                       className="w-full h-full object-cover rounded-[6px]"
@@ -239,19 +277,57 @@ export default function UserProfilePage() {
                 </p>
               ))}
 
-            {activeTab === "albums" && (
-              <p className="col-span-3 text-center text-gray-500 mt-10">
-                앨범 기능은 준비 중입니다.
-              </p>
-            )}
+            {activeTab === "scraps" &&
+              (userScraps.length > 0 ? (
+                userScraps.map((p: any) => (
+                  <div
+                    key={p.postId}
+                    className="aspect-square cursor-pointer active:scale-[0.98] transition"
+                    onClick={() => navigate(`/community/${p.postId}`)}
+                  >
+                    <img
+                      src={p.imageUrl || "/images/default.png"}
+                      className="w-full h-full object-cover rounded-[6px]"
+                    />
+                  </div>
+                ))
+              ) : (
+                <p className="col-span-3 text-center text-gray-500 mt-10">
+                  스크랩한 게시물이 없습니다.
+                </p>
+              ))}
 
-            {activeTab === "likes" && (
-              <p className="col-span-3 text-center text-gray-500 mt-10">
-                좋아요한 게시물 준비 중입니다.
-              </p>
-            )}
+            {activeTab === "likes" &&
+              (userLikes.length > 0 ? (
+                userLikes.map((p: any) => (
+                  <div
+                    key={p.postId}
+                    className="aspect-square cursor-pointer active:scale-[0.98] transition"
+                    onClick={() => navigate(`/community/${p.postId}`)}
+                  >
+                    <img
+                      src={p.imageUrl || "/images/default.png"}
+                      className="w-full h-full object-cover rounded-[6px]"
+                    />
+                  </div>
+                ))
+              ) : (
+                <p className="col-span-3 text-center text-gray-500 mt-10">
+                  좋아요한 게시물이 없습니다.
+                </p>
+              ))}
           </div>
         </>
+      )}
+
+      {/* 프로필 수정 모달 */}
+      {userProfile && (
+        <EditProfileModal
+          isOpen={isEditModalOpen}
+          onClose={() => setIsEditModalOpen(false)}
+          profile={userProfile}
+          onSave={handleSaveProfile}
+        />
       )}
     </div>
   );

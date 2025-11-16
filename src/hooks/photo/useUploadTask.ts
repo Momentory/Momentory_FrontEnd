@@ -70,13 +70,19 @@ export function useUploadTask({
         const payload: UploadPhotoRequest = {
           imageName: effectiveUploadResult.imageName,
           imageUrl: effectiveUploadResult.imageUrl,
-          latitude: uploadContext.markerLocation.lat,
-          longitude: uploadContext.markerLocation.lng,
+          latitude: uploadContext.markerLocation?.lat ?? null,
+          longitude: uploadContext.markerLocation?.lng ?? null,
           cityName: uploadContext.cityName,
           color: uploadContext.markerColor,
           visibility: !uploadContext.isPrivate,
           memo: uploadContext.description,
         };
+
+        console.log('📤 사진 업로드 요청:', {
+          cityName: payload.cityName,
+          latitude: payload.latitude,
+          longitude: payload.longitude,
+        });
 
         const photoResponse = await uploadPhotoMutate(payload);
         if (isCancelled) return;

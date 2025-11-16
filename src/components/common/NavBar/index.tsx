@@ -11,7 +11,14 @@ interface NavbarProps {
 
 const Navbar = ({ onUploadClick }: NavbarProps) => {
   return (
-    <nav className="fixed bottom-0 w-full max-w-[480px] flex flex-row justify-between px-12 py-4 z-100 bg-white shadow-[0px_-4px_4px_0px_rgba(0,0,0,0.15)]">
+    <nav
+      className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] flex flex-row justify-between px-12 py-4 z-[100] bg-white shadow-[0px_-4px_4px_0px_rgba(0,0,0,0.15)]"
+      style={{
+        paddingBottom: 'max(1rem, env(safe-area-inset-bottom))',
+        bottom: 0
+      }}
+    >
+
       <Navlink to="/home" Icon={Home} alt="홈" />
       <Navlink to="/myMap" Icon={Map} alt="탐색" />
       <div onClick={onUploadClick} className="cursor-pointer">

@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useState, useMemo } from "react";
+import { Bookmark, Heart } from "lucide-react";
 import {
   toggleLike,
   toggleScrap,
@@ -210,8 +211,14 @@ export default function CommunityCard({ post, onUpdate }: CommunityCardProps) {
             className="flex items-center gap-2 cursor-pointer active:scale-95 transition"
             onClick={handleLike}
           >
-            <img src="/images/Heart.png" className="w-4 h-4 ml-5" />
-            <span className="font-medium">{likeCount}</span>
+            <Heart
+              className={`w-4 h-4 transition-colors ${
+                liked
+                  ? "fill-red-500 text-red-500"
+                  : "fill-none text-gray-700"
+              }`}
+            />
+            <span>{likeCount}</span>
           </div>
 
           {/* 댓글 */}
@@ -225,10 +232,13 @@ export default function CommunityCard({ post, onUpdate }: CommunityCardProps) {
             className="flex items-center gap-2 cursor-pointer active:scale-95 transition min-w-[60px]"
             onClick={handleScrap}
           >
-            <img src="/images/mark.png" className="w-4 h-4" />
-            <span className="font-medium mr-5 whitespace-nowrap">
-              {scrapped ? "저장됨" : "저장"}
-            </span>
+            <Bookmark
+              className={`w-4 h-4 transition-colors ${
+                scrapped
+                  ? "fill-yellow-400 text-yellow-400"
+                  : "fill-none text-gray-700"
+              }`}
+            />
           </div>
 
         </div>
