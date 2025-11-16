@@ -19,8 +19,7 @@ export default function UserProfilePage() {
   const numericUserId = userId ? Number(userId) : undefined;
   const queryClient = useQueryClient();
 
-  const [activeTab, setActiveTab] =
-    useState<"posts" | "scraps" | "likes">("posts");
+  const [activeTab, setActiveTab] = useState<"posts" | "scraps" | "likes">("posts");
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   /* -------------------- API (Hooks) -------------------- */
@@ -79,11 +78,11 @@ export default function UserProfilePage() {
     }
   };
 
-  /* ===========================렌더링=================================== */
+  /* =========================== 렌더링 =============================== */
 
   return (
     <div className="w-full min-h-screen bg-[#F9FAFB] flex flex-col items-center mt-[60px]">
-      {/* 공통 헤더  */}
+      {/* 공통 헤더 */}
       <div className="w-full max-w-[480px] bg-white h-[55px] border-b border-gray-200 flex items-center justify-center relative">
         <button
           onClick={() => navigate(-1)}
@@ -91,16 +90,12 @@ export default function UserProfilePage() {
         >
           <img src="/images/109618.png" className="w-[20px] h-[20px]" />
         </button>
-        <span className="text-[20px] font-semibold text-gray-900">
-          마이페이지
-        </span>
+        <span className="text-[20px] font-semibold text-gray-900">마이페이지</span>
       </div>
 
       {/* 로딩 */}
-      {profileQuery.isLoading || postsQuery.isLoading ? (
-        <div className="w-full h-[200px] flex items-center justify-center">
-          로딩 중...
-        </div>
+      {(profileQuery.isLoading || postsQuery.isLoading) ? (
+        <div className="w-full h-[200px] flex items-center justify-center">로딩 중...</div>
       ) : (
         <>
           {/* 배경 */}
@@ -113,18 +108,18 @@ export default function UserProfilePage() {
 
           {/* 프로필 전체 */}
           <div className="w-full max-w-[480px] px-[15px] mt-[-35px] relative z-10">
+
             {/* 프로필 이미지 */}
             <img
               src={
-                !userProfile?.imageUrl ||
-                  userProfile.imageUrl === "string"
+                !userProfile?.imageUrl || userProfile.imageUrl === "string"
                   ? "/images/profile.png"
                   : userProfile.imageUrl
               }
               className="w-[80px] h-[80px] rounded-full bg-white object-cover shadow-md"
             />
 
-            {/* 닉네임 + 버튼 같은 줄 */}
+            {/* 닉네임 + 버튼 */}
             <div className="flex items-center justify-between mt-3 pr-2">
               <h2 className="text-[17px] font-semibold text-gray-800">
                 {userProfile?.nickname || "사용자"}
@@ -140,10 +135,8 @@ export default function UserProfilePage() {
               ) : (
                 <button
                   onClick={() => followMutation.mutate()}
-                  className={`text-white text-[13px] px-4 py-[5px] rounded-full font-medium shadow-md 
-                    ${userProfile?.isFollowing ? "bg-gray-400" : "bg-[#FF7070]"
-                    }
-                  `}
+                  className={`text-white text-[13px] px-4 py-[5px] rounded-full font-medium shadow-md
+                    ${userProfile?.isFollowing ? "bg-gray-400" : "bg-[#FF7070]"}`}
                 >
                   {userProfile?.isFollowing ? "팔로잉" : "팔로우"}
                 </button>
@@ -160,10 +153,7 @@ export default function UserProfilePage() {
             {/* 링크 */}
             {userProfile?.externalLink && (
               <div className="flex items-center gap-2 mt-2">
-                <img
-                  src="/images/link-icon.png"
-                  className="w-[14px] h-[14px] rotate-45"
-                />
+                <img src="/images/link-icon.png" className="w-[14px] h-[14px] rotate-45" />
                 <a
                   href={userProfile.externalLink}
                   target="_blank"
@@ -175,54 +165,70 @@ export default function UserProfilePage() {
               </div>
             )}
 
+            {/* 팔로잉/팔로워 */}
             <div className="flex items-center gap-6 mt-3 text-gray-700">
-              {/* 팔로잉 */}
               <button
                 onClick={() => navigate(`/community/${numericUserId}/followings`)}
                 className="text-[12px] active:opacity-60"
               >
-                <span className="font-semibold">{userProfile?.followingCount || 0}</span>{" "}
-                팔로잉
+                <span className="font-semibold">{userProfile?.followingCount || 0}</span> 팔로잉
               </button>
 
-              {/* 팔로워 */}
               <button
                 onClick={() => navigate(`/community/${numericUserId}/followers`)}
                 className="text-[12px] active:opacity-60"
               >
-                <span className="font-semibold">{userProfile?.followerCount || 0}</span>{" "}
-                팔로워
+                <span className="font-semibold">{userProfile?.followerCount || 0}</span> 팔로워
               </button>
             </div>
-
           </div>
-
           {/* 탭 */}
           <div className="flex justify-center items-center gap-[100px] mt-[30px] mb-[5px]">
-            <button
-              onClick={() => setActiveTab("posts")}
-              className={activeTab === "posts" ? "opacity-100" : "opacity-40"}
-            >
-              <img src="/images/list.png" className="w-[25px] h-[25px]" />
+
+            {/* 게시물 탭 */}
+            <button onClick={() => setActiveTab("posts")}>
+              <img
+                src="/images/list.png"
+                className={`w-[19px] h-[19px] transition
+        ${activeTab === "posts"
+                    ? "opacity-100"
+                    : "[filter:brightness(0)_saturate(0)_opacity(0.4)]"}
+                          `}
+              />
             </button>
 
-            <button
-              onClick={() => setActiveTab("scraps")}
-              className={activeTab === "scraps" ? "opacity-100" : "opacity-40"}
-            >
-              <img src="/images/mark.png" className="w-[25px] h-[25px]" />
+            {/* 스크랩 탭 */}
+            <button onClick={() => setActiveTab("scraps")}>
+              <img
+                src="/images/mark.png"
+                className={`w-[27px] h-[27px] transition
+        ${activeTab === "scraps"
+                    ? "opacity-100"
+                    : "[filter:brightness(0)_saturate(0)_opacity(0.4)]"}
+                         `}
+              />
             </button>
 
-            <button
-              onClick={() => setActiveTab("likes")}
-              className={activeTab === "likes" ? "opacity-100" : "opacity-40"}
-            >
-              <img src="/images/Heart.png" className="w-[25px] h-[25px]" />
+            {/* 좋아요 탭 */}
+            <button onClick={() => setActiveTab("likes")}>
+              <img
+                src="/images/Heart.png"
+                className={`w-[27px] h-[27px] transition
+        ${activeTab === "likes"
+                    ? "opacity-100"
+                    : "[filter:brightness(0)_saturate(0)_opacity(0.4)]"}
+                          `}
+              />
             </button>
+
           </div>
+
+
 
           {/* 탭 콘텐츠 */}
           <div className="grid grid-cols-3 gap-[4px] mt-[20px] px-2 w-full max-w-[480px] mb-[80px]">
+
+            {/* 게시글 */}
             {activeTab === "posts" &&
               (userPosts.length > 0 ? (
                 userPosts.map((p: any) => (
@@ -243,6 +249,7 @@ export default function UserProfilePage() {
                 </p>
               ))}
 
+            {/* 스크랩 */}
             {activeTab === "scraps" &&
               (userScraps.length > 0 ? (
                 userScraps.map((p: any) => (
@@ -263,6 +270,7 @@ export default function UserProfilePage() {
                 </p>
               ))}
 
+            {/* 좋아요 */}
             {activeTab === "likes" &&
               (userLikes.length > 0 ? (
                 userLikes.map((p: any) => (

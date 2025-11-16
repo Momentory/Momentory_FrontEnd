@@ -292,21 +292,21 @@ export default function CommunityMyPage() {
             onClick={() => setActiveTab("list")}
             className={`${activeTab === "list" ? "opacity-100" : "opacity-40"}`}
           >
-            <img src="/images/list.png" className="w-[25px] h-[25px]" />
+            <img src="/images/list.png" className="w-[19px] h-[19px]" />
           </button>
 
           <button
             onClick={() => setActiveTab("scrap")}
             className={`${activeTab === "scrap" ? "opacity-100" : "opacity-40"}`}
           >
-            <img src="/images/mark.png" className="w-[25px] h-[25px]" />
+            <img src="/images/mark.png" className="w-[27px] h-[27px]" />
           </button>
 
           <button
             onClick={() => setActiveTab("like")}
             className={`${activeTab === "like" ? "opacity-100" : "opacity-40"}`}
           >
-            <img src="/images/Heart.png" className="w-[25px] h-[25px]" />
+            <img src="/images/Heart.png" className="w-[27px] h-[27px]" />
           </button>
         </div>
       </div>
