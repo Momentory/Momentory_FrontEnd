@@ -80,7 +80,7 @@ export default function CommunityPage() {
     );
   };
 
-  /* ---------------- 전체 게시글 불러오기 ---------------- */
+  /* 서버 데이터만 사용하도록 수정 */
   useEffect(() => {
     const fetchPosts = async () => {
       try {
@@ -89,7 +89,7 @@ export default function CommunityPage() {
         const serverPosts = await getCommunityPosts();
 
         if (!serverPosts || !Array.isArray(serverPosts)) {
-          setPosts(initialPosts);
+          setPosts([]);
           return;
         }
 
@@ -110,11 +110,10 @@ export default function CommunityPage() {
           time: getRelativeTime(p.createdAt),
         }));
 
-        // clean된 서버 데이터 + 더미 데이터 추가
-        setPosts([...cleaned, ...initialPosts]);
+        setPosts(cleaned);
       } catch (err) {
         console.error("게시글 불러오기 실패:", err);
-        setPosts(initialPosts);
+        setPosts([]); // 더미 대신 빈 배열
       } finally {
         setLoading(false);
       }
@@ -226,8 +225,8 @@ export default function CommunityPage() {
         <button
           onClick={() => setTab("latest")}
           className={`flex-1 py-5 font-medium ${tab === "latest"
-              ? "text-[#FF7070] border-b-2 border-[#FF7070]"
-              : "text-gray-700"
+            ? "text-[#FF7070] border-b-2 border-[#FF7070]"
+            : "text-gray-700"
             }`}
         >
           최신
@@ -236,8 +235,8 @@ export default function CommunityPage() {
         <button
           onClick={() => setTab("region")}
           className={`flex-1 py-5 font-medium ${tab === "region"
-              ? "text-[#FF7070] border-b-2 border-[#FF7070]"
-              : "text-gray-700"
+            ? "text-[#FF7070] border-b-2 border-[#FF7070]"
+            : "text-gray-700"
             }`}
         >
           지역별

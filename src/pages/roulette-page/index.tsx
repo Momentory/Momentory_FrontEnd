@@ -237,7 +237,7 @@ export default function RoulettePage() {
             <button
               onClick={handleSpin}
               disabled={isSpinning}
-              className={`w-full py-4 px-6 rounded-4xl font-bold text-white text-lg mb-4 ${
+              className={`w-full py-4 px-6 rounded-full font-bold text-white text-lg mb-4 ${
                 isSpinning
                   ? 'bg-[#EAEAEA]'
                   : 'bg-[#FF7070] hover:bg-[#ff6060] active:bg-[#ff5050] cursor-pointer'

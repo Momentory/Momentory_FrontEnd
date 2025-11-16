@@ -19,7 +19,7 @@ export default function PrivacyPolicyPage() {
       </div>
 
       {/* 본문 */}
-      <div className="pb-10 whitespace-pre-line leading-relaxed text-gray-700 text-[13px] mt-20">
+      <div className="pb-10 whitespace-pre-line leading-relaxed text-gray-700 text-[13px] mt-10">
         <h2 className="text-[22px] font-bold mb-8 text-black">개인정보 처리방침</h2>
 
         <div className="space-y-8">
