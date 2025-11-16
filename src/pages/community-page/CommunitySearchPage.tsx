@@ -122,7 +122,7 @@ export default function CommunitySearchPage() {
               : "bg-white text-[#666666]"
               }`}
           >
-            <Search size={16} />
+            <Search size={12} />
             제목/내용 검색
           </button>
 
@@ -133,7 +133,7 @@ export default function CommunitySearchPage() {
               : "bg-white text-[#666666]"
               }`}
           >
-            <Tag size={16} />
+            <Tag size={12} />
             태그 검색
           </button>
         </div>

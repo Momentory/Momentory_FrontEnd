@@ -16,13 +16,12 @@ export default function CreateProfilePage() {
   const [birthDay, setBirthDay] = useState('01');
   const [characterType, setCharacterType] = useState('CAT');
 
-  const [/*nicknameAvailable*/, setNicknameAvailable] = useState<boolean | null>(null);
+  const [, setNicknameAvailable] = useState<boolean | null>(null);
   const [checkingNickname, setCheckingNickname] = useState(false);
 
   const maxIntroLength = 100;
 
-
-  /* ------------------- 닉네임 자동 확인------------------- */
+  /* ------------------- 닉네임 자동 중복 확인 ------------------- */
   useEffect(() => {
     if (!nickname.trim()) {
       setNicknameAvailable(null);
@@ -46,14 +45,12 @@ export default function CreateProfilePage() {
     return () => clearTimeout(timeout);
   }, [nickname]);
 
-
-  /* ------------------------ 저장 ------------------------ */
+  /* ------------------- 저장 ------------------- */
   const handleSubmit = async () => {
     if (!name.trim()) return alert('이름을 입력해주세요.');
     if (!nickname.trim()) return alert('닉네임을 입력해주세요.');
     if (checkingNickname) return alert('닉네임 확인 중입니다.');
 
-    // localStorage에서 카카오 정보 가져오기
     const kakaoNickname = localStorage.getItem("nickname") || "";
     const profileImage = localStorage.getItem("profileImage") || "";
 
@@ -67,30 +64,15 @@ export default function CreateProfilePage() {
       characterType,
     };
 
-    // 선택 필드 추가
-    if (introduction.trim()) {
-      profilePayload.bio = introduction;
-    }
-    if (link.trim()) {
-      profilePayload.externalLink = link;
-    }
-    if (kakaoNickname) {
-      profilePayload.kakaoNickname = kakaoNickname;
-    }
-    if (profileImage) {
-      profilePayload.profileImage = profileImage;
-    }
-
-    console.log("저장할 프로필 데이터:", profilePayload);
+    if (introduction.trim()) profilePayload.bio = introduction;
+    if (link.trim()) profilePayload.externalLink = link;
+    if (kakaoNickname) profilePayload.kakaoNickname = kakaoNickname;
+    if (profileImage) profilePayload.profileImage = profileImage;
 
     try {
-      // 카카오 프로필 API 호출
       await setKakaoProfile(profilePayload);
 
-      console.log("✅ 프로필 저장 완료");
       alert("프로필 저장 완료!");
-
-      // 홈으로 이동
       navigate("/home", { replace: true });
     } catch (error) {
       console.error("❌ 프로필 저장 실패:", error);
@@ -98,7 +80,7 @@ export default function CreateProfilePage() {
     }
   };
 
-
+  /* ------------------------------ UI ------------------------------ */
   return (
     <div className="flex flex-col items-center justify-start min-h-screen bg-white px-[31px] pt-[80px] pb-10 relative overflow-y-auto">
 
@@ -106,17 +88,17 @@ export default function CreateProfilePage() {
       <img
         src="/images/109618.png"
         alt="뒤로가기"
-        className="absolute top-[25px] left-[30px] w-[35px] h-[35px] cursor-pointer"
+        className="absolute top-[25px] left-[30px] w-[35px] h-[35px] cursor-pointer z-10"
         onClick={() => navigate(-1)}
       />
 
-      {/* 타이틀 */}
       <h1 className="text-[24px] font-semibold mb-8 text-center">
         프로필 정보 입력
       </h1>
 
       <div className="w-[329px] space-y-5">
-        {/* 이름 입력 */}
+
+        {/* 이름 */}
         <div>
           <label className="text-[15px] font-semibold mb-1 block">이름</label>
           <input
@@ -128,7 +110,7 @@ export default function CreateProfilePage() {
           />
         </div>
 
-        {/* 닉네임 입력 */}
+        {/* 닉네임 */}
         <div>
           <label className="text-[15px] font-semibold mb-1 block">닉네임</label>
           <input
@@ -138,12 +120,14 @@ export default function CreateProfilePage() {
             onChange={(e) => setNickname(e.target.value)}
             className="w-full h-[50px] rounded-2xl border px-4 text-[15px]"
           />
-          {/* 닉네임 중복 메시지 */}
+
+          {/* 닉네임 메시지 */}
           {nickname.trim() !== "" && checkingNickname && (
             <p className="text-gray-400 text-[13px] mt-1 animate-pulse">
               닉네임 확인 중...
             </p>
           )}
+
           {nickname.trim() !== "" && !checkingNickname && (
             <p className="text-green-500 text-[13px] mt-1">
               사용 가능한 닉네임입니다
@@ -151,7 +135,7 @@ export default function CreateProfilePage() {
           )}
         </div>
 
-        {/* 성별 선택 */}
+        {/* 성별 */}
         <div>
           <label className="text-[15px] font-semibold mb-2 block">성별</label>
           <div className="flex space-x-4">
@@ -166,6 +150,7 @@ export default function CreateProfilePage() {
             >
               남성
             </button>
+
             <button
               type="button"
               onClick={() => setGender('FEMALE')}
@@ -180,49 +165,31 @@ export default function CreateProfilePage() {
           </div>
         </div>
 
-        {/* 생년월일 선택 */}
+        {/* 생년월일 */}
         <div>
           <label className="text-[15px] font-semibold mb-2 block">생년월일</label>
           <div className="flex space-x-2">
-            <select
-              value={birthYear}
-              onChange={(e) => setBirthYear(e.target.value)}
-              className="flex-1 h-[50px] rounded-2xl border px-3 text-[14px]"
-            >
+            <select value={birthYear} onChange={(e) => setBirthYear(e.target.value)} className="flex-1 h-[50px] rounded-2xl border px-3 text-[14px]">
               {Array.from({ length: 50 }, (_, i) => 2024 - i).map((year) => (
-                <option key={year} value={year}>
-                  {year}년
-                </option>
+                <option key={year} value={year}>{year}년</option>
               ))}
             </select>
 
-            <select
-              value={birthMonth}
-              onChange={(e) => setBirthMonth(e.target.value)}
-              className="flex-1 h-[50px] rounded-2xl border px-3 text-[14px]"
-            >
+            <select value={birthMonth} onChange={(e) => setBirthMonth(e.target.value)} className="flex-1 h-[50px] rounded-2xl border px-3 text-[14px]">
               {Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, '0')).map((month) => (
-                <option key={month} value={month}>
-                  {month}월
-                </option>
+                <option key={month} value={month}>{month}월</option>
               ))}
             </select>
 
-            <select
-              value={birthDay}
-              onChange={(e) => setBirthDay(e.target.value)}
-              className="flex-1 h-[50px] rounded-2xl border px-3 text-[14px]"
-            >
+            <select value={birthDay} onChange={(e) => setBirthDay(e.target.value)} className="flex-1 h-[50px] rounded-2xl border px-3 text-[14px]">
               {Array.from({ length: 31 }, (_, i) => String(i + 1).padStart(2, '0')).map((day) => (
-                <option key={day} value={day}>
-                  {day}일
-                </option>
+                <option key={day} value={day}>{day}일</option>
               ))}
             </select>
           </div>
         </div>
 
-        {/* 캐릭터 선택 */}
+        {/* 캐릭터 */}
         <div>
           <label className="text-[15px] font-semibold mb-2 block">캐릭터</label>
           <div className="flex space-x-4">
@@ -237,6 +204,7 @@ export default function CreateProfilePage() {
             >
               고양이
             </button>
+
             <button
               type="button"
               onClick={() => setCharacterType('DOG')}
@@ -251,25 +219,29 @@ export default function CreateProfilePage() {
           </div>
         </div>
 
-        {/* 자기소개 (선택) */}
+        {/* 자기소개 */}
         <div>
           <label className="text-[15px] font-semibold mb-1 block">
             자기소개 <span className="text-gray-400 text-[13px]">(선택)</span>
           </label>
+
           <div className="relative">
             <textarea
               placeholder="자기소개를 입력해주세요"
               value={introduction}
-              onChange={(e) => setIntroduction(e.target.value.slice(0, maxIntroLength))}
+              onChange={(e) =>
+                setIntroduction(e.target.value.slice(0, maxIntroLength))
+              }
               className="w-full h-[90px] rounded-2xl border px-4 py-3 text-[15px] resize-none"
             />
+
             <p className="absolute bottom-2 right-3 text-gray-400 text-[12px]">
               {introduction.length} / {maxIntroLength}
             </p>
           </div>
         </div>
 
-        {/* 외부 링크 (선택) */}
+        {/* 링크 */}
         <div>
           <label className="text-[15px] font-semibold mb-1 block">
             외부 링크 <span className="text-gray-400 text-[13px]">(선택)</span>
