@@ -22,8 +22,6 @@ export default function LoginScreen() {
     
     window.location.href = backendOAuthUrl;
   };
-
-<<<<<<< HEAD
   const handleNaverLogin = () => {
     console.log("네이버 로그인 - 아직 미구현");
     alert("네이버 로그인은 준비 중입니다.");
@@ -32,19 +30,6 @@ export default function LoginScreen() {
   const handleGoogleLogin = () => {
     console.log("구글 로그인 - 아직 미구현");
     alert("구글 로그인은 준비 중입니다.");
-=======
-  // 카카오 로그인을 건너뛰고 강제로 이동시키는 임시 함수
-  const handleTempKakaoLogin = () => {
-    console.log("카카오 로그인 건너뛰기 (임시)");
-    alert("임시 로그인 성공! 캐릭터 선택 페이지로 이동합니다.");
-
-    // 1. 임시 토큰을 저장 (로그인 된 척)
-    localStorage.setItem("accessToken", "dummy-token-for-ui-test");
-
-    // 2. 캐릭터 선택 페이지로 강제 이동
-    navigate("/auth/select-character");
->>>>>>> e2969aeb27a9010db54818a5ef689d173a5d6a64
-  };
 
   return (
     <div className="flex flex-col items-center justify-center h-screen bg-white px-6">
