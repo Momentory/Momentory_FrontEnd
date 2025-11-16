@@ -73,7 +73,6 @@ export default function CommunityPage() {
         setLoading(true);
 
         const serverPosts = await getCommunityPosts();
-        console.log("서버 전체 게시글:", serverPosts);
 
         if (!serverPosts || !Array.isArray(serverPosts)) {
           setPosts(initialPosts);

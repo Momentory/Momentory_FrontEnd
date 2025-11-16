@@ -7,10 +7,10 @@ export default function LoginScreen() {
   const handleTempKakaoLogin = () => {
     console.log("카카오 로그인 건너뛰기 (임시)");
     alert("임시 로그인 성공! 캐릭터 선택 페이지로 이동합니다.");
-    
+
     // 1. 임시 토큰을 저장 (로그인 된 척)
     localStorage.setItem("accessToken", "dummy-token-for-ui-test");
-    
+
     // 2. 캐릭터 선택 페이지로 강제 이동
     navigate("/auth/select-character");
   };

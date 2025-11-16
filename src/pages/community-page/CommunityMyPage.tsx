@@ -1,47 +1,133 @@
-import { useState, useRef } from "react";
-import { useNavigate } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { ArrowLeft, Pencil } from "lucide-react";
+import {
+  getCommunityUserProfile,
+  getUserPosts,
+  getUserLikes,
+  getUserScraps,
+  updateUserProfile,
+  type MyPostItem,
+  type CommunityUserProfile,
+} from "../../api/community";
+import EditProfileModal from "../../components/community/EditProfileModal";
 
 export default function CommunityMyPage() {
   const navigate = useNavigate();
+  const { userId } = useParams<{ userId: string }>();
   const [activeTab, setActiveTab] = useState<"list" | "scrap" | "like">("list");
 
-  const [backgroundImage, setBackgroundImage] = useState("/images/city.png");
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const backgroundInputRef = useRef<HTMLInputElement | null>(null);
+  const profileInputRef = useRef<HTMLInputElement | null>(null);
 
-  const handleBackgroundChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  /* -------------------------------- API 데이터 상태 관리 ------------------------------- */
+  const [profile, setProfile] = useState<CommunityUserProfile | null>(null);
+  const [myPosts, setMyPosts] = useState<MyPostItem[]>([]);
+  const [scrapPosts, setScrapPosts] = useState<MyPostItem[]>([]);
+  const [likedPosts, setLikedPosts] = useState<MyPostItem[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+  /* -------------------------------- 데이터 불러오기 ------------------------------- */
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsLoading(true);
+      try {
+        const targetUserId = userId ? parseInt(userId) : undefined;
+
+        console.log(targetUserId ? `사용자(${targetUserId}) 데이터 조회 중...` : '내 데이터 조회 중...');
+
+        const [profileData, postsResult, scrapsResult, likesResult] = await Promise.all([
+          getCommunityUserProfile(targetUserId),
+          getUserPosts(targetUserId),
+          getUserScraps(targetUserId),
+          getUserLikes(targetUserId),
+        ]);
+
+        setProfile(profileData);
+        setMyPosts(postsResult.posts);
+        setScrapPosts(scrapsResult.posts);
+        setLikedPosts(likesResult.posts);
+      } catch (error) {
+        console.error("❌ 데이터 불러오기 실패:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [userId]);
+
+  const handleBackgroundChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      const imageUrl = URL.createObjectURL(file);
-      setBackgroundImage(imageUrl);
+    if (!file) return;
+
+    try {
+
+      // API 호출
+      await updateUserProfile({ backgroundImage: file });
+
+      // 성공 시 프로필 데이터 새로고침
+      const updatedProfile = await getCommunityUserProfile();
+      setProfile(updatedProfile);
+
+    } catch (error) {
+      console.error('❌ 배경화면 변경 실패:', error);
+      alert('배경화면 변경에 실패했습니다.');
     }
   };
 
   const handleBackgroundClick = () => {
-    fileInputRef.current?.click();
+    backgroundInputRef.current?.click();
   };
 
-  /* -------------------------------- 더미 데이터 (내 글 / 스크랩 / 좋아요)------------------------------- */
-  const myPosts = [
-    "/images/pic1.png",
-    "/images/pic2.png",
-    "/images/pic3.png",
-    "/images/pic4.png",
-    "/images/pic5.png",
-    "/images/image51.png",
-  ];
+  const handleProfileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-  const scrapPosts = [
-    "/images/image51.png",
-    "/images/image52.png",
-    "/images/pic6.png",
-  ];
+    try {
 
-  const likedPosts = [
-    "/images/everland.jpg",
-    "/images/pic2.png",
-    "/images/pic3.png",
-  ];
+      // API 호출
+      await updateUserProfile({ profileImage: file });
+
+      // 성공 시 프로필 데이터 새로고침
+      const updatedProfile = await getCommunityUserProfile();
+      setProfile(updatedProfile);
+      
+    } catch (error) {
+      console.error('❌ 프로필 사진 변경 실패:', error);
+      alert('프로필 사진 변경에 실패했습니다.');
+    }
+  };
+
+  const handleProfileClick = () => {
+    profileInputRef.current?.click();
+  };
+
+  // 프로필 수정 모달에서 저장
+  const handleSaveProfile = async (data: {
+    nickname?: string;
+    bio?: string;
+    externalLink?: string;
+    profileImage?: File;
+    backgroundImage?: File;
+  }) => {
+    try {
+      console.log('프로필 수정 중...', data);
+
+      // API 호출
+      await updateUserProfile(data);
+
+      // 성공 시 프로필 데이터 새로고침
+      const updatedProfile = await getCommunityUserProfile();
+      setProfile(updatedProfile);
+
+      console.log('✅ 프로필 수정 완료');
+    } catch (error) {
+      console.error('❌ 프로필 수정 실패:', error);
+      throw error;
+    }
+  };
 
   const currentPosts =
     activeTab === "list"
@@ -51,26 +137,8 @@ export default function CommunityMyPage() {
       : likedPosts;
 
   /* -------------------------------- 상세 페이지 이동 함수------------------------------------- */
-  const goToDetail = (src: string, idx: number) => {
-    navigate(`/community/${idx + 1}`, {
-      state: {
-        post: {
-          postId: idx + 1,
-          userId: 0,
-          userNickname: "여행하는물개",
-          userProfileImageUrl: "/images/profile.png",
-          regionName: "고양시",
-          imageUrl: src,
-          title: "이번 주말 다녀온 고양시 스타필드!",
-          content:
-            "경기도 고양시 덕양구에 위치한 스타필드에 다녀왔어요. 조명이 너무 예뻐서 가족들과 좋은 시간을 보냈어요.",
-          tags: ["#고양시", "#핫플", "#야경"],
-          likeCount: 125,
-          commentCount: 15,
-          createdAt: new Date().toISOString(),
-        },
-      },
-    });
+  const goToDetail = (postId: number) => {
+    navigate(`/community/${postId}`);
   };
 
   /* ------------------------------렌더링 ------------------------------------------------------- */
@@ -97,46 +165,115 @@ export default function CommunityMyPage() {
 
       {/* 배경 이미지 */}
       <div
-        className="relative w-full max-w-[480px] h-[180px] overflow-hidden cursor-pointer group"
-        onClick={handleBackgroundClick}
+        className={`relative w-full max-w-[480px] h-[180px] overflow-hidden ${profile?.isMe ? 'cursor-pointer group' : ''}`}
+        onClick={profile?.isMe ? handleBackgroundClick : undefined}
       >
         <img
-          src={backgroundImage}
+          src={profile?.backgroundImageUrl || "/images/city.png"}
           alt="배경"
-          className="absolute w-full h-full object-cover brightness-[0.45] transition-all duration-300 group-hover:brightness-[0.35]"
+          className={`absolute w-full h-full object-cover brightness-[0.45] transition-all duration-300 ${profile?.isMe ? 'group-hover:brightness-[0.35]' : ''}`}
         />
 
-        {/* 변경 안내 */}
-        <div className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 group-hover:opacity-100 transition-all duration-300">
-          <span className="text-white text-[15px] font-medium">
-            배경화면 변경하기
-          </span>
-        </div>
+        {/* 변경 안내 (내 페이지에서만 표시) */}
+        {profile?.isMe && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 group-hover:opacity-100 transition-all duration-300">
+            <span className="text-white text-[15px] font-medium">
+              배경화면 변경하기
+            </span>
+          </div>
+        )}
 
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          className="hidden"
-          onChange={handleBackgroundChange}
-        />
+        {profile?.isMe && (
+          <input
+            ref={backgroundInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleBackgroundChange}
+          />
+        )}
       </div>
 
       {/* 프로필 */}
       <div className="w-full max-w-[480px] px-[15px] mt-[-35px] relative z-10">
-        <img
-          src="/images/profile.png"
-          alt="프로필"
-          className="w-[80px] h-[80px] rounded-full object-cover shadow-md border-white bg-white"
-        />
+        {/* 프로필 수정 버튼 - 우측 상단 */}
+        {profile?.isMe && (
+          <button
+            onClick={() => setIsEditModalOpen(true)}
+            className="absolute top-0 right-[15px] p-2 bg-white hover:bg-gray-50 rounded-full transition-colors shadow-md"
+            aria-label="프로필 수정"
+          >
+            <Pencil size={18} className="text-gray-700" />
+          </button>
+        )}
+
+        <div className="relative inline-block">
+          <img
+            src={profile?.imageUrl || "/images/profile.png"}
+            alt="프로필"
+            className={`w-[80px] h-[80px] rounded-full object-cover shadow-md border-white bg-white ${
+              profile?.isMe ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''
+            }`}
+            onClick={profile?.isMe ? handleProfileClick : undefined}
+          />
+          {profile?.isMe && (
+            <div
+              className="absolute bottom-0 right-0 w-[26px] h-[26px] bg-[#FF7070] rounded-full flex items-center justify-center cursor-pointer shadow-md"
+              onClick={handleProfileClick}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 5v14M5 12h14"/>
+              </svg>
+            </div>
+          )}
+        </div>
+
+        {profile?.isMe && (
+          <input
+            ref={profileInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleProfileChange}
+          />
+        )}
 
         <div className="mt-[8px]">
           <h2 className="text-[17px] font-semibold text-gray-800">
-            여행하는물개
+            {profile?.nickname || "사용자"}
           </h2>
-          <p className="text-[13px] text-gray-500 w-[282px] leading-snug">
-            새로운 것과 낯선 곳에서의 새로운 발견을 즐깁니다.
+          <p className="text-[13px] text-gray-500 w-[282px] leading-snug mt-1">
+            {profile?.bio || ""}
           </p>
+
+          {/* 링크 표시 */}
+          {profile?.externalLink && (
+            <div className="flex items-center gap-2 mt-2">
+              <img
+                src="/images/link-icon.png"
+                className="w-[14px] h-[14px] rotate-45"
+                alt="link"
+              />
+              <a
+                href={profile.externalLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[13px] text-blue-600 underline hover:text-blue-700"
+              >
+                {profile.externalLink}
+              </a>
+            </div>
+          )}
+
+          {/* 팔로워/팔로잉 수 */}
+          <div className="flex gap-4 mt-2">
+            <span className="text-[13px] text-gray-600">
+              팔로워 <span className="font-semibold">{profile?.followerCount || 0}</span>
+            </span>
+            <span className="text-[13px] text-gray-600">
+              팔로잉 <span className="font-semibold">{profile?.followingCount || 0}</span>
+            </span>
+          </div>
         </div>
 
         {/* 아이콘 탭 */}
@@ -166,20 +303,40 @@ export default function CommunityMyPage() {
 
       {/* 게시물 목록 */}
       <div className="grid grid-cols-3 gap-[4px] mt-[25px] px-2 w-full max-w-[480px]">
-        {currentPosts.map((src, idx) => (
-          <div
-            key={idx}
-            className="aspect-square cursor-pointer active:scale-[0.98] transition"
-            onClick={() => goToDetail(src, idx)}
-          >
-            <img
-              src={src}
-              alt={`게시물 ${idx + 1}`}
-              className="w-full h-full object-cover rounded-[6px]"
-            />
+        {isLoading ? (
+          <div className="col-span-3 text-center py-10 text-gray-500">
+            로딩 중...
           </div>
-        ))}
+        ) : currentPosts.length === 0 ? (
+          <div className="col-span-3 text-center py-10 text-gray-500">
+            게시물이 없습니다.
+          </div>
+        ) : (
+          currentPosts.map((post) => (
+            <div
+              key={post.postId}
+              className="aspect-square cursor-pointer active:scale-[0.98] transition"
+              onClick={() => goToDetail(post.postId)}
+            >
+              <img
+                src={post.imageUrl}
+                alt={`게시물 ${post.postId}`}
+                className="w-full h-full object-cover rounded-[6px]"
+              />
+            </div>
+          ))
+        )}
       </div>
+
+      {/* 프로필 수정 모달 */}
+      {profile && (
+        <EditProfileModal
+          isOpen={isEditModalOpen}
+          onClose={() => setIsEditModalOpen(false)}
+          profile={profile}
+          onSave={handleSaveProfile}
+        />
+      )}
     </div>
   );
 }

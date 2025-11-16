@@ -55,7 +55,6 @@ const MapView = memo(function MapView({
         backgroundPosition: 'center',
         touchAction: 'none',
       }}
-      onWheel={handleWheel}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}

@@ -130,24 +130,11 @@ export default function useMapZoom({ markers }: UseMapZoomOptions) {
   }, [pickNearestMarker]);
 
   const handleWheel = useCallback(
-    (e: React.WheelEvent) => {
-      // 트랙패드 핀치
-      if (!e.ctrlKey) return;
-      e.preventDefault();
-
-      const container = containerRef.current;
-      if (container) {
-        const rect = container.getBoundingClientRect();
-        const leftPct = ((e.clientX - rect.left) / rect.width) * 100;
-        const topPct = ((e.clientY - rect.top) / rect.height) * 100;
-        originPosRef.current = { top: `${topPct}%`, left: `${leftPct}%` };
-      }
-
-      const factor = Math.exp(-e.deltaY * 0.002);
-      const next = Math.max(1, Math.min(2, scaleRef.current * factor));
-      updateZoomState(next);
+    (_e: React.WheelEvent) => {
+      // 네이티브 이벤트 리스너에서 처리하므로 여기서는 아무것도 안함
+      // (passive: false 경고 방지)
     },
-    [updateZoomState]
+    []
   );
 
   const zoomIn = useCallback((marker: Marker) => {
@@ -168,7 +155,7 @@ export default function useMapZoom({ markers }: UseMapZoomOptions) {
     setTimeout(() => (originPosRef.current = null), 600);
   }, []);
 
-  // 터치 이벤트를 passive: false로 등록 (성능 최적화)
+  // 터치 및 휠 이벤트를 passive: false로 등록
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
@@ -193,13 +180,32 @@ export default function useMapZoom({ markers }: UseMapZoomOptions) {
       });
     };
 
+    const handleWheelNative = (e: WheelEvent) => {
+      // 트랙패드 핀치 (Ctrl + 휠)
+      if (!e.ctrlKey) return;
+      e.preventDefault();
+
+      const rect = container.getBoundingClientRect();
+      const leftPct = ((e.clientX - rect.left) / rect.width) * 100;
+      const topPct = ((e.clientY - rect.top) / rect.height) * 100;
+      originPosRef.current = { top: `${topPct}%`, left: `${leftPct}%` };
+
+      const factor = Math.exp(-e.deltaY * 0.002);
+      const next = Math.max(1, Math.min(2, scaleRef.current * factor));
+      updateZoomState(next);
+    };
+
     // passive: false로 등록하여 preventDefault 가능하게 함
     container.addEventListener('touchmove', handleTouchMoveNative, {
+      passive: false,
+    });
+    container.addEventListener('wheel', handleWheelNative, {
       passive: false,
     });
 
     return () => {
       container.removeEventListener('touchmove', handleTouchMoveNative);
+      container.removeEventListener('wheel', handleWheelNative);
     };
   }, [getDistance, updateZoomState]);
 
@@ -212,7 +218,6 @@ export default function useMapZoom({ markers }: UseMapZoomOptions) {
     containerRef,
     scale,
     isPinching,
-    handleWheel,
     handleTouchStart,
     handleTouchMove,
     handleTouchEnd,
