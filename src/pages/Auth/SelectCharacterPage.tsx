@@ -31,7 +31,7 @@ export default function SelectCharacterPage() {
       />
 
       <h1
-        className="absolute left-[30px] top-[110px] text-[22px] font-semibold text-black leading-tight whitespace-pre-line text-left"
+        className="absolute left-[30px] top-[110px] text-[29px] font-semibold text-black leading-tight whitespace-pre-line text-left"
       >
         {"캐릭터를\n선택하세요"}
       </h1>

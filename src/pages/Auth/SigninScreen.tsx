@@ -50,39 +50,38 @@ export default function LoginPage() {
       />
 
       {/* 로그인 박스 */}
-      <div className="w-[330px] border border-gray-300 rounded-[10px] p-6 text-center">
-        <h1 className="text-[28px] font-bold text-black mb-6">로그인</h1>
+      <h1 className="text-[45px] font-bold text-black mb-6">로그인</h1>
 
+      <div className="w-full max-w-[360px] mx-auto">
         <form onSubmit={handleSubmit} className="flex flex-col space-y-4">
           <input
             type="email"
             placeholder="abc@naver.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full h-[50px] rounded-[12px] border border-gray-300 px-4 text-[15px] placeholder-gray-400"
+            className="w-full h-[80px] rounded-[25px] border border-gray-300 px-4 text-[22px] placeholder-gray-400"
           />
           <input
             type="password"
             placeholder="비밀번호"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full h-[50px] rounded-[12px] border border-gray-300 px-4 text-[15px] placeholder-gray-400"
+            className="w-full h-[80px] rounded-[25px] border border-gray-300 px-4 text-[22px] placeholder-gray-400"
           />
 
           {/* 로그인 버튼 */}
           <button
             type="submit"
             disabled={loading}
-            className={`w-full h-[55px] text-white text-[16px] font-semibold rounded-[15px] ${
-              loading ? 'bg-gray-400' : 'bg-[#FF7070]'
-            } transition active:scale-95`}
+            className={`w-full h-[70px] text-white text-[22px] font-semibold rounded-[25px] ${loading ? 'bg-gray-400' : 'bg-[#FF7070]'
+              } transition active:scale-95`}
           >
             {loading ? '로그인중...' : '로그인'}
           </button>
         </form>
 
         {/* 하단 링크 */}
-        <div className="mt-5 text-[13px] text-gray-500">
+        <div className="mt-5 text-[16px] text-center text-gray-500">
           <Link to="/find-id" className="hover:underline">
             아이디 찾기
           </Link>{' '}
