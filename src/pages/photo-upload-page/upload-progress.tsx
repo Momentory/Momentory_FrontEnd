@@ -33,11 +33,13 @@ export default function PhotoUploadProgressPage() {
           selectedImage: uploadResult.imageUrl,
           photoId: uploadResult.photoId,
           regionName: uploadResult.regionalStampName,
+          // 지역 스탬프만 바로 획득 (문화 스탬프는 인증 후 발급)
           stampType: uploadResult.regionalStampGranted ? 'regional' : undefined,
           points: uploadResult.rouletteRewardGranted
             ? uploadResult.rouletteRewardPoint
             : undefined,
           rouletteRewardGranted: uploadResult.rouletteRewardGranted,
+          // 근처 문화 관광지 정보 (인증 프로세스용)
           nearbyPlace: uploadResult.hasNearbyCulturalSpots
             ? uploadResult.nearbyCulturalSpotName
             : undefined,
