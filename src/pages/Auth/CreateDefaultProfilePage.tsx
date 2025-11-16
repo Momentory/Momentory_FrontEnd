@@ -15,10 +15,10 @@ export default function CreateProfilePage() {
   const maxIntroLength = 100;
 
 
-  /* ------------------- 닉네임 자동 확인 (API 없어도 통과) ------------------- */
+  /* ------------------- 닉네임 자동 확인 ------------------- */
   useEffect(() => {
     if (!nickname.trim()) {
-      setNicknameAvailable(null); // 닉네임 비어있으면 메시지 숨기기
+      setNicknameAvailable(null);
       return;
     }
 
@@ -29,9 +29,8 @@ export default function CreateProfilePage() {
         const res = await checkNickname(nickname);
         setNicknameAvailable(res.available);
       } catch (error) {
-        // API 없어도 통과되도록
-        console.warn("닉네임 확인 실패 → 사용 가능으로 처리");
-        setNicknameAvailable(true);
+        console.warn("닉네임 확인 실패 → 이미 사용 중으로 처리");
+        setNicknameAvailable(false);  
       }
 
       setCheckingNickname(false);
@@ -39,6 +38,7 @@ export default function CreateProfilePage() {
 
     return () => clearTimeout(timeout);
   }, [nickname]);
+
 
 
   /* ------------------------ 저장 ------------------------ */
@@ -180,11 +180,10 @@ export default function CreateProfilePage() {
       <button
         disabled={nickname.trim() === "" || checkingNickname}
         onClick={handleSubmit}
-        className={`w-[329px] h-[60px] text-white text-[18px] font-semibold rounded-2xl mt-8 ${
-          nickname.trim() !== "" && !checkingNickname
+        className={`w-[329px] h-[60px] text-white text-[18px] font-semibold rounded-2xl mt-8 ${nickname.trim() !== "" && !checkingNickname
             ? "bg-[#FF7070]"
             : "bg-gray-300 cursor-not-allowed"
-        }`}
+          }`}
       >
         프로필 저장
       </button>
