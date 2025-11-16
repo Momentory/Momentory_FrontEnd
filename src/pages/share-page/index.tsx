@@ -33,8 +33,12 @@ export default function SharePage() {
       <DropdownHeader title="공유" />
 
       <main
-        className="flex flex-col items-center pt-10 px-6 bg-white"
-        style={{ height: 'calc(100vh - 112px - 80px)', overflowY: 'auto' }}
+        className="flex flex-col items-center pt-10 px-6 bg-white pb-16"
+        style={{
+          height: 'calc(100vh - 112px - 80px)',
+          overflowY: 'auto',
+          paddingBottom: 'calc(24px + env(safe-area-inset-bottom))',
+        }}
       >
         <h2 className="text-2xl font-extrabold text-[#444444]">
           {isCaptured ? '나의 경기 지도 생성 완료!' : '지도 공유 페이지'}
@@ -51,7 +55,7 @@ export default function SharePage() {
           />
         </div>
 
-        <div className="w-full px-7">
+        <div className="w-full px-7 mb-6">
           <button
             onClick={handleSaveImage}
             className="w-full bg-[#FF7070] text-white text-lg font-bold py-3.5 rounded-full hover:bg-[#E05A5A] transition-colors"
