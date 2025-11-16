@@ -27,8 +27,18 @@ export default function PhotoUploadCompletePage() {
   const [showNearbyPlaceModal, setShowNearbyPlaceModal] = useState(false);
   const [nearbyPlace, setNearbyPlace] = useState<string | null>(null);
   const [showShareChannels, setShowShareChannels] = useState(false);
+  const [showRouletteModal, setShowRouletteModal] = useState(false);
 
   useEffect(() => {
+    const rouletteGranted = location.state?.rouletteRewardGranted;
+
+    // 룰렛 성공 팝업을 먼저 표시
+    if (rouletteGranted) {
+      setShowRouletteModal(true);
+      return;
+    }
+
+    // 룰렛 팝업이 없으면 바로 nearbyPlace 체크
     const nearbyPlaceName = location.state?.nearbyPlace;
 
     if (nearbyPlaceName) {
@@ -535,6 +545,21 @@ export default function PhotoUploadCompletePage() {
     setShowNearbyPlaceModal(false);
   };
 
+  const handleRouletteClose = () => {
+    setShowRouletteModal(false);
+
+    // 룰렛 모달을 닫은 후 nearbyPlace 체크
+    const nearbyPlaceName = location.state?.nearbyPlace;
+
+    if (nearbyPlaceName) {
+      const { isSupported } = mapCulturalSpotName(nearbyPlaceName);
+      if (isSupported) {
+        setNearbyPlace(nearbyPlaceName);
+        setShowNearbyPlaceModal(true);
+      }
+    }
+  };
+
   const nearbySpots =
     (location.state?.nearbySpots as
       | Array<{
@@ -551,6 +576,34 @@ export default function PhotoUploadCompletePage() {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-white">
+      {showRouletteModal && (
+        <Modal title="룰렛 성공!" onClose={handleRouletteClose}>
+          <div className="flex flex-col items-center">
+            <div className="w-20 h-20 bg-[#FF7070] rounded-full flex items-center justify-center mb-4">
+              <span className="text-4xl">🎉</span>
+            </div>
+            <p className="text-center text-[#4C4C4C] mb-4 text-lg font-bold">
+              축하합니다!
+            </p>
+            <p className="text-center text-[#4C4C4C] mb-8 text-base">
+              방문 스탬프 + 룰렛 성공으로
+              <br />
+              <span className="text-[#FF7070] font-bold text-xl">
+                +{location.state?.points || 0} 포인트
+              </span>
+              를 획득했습니다!
+            </p>
+
+            <button
+              onClick={handleRouletteClose}
+              className="w-full py-4 px-6 rounded-[12px] bg-[#FF7070] text-white font-semibold text-base hover:bg-[#ff6060] transition-colors"
+            >
+              확인
+            </button>
+          </div>
+        </Modal>
+      )}
+
       {showNearbyPlaceModal && nearbyPlace && (
         <Modal title="근처 문화 관광지 발견!" onClose={handleCloseModal}>
           <p className="text-center text-[#4C4C4C] mb-8 text-lg font-bold">
