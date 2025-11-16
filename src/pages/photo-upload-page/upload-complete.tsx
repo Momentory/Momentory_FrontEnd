@@ -235,61 +235,36 @@ export default function PhotoUploadCompletePage() {
         break;
       }
       case 'instagram': {
-        try {
-          const shareImageUrl = toS3WebsiteUrl(uploadedImage);
-          const blob = await getImageBlob(shareImageUrl);
-          const downloadName = `momentory-photo-${new Date().toISOString().split('T')[0]}.jpg`;
-          downloadBlob(blob, downloadName);
-          const isMobile =
-            /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-              navigator.userAgent
+        const ua = navigator.userAgent || '';
+        const isAndroid = /Android/i.test(ua);
+        const isIOS = /iPhone|iPad|iPod/i.test(ua);
+        const openUrl = (url: string) => {
+          window.location.href = url;
+        };
+        if (isAndroid) {
+          openUrl(
+            'intent://story-camera#Intent;scheme=instagram;package=com.instagram.android;end'
+          );
+          setTimeout(() => {
+            openUrl(
+              'intent://app#Intent;scheme=instagram;package=com.instagram.android;end'
             );
-          const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
-          const isAndroid = /Android/i.test(navigator.userAgent);
-          const tryOpen = async (url: string) => {
-            return new Promise<void>((resolve) => {
-              try {
-                window.location.href = url;
-              } catch (e) {
-                console.error(e);
-              }
-              setTimeout(() => resolve(), 600);
-            });
-          };
-          if (isMobile) {
-            if (isIOS || isAndroid) await tryOpen('instagram://story-camera');
-            await tryOpen('instagram://app');
-            if (navigator.share) {
-              try {
-                const file = new File([blob], downloadName, {
-                  type: blob.type || 'image/jpeg',
-                });
-                if (
-                  navigator.canShare &&
-                  navigator.canShare({ files: [file] })
-                ) {
-                  await navigator.share({
-                    title: 'Momentory',
-                    text: '나의 순간을 Momentory에서 확인해보세요!',
-                    files: [file],
-                  });
-                  return;
-                }
-              } catch (shareError) {
-                console.error(shareError);
-              }
-            }
-            alert(
-              '사진을 갤러리에 저장했어요.\n인스타그램 앱을 열어 스토리에서 저장한 사진을 선택해 공유해주세요.'
+          }, 600);
+          setTimeout(() => {
+            openUrl(
+              'https://play.google.com/store/apps/details?id=com.instagram.android'
             );
-          } else {
-            alert(
-              '사진을 다운로드했어요.\n인스타그램 웹사이트에서 다운로드한 사진을 업로드해주세요.'
-            );
-          }
-        } catch (error) {
-          if (error instanceof Error && error.name !== 'AbortError')
-            alert('인스타그램 공유에 실패했습니다.');
+          }, 1400);
+        } else if (isIOS) {
+          openUrl('instagram://story-camera');
+          setTimeout(() => {
+            openUrl('instagram://app');
+          }, 600);
+          setTimeout(() => {
+            openUrl('https://apps.apple.com/app/instagram/id389801252');
+          }, 1400);
+        } else {
+          window.open('https://www.instagram.com', '_blank');
         }
         break;
       }
