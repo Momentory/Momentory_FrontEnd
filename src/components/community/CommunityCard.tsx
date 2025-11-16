@@ -212,11 +212,10 @@ export default function CommunityCard({ post, onUpdate }: CommunityCardProps) {
             onClick={handleLike}
           >
             <Heart
-              className={`w-4 h-4 transition-colors ${
-                liked
+              className={`w-4 h-4 transition-colors ${liked
                   ? "fill-red-500 text-red-500"
                   : "fill-none text-gray-700"
-              }`}
+                }`}
             />
             <span>{likeCount}</span>
           </div>
@@ -233,19 +232,15 @@ export default function CommunityCard({ post, onUpdate }: CommunityCardProps) {
             onClick={handleScrap}
           >
             <Bookmark
-              className={`w-4 h-4 transition-colors ${
-                scrapped
+              className={`w-4 h-4 transition-colors ${scrapped
                   ? "fill-yellow-400 text-yellow-400"
                   : "fill-none text-gray-700"
-              }`}
+                }`}
             />
           </div>
-
         </div>
-
-
       </div>
     </div>
   );
 }
-``
+

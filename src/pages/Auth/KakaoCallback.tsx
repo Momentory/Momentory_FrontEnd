@@ -1,4 +1,3 @@
-// src/pages/Auth/KakaoCallback.tsx
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -39,7 +38,7 @@ export default function KakaoCallback() {
 
         // 토큰 검증
         if (!token) {
-          console.error("❌ 토큰이 없습니다!");
+          console.error(" 토큰이 없습니다!");
           setError("인증 토큰을 받지 못했습니다.");
           setTimeout(() => {
             navigate("/login?error=no_token", { replace: true });
@@ -49,7 +48,7 @@ export default function KakaoCallback() {
 
         // userId 검증
         if (!userId) {
-          console.error("❌ userId가 없습니다!");
+          console.error(" userId가 없습니다!");
           setError("사용자 정보를 받지 못했습니다.");
           setTimeout(() => {
             navigate("/login?error=no_user_id", { replace: true });
@@ -71,7 +70,7 @@ export default function KakaoCallback() {
         localStorage.setItem("nickname", safeNickname);
         localStorage.setItem("profileImage", safeProfileImage);
 
-        console.log("✅ localStorage 저장 완료");
+        console.log("ocalStorage 저장 완료");
         console.log("=== 저장된 값 확인 ===");
         console.log("accessToken:", localStorage.getItem("accessToken"));
         console.log("userId:", localStorage.getItem("userId"));
@@ -80,15 +79,15 @@ export default function KakaoCallback() {
 
         // 페이지 이동
         if (isProfileCompleted) {
-          console.log("✅ 프로필 완료 → /home으로 이동");
+          console.log(" 프로필 완료 → /home으로 이동");
           navigate("/home", { replace: true });
         } else {
-          console.log("✅ 프로필 미완료 → /select로 이동");
+          console.log(" 프로필 미완료 → /select로 이동");
           navigate("/select", { replace: true });
         }
 
       } catch (err) {
-        console.error("❌ 콜백 처리 중 오류:", err);
+        console.error(" 콜백 처리 중 오류:", err);
         setError("로그인 처리 중 오류가 발생했습니다.");
         setTimeout(() => {
           navigate("/login?error=callback_error", { replace: true });
@@ -103,7 +102,7 @@ export default function KakaoCallback() {
     <div className="flex flex-col justify-center items-center h-screen bg-white">
       {error ? (
         <>
-          <div className="text-red-500 text-sm mb-2">⚠️ {error}</div>
+          <div className="text-red-500 text-sm mb-2"> {error}</div>
           <div className="text-gray-400 text-xs">로그인 페이지로 돌아갑니다...</div>
         </>
       ) : (
