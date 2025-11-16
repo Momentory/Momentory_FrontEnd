@@ -235,36 +235,61 @@ export default function PhotoUploadCompletePage() {
         break;
       }
       case 'instagram': {
-        const ua = navigator.userAgent || '';
-        const isAndroid = /Android/i.test(ua);
-        const isIOS = /iPhone|iPad|iPod/i.test(ua);
-        const openUrl = (url: string) => {
-          window.location.href = url;
-        };
-        if (isAndroid) {
-          openUrl(
-            'intent://story-camera#Intent;scheme=instagram;package=com.instagram.android;end'
+        try {
+          if (uploadedImage.startsWith('data:')) {
+            alert(
+              '이미지가 아직 업로드되지 않았습니다. 업로드 완료 후 다시 시도해주세요.'
+            );
+            return;
+          }
+
+          const shareImageUrl = toS3WebsiteUrl(uploadedImage);
+          const blob = await getImageBlob(shareImageUrl);
+          const downloadName = `momentory-photo-${new Date().toISOString().split('T')[0]}.jpg`;
+
+          // 1) 먼저 이미지 저장(다운로드) 시도
+          downloadBlob(blob, downloadName);
+
+          // 2) 그 다음 플랫폼별로 인스타 앱 오픈 시도
+          const ua = navigator.userAgent || '';
+          const isAndroid = /Android/i.test(ua);
+          const isIOS = /iPhone|iPad|iPod/i.test(ua);
+          const openUrl = (url: string) => {
+            window.location.href = url;
+          };
+
+          // 약간의 지연 후 앱 오픈(다운로드 트리거와 충돌 방지)
+          setTimeout(() => {
+            if (isAndroid) {
+              openUrl(
+                'intent://story-camera#Intent;scheme=instagram;package=com.instagram.android;end'
+              );
+              setTimeout(() => {
+                openUrl(
+                  'intent://app#Intent;scheme=instagram;package=com.instagram.android;end'
+                );
+              }, 600);
+              setTimeout(() => {
+                openUrl(
+                  'https://play.google.com/store/apps/details?id=com.instagram.android'
+                );
+              }, 1400);
+            } else if (isIOS) {
+              openUrl('instagram://story-camera');
+              setTimeout(() => {
+                openUrl('instagram://app');
+              }, 600);
+              setTimeout(() => {
+                openUrl('https://apps.apple.com/app/instagram/id389801252');
+              }, 1400);
+            } else {
+              window.open('https://www.instagram.com', '_blank');
+            }
+          }, 300);
+        } catch {
+          alert(
+            '인스타그램 공유 준비 중 오류가 발생했습니다. 다시 시도해주세요.'
           );
-          setTimeout(() => {
-            openUrl(
-              'intent://app#Intent;scheme=instagram;package=com.instagram.android;end'
-            );
-          }, 600);
-          setTimeout(() => {
-            openUrl(
-              'https://play.google.com/store/apps/details?id=com.instagram.android'
-            );
-          }, 1400);
-        } else if (isIOS) {
-          openUrl('instagram://story-camera');
-          setTimeout(() => {
-            openUrl('instagram://app');
-          }, 600);
-          setTimeout(() => {
-            openUrl('https://apps.apple.com/app/instagram/id389801252');
-          }, 1400);
-        } else {
-          window.open('https://www.instagram.com', '_blank');
         }
         break;
       }

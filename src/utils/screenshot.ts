@@ -25,7 +25,7 @@ export async function captureElement(
 
   try {
     // 보이는 비율 그대로 캡처
-    const dataUrl = await htmlToImage.toPng(element, defaultOptions);
+    const dataUrl = await htmlToImage.toPng(element, defaultOptions as any);
     return dataUrl;
   } catch (error) {
     console.error('캡처 실패:', error);
