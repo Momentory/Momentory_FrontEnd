@@ -22,7 +22,6 @@ const MapView = memo(function MapView({
   colorMap = {},
   zoomInMarker,
   zoomOutMarker,
-  handleWheel,
   handleTouchStart,
   handleTouchMove,
   handleTouchEnd,
@@ -55,7 +54,6 @@ const MapView = memo(function MapView({
         backgroundPosition: 'center',
         touchAction: 'none',
       }}
-      onWheel={handleWheel}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}

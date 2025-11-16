@@ -101,7 +101,6 @@ export default function PublicMapPage() {
     isPinching,
     zoomIn: zoomInMarker,
     zoomOut: zoomOutMarker,
-    handleWheel,
     handleTouchStart,
     handleTouchMove,
     handleTouchEnd,
@@ -208,7 +207,6 @@ export default function PublicMapPage() {
           colorMap={colorMap}
           zoomInMarker={zoomInMarker}
           zoomOutMarker={zoomOutMarker}
-          handleWheel={handleWheel}
           handleTouchStart={handleTouchStart}
           handleTouchMove={handleTouchMove}
           handleTouchEnd={handleTouchEnd}

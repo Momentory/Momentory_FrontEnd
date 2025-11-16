@@ -1,12 +1,14 @@
 // 방문한 지역의 색상 오버레이 표시
-import { useMemo } from 'react';
+import { memo, useMemo } from 'react';
 import { getVisitedRegionsWithColors } from '../../utils/regionMapLoader';
 
 interface RegionColorLayerProps {
   colorMap: Record<string, string>; // { "수원시": "#FF5733", ... }
 }
 
-export default function RegionColorLayer({ colorMap }: RegionColorLayerProps) {
+const RegionColorLayer = memo(function RegionColorLayer({
+  colorMap
+}: RegionColorLayerProps) {
   const visitedRegions = useMemo(
     () => getVisitedRegionsWithColors(colorMap),
     [colorMap]
@@ -34,9 +36,13 @@ export default function RegionColorLayer({ colorMap }: RegionColorLayerProps) {
             WebkitMaskRepeat: 'no-repeat',
             maskPosition: '0 0',
             WebkitMaskPosition: '0 0',
+            willChange: 'transform',
+            transform: 'translateZ(0)',
           }}
         />
       ))}
     </>
   );
-}
+});
+
+export default RegionColorLayer;

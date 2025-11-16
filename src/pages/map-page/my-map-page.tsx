@@ -90,7 +90,6 @@ export default function MyMapPage() {
     isPinching,
     zoomIn: zoomInMarker, // alias 사용
     zoomOut: zoomOutMarker, // alias 사용
-    handleWheel,
     handleTouchStart,
     handleTouchMove,
     handleTouchEnd,
@@ -199,7 +198,6 @@ export default function MyMapPage() {
           colorMap={colorMap}
           zoomInMarker={zoomInMarker}
           zoomOutMarker={zoomOutMarker}
-          handleWheel={handleWheel}
           handleTouchStart={handleTouchStart}
           handleTouchMove={handleTouchMove}
           handleTouchEnd={handleTouchEnd}

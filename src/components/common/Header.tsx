@@ -13,6 +13,7 @@ import { getUnreadStatus } from "../../api/notification";
 import { getMyProfileSummary } from "../../api/mypage";
 import { getUserIdFromToken } from "../../utils/jwt";
 import { tokenStore } from "../../lib/token";
+import { logout } from "../../api/auth";
 
 const Header = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -56,6 +57,21 @@ const Header = () => {
 
     fetchProfile();
   }, [userId]);
+
+  // 로그아웃 핸들러
+  const handleLogout = async () => {
+    if (!confirm("로그아웃 하시겠습니까?")) {
+      return;
+    }
+
+    try {
+      await logout();
+      setIsDropdownOpen(false);
+      navigate("/login");
+    } catch (error) {
+      console.error("로그아웃 실패:", error);
+    }
+  };
 
   // 초기 미확인 알림 상태 조회
   useEffect(() => {
@@ -194,10 +210,7 @@ const Header = () => {
                     프로필 수정
                   </button>
                   <button
-                    onClick={() => {
-                      alert('로그아웃');
-                      setIsDropdownOpen(false);
-                    }}
+                    onClick={handleLogout}
                     className="block w-full text-left px-4 py-2 text-[14px] hover:bg-gray-50"
                   >
                     로그아웃

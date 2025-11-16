@@ -37,7 +37,6 @@ export interface MapViewProps {
   colorMap?: Record<string, string>; // 지역별 색상 맵
   zoomInMarker: (marker: Marker) => void;
   zoomOutMarker: () => void;
-  handleWheel: (e: React.WheelEvent) => void;
   handleTouchStart: (e: React.TouchEvent) => void;
   handleTouchMove: (e: React.TouchEvent) => void;
   handleTouchEnd: () => void;
@@ -56,7 +55,6 @@ export interface PublicMapViewProps {
   colorMap?: Record<string, string>; // 지역별 색상 맵
   zoomInMarker?: (marker: Marker) => void;
   zoomOutMarker?: () => void;
-  handleWheel: (e: React.WheelEvent) => void;
   handleTouchStart: (e: React.TouchEvent) => void;
   handleTouchMove: (e: React.TouchEvent) => void;
   handleTouchEnd: () => void;

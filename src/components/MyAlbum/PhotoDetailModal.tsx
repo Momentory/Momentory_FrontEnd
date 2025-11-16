@@ -77,7 +77,7 @@ const PhotoDetailModal: React.FC<PhotoDetailModalProps> = ({
     <Modal title="" onClose={onClose}>
       <div className="flex justify-center items-center p-4">
         <div
-          className="bg-white p-4 pb-16 transition-all duration-300 ease-out relative overflow-hidden"
+          className="bg-white p-4 pb-16 transition-all duration-300 ease-out relative overflow-visible"
           onMouseMove={handleMouseMove}
           onMouseLeave={handleMouseLeave}
           style={{
@@ -128,20 +128,17 @@ const PhotoDetailModal: React.FC<PhotoDetailModalProps> = ({
                 {formatDate(photo.createdAt)}
               </div>
             </div>
-
-            <div className="flex justify-end mt-2 pt-2">
-              <button
-                onClick={handleDeleteClick}
-                disabled={deletePhotoMutation.isPending}
-                className="flex items-center gap-1.5 text-xs text-gray-400 disabled:opacity-50"
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-                <span>
-                  {deletePhotoMutation.isPending ? '삭제 중...' : '삭제'}
-                </span>
-              </button>
-            </div>
           </div>
+
+          {/* 삭제 버튼 - 우측 하단 */}
+          <button
+            onClick={handleDeleteClick}
+            disabled={deletePhotoMutation.isPending}
+            className="absolute bottom-4 right-4 flex items-center gap-1.5 text-xs text-gray-400 disabled:opacity-50 z-10"
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+            <span>{deletePhotoMutation.isPending ? '삭제 중...' : '삭제'}</span>
+          </button>
         </div>
       </div>
 
