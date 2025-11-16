@@ -186,10 +186,10 @@ export default function CommunityPage() {
 
   /* ---------------- 렌더링 ---------------- */
   return (
-    <div className="w-full min-h-screen bg-[#F9FAFB] relative">
+    <div className="w-full min-h-screen bg-[#F9FAFB] relative" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
 
       {/* 상단 헤더 */}
-      <header className="flex items-center justify-between bg-[#FF7070] text-white px-3 py-3">
+      <header className="flex items-center justify-between bg-[#FF7070] text-white px-3 py-3" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
         <div className="flex items-center gap-3">
           <img src="/images/menuIcon.png" className="w-[22px] h-[22px]" />
           <img src="/images/notificationIcon.png" className="w-[22px] h-[22px]" />

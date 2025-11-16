@@ -11,21 +11,21 @@ export async function captureElement(
   options?: {
     backgroundColor?: string;
     quality?: number;
+    pixelRatio?: number;
   }
 ): Promise<string> {
   const defaultOptions = {
     backgroundColor: '#ffffff',
     quality: 1,
-    style: {
-      transform: 'none', // scale, zoom 영향 제거
-      zoom: '1',
-    },
+    // 확대 상태 그대로 캡처되도록 transform/zoom 강제 해제 제거
+    // 더 선명한 결과를 위해 픽셀 비율 적용
+    pixelRatio: Math.max(1, window.devicePixelRatio || 1),
     ...options,
   };
 
   try {
     // 보이는 비율 그대로 캡처
-    const dataUrl = await htmlToImage.toPng(element, defaultOptions);
+    const dataUrl = await htmlToImage.toPng(element, defaultOptions as any);
     return dataUrl;
   } catch (error) {
     console.error('캡처 실패:', error);

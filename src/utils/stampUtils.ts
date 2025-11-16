@@ -48,8 +48,16 @@ export function getStampImagePath(regionName: string): string {
 }
 
 export function getCulturalStampImagePath(stampName: string): string {
-  const name = stampName.trim();
-  return `/cultural-stamps/${name}.svg`;
+  // 파일명 규칙: 공백 제거 + 일부 예외 매핑
+  const trimmed = stampName.trim();
+  let fileKey = trimmed.replace(/\s+/g, '');
+
+  // 예외: 실제 파일은 '동두천시계곡.svg'
+  if (fileKey === '동두천계곡') {
+    fileKey = '동두천시계곡';
+  }
+
+  return `/cultural-stamps/${fileKey}.svg`;
 }
 
 /* 경기도 시·군 여부 체크 */
@@ -71,13 +79,13 @@ type CulturalStampMapping = {
 };
 
 const CULTURAL_STAMP_MAPPINGS: CulturalStampMapping[] = [
-  { keywords: ['수원 화성', '유네스코'], stampName: '수원 화성' },
+  { keywords: ['수원 화성', '유네스코'], stampName: '수원화성' },
   { keywords: ['평택항'], stampName: '평택항' },
-  { keywords: ['누에섬 등대전망대', '탄도항누에섬'], stampName: '안산 누에섬' },
-  { keywords: ['킨텍스'], stampName: '고양 킨텍스' },
-  { keywords: ['서울대공원'], stampName: '과천 서울대공원' },
-  { keywords: ['왕방계곡'], stampName: '동두천 계곡' },
-  { keywords: ['남한산성 행궁'], stampName: '성남 남한산성' },
+  { keywords: ['누에섬 등대전망대', '탄도항누에섬'], stampName: '안산누에섬' },
+  { keywords: ['킨텍스'], stampName: '고양킨텍스' },
+  { keywords: ['서울대공원'], stampName: '과천서울대공원' },
+  { keywords: ['왕방계곡'], stampName: '동두천계곡' },
+  { keywords: ['남한산성 행궁'], stampName: '성남남한산성' },
 ];
 
 /* 관광지명 → 표준 스탬프명 매핑 */

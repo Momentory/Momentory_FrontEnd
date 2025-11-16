@@ -54,15 +54,16 @@ export default function PhotoUploadPage() {
 
     try {
       const mediaStream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: { ideal: 'environment' } },
+        video: {
+          facingMode: { ideal: 'environment' },
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+        },
+        audio: false,
       });
 
       setStream(mediaStream);
       setShowCamera(true);
-
-      if (videoRef.current) {
-        videoRef.current.srcObject = mediaStream;
-      }
     } catch (error) {
       alert('카메라 접근에 실패했습니다. 권한을 확인해주세요.');
       navigate('/home');
@@ -129,14 +130,12 @@ export default function PhotoUploadPage() {
           const uploadResponse = await uploadFile(file);
           setUploadedInfo(uploadResponse.result);
         } catch (uploadError) {
-          console.error(uploadError);
           alert('사진을 업로드하지 못했습니다. 다시 시도해주세요.');
         } finally {
           setIsUploadingS3(false);
         }
         setGpsCoords(null);
       } catch (error) {
-        console.error(error);
         alert('사진 파일을 생성하지 못했습니다. 다시 시도해주세요.');
       }
     } catch (error) {
@@ -152,7 +151,6 @@ export default function PhotoUploadPage() {
       return;
     }
 
-    // GPS 정보가 있을 때만 마커 추가
     if (markerLocation) {
       const cityName = extractCityName(markerLocation.address);
       const position = gpsToMapPosition(markerLocation.lat, markerLocation.lng);
@@ -175,18 +173,6 @@ export default function PhotoUploadPage() {
       return;
     }
 
-    console.log('Navigating to /photo-edit with state:', {
-      imageUrl: imageToSend,
-      uploadResult: uploadedInfo,
-      uploadContext: {
-        description,
-        isPrivate,
-        markerColor,
-        markerLocation,
-        cityName: markerLocation ? extractCityName(markerLocation.address) || '미확인' : '미확인',
-      },
-    });
-
     navigate('/photo-edit', {
       state: {
         imageUrl: imageToSend,
@@ -196,7 +182,9 @@ export default function PhotoUploadPage() {
           isPrivate,
           markerColor,
           markerLocation,
-          cityName: markerLocation ? extractCityName(markerLocation.address) || '미확인' : '미확인',
+          cityName: markerLocation
+            ? extractCityName(markerLocation.address) || '미확인'
+            : '미확인',
         },
       },
     });
@@ -214,12 +202,6 @@ export default function PhotoUploadPage() {
     if (!locationAddressData?.result) {
       return;
     }
-    console.log('✅ API 응답:', {
-      cityName: locationAddressData.result.cityName,
-      address: locationAddressData.result.address,
-      lat: locationAddressData.result.latitude,
-      lng: locationAddressData.result.longitude,
-    });
     setMarkerLocation((prev) => ({
       ...prev,
       address: locationAddressData.result.address,
@@ -252,7 +234,6 @@ export default function PhotoUploadPage() {
       const gpsLocation = await extractGPSFromImage(image);
 
       if (gpsLocation) {
-        // GPS 좌표를 설정하면 API 호출이 자동으로 일어남
         setGpsCoords({ lat: gpsLocation.lat, lng: gpsLocation.lng });
       }
     };
@@ -279,6 +260,50 @@ export default function PhotoUploadPage() {
 
     handleCameraOpen();
   }, [location.key, location.state?.cameraStream]);
+
+  useEffect(() => {
+    const setup = async () => {
+      if (!showCamera || !stream || !videoRef.current) {
+        return;
+      }
+
+      const video = videoRef.current;
+      video.muted = true;
+      video.playsInline = true;
+      video.setAttribute('webkit-playsinline', 'true');
+
+      if (video.srcObject !== stream) {
+        video.srcObject = stream;
+      }
+
+      await new Promise<void>((resolve) => {
+        const onLoaded = () => {
+          video.removeEventListener('loadedmetadata', onLoaded);
+          resolve();
+        };
+        if (video.readyState >= 1) {
+          resolve();
+        } else {
+          video.addEventListener('loadedmetadata', onLoaded, { once: true });
+        }
+      });
+
+      try {
+        await video.play();
+      } catch {
+        await new Promise((r) => setTimeout(r, 80));
+        try {
+          await video.play();
+        } catch {
+          alert(
+            '카메라 미리보기를 시작할 수 없습니다. 브라우저 권한을 확인해주세요.'
+          );
+        }
+      }
+    };
+
+    setup();
+  }, [showCamera, stream]);
 
   useEffect(() => {
     return () => {
@@ -499,7 +524,8 @@ export default function PhotoUploadPage() {
               </div>
               <button
                 onClick={() =>
-                  markerLocation && setGpsCoords({
+                  markerLocation &&
+                  setGpsCoords({
                     lat: markerLocation.lat,
                     lng: markerLocation.lng,
                   })

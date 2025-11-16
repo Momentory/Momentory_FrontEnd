@@ -7,9 +7,6 @@ export default function PhotoUploadSuccessPage() {
   const location = useLocation();
 
   useEffect(() => {
-    console.log('[UploadSuccess] location.state:', location.state);
-    console.log('[UploadSuccess] photoId:', location.state?.photoId);
-
     const timer = setTimeout(() => {
       navigate('/stamp-acquisition', {
         state: {
