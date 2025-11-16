@@ -54,6 +54,40 @@ export default function PhotoUploadCompletePage() {
     setShowNearbyPlaceModal(false);
   }, [location.state]);
 
+  // 디버그: 공유 대상 이미지 형식 점검 (data URL인지, https인지)
+  useEffect(() => {
+    try {
+      const isDataUrl = uploadedImage?.startsWith('data:') ?? null;
+      let protocol: string | null = null;
+      try {
+        protocol = new URL(uploadedImage).protocol;
+      } catch {
+        protocol = null;
+      }
+      // 라우터 state에서 우선순위 소스도 함께 출력
+      const st = (window.history.state as any)?.usr ?? {};
+      const stateImage =
+        st?.uploadResult?.imageUrl ?? st?.imageUrl ?? st?.selectedImage ?? null;
+
+      console.log('[UploadComplete] image debug:', {
+        uploadedImage,
+        isDataUrl,
+        protocol,
+        stateImage,
+        stateIsDataUrl: stateImage?.startsWith?.('data:') ?? null,
+        stateProtocol: (() => {
+          try {
+            return new URL(stateImage).protocol;
+          } catch {
+            return null;
+          }
+        })(),
+      });
+    } catch (e) {
+      console.warn('[UploadComplete] image debug error:', e);
+    }
+  }, [uploadedImage]);
+
   const handleSave = async () => {
     try {
       const blob = await getImageBlob(uploadedImage);
@@ -408,9 +442,15 @@ export default function PhotoUploadCompletePage() {
 
       case 'instagram': {
         try {
-          // S3 URL을 CloudFront URL로 변환
+          // 0) 공유 원본 확보 (CloudFront URL로 정규화 후 Blob 추출)
           const shareImageUrl = toS3WebsiteUrl(uploadedImage);
           const blob = await getImageBlob(shareImageUrl);
+
+          // 1) 갤러리 저장(다운로드)
+          const downloadName = `momentory-photo-${
+            new Date().toISOString().split('T')[0]
+          }.jpg`;
+          downloadBlob(blob, downloadName);
 
           const isMobile =
             /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
@@ -419,92 +459,63 @@ export default function PhotoUploadCompletePage() {
           const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
           const isAndroid = /Android/i.test(navigator.userAgent);
 
-          // 모바일: Instagram 스토리 공유 URL 스킴 시도
-          if (isMobile) {
-            // 먼저 이미지를 다운로드 (Instagram이 접근할 수 있도록)
-            const filename = `momentory-photo-${Date.now()}.jpg`;
-            downloadBlob(blob, filename);
-
-            // Instagram 스토리 공유 URL 스킴
-            let instagramUrl = '';
-
-            if (isIOS) {
-              // iOS: Instagram 스토리 공유 스킴
-              // 참고: Instagram은 보안상 외부 URL 직접 공유를 제한하므로,
-              // 이미지를 다운로드하고 Instagram 앱을 열어서 사용자가 수동으로 선택하도록 안내
-              instagramUrl = 'instagram-stories://share';
-            } else if (isAndroid) {
-              // Android: Intent 스킴
-              instagramUrl = `intent://share#Intent;package=com.instagram.android;scheme=https;end`;
-            }
-
-            // Instagram 앱 열기 시도
-            if (instagramUrl) {
+          const tryOpen = async (url: string) => {
+            return new Promise<void>((resolve) => {
               try {
-                window.location.href = instagramUrl;
-                // 약간의 지연 후 안내 메시지
-                setTimeout(() => {
-                  alert(
-                    '인스타그램 앱이 열렸습니다.\n' +
-                      '스토리에서 다운로드한 사진을 선택하여 공유해주세요.\n\n' +
-                      '(사진은 갤러리에 다운로드되었습니다)'
-                  );
-                }, 500);
-                return;
-              } catch (schemeError) {
-                console.warn('Instagram 스킴 열기 실패:', schemeError);
-                // 스킴 실패 시 Web Share API로 폴백
-              }
+                // location.href 사용 (대부분의 모바일 브라우저에서 동작)
+                window.location.href = url;
+              } catch {}
+              // 짧은 지연 후 종료
+              setTimeout(() => resolve(), 600);
+            });
+          };
+
+          if (isMobile) {
+            // 2) 스토리 딥링크 시도
+            if (isIOS) {
+              await tryOpen('instagram://story-camera');
+            } else if (isAndroid) {
+              // Android에서도 story-camera 스킴 시도
+              await tryOpen('instagram://story-camera');
             }
 
-            // Web Share API 지원 여부 확인 (모바일, HTTPS 환경)
+            // 3) 실패시 인스타 앱 열기
+            await tryOpen('instagram://app');
+
+            // 4) 그래도 실패 → Web Share API 시도
             if (navigator.share) {
-              const file = new File(
-                [blob],
-                `momentory-photo-${new Date().toISOString().split('T')[0]}.jpg`,
-                {
-                  type: 'image/jpeg',
-                }
-              );
-
-              const canShareFiles =
-                navigator.canShare && navigator.canShare({ files: [file] });
-
-              if (canShareFiles) {
-                // Web Share API (네이티브 공유) 시도
-                try {
+              try {
+                const file = new File([blob], downloadName, {
+                  type: blob.type || 'image/jpeg',
+                });
+                const canShareFiles =
+                  navigator.canShare && navigator.canShare({ files: [file] });
+                if (canShareFiles) {
                   await navigator.share({
                     title: 'Momentory',
                     text: '나의 순간을 Momentory에서 확인해보세요!',
                     files: [file],
                   });
-                  // 공유 성공 시 여기서 종료
                   return;
-                } catch (shareError) {
-                  // 사용자가 공유를 취소한(AbortError) 경우 무시
-                  if (
-                    shareError instanceof Error &&
-                    shareError.name === 'AbortError'
-                  ) {
-                    return;
-                  }
-                  // 다른 에러 발생 시, 폴백 로직으로 넘어가도록 함
+                }
+              } catch (shareError) {
+                if (
+                  shareError instanceof Error &&
+                  shareError.name === 'AbortError'
+                ) {
+                  return;
                 }
               }
             }
 
-            // 모든 방법 실패 시 안내
+            // 5) 최종 폴백 안내
             alert(
-              '사진이 다운로드되었습니다.\n' +
-                '인스타그램 앱을 열고, 스토리에서 다운로드한 사진을 선택하여 공유해주세요.'
+              '사진을 갤러리에 저장했어요.\n인스타그램 앱을 열어 스토리에서 저장한 사진을 선택해 공유해주세요.'
             );
           } else {
-            // 데스크톱: 다운로드만 제공
-            const filename = `momentory-photo-${new Date().toISOString().split('T')[0]}.jpg`;
-            downloadBlob(blob, filename);
+            // 데스크톱: 저장 안내
             alert(
-              '사진이 다운로드되었습니다.\n' +
-                '인스타그램 웹사이트(instagram.com)에서 다운로드한 사진을 업로드해주세요.'
+              '사진을 다운로드했어요.\n인스타그램 웹사이트(instagram.com)에서 다운로드한 사진을 업로드해주세요.'
             );
           }
         } catch (error) {
