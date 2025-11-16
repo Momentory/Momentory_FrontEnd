@@ -16,7 +16,7 @@ export default function CreateProfilePage() {
   const [birthDay, setBirthDay] = useState('01');
   const [characterType, setCharacterType] = useState('CAT');
 
-  const [nicknameAvailable, setNicknameAvailable] = useState<boolean | null>(null);
+  const [, setNicknameAvailable] = useState<boolean | null>(null);
   const [checkingNickname, setCheckingNickname] = useState(false);
 
   const maxIntroLength = 100;
