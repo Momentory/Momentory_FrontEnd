@@ -23,7 +23,6 @@ const GalleryPage = () => {
     return photosData.pages.flatMap(page =>
       page.photos.map(photo => ({
         ...photo,
-        // S3 REST Endpoint를 Website Endpoint로 변환 (CORS 해결)
         imageUrl: toS3WebsiteUrl(photo.imageUrl),
       }))
     );
@@ -46,12 +45,17 @@ const GalleryPage = () => {
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   return (
-    <>
+    <div className="min-h-screen bg-[#EDE2E2]">
       <DropdownHeader title="사진 기록" />
-      <div ref={scrollRef} className="p-8 pb-20 bg-[#EDE2E2] pt-[130px]">
+      <div ref={scrollRef} className="p-8 pb-20 pt-[130px]">
         {isLoading && (
-          <div className="flex justify-center items-center min-h-[50vh]">
-            <p className="text-gray-500">사진을 불러오는 중...</p>
+          <div className="grid grid-cols-2 gap-4">
+            {[...Array(6)].map((_, index) => (
+              <div
+                key={index}
+                className="aspect-square bg-gray-300 rounded-lg animate-pulse"
+              />
+            ))}
           </div>
         )}
 
@@ -87,12 +91,6 @@ const GalleryPage = () => {
               </div>
             )}
 
-            {!hasNextPage && photos.length > 0 && (
-              <div className="py-8 text-center">
-                <p className="text-gray-400 text-sm">모든 사진을 불러왔습니다</p>
-              </div>
-            )}
-
             {photos.length === 0 && (
               <div className="py-16 text-center">
                 <p className="text-gray-400">업로드된 사진이 없습니다</p>
@@ -106,7 +104,7 @@ const GalleryPage = () => {
         photo={selectedPhoto}
         onClose={() => setSelectedPhoto(null)}
       />
-    </>
+    </div>
   );
 };
 
