@@ -1,11 +1,12 @@
 import type { TemplateProps } from '../../../../types/Templates';
 import React from 'react';
 import PlusIcon from '../../../../assets/icons/plusIcon.svg?react';
+import StickerOverlay from '../../StickerOverlay';
 
 const PageTemplate4: React.FC<TemplateProps> = ({ data, updateData, onImageClick }) => {
 
   return (
-    <div className="relative w-full max-w-[480px] aspect-[9/16] mx-auto font-[inter] flex flex-col justify-end p-6 overflow-hidden bg-[#D8D8D8]">
+    <div className="relative w-[480px] aspect-[9/16] mx-auto font-[inter] flex flex-col justify-end p-6 overflow-hidden bg-[#D8D8D8]">
       {data.image && <img src={data.image} alt="background" crossOrigin="anonymous" className="absolute inset-0 w-full h-full object-cover z-0" />}
       <div
         className="absolute inset-0 z-5"
@@ -45,6 +46,15 @@ const PageTemplate4: React.FC<TemplateProps> = ({ data, updateData, onImageClick
           )}
         </div>
       </div>
+      <StickerOverlay
+        stickers={data.stickers}
+        onUpdateSticker={(stickerId, updates) => {
+          const updatedStickers = data.stickers?.map(s =>
+            s.id === stickerId ? { ...s, ...updates } : s
+          );
+          updateData({ stickers: updatedStickers });
+        }}
+      />
     </div>
   );
 };

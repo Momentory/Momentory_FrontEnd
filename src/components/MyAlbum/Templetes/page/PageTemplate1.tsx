@@ -1,6 +1,7 @@
 import type { TemplateProps } from '../../../../types/Templates';
 import React from 'react';
 import PlusIcon from '../../../../assets/icons/plusIcon.svg?react';
+import StickerOverlay from '../../StickerOverlay';
 
 const PageTemplate1: React.FC<TemplateProps> = ({ data, updateData, onEmptyAreaClick, onImageClick }) => {
   const handleEmptyClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -13,7 +14,7 @@ const PageTemplate1: React.FC<TemplateProps> = ({ data, updateData, onEmptyAreaC
   };
 
   return (
-    <div className="w-full max-w-[480px] aspect-[9/16] mx-auto font-[inter] flex flex-col p-6 bg-white">
+    <div className="w-[480px] aspect-[9/16] mx-auto font-[inter] flex flex-col p-6 bg-white relative">
       <div className="flex justify-between items-start h-[35%] mb-[40px]">
         <div className="w-[30%] h-full relative bg-gray-100 overflow-hidden">
           {data.image1 && <img src={data.image1} alt="Image 1" crossOrigin="anonymous" className="w-full h-full object-cover" />}
@@ -90,6 +91,16 @@ const PageTemplate1: React.FC<TemplateProps> = ({ data, updateData, onEmptyAreaC
           )}
         </div>
       </div>
+
+      <StickerOverlay
+        stickers={data.stickers}
+        onUpdateSticker={(stickerId, updates) => {
+          const updatedStickers = data.stickers?.map(s =>
+            s.id === stickerId ? { ...s, ...updates } : s
+          );
+          updateData({ stickers: updatedStickers });
+        }}
+      />
     </div>
   );
 };

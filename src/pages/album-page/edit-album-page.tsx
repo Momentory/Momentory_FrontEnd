@@ -563,8 +563,8 @@ const EditAlbumPage = () => {
           }}
         >
           {pages.length > 0 && (
-            <div className="relative w-full h-full flex items-center justify-center">
-              <div ref={templateRef} className="max-w-full max-h-full flex items-center justify-center">
+            <div className="relative w-[480px] h-full flex items-center justify-center overflow-auto">
+              <div ref={templateRef} className="w-full flex items-center justify-center">
                 {currentPage && (
                   currentPage.readOnly ? (
                     <img
@@ -652,6 +652,35 @@ const EditAlbumPage = () => {
         <MemoStickerModal
           isOpen={showMemoStickerModal}
           onClose={() => setShowMemoStickerModal(false)}
+          onSelectSticker={(stampImage, stamp) => {
+            console.log('스티커 선택됨:', stampImage, stamp);
+            console.log('현재 페이지:', currentPage);
+
+            const newSticker = {
+              id: `sticker-${Date.now()}`,
+              imageUrl: stampImage,
+              x: 50,
+              y: 50,
+              width: 80,
+              height: 80,
+              region: stamp.region,
+              spotName: stamp.spotName || undefined,
+            };
+
+            console.log('새 스티커:', newSticker);
+
+            const currentStickers = currentPage.stickers || [];
+            console.log('현재 스티커들:', currentStickers);
+
+            const updatedStickers = [...currentStickers, newSticker];
+            console.log('업데이트된 스티커들:', updatedStickers);
+
+            updatePageData(currentPageIndex, {
+              stickers: updatedStickers,
+            });
+
+            console.log('업데이트 후 페이지:', pages[currentPageIndex]);
+          }}
         />
         <TemplateEditModal
           isOpen={showTemplateEditModal}
@@ -792,6 +821,35 @@ const EditAlbumPage = () => {
       <MemoStickerModal
         isOpen={showMemoStickerModal}
         onClose={() => setShowMemoStickerModal(false)}
+        onSelectSticker={(stampImage, stamp) => {
+          console.log('앨범 생성 모드 - 스티커 선택됨:', stampImage, stamp);
+          console.log('현재 페이지:', currentPage);
+
+          const newSticker = {
+            id: `sticker-${Date.now()}`,
+            imageUrl: stampImage,
+            x: 50,
+            y: 50,
+            width: 80,
+            height: 80,
+            region: stamp.region,
+            spotName: stamp.spotName || undefined,
+          };
+
+          console.log('새 스티커:', newSticker);
+
+          const currentStickers = currentPage.stickers || [];
+          console.log('현재 스티커들:', currentStickers);
+
+          const updatedStickers = [...currentStickers, newSticker];
+          console.log('업데이트된 스티커들:', updatedStickers);
+
+          updatePageData(currentPageIndex, {
+            stickers: updatedStickers,
+          });
+
+          console.log('업데이트 후 페이지:', pages[currentPageIndex]);
+        }}
       />
       <TemplateEditModal
         isOpen={showTemplateEditModal}

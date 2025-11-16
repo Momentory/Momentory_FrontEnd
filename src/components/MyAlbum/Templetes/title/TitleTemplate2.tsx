@@ -1,6 +1,7 @@
 import type { TemplateProps } from '../../../../types/Templates';
 import React from 'react';
 import PlusIcon from '../../../../assets/icons/plusIcon.svg?react';
+import StickerOverlay from '../../StickerOverlay';
 
 const TitleTemplate2: React.FC<TemplateProps> = ({ data, updateData, onEmptyAreaClick, onImageClick }) => {
   const handleEmptyClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -55,6 +56,15 @@ const TitleTemplate2: React.FC<TemplateProps> = ({ data, updateData, onEmptyArea
           )}
         </div>
       </div>
+      <StickerOverlay
+        stickers={data.stickers}
+        onUpdateSticker={(stickerId, updates) => {
+          const updatedStickers = data.stickers?.map(s =>
+            s.id === stickerId ? { ...s, ...updates } : s
+          );
+          updateData({ stickers: updatedStickers });
+        }}
+      />
     </div>
   );
 };
