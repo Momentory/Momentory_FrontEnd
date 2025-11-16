@@ -31,10 +31,10 @@ export default function LoginScreen() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen bg-white px-6">
+    <div className="flex flex-col items-center justify-between h-screen bg-white px-6 py-10">
 
       {/* 로고 섹션 */}
-      <div className="flex flex-col items-center mb-40 mt-40">
+      <div className="flex flex-col items-center mt-20">
         <p
           style={{
             fontSize: "13px",
@@ -62,7 +62,7 @@ export default function LoginScreen() {
       </div>
 
       {/* 로그인 버튼 */}
-      <div className="mt-20 w-full max-w-[330px]">
+      <div className="w-full max-w-[330px]">
         <Link
           to="/signinscreen"
           className="w-full h-[70px] bg-[#FF7070] text-white text-[16px] font-medium flex items-center justify-center rounded-[25px] mb-4 shadow-sm transition active:scale-95 hover:bg-[#FF5858]"
@@ -80,7 +80,7 @@ export default function LoginScreen() {
         <div className="w-full h-[1px] bg-gray-300 mb-6"></div>
 
         {/* 소셜 로그인 */}
-        <div className="flex justify-center gap-5">
+        <div className="flex justify-center gap-5 mb-10">
           
           {/* 카카오 로그인 */}
           <button
