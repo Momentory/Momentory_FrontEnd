@@ -54,14 +54,50 @@ export default function PhotoUploadPage() {
 
     try {
       const mediaStream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: { ideal: 'environment' } },
+        video: {
+          facingMode: { ideal: 'environment' },
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+        },
+        audio: false,
       });
 
       setStream(mediaStream);
       setShowCamera(true);
 
       if (videoRef.current) {
-        videoRef.current.srcObject = mediaStream;
+        const video = videoRef.current;
+        video.srcObject = mediaStream;
+        video.muted = true;
+        video.playsInline = true;
+
+        // 메타데이터 로드 후 재생을 시도하여 모바일 자동재생 정책 문제를 회피
+        await new Promise<void>((resolve) => {
+          const onLoaded = () => {
+            video.removeEventListener('loadedmetadata', onLoaded);
+            resolve();
+          };
+          if (video.readyState >= 1) {
+            resolve();
+          } else {
+            video.addEventListener('loadedmetadata', onLoaded, { once: true });
+          }
+        });
+
+        try {
+          await video.play();
+        } catch {
+          // 일부 브라우저에서 첫 호출이 실패하는 경우가 있어 짧은 지연 후 재시도
+          await new Promise((r) => setTimeout(r, 80));
+          try {
+            await video.play();
+          } catch {
+            // 재생 실패 시에는 사용자에게 안내하고 종료
+            alert(
+              '카메라 미리보기를 시작할 수 없습니다. 브라우저 권한을 확인해주세요.'
+            );
+          }
+        }
       }
     } catch (error) {
       alert('카메라 접근에 실패했습니다. 권한을 확인해주세요.');
@@ -183,7 +219,9 @@ export default function PhotoUploadPage() {
         isPrivate,
         markerColor,
         markerLocation,
-        cityName: markerLocation ? extractCityName(markerLocation.address) || '미확인' : '미확인',
+        cityName: markerLocation
+          ? extractCityName(markerLocation.address) || '미확인'
+          : '미확인',
       },
     });
 
@@ -196,7 +234,9 @@ export default function PhotoUploadPage() {
           isPrivate,
           markerColor,
           markerLocation,
-          cityName: markerLocation ? extractCityName(markerLocation.address) || '미확인' : '미확인',
+          cityName: markerLocation
+            ? extractCityName(markerLocation.address) || '미확인'
+            : '미확인',
         },
       },
     });
@@ -214,12 +254,6 @@ export default function PhotoUploadPage() {
     if (!locationAddressData?.result) {
       return;
     }
-    console.log('✅ API 응답:', {
-      cityName: locationAddressData.result.cityName,
-      address: locationAddressData.result.address,
-      lat: locationAddressData.result.latitude,
-      lng: locationAddressData.result.longitude,
-    });
     setMarkerLocation((prev) => ({
       ...prev,
       address: locationAddressData.result.address,
@@ -499,7 +533,8 @@ export default function PhotoUploadPage() {
               </div>
               <button
                 onClick={() =>
-                  markerLocation && setGpsCoords({
+                  markerLocation &&
+                  setGpsCoords({
                     lat: markerLocation.lat,
                     lng: markerLocation.lng,
                   })

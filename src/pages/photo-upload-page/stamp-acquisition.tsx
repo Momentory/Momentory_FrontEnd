@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Check } from 'lucide-react';
-import { extractRegionName, getStampImagePath } from '../../utils/stampUtils';
+import { extractRegionName, getStampImagePath, getCulturalStampImagePath } from '../../utils/stampUtils';
 import PointIcon from '../../assets/icons/pointIcon.svg?react';
 
 export default function StampAcquisitionPage() {
@@ -10,11 +10,17 @@ export default function StampAcquisitionPage() {
   const [showAnimation, setShowAnimation] = useState(false);
 
   const stampType = location.state?.stampType ?? null;
-  const rawRegionName = location.state?.regionName || '하남시';
+  // stampName (문화 스탬프)와 regionName (지역 스탬프) 우선순위 처리
+  const rawRegionName = location.state?.stampName || location.state?.regionName || '하남시';
   const regionName = extractRegionName(rawRegionName);
   const points = location.state?.points || 50;
-  const stampImagePath =
-    location.state?.stampImagePath || getStampImagePath(regionName);
+
+  // 스탬프 타입에 따라 이미지 경로 결정
+  const stampImagePath = location.state?.stampImagePath ||
+    (stampType === 'cultural'
+      ? getCulturalStampImagePath(regionName)
+      : getStampImagePath(regionName));
+
   const [imageError, setImageError] = useState(false);
 
   useEffect(() => {

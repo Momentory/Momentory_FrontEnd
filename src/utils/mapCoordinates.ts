@@ -40,7 +40,7 @@ export const REGION_MAP_POSITIONS: Record<
   광주시: { top: '59%', left: '70%' },
 
   // 중남부 지역 - 안양 주변
-  과천시: { top: '58%', left: '50%' },
+  과천시: { top: '55.5%', left: '47%' },
   안양시: { top: '56%', left: '43%' },  // 기준점 3
   의왕시: { top: '60%', left: '48%' },
   시흥시: { top: '59%', left: '32%' },
@@ -53,7 +53,7 @@ export const REGION_MAP_POSITIONS: Record<
   화성시: { top: '70%', left: '38%' },
   오산시: { top: '72%', left: '49%' },
   이천시: { top: '62%', left: '69%' },
-  여주시: { top: '76%', left: '87%' },
+  여주시: { top: '62%', left: '78%' },
   평택시: { top: '79%', left: '45%' },
   안성시: { top: '82%', left: '59%' },
 };
