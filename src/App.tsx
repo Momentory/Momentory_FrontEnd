@@ -32,9 +32,11 @@ import SigninScreen from './pages/Auth/SigninScreen';
 import CreateAccountPage from './pages/Auth/CreateAccountPage';
 import TermsOfServicePage from './pages/Auth/TermsOfServicePage';
 import CreateProfilePage from './pages/Auth/CreateProfilePage';
+import CreateDefaultProfilePage from './pages/Auth/CreateDefaultProfilePage';
 import SelectCharacterPage from './pages/Auth/SelectCharacterPage';
 import AccountCreatedPage from './pages/Auth/AccountCreatedPage';
 import KakaoCallback from './pages/Auth/KakaoCallback';
+
 
 import SettingsHomePage from './pages/settings-page/SettingHomepage';
 import ProfileEditPage from './pages/settings-page/ProfileEditpage';
@@ -95,6 +97,7 @@ const publicRoutes: RouteObject[] = [
       { path: 'signup', element: <CreateAccountPage /> },
       { path: 'terms', element: <TermsOfServicePage /> },
       { path: 'create-profile', element: <CreateProfilePage /> },
+      { path: 'create', element: <CreateDefaultProfilePage /> },
       { path: 'select', element: <SelectCharacterPage /> },
       { path: 'account', element: <AccountCreatedPage /> },
       { path: 'auth/kakao/callback', element: <KakaoCallback /> },
