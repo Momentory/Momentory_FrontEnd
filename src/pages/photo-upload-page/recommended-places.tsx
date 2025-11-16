@@ -33,7 +33,11 @@ export default function RecommendedPlacesPage() {
     data,
     isLoading: isRecentLoading,
     isError: isRecentError,
-  } = useRecentStamps();
+    refetch: refetchRecentStamps,
+  } = useRecentStamps({
+    // 페이지 진입 시 항상 최신 데이터 가져오기
+    refetchOnMount: 'always',
+  });
   const { mutateAsync: fetchNearbySpots } = usePhotoNearby();
 
   const photoId = location.state?.photoId as number | undefined;
@@ -83,10 +87,10 @@ export default function RecommendedPlacesPage() {
         return { name: region, image: getStampImagePath(region) };
       }
 
-      const { stampDisplayName } = mapCulturalSpotName(stamp.spotName);
+      // 문화 스탬프는 서버에서 온 원본 spotName을 그대로 사용
       return {
-        name: stampDisplayName,
-        image: getCulturalStampImagePath(stampDisplayName),
+        name: stamp.spotName,
+        image: getCulturalStampImagePath(stamp.spotName),
       };
     };
 
