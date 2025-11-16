@@ -4,6 +4,7 @@ import Modal from '../../components/common/Modal';
 import LoaderIcon from '../../assets/loader.svg?react';
 import AuthFailIcon from '../../assets/authfail.svg?react';
 import WarningIcon from '../../assets/icons/warningIcon.svg?react';
+import CheckIcon from '../../assets/icons/checkIcon.svg?react';
 
 export default function AuthenticationPage() {
   const navigate = useNavigate();
@@ -72,7 +73,7 @@ export default function AuthenticationPage() {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-white px-6">
       <div className="w-full max-w-sm">
-        <h2 className="text-[29px] font-semibold text-left mb-15">
+        <h2 className="text-[29px] font-extrabold text-left mb-[80px]">
           <div>
             <span className="text-[#444444]">{keyword}</span>
             {particle && <span className="text-[#444444]">{particle}</span>}
@@ -144,19 +145,7 @@ export default function AuthenticationPage() {
           {authStatus === 'success' && (
             <div className="flex flex-col items-center pb-6">
               <div className="w-17 h-17 bg-[#FF7070] rounded-full flex items-center justify-center mb-4">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="40"
-                  height="40"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="white"
-                  strokeWidth="3"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <polyline points="20 6 9 17 4 12"></polyline>
-                </svg>
+                <CheckIcon className="w-10 h-10 text-white" />
               </div>
               <p className="text-[#7C7C7C] text-center">인증을 완료했어요!</p>
             </div>
