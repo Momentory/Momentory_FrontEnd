@@ -37,11 +37,11 @@ export const categoryDefaults: Record<string, ItemTransform> = {
 
 export const itemExceptions: Record<number, ItemTransform> = {
   // 장식
-  1: { scale: 0.3, translateX: -40, translateY: -70 }, // 리본
-  3: { scale: 0.3, translateX: 60, translateY: -50 }, // 장미
-  4: { scale: 0.3, translateX: 30, translateY: -80 }, // 깃털
-  5: { scale: 1.6, scaleX: -1, translateX: 6, translateY: -14 }, // 빨강 리본
-  6: { scale: 2, scaleX: -1, translateX: 6, translateY: -14 }, // 안경
+  1: { scale: 0.3, translateX: -40, translateY: -70 }, // 리본 - 머리
+  14: { scale: 0.3, translateX: 60, translateY: -50 }, // 장미
+  5: { scale: 0.3, translateX: 30, translateY: -80 }, // 깃털
+  7: { scale: 1.6, scaleX: -1, translateX: 6, translateY: -14 }, // 리본 - 목
+  8: { scale: 2, scaleX: -1, translateX: 6, translateY: -14 }, // 안경
 };
 
 export const getItemTransform = (
