@@ -278,7 +278,7 @@ export default function CommunityMyPage() {
             {/* 팔로워 */}
             <button
               className="text-[13px] text-gray-600"
-              onClick={() => navigate(`/community${profile?.userId}/followers`)}
+              onClick={() => navigate(`/community/${profile?.userId}/followers`)}
             >
               팔로워 <span className="font-semibold">{profile?.followerCount || 0}</span>
             </button>
