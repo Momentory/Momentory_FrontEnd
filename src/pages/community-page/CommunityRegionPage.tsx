@@ -28,7 +28,6 @@ export default function CommunityRegionPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // getPostsByRegion은 이미 매핑된 posts 배열을 반환합니다
         const posts = await getPostsByRegion(Number(regionId));
 
         setPosts(posts || []);

@@ -334,15 +334,6 @@ export default function CreateAccountPage() {
         >
           다음
         </button>
-
-        {/* 임시 다음 이동 버튼 */}
-        <button
-          type="button"
-          onClick={() => navigate("/create-profile")}
-          className="w-full h-[60px] bg-[#FF7070] text-white text-lg font-semibold rounded-2xl mt-6 active:scale-95 transition"
-        >
-          (임시) 프로필 작성으로 이동 →
-        </button>
       </form>
     </div>
   );

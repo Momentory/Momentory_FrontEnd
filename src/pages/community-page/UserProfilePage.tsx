@@ -50,7 +50,7 @@ export default function UserProfilePage() {
 
   const followMutation = useMutation({
     mutationFn: () => {
-      if (numericUserId === undefined) throw new Error('userId is required');
+      if (numericUserId === undefined) throw new Error("userId is required");
       return toggleFollowUser(numericUserId);
     },
     onSuccess: () => {
@@ -66,65 +66,44 @@ export default function UserProfilePage() {
   const userScraps = scrapsQuery.data?.posts || [];
   const userLikes = likesQuery.data?.posts || [];
 
-  // 프로필 수정 모달에서 저장
-  const handleSaveProfile = async (data: {
-    nickName?: string;
-    bio?: string;
-    externalLink?: string;
-    imageName?: string;
-    imageUrl?: string;
-    backgroundImageName?: string;
-    backgroundImageUrl?: string;
-  }) => {
+  /* -------------------- 프로필 저장 -------------------- */
+  const handleSaveProfile = async (data: any) => {
     try {
-      console.log('프로필 수정 중...', data);
-
-      // API 호출
       await updateUserProfile(data);
 
-      // 성공 시 프로필 데이터 새로고침
       queryClient.invalidateQueries({
         queryKey: ["communityUserProfile", numericUserId],
       });
-
-      console.log('✅ 프로필 수정 완료');
     } catch (error) {
-      console.error('❌ 프로필 수정 실패:', error);
-      throw error;
+      console.error(" 프로필 수정 실패:", error);
     }
   };
 
-  /* ============================================================== */
-  /* -------------------------- RENDER ----------------------------- */
-  /* ============================================================== */
+  /* ===========================렌더링=================================== */
 
   return (
     <div className="w-full min-h-screen bg-[#F9FAFB] flex flex-col items-center mt-[60px]">
-      {/* 공통헤더  */}
+      {/* 공통 헤더  */}
       <div className="w-full max-w-[480px] bg-white h-[55px] border-b border-gray-200 flex items-center justify-center relative">
         <button
           onClick={() => navigate(-1)}
           className="absolute left-5 flex items-center justify-center"
         >
-          <img
-            src="/images/109618.png"
-            className="w-[20px] h-[20px]"
-            alt="back"
-          />
+          <img src="/images/109618.png" className="w-[20px] h-[20px]" />
         </button>
         <span className="text-[20px] font-semibold text-gray-900">
           마이페이지
         </span>
       </div>
 
-      {/* 로딩 처리 */}
+      {/* 로딩 */}
       {profileQuery.isLoading || postsQuery.isLoading ? (
         <div className="w-full h-[200px] flex items-center justify-center">
           로딩 중...
         </div>
       ) : (
         <>
-          {/* 상단 배경 */}
+          {/* 배경 */}
           <div className="relative w-full max-w-[480px] h-[180px] overflow-hidden">
             <img
               src={userProfile?.backgroundImageUrl || "/images/city.png"}
@@ -132,75 +111,73 @@ export default function UserProfilePage() {
             />
           </div>
 
-          {/* 프로필 */}
+          {/* 프로필 전체 */}
           <div className="w-full max-w-[480px] px-[15px] mt-[-35px] relative z-10">
-            {/* 프로필 이미지와 버튼 */}
-            <div className="flex items-center gap-2">
-              <img
-                src={
-                  !userProfile?.imageUrl ||
-                    userProfile.imageUrl === "string"
-                    ? "/images/profile.png"
-                    : userProfile.imageUrl
-                }
-                className="w-[80px] h-[80px] rounded-full bg-white object-cover shadow-md"
-              />
+            {/* 프로필 이미지 */}
+            <img
+              src={
+                !userProfile?.imageUrl ||
+                userProfile.imageUrl === "string"
+                  ? "/images/profile.png"
+                  : userProfile.imageUrl
+              }
+              className="w-[80px] h-[80px] rounded-full bg-white object-cover shadow-md"
+            />
 
-              {/* 수정 또는 팔로우 버튼 */}
+            {/* 닉네임 + 버튼 같은 줄 */}
+            <div className="flex items-center justify-between mt-3 pr-2">
+              <h2 className="text-[17px] font-semibold text-gray-800">
+                {userProfile?.nickname || "사용자"}
+              </h2>
+
               {userProfile?.isMe ? (
                 <button
                   onClick={() => setIsEditModalOpen(true)}
-                  className="p-2 bg-white hover:bg-gray-50 rounded-full transition-colors shadow-md mt-6"
-                  aria-label="프로필 수정"
+                  className="p-2 bg-white hover:bg-gray-50 rounded-full shadow-md"
                 >
                   <Pencil size={18} className="text-gray-700" />
                 </button>
               ) : (
                 <button
                   onClick={() => followMutation.mutate()}
-                  className={`text-white text-[13px] px-4 py-[5px] rounded-full font-medium shadow-md mt-6 ${userProfile?.isFollowing
-                      ? "bg-gray-400"
-                      : "bg-[#FF7070]"
-                    }`}
+                  className={`text-white text-[13px] px-4 py-[5px] rounded-full font-medium shadow-md 
+                    ${
+                      userProfile?.isFollowing ? "bg-gray-400" : "bg-[#FF7070]"
+                    }
+                  `}
                 >
                   {userProfile?.isFollowing ? "팔로잉" : "팔로우"}
                 </button>
               )}
             </div>
 
-            <div className="mt-[10px]">
-              <h2 className="text-[17px] font-semibold text-gray-800">
-                {userProfile?.nickname || "사용자"}
-              </h2>
-            </div>
-
+            {/* 소개글 */}
             {userProfile?.bio && (
               <p className="text-[13px] text-gray-700 mt-2 w-[282px] leading-snug">
                 {userProfile.bio}
               </p>
             )}
 
-            {/* 링크 표시 */}
+            {/* 링크 */}
             {userProfile?.externalLink && (
               <div className="flex items-center gap-2 mt-2">
                 <img
                   src="/images/link-icon.png"
                   className="w-[14px] h-[14px] rotate-45"
-                  alt="link"
                 />
                 <a
                   href={userProfile.externalLink}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-[13px] text-blue-600 underline hover:text-blue-700"
+                  className="text-[13px] text-blue-600 underline"
                 >
                   {userProfile.externalLink}
                 </a>
               </div>
             )}
 
+            {/* 팔로잉/팔로워 */}
             <div className="flex items-center gap-6 mt-3 text-gray-700">
-              {/* 팔로잉 */}
               <p className="text-[12px]">
                 <span className="font-semibold">
                   {userProfile?.followingCount || 0}
@@ -208,7 +185,6 @@ export default function UserProfilePage() {
                 팔로잉
               </p>
 
-              {/* 팔로워 */}
               <p className="text-[12px]">
                 <span className="font-semibold">
                   {userProfile?.followerCount || 0}
@@ -216,40 +192,27 @@ export default function UserProfilePage() {
                 팔로워
               </p>
             </div>
-
           </div>
 
           {/* 탭 */}
           <div className="flex justify-center items-center gap-[100px] mt-[30px] mb-[5px]">
             <button
               onClick={() => setActiveTab("posts")}
-              className={
-                activeTab === "posts"
-                  ? "opacity-100"
-                  : "opacity-40"
-              }
+              className={activeTab === "posts" ? "opacity-100" : "opacity-40"}
             >
               <img src="/images/list.png" className="w-[25px] h-[25px]" />
             </button>
 
             <button
               onClick={() => setActiveTab("scraps")}
-              className={
-                activeTab === "scraps"
-                  ? "opacity-100"
-                  : "opacity-40"
-              }
+              className={activeTab === "scraps" ? "opacity-100" : "opacity-40"}
             >
               <img src="/images/mark.png" className="w-[25px] h-[25px]" />
             </button>
 
             <button
               onClick={() => setActiveTab("likes")}
-              className={
-                activeTab === "likes"
-                  ? "opacity-100"
-                  : "opacity-40"
-              }
+              className={activeTab === "likes" ? "opacity-100" : "opacity-40"}
             >
               <img src="/images/Heart.png" className="w-[25px] h-[25px]" />
             </button>
