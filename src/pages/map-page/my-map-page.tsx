@@ -266,7 +266,7 @@ export default function MyMapPage() {
           handleTouchEnd={handleTouchEnd}
           onMarkerClick={(_markerId, location) => {
             setIsExpanded(false);
-            setHeight(516);
+            setHeight(460);
             if (location) {
               setSelectedRegion(location);
             }

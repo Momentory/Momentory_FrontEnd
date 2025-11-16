@@ -29,7 +29,7 @@ export default function BottomSheet({
 }: BottomSheetProps) {
   const navigate = useNavigate();
 
-  const MAX_HEIGHT = 516;
+  const MAX_HEIGHT = 460;
   const MIN_HEIGHT = 40; // 슬라이드바가 살짝만 보이도록 조정
   const BOTTOM_BAR_HEIGHT = 70; // bottom navigation bar 높이
 
@@ -92,7 +92,8 @@ export default function BottomSheet({
 
       const onMove = (event: MouseEvent | TouchEvent) => {
         event.preventDefault();
-        const clientY = 'touches' in event ? event.touches[0].clientY : event.clientY;
+        const clientY =
+          'touches' in event ? event.touches[0].clientY : event.clientY;
         const deltaY = startY - clientY;
         setHeight(
           Math.max(MIN_HEIGHT, Math.min(MAX_HEIGHT, startHeight + deltaY))
@@ -101,7 +102,10 @@ export default function BottomSheet({
 
       const onEnd = (event: MouseEvent | TouchEvent) => {
         event.preventDefault();
-        const clientY = 'changedTouches' in event ? event.changedTouches[0].clientY : (event as MouseEvent).clientY;
+        const clientY =
+          'changedTouches' in event
+            ? event.changedTouches[0].clientY
+            : (event as MouseEvent).clientY;
         const deltaY = startY - clientY;
 
         if (deltaY > 30) {
@@ -268,37 +272,37 @@ export default function BottomSheet({
           onClick={handleClick}
         />
 
-      <div className="p-6 pb-14">
-        <h2 className="mb-1 text-[25px] font-bold">
-          {regionName ? `경기도 ${regionName}` : '지역을 선택해주세요'}
-        </h2>
-        <p className="mb-8 text-sm text-[#A3A3A3]">
-          {formattedDate
-            ? `최근 방문 ${formattedDate}`
-            : '최근 방문 기록이 없어요.'}
-        </p>
+        <div className="p-6 pb-14">
+          <h2 className="mb-1 text-[25px] font-bold">
+            {regionName ? `경기도 ${regionName}` : '지역을 선택해주세요'}
+          </h2>
+          <p className="mb-8 text-sm text-[#A3A3A3]">
+            {formattedDate
+              ? `최근 방문 ${formattedDate}`
+              : '최근 방문 기록이 없어요.'}
+          </p>
 
-        <div className="mb-3 flex items-center justify-between">
-          <h3 className="text-[18px] font-semibold">
-            {isPublic ? '공개된 전체 사진' : '나의 사진'}
-          </h3>
-          {regionPhotos.length > 0 && (
-            <button
-              type="button"
-              className="flex items-center hover:opacity-80 transition-opacity"
-              style={{ color: '#C8B6B6' }}
-              onClick={(e) => {
-                e.stopPropagation();
-                handleNavigateList();
-              }}
-            >
-              <ChevronRight className="w-5 h-5" />
-            </button>
-          )}
+          <div className="mb-3 flex items-center justify-between">
+            <h3 className="text-[18px] font-semibold">
+              {isPublic ? '공개된 전체 사진' : '나의 사진'}
+            </h3>
+            {regionPhotos.length > 0 && (
+              <button
+                type="button"
+                className="flex items-center hover:opacity-80 transition-opacity"
+                style={{ color: '#C8B6B6' }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleNavigateList();
+                }}
+              >
+                <ChevronRight className="w-5 h-5" />
+              </button>
+            )}
+          </div>
+
+          {renderContent()}
         </div>
-
-        {renderContent()}
-      </div>
       </div>
     </>
   );
