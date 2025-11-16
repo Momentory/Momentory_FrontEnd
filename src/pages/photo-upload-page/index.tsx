@@ -64,41 +64,6 @@ export default function PhotoUploadPage() {
 
       setStream(mediaStream);
       setShowCamera(true);
-
-      if (videoRef.current) {
-        const video = videoRef.current;
-        video.srcObject = mediaStream;
-        video.muted = true;
-        video.playsInline = true;
-
-        // 메타데이터 로드 후 재생을 시도하여 모바일 자동재생 정책 문제를 회피
-        await new Promise<void>((resolve) => {
-          const onLoaded = () => {
-            video.removeEventListener('loadedmetadata', onLoaded);
-            resolve();
-          };
-          if (video.readyState >= 1) {
-            resolve();
-          } else {
-            video.addEventListener('loadedmetadata', onLoaded, { once: true });
-          }
-        });
-
-        try {
-          await video.play();
-        } catch {
-          // 일부 브라우저에서 첫 호출이 실패하는 경우가 있어 짧은 지연 후 재시도
-          await new Promise((r) => setTimeout(r, 80));
-          try {
-            await video.play();
-          } catch {
-            // 재생 실패 시에는 사용자에게 안내하고 종료
-            alert(
-              '카메라 미리보기를 시작할 수 없습니다. 브라우저 권한을 확인해주세요.'
-            );
-          }
-        }
-      }
     } catch (error) {
       alert('카메라 접근에 실패했습니다. 권한을 확인해주세요.');
       navigate('/home');
@@ -165,14 +130,12 @@ export default function PhotoUploadPage() {
           const uploadResponse = await uploadFile(file);
           setUploadedInfo(uploadResponse.result);
         } catch (uploadError) {
-          console.error(uploadError);
           alert('사진을 업로드하지 못했습니다. 다시 시도해주세요.');
         } finally {
           setIsUploadingS3(false);
         }
         setGpsCoords(null);
       } catch (error) {
-        console.error(error);
         alert('사진 파일을 생성하지 못했습니다. 다시 시도해주세요.');
       }
     } catch (error) {
@@ -188,7 +151,6 @@ export default function PhotoUploadPage() {
       return;
     }
 
-    // GPS 정보가 있을 때만 마커 추가
     if (markerLocation) {
       const cityName = extractCityName(markerLocation.address);
       const position = gpsToMapPosition(markerLocation.lat, markerLocation.lng);
@@ -210,20 +172,6 @@ export default function PhotoUploadPage() {
       alert('이미지를 업로드하는 중입니다. 잠시 후 다시 시도해주세요.');
       return;
     }
-
-    console.log('Navigating to /photo-edit with state:', {
-      imageUrl: imageToSend,
-      uploadResult: uploadedInfo,
-      uploadContext: {
-        description,
-        isPrivate,
-        markerColor,
-        markerLocation,
-        cityName: markerLocation
-          ? extractCityName(markerLocation.address) || '미확인'
-          : '미확인',
-      },
-    });
 
     navigate('/photo-edit', {
       state: {
@@ -286,7 +234,6 @@ export default function PhotoUploadPage() {
       const gpsLocation = await extractGPSFromImage(image);
 
       if (gpsLocation) {
-        // GPS 좌표를 설정하면 API 호출이 자동으로 일어남
         setGpsCoords({ lat: gpsLocation.lat, lng: gpsLocation.lng });
       }
     };
@@ -313,6 +260,50 @@ export default function PhotoUploadPage() {
 
     handleCameraOpen();
   }, [location.key, location.state?.cameraStream]);
+
+  useEffect(() => {
+    const setup = async () => {
+      if (!showCamera || !stream || !videoRef.current) {
+        return;
+      }
+
+      const video = videoRef.current;
+      video.muted = true;
+      video.playsInline = true;
+      video.setAttribute('webkit-playsinline', 'true');
+
+      if (video.srcObject !== stream) {
+        video.srcObject = stream;
+      }
+
+      await new Promise<void>((resolve) => {
+        const onLoaded = () => {
+          video.removeEventListener('loadedmetadata', onLoaded);
+          resolve();
+        };
+        if (video.readyState >= 1) {
+          resolve();
+        } else {
+          video.addEventListener('loadedmetadata', onLoaded, { once: true });
+        }
+      });
+
+      try {
+        await video.play();
+      } catch {
+        await new Promise((r) => setTimeout(r, 80));
+        try {
+          await video.play();
+        } catch {
+          alert(
+            '카메라 미리보기를 시작할 수 없습니다. 브라우저 권한을 확인해주세요.'
+          );
+        }
+      }
+    };
+
+    setup();
+  }, [showCamera, stream]);
 
   useEffect(() => {
     return () => {
