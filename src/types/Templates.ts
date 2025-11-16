@@ -1,3 +1,14 @@
+export interface Sticker {
+  id: string;
+  imageUrl: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  region?: string;
+  spotName?: string;
+}
+
 export type PageData = {
   templateId: number;
   title?: string;
@@ -13,6 +24,7 @@ export type PageData = {
   readOnly?: boolean; // 기존 앨범 페이지 여부
   imageUrl?: string; // 기존 앨범 페이지의 이미지 URL 또는 썸네일
   thumbnail?: string; // 새 페이지의 미리보기 썸네일 (base64)
+  stickers?: Sticker[]; // 스티커 배열
 };
 
 export interface TemplateProps {

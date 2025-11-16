@@ -188,7 +188,7 @@ export default function AlbumEditBottomSheet({
 
   return (
     <div
-      className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] bg-white rounded-t-2xl shadow-lg z-[150] transition-all duration-300 overflow-hidden"
+      className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] bg-white rounded-t-2xl shadow-[0px_-4px_20px_rgba(0,0,0,0.25)] z-[150] transition-all duration-300 overflow-hidden scrollbar-hide"
       style={{ height: `${height}px` }}
     >
       <div
