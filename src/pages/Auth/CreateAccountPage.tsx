@@ -29,9 +29,6 @@ export default function CreateAccountPage() {
 
   const [agree, setAgree] = useState(false);
 
-  const handleGoCreate = () => {
-  navigate("/create");
-};
 
   /* ---------------------- 비밀번호 검증 ---------------------- */
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -313,13 +310,6 @@ export default function CreateAccountPage() {
         >
           다음
         </button>
-
-        <button
-  onClick={handleGoCreate}
-  className="w-full h-[50px] rounded-2xl bg-blue-500 text-white text-[16px] font-semibold mt-4"
->
-  기본 프로필 만들러 가기
-</button>
       </form>
     </div>
   );
