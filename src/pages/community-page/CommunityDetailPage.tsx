@@ -326,7 +326,7 @@ export default function CommunityDetailPage() {
         )}
 
         {/* 좋아요 / 댓글 / 스크랩 */}
-        <div className="flex items-center gap-32 text-[14px] mt-6 ">
+       <div className="flex items-center justify-center gap-28 text-gray-500 text-[14px] mt-4">
 
           {/* 좋아요 */}
           <div
@@ -346,7 +346,9 @@ export default function CommunityDetailPage() {
           {/* 댓글 */}
           <div className="flex items-center gap-1">
             <img src="/images/msg.png" className="w-4" />
-            {post.commentCount ?? 0}
+            <span className="text-gray-500 font-semibold text-[15px]">
+              {post.commentCount ?? 0}
+            </span>
           </div>
 
           {/* 스크랩 */}
@@ -363,19 +365,16 @@ export default function CommunityDetailPage() {
             />
           </div>
         </div>
+
       </div>
 
       {/* 댓글 */}
       <div className="px-4 mt-6">
 
         <div className="flex justify-between mb-3">
-          <h3 className="text-[12px] text-gray-400 font-semibold">
+          <h3 className="text-[12px] text-gray-500 font-semibold">
             모든 댓글
           </h3>
-
-          <span className="text-[12px] text-gray-400">
-            저장 {post.viewCount ?? 0}회
-          </span>
         </div>
 
         {comments.map((c) => (
@@ -394,11 +393,6 @@ export default function CommunityDetailPage() {
                   {getRelativeTime(c.createdAt)}
                 </span>
               </div>
-
-              <div className="flex flex-col items-center text-gray-400">
-                <img src="/images/Heart.png" className="w-5" />
-                <span className="text-[11px]">{c.likeCount ?? 0}</span>
-              </div>
             </div>
 
             {/* 수정 모드 */}
@@ -412,14 +406,14 @@ export default function CommunityDetailPage() {
 
                 <div className="flex gap-4 mt-2 text-[12px]">
                   <button
-                    className="text-[#FF7070] font-medium"
+                    className="text-[#787878] font-medium"
                     onClick={() => handleEditSave(c.commentId)}
                   >
                     저장
                   </button>
 
                   <button
-                    className="text-gray-500"
+                    className="text-gray-400"
                     onClick={() => setEditCommentId(null)}
                   >
                     취소
@@ -431,7 +425,6 @@ export default function CommunityDetailPage() {
                 <p className="text-gray-700 mt-2">{c.content}</p>
 
                 <div className="flex gap-4 mt-2 text-[12px] text-gray-500">
-                  <button>답글 달기</button>
                   <button onClick={() => handleEditStart(c.commentId, c.content)}>
                     수정
                   </button>
@@ -459,7 +452,7 @@ export default function CommunityDetailPage() {
           onClick={handleAddComment}
           className="w-10 h-10 bg-[#FF7070] rounded-full flex items-center justify-center text-white active:scale-95"
         >
-          <img src="/images/BackIcon.png" className="w-4 h-4" />
+          <img src="/images/BackIcon.png" className="w-4 h-4 brightness-200" />
         </button>
       </div>
     </div>
