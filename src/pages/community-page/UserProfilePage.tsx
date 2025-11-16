@@ -68,11 +68,13 @@ export default function UserProfilePage() {
 
   // 프로필 수정 모달에서 저장
   const handleSaveProfile = async (data: {
-    nickname?: string;
+    nickName?: string;
     bio?: string;
     externalLink?: string;
-    profileImage?: File;
-    backgroundImage?: File;
+    imageName?: string;
+    imageUrl?: string;
+    backgroundImageName?: string;
+    backgroundImageUrl?: string;
   }) => {
     try {
       console.log('프로필 수정 중...', data);

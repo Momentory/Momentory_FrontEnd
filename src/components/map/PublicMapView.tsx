@@ -21,7 +21,6 @@ const PublicMapView = memo(function PublicMapView({
   colorMap = {},
   zoomInMarker,
   zoomOutMarker,
-  handleWheel,
   handleTouchStart,
   handleTouchMove,
   handleTouchEnd,

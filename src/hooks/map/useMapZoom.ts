@@ -129,13 +129,6 @@ export default function useMapZoom({ markers }: UseMapZoomOptions) {
     }
   }, [pickNearestMarker]);
 
-  const handleWheel = useCallback(
-    (_e: React.WheelEvent) => {
-      // 네이티브 이벤트 리스너에서 처리하므로 여기서는 아무것도 안함
-      // (passive: false 경고 방지)
-    },
-    []
-  );
 
   const zoomIn = useCallback((marker: Marker) => {
     originPosRef.current = { top: marker.top, left: marker.left };

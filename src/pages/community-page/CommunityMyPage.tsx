@@ -63,14 +63,18 @@ export default function CommunityMyPage() {
     if (!file) return;
 
     try {
-
-      // API 호출
-      await updateUserProfile({ backgroundImage: file });
+      // TODO: S3 업로드 후 URL을 받아서 updateUserProfile 호출
+      // const uploadResult = await uploadFile(file);
+      // await updateUserProfile({
+      //   backgroundImageName: uploadResult.result.imageName,
+      //   backgroundImageUrl: uploadResult.result.imageUrl
+      // });
 
       // 성공 시 프로필 데이터 새로고침
-      const updatedProfile = await getCommunityUserProfile();
-      setProfile(updatedProfile);
+      // const updatedProfile = await getCommunityUserProfile();
+      // setProfile(updatedProfile);
 
+      console.warn('배경화면 변경 기능은 프로필 수정 모달을 이용해주세요.');
     } catch (error) {
       console.error('❌ 배경화면 변경 실패:', error);
       alert('배경화면 변경에 실패했습니다.');
@@ -86,14 +90,18 @@ export default function CommunityMyPage() {
     if (!file) return;
 
     try {
-
-      // API 호출
-      await updateUserProfile({ profileImage: file });
+      // TODO: S3 업로드 후 URL을 받아서 updateUserProfile 호출
+      // const uploadResult = await uploadFile(file);
+      // await updateUserProfile({
+      //   imageName: uploadResult.result.imageName,
+      //   imageUrl: uploadResult.result.imageUrl
+      // });
 
       // 성공 시 프로필 데이터 새로고침
-      const updatedProfile = await getCommunityUserProfile();
-      setProfile(updatedProfile);
-      
+      // const updatedProfile = await getCommunityUserProfile();
+      // setProfile(updatedProfile);
+
+      console.warn('프로필 사진 변경 기능은 프로필 수정 모달을 이용해주세요.');
     } catch (error) {
       console.error('❌ 프로필 사진 변경 실패:', error);
       alert('프로필 사진 변경에 실패했습니다.');
@@ -106,11 +114,13 @@ export default function CommunityMyPage() {
 
   // 프로필 수정 모달에서 저장
   const handleSaveProfile = async (data: {
-    nickname?: string;
+    nickName?: string;
     bio?: string;
     externalLink?: string;
-    profileImage?: File;
-    backgroundImage?: File;
+    imageName?: string;
+    imageUrl?: string;
+    backgroundImageName?: string;
+    backgroundImageUrl?: string;
   }) => {
     try {
       console.log('프로필 수정 중...', data);

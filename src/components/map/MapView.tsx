@@ -22,7 +22,6 @@ const MapView = memo(function MapView({
   colorMap = {},
   zoomInMarker,
   zoomOutMarker,
-  handleWheel,
   handleTouchStart,
   handleTouchMove,
   handleTouchEnd,
