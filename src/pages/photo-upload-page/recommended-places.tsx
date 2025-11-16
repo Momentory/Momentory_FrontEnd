@@ -268,13 +268,13 @@ export default function RecommendedPlacesPage() {
               recentStamps.map((stamp, index) => (
                 <div
                   key={`${stamp.name}-${index}`}
-                  className="w-20 h-20 sm:w-28 sm:h-28 bg-white rounded-lg border-2 border-[#A54545] flex items-center justify-center overflow-hidden shadow-md"
+                  className="w-28 h-28 sm:w-36 sm:h-36 bg-white rounded-lg border-2 border-[#A54545] flex items-center justify-center overflow-hidden shadow-md"
                   title={stamp.name}
                 >
                   <img
                     src={stamp.image}
                     alt={stamp.name}
-                    className="w-[70px] h-[70px] sm:w-[100px] sm:h-[100px] object-contain"
+                    className="w-[100px] h-[100px] sm:w-[140px] sm:h-[140px] object-contain"
                   />
                 </div>
               ))}
