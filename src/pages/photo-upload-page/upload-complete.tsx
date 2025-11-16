@@ -378,7 +378,7 @@ export default function PhotoUploadCompletePage() {
       )}
       {showNearbyPlaceModal && nearbyPlace && (
         <Modal title="근처 문화 관광지 발견!" onClose={handleCloseModal}>
-          <p className="text-center text-[#4C4C4C] mb-8 text-lg font-bold">
+          <p className="text-center text-[#4C4C4C] mb-8 text-lg font-bold break-keep">
             혹시{' '}
             <span className="text-[#B66262] font-semibold">
               [{nearbyPlace}]
