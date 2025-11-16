@@ -14,7 +14,7 @@ export default function LoginScreen() {
     
     console.log("localStorage 초기화 완료");
     
-    const backendOAuthUrl = "https://www.momentory.store/oauth/authorization/kakao";
+    const backendOAuthUrl = "https://www.momentory.store/oauth2/authorization/kakao";
     console.log("이동할 URL:", backendOAuthUrl);
     
     window.location.href = backendOAuthUrl;
