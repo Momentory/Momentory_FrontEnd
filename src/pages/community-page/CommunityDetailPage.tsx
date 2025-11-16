@@ -1,5 +1,5 @@
 import { useNavigate, useParams, useLocation } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Bookmark, Heart } from "lucide-react";
 import {
   getCommunityPostDetail,
@@ -11,6 +11,7 @@ import {
   toggleScrap,
   deletePost,
 } from "../../api/community";
+
 
 /* 상대 시간 계산 */
 function getRelativeTime(dateString: string) {
@@ -39,6 +40,13 @@ export default function CommunityDetailPage() {
   const [post, setPost] = useState<any>(initialPost);
   const [showMenu, setShowMenu] = useState(false);
 
+  const myUserId = Number(localStorage.getItem("userId"));
+
+  const isMyPost = useMemo(() => {
+    return post && myUserId === Number(post.userId);
+  }, [post, myUserId]);
+
+
   /* 좋아요/스크랩 상태 */
   const [liked, setLiked] = useState<boolean>(post?.liked ?? false);
   const [scrapped, setScrapped] = useState<boolean>(post?.scrapStatus ?? false);
@@ -50,12 +58,13 @@ export default function CommunityDetailPage() {
   const [editCommentId, setEditCommentId] = useState<number | null>(null);
   const [editContent, setEditContent] = useState("");
 
+  /* 안전 이미지 처리 */
   const safe = (url?: string | null) =>
     !url || url === "string" || url.startsWith("blob:")
       ? "/images/default.png"
       : url;
 
-  /* 게시글 상세 불러오기 */
+  /* 게시글 불러오기 */
   useEffect(() => {
     const fetchDetail = async () => {
       try {
@@ -131,7 +140,6 @@ export default function CommunityDetailPage() {
   /* 댓글 삭제 */
   const handleDeleteComment = async (commentId: number) => {
     await deleteComment(commentId);
-
     setComments((prev) => prev.filter((c) => c.commentId !== commentId));
     setPost((prev: any) => ({
       ...prev,
@@ -148,73 +156,52 @@ export default function CommunityDetailPage() {
   const handleEditSave = async (commentId: number) => {
     if (!editContent.trim()) return;
 
-    try {
-      await updateComment(commentId, editContent);
+    await updateComment(commentId, editContent);
 
-      setComments((prev) =>
-        prev.map((c) =>
-          c.commentId === commentId ? { ...c, content: editContent } : c
-        )
-      );
+    setComments((prev) =>
+      prev.map((c) =>
+        c.commentId === commentId ? { ...c, content: editContent } : c
+      )
+    );
 
-      setEditCommentId(null);
-      setEditContent("");
-    } catch (err) {
-      console.error("댓글 수정 실패:", err);
-    }
+    setEditCommentId(null);
+    setEditContent("");
   };
 
   /* 좋아요 토글 */
   const handleToggleLike = async () => {
-    try {
-      await toggleLike(postId);
+    await toggleLike(postId);
 
-      setLiked((prev) => !prev);
+    setLiked((prev) => !prev);
 
-      setLikeCount((prev) => {
-        const newCount = liked ? prev - 1 : prev + 1;
+    setLikeCount((prev) => {
+      const newCount = liked ? prev - 1 : prev + 1;
 
-        setPost((p: any) => ({
-          ...p,
-          likeCount: newCount,
-          liked: !liked,
-        }));
+      setPost((p: any) => ({
+        ...p,
+        likeCount: newCount,
+        liked: !liked,
+      }));
 
-        return newCount;
-      });
-    } catch (err) {
-      console.error("좋아요 토글 실패:", err);
-    }
+      return newCount;
+    });
   };
 
   /* 스크랩 토글 */
   const handleToggleScrap = async () => {
-    try {
-      await toggleScrap(postId);
+    await toggleScrap(postId);
 
-      setScrapped((prev) => !prev);
-
-      setPost((p: any) => ({
-        ...p,
-        scrapStatus: !scrapped,
-      }));
-    } catch (err) {
-      console.error("스크랩 토글 실패:", err);
-    }
+    setScrapped((prev) => !prev);
+    setPost((p: any) => ({ ...p, scrapStatus: !scrapped }));
   };
 
   /* 게시글 삭제 */
   const handleDeletePost = async () => {
     if (!window.confirm("정말 삭제하시겠습니까?")) return;
 
-    try {
-      await deletePost(postId);
-      alert("게시글 삭제됨");
-      navigate("/community");
-    } catch (err) {
-      console.error(" 삭제 실패:", err);
-      alert("삭제 실패");
-    }
+    await deletePost(postId);
+    alert("게시글 삭제됨");
+    navigate("/community");
   };
 
   /* 게시글 수정 */
@@ -224,7 +211,7 @@ export default function CommunityDetailPage() {
     });
   };
 
-  /* 뒤로가기: 목록으로 좋아요/스크랩 반영 */
+  /* 뒤로가기 (좋아요/스크랩 동기화) */
   const goBackWithSync = () => {
     navigate("/community", {
       state: {
@@ -261,34 +248,36 @@ export default function CommunityDetailPage() {
           </div>
         </div>
 
-        {/* 메뉴 */}
-        <div className="relative">
-          <button onClick={() => setShowMenu(!showMenu)}>
-            <img src="/images/more.png" className="w-6" />
-          </button>
+        {/* 내 글일 때만 메뉴 표시 */}
+        {isMyPost && (
+          <div className="relative">
+            <button onClick={() => setShowMenu(!showMenu)}>
+              <img src="/images/more.png" className="w-6" />
+            </button>
 
-          {showMenu && (
-            <div className="absolute right-0 mt-2 w-[160px] bg-white rounded-xl shadow-xl border p-2 z-50">
+            {showMenu && (
+              <div className="absolute right-0 mt-2 w-[160px] bg-white rounded-xl shadow-xl border p-2 z-50">
 
-              <button
-                className="flex items-center gap-2 w-full px-2 py-2 text-left hover:bg-gray-100 rounded-lg"
-                onClick={handleEditPost}
-              >
-                <img src="/images/edit-icon.png" className="w-4 h-4" />
-                <span>게시글 수정</span>
-              </button>
+                <button
+                  className="flex items-center gap-2 w-full px-2 py-2 text-left hover:bg-gray-100 rounded-lg"
+                  onClick={handleEditPost}
+                >
+                  <img src="/images/edit-icon.png" className="w-4 h-4" />
+                  <span>게시글 수정</span>
+                </button>
 
-              <button
-                className="flex items-center gap-2 w-full px-2 py-2 text-left text-red-500 hover:bg-gray-100 rounded-lg"
-                onClick={handleDeletePost}
-              >
-                <img src="/images/delete.png" className="w-4 h-4" />
-                <span>게시글 삭제</span>
-              </button>
+                <button
+                  className="flex items-center gap-2 w-full px-2 py-2 text-left text-red-500 hover:bg-gray-100 rounded-lg"
+                  onClick={handleDeletePost}
+                >
+                  <img src="/images/delete.png" className="w-4 h-4" />
+                  <span>게시글 삭제</span>
+                </button>
 
-            </div>
-          )}
-        </div>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* 이미지 */}
@@ -300,7 +289,6 @@ export default function CommunityDetailPage() {
 
       {/* 본문 */}
       <div className="bg-white px-3 py-1 mt-2">
-
         <span className="text-[12px]">📌 {post.regionName}</span>
 
         <h2 className="text-[15px] text-black-800 font-semibold mt-1">
@@ -325,25 +313,22 @@ export default function CommunityDetailPage() {
           </div>
         )}
 
-        {/* 좋아요 / 댓글 / 스크랩 */}
-       <div className="flex items-center justify-center gap-28 text-gray-500 text-[14px] mt-4">
 
-          {/* 좋아요 */}
+
+        {/* 좋아요 / 댓글 / 스크랩 */}
+        <div className="flex items-center justify-center gap-28 text-gray-500 text-[14px] mt-4">
           <div
-            className="flex items-center  gap-1 cursor-pointer active:scale-95 transition"
+            className="flex items-center gap-1 cursor-pointer active:scale-95 transition"
             onClick={handleToggleLike}
           >
             <Heart
-              className={`w-5 h-5 transition-colors ${
-                liked
-                  ? "fill-red-500 text-red-500"
-                  : "fill-none text-gray-700"
-              }`}
+              className={`w-5 h-5 transition-colors ${liked ? "fill-red-500 text-red-500" : "fill-none text-gray-700"
+                }`}
             />
             {likeCount}
           </div>
 
-          {/* 댓글 */}
+
           <div className="flex items-center gap-1">
             <img src="/images/msg.png" className="w-4" />
             <span className="text-gray-500 font-semibold text-[15px]">
@@ -351,51 +336,41 @@ export default function CommunityDetailPage() {
             </span>
           </div>
 
-          {/* 스크랩 */}
           <div
-            className="flex items-center mr-2 gap-1 cursor-pointer active:scale-95 transition"
+            className="flex items-center gap-1 cursor-pointer active:scale-95 transition"
             onClick={handleToggleScrap}
           >
             <Bookmark
-              className={`w-5 h-5 transition-colors ${
-                scrapped
-                  ? "fill-yellow-400 text-yellow-400"
-                  : "fill-none text-gray-700"
-              }`}
+              className={`w-5 h-5 transition-colors ${scrapped
+                ? "fill-yellow-400 text-yellow-400"
+                : "fill-none text-gray-700"
+                }`}
             />
           </div>
         </div>
-
       </div>
 
       {/* 댓글 */}
       <div className="px-4 mt-6">
-
         <div className="flex justify-between mb-3">
-          <h3 className="text-[12px] text-gray-500 font-semibold">
-            모든 댓글
-          </h3>
+          <h3 className="text-[12px] text-gray-500 font-semibold">모든 댓글</h3>
         </div>
 
         {comments.map((c) => (
           <div key={c.commentId} className="bg-white p-4 rounded-xl shadow mb-3">
-
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-2">
                 <img
                   src="/images/profile.png"
                   className="w-7 h-7 rounded-full object-cover"
                 />
-                <span className="text-[11px] font-medium">
-                  {c.userNickname}
-                </span>
+                <span className="text-[11px] font-medium">{c.userNickname}</span>
                 <span className="text-[8px] text-gray-400">
                   {getRelativeTime(c.createdAt)}
                 </span>
               </div>
             </div>
 
-            {/* 수정 모드 */}
             {editCommentId === c.commentId ? (
               <>
                 <textarea
@@ -424,14 +399,19 @@ export default function CommunityDetailPage() {
               <>
                 <p className="text-gray-700 mt-2">{c.content}</p>
 
-                <div className="flex gap-4 mt-2 text-[12px] text-gray-500">
-                  <button onClick={() => handleEditStart(c.commentId, c.content)}>
-                    수정
-                  </button>
-                  <button onClick={() => handleDeleteComment(c.commentId)}>
-                    삭제
-                  </button>
-                </div>
+                {/* 내 댓글일 때만 수정/삭제 */}
+                {c.userId === myUserId && (
+                  <div className="flex gap-4 mt-2 text-[12px] text-gray-500">
+                    <button
+                      onClick={() => handleEditStart(c.commentId, c.content)}
+                    >
+                      수정
+                    </button>
+                    <button onClick={() => handleDeleteComment(c.commentId)}>
+                      삭제
+                    </button>
+                  </div>
+                )}
               </>
             )}
           </div>
@@ -440,7 +420,6 @@ export default function CommunityDetailPage() {
 
       {/* 댓글 입력 */}
       <div className="fixed bottom-[70px] left-1/2 -translate-x-1/2 w-full max-w-[480px] px-4 py-3 bg-white flex items-center gap-3 border-t shadow-lg">
-
         <input
           value={newComment}
           onChange={(e) => setNewComment(e.target.value)}

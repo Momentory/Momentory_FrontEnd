@@ -42,11 +42,14 @@ export default function CommunityCard({ post, onUpdate }: CommunityCardProps) {
     };
   }, [post]);
 
+  /* ----------------------- 내 글 여부 ----------------------- */
+  const myUserId = Number(localStorage.getItem("userId"));
+  const isMyPost = safePost.userId === myUserId;
+
   const safeProfile = (url?: string | null) => {
-    if (!url) return "/images/profile.png";
-    if (url === "string") return "/images/profile.png";
-    if (url === "null") return "/images/profile.png";
-    if (url.trim() === "") return "/images/profile.png";
+    if (!url || url === "string" || url === "null" || url.trim() === "") {
+      return "/images/profile.png";
+    }
     return url;
   };
 
@@ -65,16 +68,11 @@ export default function CommunityCard({ post, onUpdate }: CommunityCardProps) {
     return `${Math.floor(diff / 604800)}주 전`;
   };
 
-  /* ----------------------- 좋아요 / 스크랩 상태 ----------------------- */
+  /* ----------------------- 좋아요 / 스크랩 ----------------------- */
   const [liked, setLiked] = useState<boolean>(safePost.liked ?? false);
-  const [scrapped, setScrapped] = useState<boolean>(
-    safePost.scrapStatus ?? false
-  );
-  const [likeCount, setLikeCount] = useState<number>(
-    safePost.likeCount ?? 0
-  );
+  const [scrapped, setScrapped] = useState<boolean>(safePost.scrapStatus ?? false);
+  const [likeCount, setLikeCount] = useState<number>(safePost.likeCount ?? 0);
 
-  /* ----------------------- 좋아요 토글 ----------------------- */
   const handleLike = async (e: any) => {
     e.stopPropagation();
     try {
@@ -96,7 +94,6 @@ export default function CommunityCard({ post, onUpdate }: CommunityCardProps) {
     }
   };
 
-  /* ----------------------- 스크랩 토글 ----------------------- */
   const handleScrap = async (e: any) => {
     e.stopPropagation();
     try {
@@ -114,7 +111,7 @@ export default function CommunityCard({ post, onUpdate }: CommunityCardProps) {
     }
   };
 
-  /* ----------------------- 상세로 전달할 데이터 ----------------------- */
+  /* ----------------------- 상세 페이지 전달용 ----------------------- */
   const normalizedPost = {
     ...safePost,
     liked,
@@ -136,7 +133,6 @@ export default function CommunityCard({ post, onUpdate }: CommunityCardProps) {
         }}
       >
         <div className="flex items-center gap-3">
-
           <img
             src={safeProfile(safePost.userProfileImageUrl)}
             onError={(e) => {
@@ -144,7 +140,6 @@ export default function CommunityCard({ post, onUpdate }: CommunityCardProps) {
             }}
             className="w-10 h-10 rounded-full object-cover"
           />
-
 
           <div className="flex flex-col">
             <span className="text-[11px] font-semibold">
@@ -155,13 +150,12 @@ export default function CommunityCard({ post, onUpdate }: CommunityCardProps) {
               {safePost.time ? safePost.time : getRelativeTime(safePost.createdAt)}
             </span>
           </div>
-
         </div>
       </div>
 
       {/* 이미지 클릭 */}
       <div
-        className="cursor-pointer active:opacity-80"
+        className="relative cursor-pointer active:opacity-80"
         onClick={() =>
           navigate(`/community/${safePost.postId}`, {
             state: { post: normalizedPost },
@@ -172,11 +166,11 @@ export default function CommunityCard({ post, onUpdate }: CommunityCardProps) {
           src={safePost.imageUrl ?? "/images/default.png"}
           className="w-full h-[280px] object-cover"
         />
+
       </div>
 
       {/* 본문 */}
       <div className="p-4">
-
         {safePost.regionName && (
           <div className="text-[12px] text-black mb-1">
             📌 {safePost.regionName}
@@ -205,37 +199,31 @@ export default function CommunityCard({ post, onUpdate }: CommunityCardProps) {
 
         {/* 좋아요 / 댓글 / 스크랩 */}
         <div className="flex items-center justify-center gap-28 text-gray-500 text-[14px] mt-4">
-
-          {/* 좋아요 */}
           <div
             className="flex items-center gap-2 ml-7 cursor-pointer active:scale-95 transition"
             onClick={handleLike}
           >
             <Heart
-              className={`w-4 h-4 transition-colors ${liked
-                  ? "fill-red-500 text-red-500"
-                  : "fill-none text-gray-700"
-                }`}
+              className={`w-4 h-4 transition-colors ${
+                liked ? "fill-red-500 text-red-500" : "fill-none text-gray-700"
+              }`}
             />
             <span>{likeCount}</span>
           </div>
 
-          {/* 댓글 */}
           <div className="flex items-center gap-2">
             <img src="/images/msg.png" className="w-4 h-4" />
             <span className="font-medium">{safePost.commentCount}</span>
           </div>
 
-          {/* 스크랩 */}
           <div
             className="flex items-center gap-2 cursor-pointer active:scale-95 transition min-w-[60px]"
             onClick={handleScrap}
           >
             <Bookmark
-              className={`w-4 h-4 transition-colors ${scrapped
-                  ? "fill-yellow-400 text-yellow-400"
-                  : "fill-none text-gray-700"
-                }`}
+              className={`w-4 h-4 transition-colors ${
+                scrapped ? "fill-yellow-400 text-yellow-400" : "fill-none text-gray-700"
+              }`}
             />
           </div>
         </div>
@@ -243,4 +231,3 @@ export default function CommunityCard({ post, onUpdate }: CommunityCardProps) {
     </div>
   );
 }
-
