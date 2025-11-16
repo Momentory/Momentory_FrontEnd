@@ -23,14 +23,16 @@ export function useCulturalStamp(
     unknown
   >({
     mutationFn: issueCulturalStamp,
-    onSuccess: (data, variables, context) => {
+    onSuccess: async (data, variables, context, mutationContext) => {
       // 문화 스탬프 발급 후 최근 스탬프 쿼리 무효화
-      queryClient.invalidateQueries({ queryKey: STAMP_QUERY_KEYS.recent });
-      queryClient.invalidateQueries({ queryKey: STAMP_QUERY_KEYS.my('CULTURAL') });
-      queryClient.invalidateQueries({ queryKey: STAMP_QUERY_KEYS.my() });
+      await queryClient.invalidateQueries({ queryKey: STAMP_QUERY_KEYS.recent });
+      await queryClient.invalidateQueries({ queryKey: STAMP_QUERY_KEYS.my('CULTURAL') });
+      await queryClient.invalidateQueries({ queryKey: STAMP_QUERY_KEYS.my() });
 
       // 사용자가 제공한 onSuccess도 호출
-      options?.onSuccess?.(data, variables, context);
+      if (options?.onSuccess) {
+        await options.onSuccess(data, variables, context, mutationContext);
+      }
     },
     ...options,
   });

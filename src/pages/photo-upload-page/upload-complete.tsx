@@ -10,7 +10,6 @@ import HeartIcon from '../../assets/heart.svg?react';
 import FacebookIcon from '../../assets/facebook.svg?react';
 import Modal from '../../components/common/Modal';
 import { getImageBlob, downloadBlob } from '../../utils/image';
-import { mapCulturalSpotName } from '../../utils/stampUtils';
 import { getKakao } from '../../utils/kakao';
 import { toS3WebsiteUrl } from '../../utils/s3';
 

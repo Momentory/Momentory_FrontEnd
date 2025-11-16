@@ -8,7 +8,6 @@ import {
   getStampImagePath,
   getCulturalStampImagePath,
   extractRegionName,
-  mapCulturalSpotName,
 } from '../../utils/stampUtils';
 import type { RecentStampItem } from '../../types/stamp';
 
@@ -33,11 +32,10 @@ export default function RecommendedPlacesPage() {
     data,
     isLoading: isRecentLoading,
     isError: isRecentError,
-    refetch: refetchRecentStamps,
   } = useRecentStamps({
     // 페이지 진입 시 항상 최신 데이터 가져오기
     refetchOnMount: 'always',
-  });
+  } as any);
   const { mutateAsync: fetchNearbySpots } = usePhotoNearby();
 
   const photoId = location.state?.photoId as number | undefined;
