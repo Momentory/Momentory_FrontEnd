@@ -15,16 +15,28 @@ interface CommunityCardProps {
 export default function CommunityCard({ post, onUpdate }: CommunityCardProps) {
   const navigate = useNavigate();
 
+  /* ----------------------- 이미지 안전 처리 공통 함수 ----------------------- */
+  const safeProfile = (url?: string | null): string => {
+    if (!url || url === "string" || url === "null" || url.trim() === "") {
+      return "/images/profile.png";
+    }
+    return url;
+  };
+
+  const safeImage = (url?: string | null): string => {
+    if (!url || url === "string" || url.startsWith("blob:") || url.trim() === "") {
+      return "/images/default.png";
+    }
+    return url;
+  };
+
   /* ----------------------- 안전한 초기값 ----------------------- */
   const safePost: CommunityPost = useMemo(() => {
     return {
       postId: post?.postId ?? 0,
       userId: post?.userId ?? 0,
       userNickname: post?.userNickname ?? "알 수 없음",
-      userProfileImageUrl:
-        !post?.userProfileImageUrl || post.userProfileImageUrl === "string"
-          ? "/images/profile.png"
-          : post.userProfileImageUrl,
+      userProfileImageUrl: safeProfile(post?.userProfileImageUrl),
       title: post?.title ?? "",
       content: post?.content ?? "",
       regionName: post?.regionName ?? "",
@@ -34,20 +46,10 @@ export default function CommunityCard({ post, onUpdate }: CommunityCardProps) {
       commentCount: post?.commentCount ?? 0,
       scrapStatus: post?.scrapStatus ?? false,
       liked: post?.liked ?? false,
-      imageUrl:
-        !post?.imageUrl || post.imageUrl === "string"
-          ? "/images/default.png"
-          : post.imageUrl,
+      imageUrl: safeImage(post?.imageUrl),
       time: post?.time,
     };
   }, [post]);
-
-  const safeProfile = (url?: string | null) => {
-    if (!url || url === "string" || url === "null" || url.trim() === "") {
-      return "/images/profile.png";
-    }
-    return url;
-  };
 
   /* ----------------------- 상대 시간 계산 ----------------------- */
   const getRelativeTime = (dateString?: string) => {
@@ -64,7 +66,7 @@ export default function CommunityCard({ post, onUpdate }: CommunityCardProps) {
     return `${Math.floor(diff / 604800)}주 전`;
   };
 
-  /* ----------------------- 좋아요 / 스크랩 ----------------------- */
+  /* ----------------------- 좋아요 / 스크랩 상태 ----------------------- */
   const [liked, setLiked] = useState<boolean>(safePost.liked ?? false);
   const [scrapped, setScrapped] = useState<boolean>(safePost.scrapStatus ?? false);
   const [likeCount, setLikeCount] = useState<number>(safePost.likeCount ?? 0);
@@ -75,18 +77,18 @@ export default function CommunityCard({ post, onUpdate }: CommunityCardProps) {
       await toggleLike(safePost.postId);
 
       const newLiked = !liked;
-      const newLikeCount = newLiked ? likeCount + 1 : likeCount - 1;
+      const newCount = newLiked ? likeCount + 1 : likeCount - 1;
 
       setLiked(newLiked);
-      setLikeCount(newLikeCount);
+      setLikeCount(newCount);
 
       onUpdate?.({
         postId: safePost.postId,
         liked: newLiked,
-        likeCount: newLikeCount,
+        likeCount: newCount,
       });
     } catch (err) {
-      console.error("좋아요 토글 실패:", err);
+      console.error("좋아요 실패:", err);
     }
   };
 
@@ -103,11 +105,11 @@ export default function CommunityCard({ post, onUpdate }: CommunityCardProps) {
         scrapStatus: newScrapped,
       });
     } catch (err) {
-      console.error("스크랩 토글 실패:", err);
+      console.error("스크랩 실패:", err);
     }
   };
 
-  /* ----------------------- 상세 페이지 전달용 ----------------------- */
+  /* ----------------------- 상세 페이지로 보낼 데이터 ----------------------- */
   const normalizedPost = {
     ...safePost,
     liked,
@@ -131,6 +133,7 @@ export default function CommunityCard({ post, onUpdate }: CommunityCardProps) {
         <div className="flex items-center gap-3">
           <img
             src={safeProfile(safePost.userProfileImageUrl)}
+            onError={(e) => (e.currentTarget.src = "/images/profile.png")}
             className="w-10 h-10 rounded-full object-cover"
           />
 
@@ -145,7 +148,7 @@ export default function CommunityCard({ post, onUpdate }: CommunityCardProps) {
         </div>
       </div>
 
-      {/* 이미지 클릭 */}
+      {/* 이미지 */}
       <div
         className="relative cursor-pointer active:opacity-80"
         onClick={() =>
@@ -155,7 +158,8 @@ export default function CommunityCard({ post, onUpdate }: CommunityCardProps) {
         }
       >
         <img
-          src={safePost.imageUrl ?? "/images/default.png"}
+          src={safeImage(safePost.imageUrl)}
+          onError={(e) => (e.currentTarget.src = "/images/default.png")}
           className="w-full h-[280px] object-cover"
         />
       </div>
@@ -163,9 +167,7 @@ export default function CommunityCard({ post, onUpdate }: CommunityCardProps) {
       {/* 본문 */}
       <div className="p-4">
         {safePost.regionName && (
-          <div className="text-[12px] text-black mb-1">
-            📌 {safePost.regionName}
-          </div>
+          <div className="text-[12px] text-black mb-1">📌 {safePost.regionName}</div>
         )}
 
         <h2 className="text-[15px] font-semibold text-gray-900 mb-2">
@@ -188,7 +190,7 @@ export default function CommunityCard({ post, onUpdate }: CommunityCardProps) {
           ))}
         </div>
 
-        {/* 좋아요 / 댓글 / 스크랩 */}
+        {/* 좋아요/댓글/스크랩 */}
         <div className="flex items-center justify-center gap-28 text-gray-500 text-[14px] mt-4">
           <div
             className="flex items-center gap-2 ml-7 cursor-pointer active:scale-95 transition"
