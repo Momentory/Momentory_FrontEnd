@@ -330,7 +330,7 @@ export default function CommunityDetailPage() {
 
           {/* 좋아요 */}
           <div
-            className="flex items-center ml-6 gap-1 cursor-pointer active:scale-95 transition"
+            className="flex items-center  gap-1 cursor-pointer active:scale-95 transition"
             onClick={handleToggleLike}
           >
             <Heart
