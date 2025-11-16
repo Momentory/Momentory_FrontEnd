@@ -141,7 +141,7 @@ const MyClosetPage = () => {
         )}
       </main>
 
-      <footer className="fixed bottom-0 left-0 right-0 max-w-[480px] mx-auto bg-white px-7 py-2">
+      <footer className="fixed bottom-0 left-0 right-0 max-w-[480px] mx-auto bg-white px-7 py-2 pb-6">
         <button
           onClick={handleApplyWardrobe}
           disabled={selectedWardrobeId === null || applyMutation.isPending}

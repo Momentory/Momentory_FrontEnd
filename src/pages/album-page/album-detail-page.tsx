@@ -48,7 +48,6 @@ const AlbumDetailPage = () => {
 
           if (images.length > 0) {
             const sortedImages = images.sort((a, b) => a.index - b.index);
-            // S3 REST Endpoint를 Website Endpoint로 변환 (CORS 해결)
             setThumbnailUrl(toS3WebsiteUrl(sortedImages[0].imageUrl));
           }
         }
@@ -74,12 +73,12 @@ const AlbumDetailPage = () => {
   return (
     <>
       <DropdownHeader
-        title="나의 사진첩"
+        title={albumTitle || "나의 사진첩"}
         onLeftClick={() => navigate('/album')}
       />
-      <main className="flex-grow p-11 pb-40 flex flex-col items-center">
+      <main className="flex-grow p-11 pb-10 flex flex-col items-center">
         <div className="relative w-full max-w-sm">
-          <div className="absolute -top-3 left-6 w-full h-full bg-[#E8CDCD]/60 rounded-3xl z-0 pr-7.5" />
+          <div className="absolute -top-3 left-4 w-full h-full bg-[#E8CDCD]/60 rounded-3xl z-0 pr-7.5" />
           <div className="relative w-full bg-white rounded-3xl border border-[#353535] shadow-lg overflow-hidden z-5">
             {thumbnailUrl ? (
               <img
@@ -94,20 +93,11 @@ const AlbumDetailPage = () => {
             )}
           </div>
         </div>
-        {albumTitle && (
-          <h2 className="mt-6 text-2xl font-bold text-[#444444]">{albumTitle}</h2>
-        )}
       </main>
 
-      <footer className="fixed bottom-0 left-0 right-0 px-7.5 pb-20 z-30">
+      <footer className="fixed bottom-0 left-0 right-0 px-7.5 pb-6 z-30">
         <div className="relative max-w-sm mx-auto">
-          <button
-            className="w-full rounded-3xl bg-[#FF7070] py-3.5 text-lg font-bold text-white shadow-md transition hover:bg-[#E56363] cursor-pointer"
-            onClick={() => navigate(`/album/${albumId}/read`)}
-          >
-            읽기
-          </button>
-          <div className="absolute bottom-[calc(100%+1rem)] right-0 flex flex-row gap-3">
+          <div className="flex flex-row justify-end gap-3 mb-4">
             <button
               className="flex h-14 w-14 items-center justify-center rounded-full border border-gray-200 bg-white shadow-md transition hover:bg-gray-100 cursor-pointer"
               onClick={() => navigate(`/myalbum/edit/${albumId}`)}
@@ -121,6 +111,12 @@ const AlbumDetailPage = () => {
               <ShareIcon className="h-6 w-6 text-gray-700" />
             </button>
           </div>
+          <button
+            className="w-full rounded-3xl bg-[#FF7070] py-3.5 text-lg font-bold text-white shadow-md transition hover:bg-[#E56363] cursor-pointer"
+            onClick={() => navigate(`/album/${albumId}/read`)}
+          >
+            읽기
+          </button>
         </div>
       </footer>
     </>

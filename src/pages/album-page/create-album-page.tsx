@@ -63,18 +63,12 @@ const CreateAlbumPage = () => {
           ))}
         </div>
 
-        <div className="bottom-0 flex flex-col gap-4 mt-6 z-10 pb-4.5">
+        <div className="bottom-0 flex flex-col mt-6 z-10">
           <button
             className="w-full rounded-3xl bg-[#FF7070] py-4 text-lg font-bold text-white transition hover:bg-[#E56363] cursor-pointer"
             onClick={handleNext}
           >
             다음
-          </button>
-          <button
-            className={`w-full rounded-3xl py-4 text-lg font-bold transition cursor-pointer bg-[#EAEAEA] text-[#8D8D8D]`}
-            onClick={()=>navigate(-1)}
-          >
-            취소
           </button>
         </div>
       </div>

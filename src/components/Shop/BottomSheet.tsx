@@ -271,9 +271,21 @@ export default function BottomSheet({
                           setTooltipPosition(null);
                         } else {
                           const rect = e.currentTarget.getBoundingClientRect();
+                          const viewportWidth = window.innerWidth;
+                          const tooltipWidth = 250;
+
+                          let left = rect.left + rect.width / 2;
+
+                          if (left - tooltipWidth / 2 < 10) {
+                            left = tooltipWidth / 2 + 10;
+                          }
+                          if (left + tooltipWidth / 2 > viewportWidth - 10) {
+                            left = viewportWidth - tooltipWidth / 2 - 10;
+                          }
+
                           setTooltipPosition({
                             top: rect.bottom + 8,
-                            left: rect.left + rect.width / 2,
+                            left: left,
                           });
                           setHoveredItem(accessory.id);
                         }
