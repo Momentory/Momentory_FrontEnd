@@ -214,12 +214,6 @@ export default function PhotoUploadPage() {
     if (!locationAddressData?.result) {
       return;
     }
-    console.log('✅ API 응답:', {
-      cityName: locationAddressData.result.cityName,
-      address: locationAddressData.result.address,
-      lat: locationAddressData.result.latitude,
-      lng: locationAddressData.result.longitude,
-    });
     setMarkerLocation((prev) => ({
       ...prev,
       address: locationAddressData.result.address,

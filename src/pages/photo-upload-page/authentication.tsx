@@ -55,10 +55,10 @@ export default function AuthenticationPage() {
       navigate('/stamp-acquisition', {
         state: {
           ...location.state,
-          stampType: 'cultural',
-          stampName: '광명동굴',
-          stampImagePath: '/cultural-stamps/광명동굴.svg',
-          points: 50,
+          // question.tsx에서 전달받은 stampType과 stampName 사용
+          stampType: location.state?.stampType || 'cultural',
+          stampName: location.state?.stampName,
+          points: 100, // 문화 스탬프 기본 포인트
         },
       });
     } else if (authStatus === 'error') {

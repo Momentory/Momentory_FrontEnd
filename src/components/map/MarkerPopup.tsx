@@ -83,6 +83,8 @@ const MarkerPopup = memo(function MarkerPopup({
               }}
             />
             <img
+              // 팝업 이미지 식별용 (캡처 직전 선택자)
+              data-role="popup-image"
               src={photo.imageUrl}
               alt={photo.address || marker.location || '최근 사진'}
               className="rounded-lg shadow-md cursor-pointer object-cover bg-[#EDE2E2]"
