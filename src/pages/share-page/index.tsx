@@ -34,12 +34,14 @@ export default function SharePage() {
 
       <main
         className="flex flex-col items-center pt-10 px-6 bg-white"
-        style={{ height: 'calc(100vh - 112px - 80px)', overflow: 'hidden' }}
+        style={{ height: 'calc(100vh - 112px - 80px)', overflowY: 'auto' }}
       >
         <h2 className="text-2xl font-extrabold text-[#444444]">
           {isCaptured ? '나의 경기 지도 생성 완료!' : '지도 공유 페이지'}
         </h2>
-        <p className="text-[#A3A3A3] font-bold mt-2">사진을 갤러리에 저장할까요?</p>
+        <p className="text-[#A3A3A3] font-bold mt-2">
+          사진을 갤러리에 저장할까요?
+        </p>
 
         <div className="mt-6 mb-8 p-3 bg-white shadow-lg rounded-lg border border-gray-100 relative max-w-[340px]">
           <img

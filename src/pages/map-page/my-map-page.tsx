@@ -17,7 +17,10 @@ import useBottomSheet from '../../hooks/map/useBottomSheet';
 import { captureMap } from '../../utils/screenshot';
 import { dataUrlToFile } from '../../utils/image';
 import { uploadFile } from '../../api/S3';
-import { getRegionMapPosition, REGION_REPRESENTATIVE_COORDS } from '../../utils/mapCoordinates';
+import {
+  getRegionMapPosition,
+  REGION_REPRESENTATIVE_COORDS,
+} from '../../utils/mapCoordinates';
 import type { Marker } from '../../types/map';
 import { useMyMapColors, useMyMapLatestPhotos } from '../../hooks/map/useMap';
 
@@ -97,15 +100,66 @@ export default function MyMapPage() {
 
   const { height, isExpanded, setHeight, setIsExpanded } = useBottomSheet();
 
+  // URL → data URL 변환 (팝업 이미지 한정)
+  const urlToDataUrl = async (url: string): Promise<string> => {
+    const res = await fetch(url, { mode: 'cors' });
+    const blob = await res.blob();
+    return await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  };
+
+  // 캡처 전: 팝업 이미지들을 data URL로 임시 치환하고 원본 src를 반환
+  const replacePopupImagesWithDataUrls = async (
+    containerId: string
+  ): Promise<Array<{ el: HTMLImageElement; src: string }>> => {
+    const container = document.getElementById(containerId);
+    const popupImgs = container
+      ? (Array.from(
+          container.querySelectorAll<HTMLImageElement>(
+            'img[data-role="popup-image"]'
+          )
+        ) as HTMLImageElement[])
+      : [];
+
+    const originals: Array<{ el: HTMLImageElement; src: string }> = [];
+    for (const img of popupImgs) {
+      if (!img.src || img.src.startsWith('data:')) continue;
+      originals.push({ el: img, src: img.src });
+      try {
+        const dataUrl = await urlToDataUrl(img.src);
+        img.src = dataUrl;
+      } catch {
+        // 변환 실패 시 해당 이미지만 제외 (캡처는 계속 진행)
+      }
+    }
+    return originals;
+  };
+
+  // 캡처 후: 원래 src로 원복
+  const restorePopupImages = (
+    originals: Array<{ el: HTMLImageElement; src: string }>
+  ) => {
+    for (const { el, src } of originals) {
+      try {
+        el.src = src;
+      } catch {
+        // 이미 언마운트되었거나 접근 불가한 경우 무시
+      }
+    }
+  };
+
   useEffect(() => {
-    if (!selectedRegion && markers.length > 0) {
-      setSelectedRegion(markers[0].location ?? '');
-    } else if (
-      selectedRegion &&
-      markers.length > 0 &&
-      !markers.some((marker) => marker.location === selectedRegion)
-    ) {
-      setSelectedRegion(markers[0].location ?? '');
+    if (markers.length > 0) {
+      const exists =
+        !!selectedRegion &&
+        markers.some((marker) => marker.location === selectedRegion);
+      if (!exists) {
+        setSelectedRegion(markers[0].location ?? '');
+      }
     }
   }, [markers, selectedRegion]);
 
@@ -118,8 +172,13 @@ export default function MyMapPage() {
   };
 
   const handleShareClick = async () => {
+    let originals: Array<{ el: HTMLImageElement; src: string }> = [];
     try {
       setIsCapturing(true);
+
+      // CORS 회피: 캡처 직전, 팝업 이미지들만 data URL로 임시 치환
+      originals = await replacePopupImagesWithDataUrls('map-container');
+
       const imageDataUrl = await captureMap('map-container');
       const file = await dataUrlToFile(
         imageDataUrl,
@@ -138,6 +197,10 @@ export default function MyMapPage() {
       console.error('지도 캡처 실패:', error);
       alert('지도 캡처에 실패했습니다. 다시 시도해주세요.');
     } finally {
+      // 원복: try에서 수집한 원본으로 복구
+      if (originals.length > 0) {
+        restorePopupImages(originals);
+      }
       setIsCapturing(false);
     }
   };
@@ -203,7 +266,7 @@ export default function MyMapPage() {
           handleTouchEnd={handleTouchEnd}
           onMarkerClick={(_markerId, location) => {
             setIsExpanded(false);
-            setHeight(516);
+            setHeight(460);
             if (location) {
               setSelectedRegion(location);
             }

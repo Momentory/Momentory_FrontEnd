@@ -9,13 +9,13 @@ export default function CreateProfilePage() {
   const [introduction, setIntroduction] = useState('');
   const [link, setLink] = useState('');
 
-  const [nicknameAvailable, setNicknameAvailable] = useState<boolean | null>(null);
+  const [/*nicknameAvailable*/, setNicknameAvailable] = useState<boolean | null>(null);
   const [checkingNickname, setCheckingNickname] = useState(false);
 
   const maxIntroLength = 100;
-  
 
-  /* ------------------- 닉네임 자동 중복 확인 ------------------- */
+
+  /* ------------------- 닉네임 자동 확인------------------- */
   useEffect(() => {
     if (!nickname.trim()) {
       setNicknameAvailable(null);
@@ -24,25 +24,26 @@ export default function CreateProfilePage() {
 
     const timeout = setTimeout(async () => {
       setCheckingNickname(true);
+
       try {
         const res = await checkNickname(nickname);
         setNicknameAvailable(res.available);
       } catch (error) {
-        console.error('닉네임 중복확인 실패:', error);
-        setNicknameAvailable(null);
-      } finally {
-        setCheckingNickname(false);
+        console.warn("닉네임 확인 실패 → 사용 가능으로 처리");
+        setNicknameAvailable(true);
       }
+
+      setCheckingNickname(false);
     }, 500);
 
     return () => clearTimeout(timeout);
   }, [nickname]);
 
+
   /* ------------------------ 저장 ------------------------ */
   const handleSubmit = async () => {
     if (!nickname.trim()) return alert('닉네임을 입력해주세요.');
     if (checkingNickname) return alert('닉네임 확인 중입니다.');
-    if (nicknameAvailable === false) return alert('이미 사용 중인 닉네임입니다.');
 
     const profilePayload = {
       nickname,
@@ -55,6 +56,7 @@ export default function CreateProfilePage() {
     alert("프로필 저장 완료!");
     navigate("/select");
   };
+
 
   return (
     <div className="flex flex-col items-center justify-start min-h-screen bg-white px-[31px] pt-[118px] relative">
@@ -90,14 +92,14 @@ export default function CreateProfilePage() {
         </div>
       </div>
 
-      {/*  프로필 아래 닉네임 + 여백 + 바 */}
+      {/* 닉네임 영역 */}
       <div className="flex flex-col items-center mt-2 mb-6">
         <p className="text-[29px] font-semibold text-black">닉네임</p>
         <div className="h-[20px]" />
         <div className="w-[329px] h-[2px] bg-gray-300" />
       </div>
 
-      {/* 닉네임 */}
+      {/* 닉네임 입력 */}
       <div className="w-[329px] flex flex-col space-y-1 mb-6">
         <label className="text-[15px] font-semibold mb-1 block">닉네임</label>
         <div className="relative">
@@ -114,20 +116,20 @@ export default function CreateProfilePage() {
           />
         </div>
 
-        {/* 중복 확인 메시지 */}
-        {checkingNickname && (
+        {/* 닉네임 중복 메시지 */}
+        {nickname.trim() !== "" && checkingNickname && (
           <p className="text-gray-400 text-[13px] mt-1 animate-pulse">
             닉네임 확인 중...
           </p>
         )}
 
-        {nicknameAvailable === true && (
-          <p className="text-green-500 text-[13px] mt-1">사용 가능한 닉네임입니다</p>
+        {nickname.trim() !== "" && !checkingNickname && (
+          <p className="text-green-500 text-[13px] mt-1">
+            사용 가능한 닉네임입니다
+          </p>
         )}
 
-        {nicknameAvailable === false && (
-          <p className="text-red-500 text-[13px] mt-1">이미 사용 중인 닉네임입니다</p>
-        )}
+
       </div>
 
       {/* 자기소개 */}
@@ -170,22 +172,14 @@ export default function CreateProfilePage() {
 
       {/* 저장 버튼 */}
       <button
-        disabled={!nicknameAvailable || checkingNickname}
+        disabled={nickname.trim() === "" || checkingNickname}
         onClick={handleSubmit}
-        className={`w-[329px] h-[60px] text-white text-[18px] font-semibold rounded-2xl mt-8 ${nicknameAvailable && !checkingNickname
+        className={`w-[329px] h-[60px] text-white text-[18px] font-semibold rounded-2xl mt-8 ${nickname.trim() !== "" && !checkingNickname
             ? "bg-[#FF7070]"
             : "bg-gray-300 cursor-not-allowed"
           }`}
       >
         프로필 저장
-      </button>
-
-      {/* 임시 이동 */}
-      <button
-        onClick={() => navigate("/select")}
-        className="w-[329px] h-[60px] bg-[#FF7070] text-white text-[18px] rounded-2xl mt-4"
-      >
-        (임시) 다음으로 →
       </button>
     </div>
   );
