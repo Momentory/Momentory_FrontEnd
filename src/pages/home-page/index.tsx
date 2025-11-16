@@ -7,12 +7,15 @@ import {
   getMyMapInfo
 } from "../../api/home";
 import { getMyProfileSummary } from "../../api/mypage";
+import { getPointHistory } from "../../api/character";
 import { X } from "lucide-react";
 import GyeonggiMap from './GyeonggiMap';
 import CharacterSection from '../../components/Home/CharacterSection';
 import EventSection from '../../components/Home/EventSection';
 import CategorySection from '../../components/Home/CategorySection';
 import TopPlacesSection from '../../components/Home/TopPlacesSection';
+import Modal from '../../components/common/Modal';
+import { useQuery } from '@tanstack/react-query';
 
 export default function HomePage() {
   const [userName, setUserName] = useState("");
@@ -24,11 +27,18 @@ export default function HomePage() {
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [_isError, setIsError] = useState(false);
+  const [showPointHistoryModal, setShowPointHistoryModal] = useState(false);
 
   const [topPlaces, setTopPlaces] = useState<any[]>([]);
   const [events, setEvents] = useState<any[]>([]);
 
   const [mapColors, setMapColors] = useState<Record<string, string>>({});
+
+  const { data: pointHistory = [], isLoading: isLoadingHistory } = useQuery({
+    queryKey: ['pointHistory'],
+    queryFn: getPointHistory,
+    enabled: showPointHistoryModal,
+  });
 
   useEffect(() => {
     const fetchHomeData = async () => {
@@ -81,8 +91,8 @@ export default function HomePage() {
   }, []);
 
   return (
-    <div className="w-full min-h-screen bg-white overflow-y-auto overflow-x-hidden relative pt-[60px]">
-      <div className="w-full bg-white flex justify-between items-center px-6 py-2 border-b border-gray-200 flex-shrink-0">
+    <div className="w-full min-h-screen bg-white overflow-y-auto overflow-x-hidden relative" style={{ paddingTop: 'calc(60px + env(safe-area-inset-top))' }}>
+      <div className="w-full bg-white flex justify-between items-center px-6 py-2 border-b border-gray-200 flex-shrink-0" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
         <p className="text-[14px] font-semibold text-gray-800">
           Level {level}
         </p>
@@ -97,10 +107,15 @@ export default function HomePage() {
               </button>
             </div>
           )}
-          <div className="w-[20px] h-[20px] bg-[#FFD966] rounded-full flex items-center justify-center text-[13px] font-bold text-white">
-            P
-          </div>
-          <span className="text-gray-700 font-medium">{points}</span>
+          <button
+            onClick={() => setShowPointHistoryModal(true)}
+            className="flex items-center gap-1 hover:opacity-80 transition-opacity"
+          >
+            <div className="w-[20px] h-[20px] bg-[#FFD966] rounded-full flex items-center justify-center text-[13px] font-bold text-white">
+              P
+            </div>
+            <span className="text-gray-700 font-medium">{points}</span>
+          </button>
         </div>
       </div>
 
@@ -195,6 +210,58 @@ export default function HomePage() {
             </div>
           </div>
         </div>
+      )}
+
+      {showPointHistoryModal && (
+        <Modal
+          title="포인트 내역"
+          onClose={() => setShowPointHistoryModal(false)}
+        >
+          <div className="flex flex-col px-4 w-full max-h-[500px] overflow-y-auto">
+            {isLoadingHistory ? (
+              <div className="flex justify-center items-center py-10">
+                <div className="text-gray-500">로딩 중...</div>
+              </div>
+            ) : pointHistory.length === 0 ? (
+              <div className="flex justify-center items-center py-10">
+                <div className="text-gray-500">포인트 내역이 없습니다</div>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {pointHistory.map((history: any, index: number) => (
+                  <div
+                    key={index}
+                    className="flex items-center justify-between py-3 px-4 bg-gray-50 rounded-lg"
+                  >
+                    <div className="flex-1">
+                      <p className="text-sm font-semibold text-gray-800">
+                        {history.actionDesc}
+                      </p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {new Date(history.createdAt).toLocaleDateString('ko-KR', {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
+                      </p>
+                    </div>
+                    <div className="ml-4">
+                      <p
+                        className={`text-base font-bold ${
+                          history.amount > 0 ? 'text-green-600' : 'text-red-600'
+                        }`}
+                      >
+                        {history.amount > 0 ? '+' : ''}{history.amount}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </Modal>
       )}
     </div>
   );

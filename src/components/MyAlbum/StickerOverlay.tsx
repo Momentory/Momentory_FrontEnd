@@ -25,6 +25,17 @@ const StickerOverlay: React.FC<StickerOverlayProps> = ({ stickers, onUpdateStick
     });
   };
 
+  const handleTouchStart = (e: React.TouchEvent, sticker: Sticker) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const touch = e.touches[0];
+    setDraggingId(sticker.id);
+    setDragOffset({
+      x: touch.clientX - sticker.x,
+      y: touch.clientY - sticker.y,
+    });
+  };
+
   const handleMouseMove = (e: MouseEvent) => {
     if (!draggingId) return;
 
@@ -34,7 +45,22 @@ const StickerOverlay: React.FC<StickerOverlayProps> = ({ stickers, onUpdateStick
     onUpdateSticker?.(draggingId, { x: newX, y: newY });
   };
 
+  const handleTouchMove = (e: TouchEvent) => {
+    if (!draggingId) return;
+    e.preventDefault();
+
+    const touch = e.touches[0];
+    const newX = touch.clientX - dragOffset.x;
+    const newY = touch.clientY - dragOffset.y;
+
+    onUpdateSticker?.(draggingId, { x: newX, y: newY });
+  };
+
   const handleMouseUp = () => {
+    setDraggingId(null);
+  };
+
+  const handleTouchEnd = () => {
     setDraggingId(null);
   };
 
@@ -42,10 +68,14 @@ const StickerOverlay: React.FC<StickerOverlayProps> = ({ stickers, onUpdateStick
     if (draggingId) {
       document.addEventListener('mousemove', handleMouseMove);
       document.addEventListener('mouseup', handleMouseUp);
+      document.addEventListener('touchmove', handleTouchMove, { passive: false });
+      document.addEventListener('touchend', handleTouchEnd);
 
       return () => {
         document.removeEventListener('mousemove', handleMouseMove);
         document.removeEventListener('mouseup', handleMouseUp);
+        document.removeEventListener('touchmove', handleTouchMove);
+        document.removeEventListener('touchend', handleTouchEnd);
       };
     }
   }, [draggingId, dragOffset]);
@@ -73,6 +103,7 @@ const StickerOverlay: React.FC<StickerOverlayProps> = ({ stickers, onUpdateStick
               opacity: draggingId === sticker.id ? 0.7 : 1,
             }}
             onMouseDown={(e) => handleMouseDown(e, sticker)}
+            onTouchStart={(e) => handleTouchStart(e, sticker)}
             draggable={false}
           />
         );
