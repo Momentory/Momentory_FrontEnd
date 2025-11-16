@@ -42,10 +42,6 @@ export default function CommunityCard({ post, onUpdate }: CommunityCardProps) {
     };
   }, [post]);
 
-  /* ----------------------- 내 글 여부 ----------------------- */
-  const myUserId = Number(localStorage.getItem("userId"));
-  const isMyPost = safePost.userId === myUserId;
-
   const safeProfile = (url?: string | null) => {
     if (!url || url === "string" || url === "null" || url.trim() === "") {
       return "/images/profile.png";
@@ -122,7 +118,7 @@ export default function CommunityCard({ post, onUpdate }: CommunityCardProps) {
 
   /* ----------------------- 렌더링 ----------------------- */
   return (
-    <div className="bg-white rounded-2xl shadow-md overflow-hidden border border-gray-200">
+    <div className="bg-white rounded-2xl shadow-md border border-gray-200">
 
       {/* 프로필 영역 */}
       <div
@@ -135,9 +131,6 @@ export default function CommunityCard({ post, onUpdate }: CommunityCardProps) {
         <div className="flex items-center gap-3">
           <img
             src={safeProfile(safePost.userProfileImageUrl)}
-            onError={(e) => {
-              e.currentTarget.src = "/images/profile.png";
-            }}
             className="w-10 h-10 rounded-full object-cover"
           />
 
@@ -145,7 +138,6 @@ export default function CommunityCard({ post, onUpdate }: CommunityCardProps) {
             <span className="text-[11px] font-semibold">
               {safePost.userNickname}
             </span>
-
             <span className="text-[9px] text-gray-500">
               {safePost.time ? safePost.time : getRelativeTime(safePost.createdAt)}
             </span>
@@ -166,7 +158,6 @@ export default function CommunityCard({ post, onUpdate }: CommunityCardProps) {
           src={safePost.imageUrl ?? "/images/default.png"}
           className="w-full h-[280px] object-cover"
         />
-
       </div>
 
       {/* 본문 */}
