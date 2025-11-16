@@ -13,16 +13,14 @@ export default function LoginScreen() {
         "callback_error": "로그인 처리 중 오류가 발생했습니다.",
       };
 
-      const message =
-        errorMessages[error] ||
-        "카카오 로그인에 실패했습니다. 백엔드 로그를 확인해주세요.";
+      const message = errorMessages[error] || "카카오 로그인에 실패했습니다. 백엔드 로그를 확인해주세요.";
+
       alert(message);
     }
   }, [error]);
 
   const handleKakaoLogin = () => {
     console.log("=== 카카오 로그인 시작 ===");
-
     localStorage.removeItem("accessToken");
     localStorage.removeItem("userId");
     localStorage.removeItem("nickname");
