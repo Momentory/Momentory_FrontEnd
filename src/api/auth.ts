@@ -121,18 +121,32 @@ export const checkEmailVerified = async (email: string) => {
   return data;
 };
 
-// 닉네임 중복 체크
+// 닉네임 중복 체크 
 export const checkNickname = async (nickname: string): Promise<CheckResult> => {
   try {
     const res = await api.get('/api/auth/check-nickname', {
       params: { nickname },
     });
-    return { available: res.data.result === '중복 없음' };
+
+    // 숫자 1 또는 "1" 이면 사용 가능
+    if (typeof res.data === "number" || typeof res.data === "string") {
+      return { available: Number(res.data) === 1 };
+    }
+
+    // result 필드 있을 때
+    if (res.data?.result !== undefined) {
+      return { available: Number(res.data.result) === 1 };
+    }
+
+    return { available: true };
+
   } catch (error) {
-    console.error('닉네임 중복확인 실패:', error);
-    return { available: false };
+    console.warn("닉네임 중복 API 없음 → 그냥 사용 가능으로 처리");
+    return { available: true };  // ← 여기 핵심!
   }
 };
+
+
 
 /* ----------------------------- 비밀번호 ----------------------------- */
 
