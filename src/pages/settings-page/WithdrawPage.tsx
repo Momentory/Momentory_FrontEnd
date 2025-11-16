@@ -88,14 +88,14 @@ export default function WithdrawPage() {
                 <img
                     src="/images/tree.png"
                     alt="트리"
-                    className="absolute top-[260px] left-[260px] w-[112px] rotate-[12deg] shadow-[0_3px_5px_rgba(0,0,0,0.25)] z-[8]"
+                    className="absolute top-[260px] left-[260px] w-[130px] rotate-[12deg] shadow-[0_3px_5px_rgba(0,0,0,0.25)] z-[8]"
                 />
 
                 {/* 벚꽃 사진 */}
                 <img
                     src="/images/flower.png"
                     alt="벚꽃"
-                    className="absolute top-[220px] left-[210px] w-[82px] rotate-[-10deg] shadow-[0_3px_5px_rgba(0,0,0,0.2)] z-[9]"
+                    className="absolute top-[220px] left-[210px] w-[85px] rotate-[-10deg] shadow-[0_3px_5px_rgba(0,0,0,0.2)] z-[9]"
                 />
 
 

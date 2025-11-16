@@ -24,7 +24,7 @@ export default function CommentSection({ postId }: CommentSectionProps) {
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState("");
 
-  // ✏️ 수정 관련 상태
+  // 수정 관련 상태
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editContent, setEditContent] = useState("");
 
@@ -35,10 +35,10 @@ export default function CommentSection({ postId }: CommentSectionProps) {
     const fetchComments = async () => {
       try {
         const res = await getComments(postId);
-        console.log("💬 댓글 목록 응답:", res.data);
+        console.log(" 댓글 목록 응답:", res.data);
         setComments(Array.isArray(res.data.result) ? res.data.result : []);
       } catch (error) {
-        console.error("❌ 댓글 불러오기 실패:", error);
+        console.error("댓글 불러오기 실패:", error);
         setComments([]);
       }
     };
@@ -53,13 +53,13 @@ export default function CommentSection({ postId }: CommentSectionProps) {
     if (!newComment.trim()) return;
 
     try {
-      await createComment(postId, newComment);   // ✅ 객체 말고 문자열만 전달
+      await createComment(postId, newComment);   
       setNewComment("");
 
       const { data } = await getComments(postId);
       setComments(Array.isArray(data.result) ? data.result : []);
     } catch (error) {
-      console.error("❌ 댓글 작성 실패:", error);
+      console.error(" 댓글 작성 실패:", error);
     }
   };
 
@@ -69,9 +69,9 @@ export default function CommentSection({ postId }: CommentSectionProps) {
     try {
       await deleteComment(commentId);
       setComments((prev) => prev.filter((c) => c.commentId !== commentId));
-      console.log(`🗑️ 댓글 ${commentId} 삭제 완료`);
+      console.log(` 댓글 ${commentId} 삭제 완료`);
     } catch (error) {
-      console.error("❌ 댓글 삭제 실패:", error);
+      console.error(" 댓글 삭제 실패:", error);
     }
   };
 
@@ -81,7 +81,7 @@ export default function CommentSection({ postId }: CommentSectionProps) {
 
     try {
       await updateComment(commentId, editContent);
-      console.log(`✏️ 댓글 ${commentId} 수정 완료`);
+      console.log(` 댓글 ${commentId} 수정 완료`);
 
       // 수정 후 목록 새로고침
       const res = await getComments(postId);
@@ -91,7 +91,7 @@ export default function CommentSection({ postId }: CommentSectionProps) {
       setEditingId(null);
       setEditContent("");
     } catch (error) {
-      console.error("❌ 댓글 수정 실패:", error);
+      console.error(" 댓글 수정 실패:", error);
     }
   };
 

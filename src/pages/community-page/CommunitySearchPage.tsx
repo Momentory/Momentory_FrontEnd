@@ -41,7 +41,7 @@ export default function CommunitySearchPage() {
         return;
       }
 
-      /* **태그 검색 (단일 태그 API 사용)** */
+      /* **태그 검색 (단일 태그 API 사용) */
       if (selectedTags.length === 0) {
         setFilteredPosts([]);
         return;
@@ -117,11 +117,10 @@ export default function CommunitySearchPage() {
         <div className="flex bg-[#F9FAFB] rounded-full p-[3px] shadow-inner">
           <button
             onClick={() => setSearchType("title")}
-            className={`flex items-center justify-center gap-2 px-12 py-[8px] text-[11px] rounded-full ${
-              searchType === "title"
-                ? "bg-[#FFE5E5] text-[#333333]"
-                : "bg-white text-[#666666]"
-            }`}
+            className={`flex items-center justify-center gap-2 px-12 py-[8px] text-[11px] rounded-full ${searchType === "title"
+              ? "bg-[#FFE5E5] text-[#333333]"
+              : "bg-white text-[#666666]"
+              }`}
           >
             <Search size={16} />
             제목/내용 검색
@@ -129,11 +128,10 @@ export default function CommunitySearchPage() {
 
           <button
             onClick={() => setSearchType("tag")}
-            className={`flex items-center justify-center gap-2 px-12 py-[8px] text-[11px] rounded-full ${
-              searchType === "tag"
-                ? "bg-[#FFE5E5] text-[#333333]"
-                : "bg-white text-[#666666]"
-            }`}
+            className={`flex items-center justify-center gap-2 px-12 py-[8px] text-[11px] rounded-full ${searchType === "tag"
+              ? "bg-[#FFE5E5] text-[#333333]"
+              : "bg-white text-[#666666]"
+              }`}
           >
             <Tag size={16} />
             태그 검색
@@ -168,16 +166,16 @@ export default function CommunitySearchPage() {
               태그를 클릭하여 필터링하세요 (여러 개 선택 가능)
             </p>
 
-            <div className="flex flex-wrap gap-2 mb-6">
+            <div className="grid grid-cols-5 gap-3">
               {tags.map((tag) => (
                 <button
                   key={tag}
                   onClick={() => toggleTag(tag)}
-                  className={`px-4 py-[6px] rounded-full text-[14px] ${
-                    selectedTags.includes(tag)
+                  className={`h-[40px] rounded-2xl text-[14px] flex items-center justify-center
+              ${selectedTags.includes(tag)
                       ? "bg-[#FF7070] text-white"
-                      : "bg-[#F9FAFB] border border-gray-300 text-gray-600"
-                  }`}
+                      : "bg-white border border-gray-300 text-gray-600"
+                    }`}
                 >
                   {tag}
                 </button>
