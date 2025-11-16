@@ -13,9 +13,9 @@ export const categoryDefaults: Record<string, ItemTransform> = {
     translateY: 0,
   },
   EXPRESSION: {
-    scale: 0.45,
-    translateX: 0,
-    translateY: -20,
+    scale: 0.4,
+    translateX: -12,
+    translateY: -8,
   },
   EFFECT: {
     scale: 0.9,
@@ -24,8 +24,8 @@ export const categoryDefaults: Record<string, ItemTransform> = {
   },
   DECORATION: {
     scale: 0.3,
-    translateX: 10,
-    translateY: -100,
+    translateX: -10,
+    translateY: -80,
   },
 };
 
@@ -37,11 +37,11 @@ export const categoryDefaults: Record<string, ItemTransform> = {
 
 export const itemExceptions: Record<number, ItemTransform> = {
   // 장식
-  1: { scale: 0.3, translateX: -40, translateY: -90 }, // 리본
-  3: { scale: 0.3, translateX: 70, translateY: -70 }, // 장미
-  4: { scale: 0.2, translateX: 60, translateY: -150 }, // 깃털
-  5: { scale: 1.6, scaleX: -1, translateX: 4, translateY: -16 }, // 빨강 리본
-  6: { scale: 2, scaleX: -1, translateX: 4, translateY: -16 }, // 안경
+  1: { scale: 0.3, translateX: -40, translateY: -70 }, // 리본
+  3: { scale: 0.3, translateX: 60, translateY: -50 }, // 장미
+  4: { scale: 0.3, translateX: 30, translateY: -80 }, // 깃털
+  5: { scale: 1.6, scaleX: -1, translateX: 6, translateY: -14 }, // 빨강 리본
+  6: { scale: 2, scaleX: -1, translateX: 6, translateY: -14 }, // 안경
 };
 
 export const getItemTransform = (

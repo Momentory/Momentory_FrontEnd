@@ -23,7 +23,7 @@ export interface BottomSheetProps {
   equippedAccessories: number[];
   onAccessoryClick: (id: number) => void;
   onCategoryChange?: (category: string) => void;
-  onSelectCharacter?: (characterType: 'CAT' | 'DOG') => void;
+  onSelectCharacter?: () => void;
   onRemoveAll?: () => void;
   isLoading?: boolean;
 }
