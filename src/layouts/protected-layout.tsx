@@ -1,9 +1,11 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import Header from '../components/common/Header';
 import Navbar from '../components/common/NavBar';
 import PhotoUploadBottomSheet from '../components/PhotoUpload/PhotoUploadBottomSheet';
 import { uploadFile } from '../api/S3';
+import { tokenStore } from '../lib/token';
+import { isTokenExpired } from '../utils/jwt';
 
 const ProtectedLayout = () => {
   const location = useLocation();
@@ -21,6 +23,15 @@ const ProtectedLayout = () => {
   const [isUploadBottomSheetOpen, setIsUploadBottomSheetOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
+
+  useEffect(() => {
+    const accessToken = tokenStore.getAccess();
+
+    if (!accessToken || isTokenExpired(accessToken)) {
+      tokenStore.clear();
+      navigate('/login', { replace: true });
+    }
+  }, [location.pathname, navigate]);
 
   const handleFileChange = useCallback(
     async (e: React.ChangeEvent<HTMLInputElement>) => {

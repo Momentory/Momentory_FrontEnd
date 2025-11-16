@@ -10,6 +10,7 @@ export default function CommunityRegionPage() {
   const [posts, setPosts] = useState<CommunityPost[]>([]);
   const [loading, setLoading] = useState(true);
 
+  /* ---------------- 지역 이름 매핑 ---------------- */
   const REGION_NAMES: Record<number, string> = {
     1: "수원시", 2: "성남시", 3: "고양시", 4: "용인시",
     5: "부천시", 6: "안산시", 7: "안양시", 8: "남양주시",
@@ -23,6 +24,7 @@ export default function CommunityRegionPage() {
 
   const regionName = REGION_NAMES[Number(regionId)] ?? "지역";
 
+  /* ---------------- 지역 게시글 로딩 ---------------- */
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -41,20 +43,28 @@ export default function CommunityRegionPage() {
     fetchData();
   }, [regionId]);
 
-
+  /* ---------------- 렌더링 ---------------- */
   return (
-    <div className="min-h-screen bg-[#F9FAFB]">
+    <div className="min-h-screen bg-[#F9FAFB] pt-[70px]">
 
-      {/* 헤더 */}
-      <div className="flex items-center px-5 py-4 bg-white shadow-sm">
+      {/* 상단 헤더 */}
+      <div className="flex items-center justify-between bg-white px-4 py-4 border-b shadow-sm">
+
+        {/* 뒤로가기 */}
         <button onClick={() => navigate(-1)}>
-          <img src="/images/back.png" className="w-7 h-7" />
+          <img src="/images/109618.png" className="w-[24px]" />
         </button>
-        <h1 className="text-[22px] font-semibold ml-4">
+
+        {/* 제목 중앙 정렬 */}
+        <h1 className="text-[22px] font-semibold">
           {regionName} 소식
         </h1>
+
+        {/* 오른쪽 공간 */}
+        <div className="w-[24px]"></div>
       </div>
 
+      {/* 게시글 리스트 */}
       <div className="p-4 space-y-5">
         {loading ? (
           <div className="text-center text-gray-500">불러오는 중...</div>

@@ -70,7 +70,7 @@ export default function CreateAccountPage() {
 
   /* --------------------------- 이메일 인증 --------------------------- */
 
-  // 1) 인증 메일 발송
+  //  인증 메일 발송
   const handleSendEmail = async () => {
     if (!email) return alert("이메일을 입력해주세요.");
 
@@ -91,7 +91,7 @@ export default function CreateAccountPage() {
     }
   };
 
-  // 2) 인증 여부 확인
+  // 인증 여부 확인
   const handleCheckVerified = async () => {
     try {
       const res: any = await checkEmailVerified(email);
@@ -124,14 +124,12 @@ export default function CreateAccountPage() {
       await signup({
         email,
         password,
-        nickName:nickname,       // ← Swagger 기준 정확함
+        nickName:nickname,     
         name,
         phone,
         gender,
         birthDate,
         agreeTerms: true,
-
-        // 선택값
         imageUrl: "",
         imageName: "",
         bio: "",
@@ -154,7 +152,7 @@ export default function CreateAccountPage() {
       <div className="relative w-full mb-8">
         <img
           src="/images/109618.png"
-          className="absolute top-[-80px] left-[2px] w-[35px] h-[35px] cursor-pointer"
+          className="absolute top-[-80px] left-[15px] w-[35px] h-[35px] cursor-pointer"
           onClick={() => navigate(-1)}
         />
         <h1 className="text-[24px] font-semibold ml-5">회원가입</h1>

@@ -13,6 +13,7 @@ export default function CreateProfilePage() {
   const [checkingNickname, setCheckingNickname] = useState(false);
 
   const maxIntroLength = 100;
+  
 
   /* ------------------- 닉네임 자동 중복 확인 ------------------- */
   useEffect(() => {
@@ -37,13 +38,12 @@ export default function CreateProfilePage() {
     return () => clearTimeout(timeout);
   }, [nickname]);
 
-  /* ------------------------ 저장 (회원가입 아님) ------------------------ */
+  /* ------------------------ 저장 ------------------------ */
   const handleSubmit = async () => {
     if (!nickname.trim()) return alert('닉네임을 입력해주세요.');
     if (checkingNickname) return alert('닉네임 확인 중입니다.');
     if (nicknameAvailable === false) return alert('이미 사용 중인 닉네임입니다.');
 
-    //  프로필 저장 payload 
     const profilePayload = {
       nickname,
       introduction,
@@ -68,7 +68,7 @@ export default function CreateProfilePage() {
       />
 
       {/* 타이틀 */}
-      <h1 className="text-[22px] font-semibold mb-6 text-center">
+      <h1 className="text-[29px] font-semibold mb-6 text-center">
         프로필을 생성하세요
       </h1>
 
@@ -90,6 +90,13 @@ export default function CreateProfilePage() {
         </div>
       </div>
 
+      {/*  프로필 아래 닉네임 + 여백 + 바 */}
+      <div className="flex flex-col items-center mt-2 mb-6">
+        <p className="text-[29px] font-semibold text-black">닉네임</p>
+        <div className="h-[20px]" />
+        <div className="w-[329px] h-[2px] bg-gray-300" />
+      </div>
+
       {/* 닉네임 */}
       <div className="w-[329px] flex flex-col space-y-1 mb-6">
         <label className="text-[15px] font-semibold mb-1 block">닉네임</label>
@@ -99,11 +106,11 @@ export default function CreateProfilePage() {
             placeholder="닉네임"
             value={nickname}
             onChange={(e) => setNickname(e.target.value)}
-            className="w-full h-[50px] rounded-[10px] border px-10 text-[15px]"
+            className="w-full h-[50px] rounded-2xl border px-10 text-[15px]"
           />
           <img
             src="/images/user-icon.png"
-            className="absolute left-3 top-3 w-[18px] h-[18px] opacity-60"
+            className="absolute left-3 top-4 w-[18px] h-[18px] opacity-60"
           />
         </div>
 
@@ -131,7 +138,7 @@ export default function CreateProfilePage() {
             placeholder="자기 소개를 입력해주세요."
             value={introduction}
             onChange={(e) => setIntroduction(e.target.value.slice(0, maxIntroLength))}
-            className="w-full h-[90px] rounded-[10px] border px-10 py-2 text-[15px] resize-none"
+            className="w-full h-[90px] rounded-2xl border px-10 py-2 text-[15px] resize-none"
           />
           <img
             src="/images/pencil-icon.png"
@@ -152,11 +159,11 @@ export default function CreateProfilePage() {
             value={link}
             placeholder="예: https://instagram.com/..."
             onChange={(e) => setLink(e.target.value)}
-            className="w-full h-[50px] rounded-[10px] border px-10 text-[15px]"
+            className="w-full h-[50px] rounded-2xl border px-10 text-[15px]"
           />
           <img
             src="/images/link-icon.png"
-            className="absolute left-3 top-3 w-[16px] h-[16px] opacity-60"
+            className="absolute left-3 top-4 w-[16px] h-[16px] opacity-60 rotate-45"
           />
         </div>
       </div>
@@ -165,11 +172,10 @@ export default function CreateProfilePage() {
       <button
         disabled={!nicknameAvailable || checkingNickname}
         onClick={handleSubmit}
-        className={`w-[329px] h-[60px] text-white text-[18px] font-semibold rounded-[20px] mt-8 ${
-          nicknameAvailable && !checkingNickname
+        className={`w-[329px] h-[60px] text-white text-[18px] font-semibold rounded-2xl mt-8 ${nicknameAvailable && !checkingNickname
             ? "bg-[#FF7070]"
             : "bg-gray-300 cursor-not-allowed"
-        }`}
+          }`}
       >
         프로필 저장
       </button>
@@ -177,7 +183,7 @@ export default function CreateProfilePage() {
       {/* 임시 이동 */}
       <button
         onClick={() => navigate("/select")}
-        className="w-[329px] h-[60px] bg-[#FF7070] text-white text-[18px] rounded-[20px] mt-4"
+        className="w-[329px] h-[60px] bg-[#FF7070] text-white text-[18px] rounded-2xl mt-4"
       >
         (임시) 다음으로 →
       </button>

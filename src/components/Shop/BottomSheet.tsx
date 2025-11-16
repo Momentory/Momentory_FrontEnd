@@ -11,6 +11,7 @@ export interface Accessory {
   locked: boolean;
   type: string;
   unlockLevel?: number;
+  unavailable?: boolean;
 }
 
 export interface BottomSheetProps {
@@ -23,7 +24,7 @@ export interface BottomSheetProps {
   equippedAccessories: number[];
   onAccessoryClick: (id: number) => void;
   onCategoryChange?: (category: string) => void;
-  onSelectCharacter?: (characterType: 'CAT' | 'DOG') => void;
+  onSelectCharacter?: () => void;
   onRemoveAll?: () => void;
   isLoading?: boolean;
 }
@@ -187,7 +188,11 @@ export default function BottomSheet({
           <div className="font-bold text-base mb-1 text-black">
             {accessories.find(a => a.id === hoveredItem)?.name}
           </div>
-          {accessories.find(a => a.id === hoveredItem)?.unlockLevel && (
+          {accessories.find(a => a.id === hoveredItem)?.unavailable ? (
+            <div className="text-gray-600 text-xs">
+              현재 캐릭터는 착용할 수 없어요
+            </div>
+          ) : accessories.find(a => a.id === hoveredItem)?.unlockLevel && (
             <div className="text-gray-600 text-xs">
               Lv.{accessories.find(a => a.id === hoveredItem)?.unlockLevel} 일 때 획득할 수 있어요
             </div>
@@ -260,7 +265,7 @@ export default function BottomSheet({
                 >
                   <button
                     onClick={(e) => {
-                      if (accessory.locked) {
+                      if (accessory.locked || accessory.unavailable) {
                         if (hoveredItem === accessory.id) {
                           setHoveredItem(null);
                           setTooltipPosition(null);
@@ -279,6 +284,8 @@ export default function BottomSheet({
                     className={`aspect-square w-full flex items-center justify-center rounded-xl transition-all relative overflow-hidden ${
                       accessory.locked
                         ? 'bg-white border-2 border-gray-300 cursor-pointer'
+                        : accessory.unavailable
+                        ? 'bg-gray-100 border-2 border-gray-400 cursor-pointer opacity-60'
                         : isEquipped
                         ? 'bg-white border-2 border-[#FF7070]'
                         : 'bg-white border-2 border-black'
@@ -288,6 +295,17 @@ export default function BottomSheet({
                       <div className="flex items-center justify-center">
                         <LockIcon className="w-8 h-8 text-gray-400" />
                       </div>
+                    ) : accessory.unavailable ? (
+                      <>
+                        <img
+                          src={accessory.icon}
+                          alt={accessory.name}
+                          className="max-w-[80%] max-h-[80%] object-contain opacity-40"
+                        />
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <span className="text-2xl">🚫</span>
+                        </div>
+                      </>
                     ) : (
                       <img
                         src={accessory.icon}
