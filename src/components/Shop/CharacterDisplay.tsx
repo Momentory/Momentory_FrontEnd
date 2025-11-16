@@ -64,7 +64,7 @@ const CharacterDisplay = forwardRef<HTMLDivElement, CharacterDisplayProps>(({
           className="absolute inset-0 flex items-end justify-center px-16"
           style={{ paddingBottom: '32px' }}
         >
-          <div className="relative w-full max-w-[300px] aspect-square">
+          <div className="relative w-full aspect-square">
             {/* 의상 있으면 clothing 이미지, 표정 있으면 noface 이미지, 없으면 기본 캐릭터 */}
             {clothingImageSrc ? (
               <img

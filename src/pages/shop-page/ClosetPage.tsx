@@ -1,8 +1,8 @@
 import { useState, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import html2canvas from 'html2canvas-pro';
 import DropdownHeader from '../../components/common/DropdownHeader';
-import Modal from '../../components/common/Modal';
 import StarIcon from '../../assets/icons/starIcon.svg?react';
 import ShareIcon from '../../assets/icons/albumShare.svg?react';
 import ShopIcon from '../../assets/accessories/shop.svg?react';
@@ -11,19 +11,26 @@ import DogImage from '../../assets/accessories/dog.svg';
 import BottomSheet from '../../components/Shop/BottomSheet';
 import type { Accessory } from '../../components/Shop/BottomSheet';
 import CharacterDisplay from '../../components/Shop/CharacterDisplay';
+import CharacterSelectModal from '../../components/Shop/CharacterSelectModal';
+import RemoveAllModal from '../../components/Shop/RemoveAllModal';
+import NoItemsModal from '../../components/Shop/NoItemsModal';
 import useBottomSheet from '../../hooks/shop/useBottomSheet';
 import { useUserPoint, useCurrentCharacter, useMyItems, useShopItems } from '../../hooks/shop/useShopQueries';
 import { useEquipItem, useUnequipItem } from '../../hooks/shop/useEquipItem';
 import type { ItemCategory } from '../../types/shop';
 import { toS3WebsiteUrl } from '../../utils/s3';
+import { getMyCharacters, selectCharacter, getAllCharacterTypes } from '../../api/character';
 
 const ClosetPage = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [selectedCategory, setSelectedCategory] = useState<ItemCategory>('DECORATION');
   const { height, isExpanded, setHeight, setIsExpanded } = useBottomSheet();
   const captureRef = useRef<HTMLDivElement>(null);
   const [showRemoveAllModal, setShowRemoveAllModal] = useState(false);
   const [showNoItemsModal, setShowNoItemsModal] = useState(false);
+  const [showCharacterSelectModal, setShowCharacterSelectModal] = useState(false);
+  const [selectedCharacterId, setSelectedCharacterId] = useState<number | null>(null);
 
   const categoryDisplayMap: { [key in ItemCategory]: string } = {
     CLOTHING: '의상',
@@ -36,6 +43,16 @@ const ClosetPage = () => {
   const { data: currentCharacter } = useCurrentCharacter();
   const { data: myItems = [], isLoading: myItemsLoading } = useMyItems(selectedCategory);
   const { data: shopItems = [], isLoading: shopItemsLoading } = useShopItems(selectedCategory);
+
+  const { data: myCharacters = [] } = useQuery({
+    queryKey: ['myCharacters'],
+    queryFn: getMyCharacters,
+  });
+
+  const { data: characterTypes = [] } = useQuery({
+    queryKey: ['characterTypes'],
+    queryFn: getAllCharacterTypes,
+  });
 
   const isLoading = myItemsLoading || shopItemsLoading;
 
@@ -56,6 +73,22 @@ const ClosetPage = () => {
     onError: (error) => {
       console.error('아이템 해제 실패:', error);
       alert(`아이템 해제에 실패했습니다: ${error.message || '알 수 없는 오류'}`);
+    },
+  });
+
+  const selectCharacterMutation = useMutation({
+    mutationFn: selectCharacter,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['myCharacters'] });
+      queryClient.invalidateQueries({ queryKey: ['currentCharacter'] });
+      setShowCharacterSelectModal(false);
+      setSelectedCharacterId(null);
+    },
+    onError: (error: any) => {
+      console.error('캐릭터 선택 실패:', error);
+      alert(`캐릭터 선택에 실패했습니다: ${error.message || '알 수 없는 오류'}`);
+      setShowCharacterSelectModal(false);
+      setSelectedCharacterId(null);
     },
   });
 
@@ -80,14 +113,23 @@ const ClosetPage = () => {
 
   const accessories: Accessory[] = useMemo(() => {
     const ownedItemIds = new Set(myItems.map(item => item.itemId));
+    const currentCharacterType = currentCharacter?.characterType;
 
-    const ownedAccessories = myItems.map(item => ({
-      id: item.itemId,
-      name: item.name,
-      icon: toS3WebsiteUrl(item.imageUrl),
-      locked: false,
-      type: item.category.toLowerCase()
-    }));
+    const ownedAccessories = myItems.map(item => {
+      const isAvailable = !item.availableCharacterTypes ||
+        item.availableCharacterTypes.length === 0 ||
+        !currentCharacterType ||
+        item.availableCharacterTypes.includes(currentCharacterType);
+
+      return {
+        id: item.itemId,
+        name: item.name,
+        icon: toS3WebsiteUrl(item.imageUrl),
+        locked: false,
+        type: item.category.toLowerCase(),
+        unavailable: !isAvailable
+      };
+    });
 
     const lockedAccessories = shopItems
       .filter(item => !ownedItemIds.has(item.itemId))
@@ -101,7 +143,7 @@ const ClosetPage = () => {
       }));
 
     return [...ownedAccessories, ...lockedAccessories];
-  }, [myItems, shopItems]);
+  }, [myItems, shopItems, currentCharacter]);
 
   const allEquippedAccessories: Accessory[] = useMemo(() => {
     if (!currentCharacter) return [];
@@ -157,10 +199,11 @@ const ClosetPage = () => {
     const accessory = accessories.find((acc) => acc.id === id);
     console.log('아이템 클릭:', { id, accessory, currentCharacter });
 
-    if (!accessory || accessory.locked || !currentCharacter) {
+    if (!accessory || accessory.locked || accessory.unavailable || !currentCharacter) {
       console.log('클릭 무시:', {
         hasAccessory: !!accessory,
         isLocked: accessory?.locked,
+        isUnavailable: accessory?.unavailable,
         hasCharacter: !!currentCharacter
       });
       return;
@@ -294,14 +337,25 @@ const ClosetPage = () => {
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
-      alert('이미지가 다운로드되었습니다.\n갤러리에서 인스타그램 스토리에 업로드해주세요!');
+      alert('이미지가 다운로드되었습니다.');
     }
   };
 
-  const handleSelectCharacter = (characterType: 'CAT' | 'DOG') => {
-    // TODO: 캐릭터 변경 API 연결
-    console.log('캐릭터 변경:', characterType);
-    alert(`${characterType === 'CAT' ? '고양이' : '강아지'}로 변경됩니다.`);
+  const handleSelectCharacter = () => {
+    setShowCharacterSelectModal(true);
+  };
+
+  const handleCharacterClick = (characterId: number, isCurrentCharacter: boolean) => {
+    if (isCurrentCharacter) {
+      return;
+    }
+    setSelectedCharacterId(characterId);
+  };
+
+  const confirmSelectCharacter = () => {
+    if (selectedCharacterId !== null) {
+      selectCharacterMutation.mutate(selectedCharacterId);
+    }
   };
 
   const handleRemoveAll = () => {
@@ -425,49 +479,34 @@ const ClosetPage = () => {
         isLoading={isLoading}
       />
 
-      {showRemoveAllModal && (
-        <Modal title="아이템 모두 벗기" onClose={() => setShowRemoveAllModal(false)}>
-          <div className="flex flex-col items-center text-center px-3.5 w-full">
-            <p className="text-gray-700 mb-6">
-              착용 중인<br/> 모든 아이템을 벗으시겠습니까?
-            </p>
+      <RemoveAllModal
+        show={showRemoveAllModal}
+        onClose={() => setShowRemoveAllModal(false)}
+        onConfirm={confirmRemoveAll}
+      />
 
-            <div className="flex w-full gap-4 justify-between">
-              <button
-                onClick={confirmRemoveAll}
-                className="flex-1 whitespace-nowrap px-6 py-2 bg-[#FF7070] text-white rounded-lg font-semibold"
-              >
-                벗기
-              </button>
-              <button
-                onClick={() => setShowRemoveAllModal(false)}
-                className="whitespace-nowrap px-6 py-2 bg-[#EAEAEA] text-[#8D8D8D] rounded-lg font-semibold"
-              >
-                취소
-              </button>
-            </div>
-          </div>
-        </Modal>
-      )}
+      <NoItemsModal
+        show={showNoItemsModal}
+        onClose={() => setShowNoItemsModal(false)}
+      />
 
-      {showNoItemsModal && (
-        <Modal title="알림" onClose={() => setShowNoItemsModal(false)}>
-          <div className="flex flex-col items-center text-center px-3.5 w-full">
-            <p className="text-gray-700 mb-4">
-              착용 중인 아이템이 없습니다.
-            </p>
-
-            <div className="flex w-full justify-center">
-              <button
-                onClick={() => setShowNoItemsModal(false)}
-                className="whitespace-nowrap px-6 py-2 bg-[#FF7070] text-white rounded-lg font-semibold w-full"
-              >
-                확인
-              </button>
-            </div>
-          </div>
-        </Modal>
-      )}
+      <CharacterSelectModal
+        show={showCharacterSelectModal}
+        onClose={() => {
+          setShowCharacterSelectModal(false);
+          setSelectedCharacterId(null);
+        }}
+        characterTypes={characterTypes}
+        myCharacters={myCharacters}
+        selectedCharacterId={selectedCharacterId}
+        onCharacterClick={handleCharacterClick}
+        onConfirm={confirmSelectCharacter}
+        onNavigateToCharacter={() => {
+          setShowCharacterSelectModal(false);
+          navigate('/character');
+        }}
+        isPending={selectCharacterMutation.isPending}
+      />
       </div>
     </div>
   );
