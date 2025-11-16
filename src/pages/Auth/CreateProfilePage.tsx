@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { checkNickname } from '../../api/auth';
+import { checkNickname, setKakaoProfile } from '../../api/auth';
 
 export default function CreateProfilePage() {
   const navigate = useNavigate();
@@ -45,16 +45,43 @@ export default function CreateProfilePage() {
     if (!nickname.trim()) return alert('닉네임을 입력해주세요.');
     if (checkingNickname) return alert('닉네임 확인 중입니다.');
 
-    const profilePayload = {
+    // localStorage에서 카카오 정보 가져오기
+    const kakaoNickname = localStorage.getItem("nickname") || "";
+    const profileImage = localStorage.getItem("profileImage") || "";
+
+    const profilePayload: Record<string, string> = {
       nickname,
-      introduction,
-      link,
     };
+
+    // 선택 필드 추가
+    if (introduction.trim()) {
+      profilePayload.bio = introduction;
+    }
+    if (link.trim()) {
+      profilePayload.externalLink = link;
+    }
+    if (kakaoNickname) {
+      profilePayload.kakaoNickname = kakaoNickname;
+    }
+    if (profileImage) {
+      profilePayload.profileImage = profileImage;
+    }
 
     console.log("저장할 프로필 데이터:", profilePayload);
 
-    alert("프로필 저장 완료!");
-    navigate("/select");
+    try {
+      // 카카오 프로필 API 호출
+      await setKakaoProfile(profilePayload);
+
+      console.log("✅ 프로필 저장 완료");
+      alert("프로필 저장 완료!");
+
+      // 홈으로 이동
+      navigate("/home", { replace: true });
+    } catch (error) {
+      console.error("❌ 프로필 저장 실패:", error);
+      alert("프로필 저장에 실패했습니다. 다시 시도해주세요.");
+    }
   };
 
 

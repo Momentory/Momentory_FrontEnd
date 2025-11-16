@@ -97,7 +97,7 @@ const publicRoutes: RouteObject[] = [
       { path: 'create-profile', element: <CreateProfilePage /> },
       { path: 'select', element: <SelectCharacterPage /> },
       { path: 'account', element: <AccountCreatedPage /> },
-      { path: 'oauth/kakao/callback', element: <KakaoCallback /> },
+      { path: 'auth/kakao/callback', element: <KakaoCallback /> },
       { path: 'share/:shareUuid', element: <SharedAlbumPage /> },
     ],
   },

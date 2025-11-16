@@ -82,8 +82,8 @@ export default function KakaoCallback() {
           console.log(" 프로필 완료 → /home으로 이동");
           navigate("/home", { replace: true });
         } else {
-          console.log(" 프로필 미완료 → /select로 이동");
-          navigate("/select", { replace: true });
+          console.log(" 프로필 미완료 → /create-profile로 이동");
+          navigate("/create-profile", { replace: true });
         }
 
       } catch (err) {
