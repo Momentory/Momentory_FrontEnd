@@ -208,7 +208,7 @@ export default function CommunityCard({ post, onUpdate }: CommunityCardProps) {
 
           {/* 좋아요 */}
           <div
-            className="flex items-center gap-2 cursor-pointer active:scale-95 transition"
+            className="flex items-center gap-2 ml-7 cursor-pointer active:scale-95 transition"
             onClick={handleLike}
           >
             <Heart

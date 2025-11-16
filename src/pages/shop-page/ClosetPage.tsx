@@ -14,6 +14,7 @@ import CharacterDisplay from '../../components/Shop/CharacterDisplay';
 import CharacterSelectModal from '../../components/Shop/CharacterSelectModal';
 import RemoveAllModal from '../../components/Shop/RemoveAllModal';
 import NoItemsModal from '../../components/Shop/NoItemsModal';
+import ClothingConflictModal from '../../components/Shop/ClothingConflictModal';
 import useBottomSheet from '../../hooks/shop/useBottomSheet';
 import { useUserPoint, useCurrentCharacter, useMyItems, useShopItems } from '../../hooks/shop/useShopQueries';
 import { useEquipItem, useUnequipItem } from '../../hooks/shop/useEquipItem';
@@ -31,6 +32,9 @@ const ClosetPage = () => {
   const [showNoItemsModal, setShowNoItemsModal] = useState(false);
   const [showCharacterSelectModal, setShowCharacterSelectModal] = useState(false);
   const [selectedCharacterId, setSelectedCharacterId] = useState<number | null>(null);
+  const [showClothingConflictModal, setShowClothingConflictModal] = useState(false);
+  const [conflictType, setConflictType] = useState<'clothing-to-other' | 'other-to-clothing'>('clothing-to-other');
+  const [pendingItemId, setPendingItemId] = useState<number | null>(null);
 
   const categoryDisplayMap: { [key in ItemCategory]: string } = {
     CLOTHING: '의상',
@@ -211,7 +215,9 @@ const ClosetPage = () => {
     const hasClothing = currentCharacter.equipped.clothing !== null;
     const isClothing = accessory.type.toUpperCase() === 'CLOTHING';
     if (hasClothing && !isClothing && !equippedAccessories.includes(id)) {
-      alert('의상을 착용한 상태에서는 다른 아이템을 착용할 수 없습니다.');
+      setConflictType('clothing-to-other');
+      setPendingItemId(id);
+      setShowClothingConflictModal(true);
       return;
     }
     if (isClothing && !equippedAccessories.includes(id)) {
@@ -221,7 +227,9 @@ const ClosetPage = () => {
         currentCharacter.equipped.decoration !== null;
 
       if (hasOtherItems) {
-        alert('다른 아이템을 착용한 상태에서는 의상을 착용할 수 없습니다.');
+        setConflictType('other-to-clothing');
+        setPendingItemId(id);
+        setShowClothingConflictModal(true);
         return;
       }
     }
@@ -399,6 +407,33 @@ const ClosetPage = () => {
     }
   };
 
+  const confirmClothingConflict = async () => {
+    if (!currentCharacter || pendingItemId === null) return;
+
+    const equipped = currentCharacter.equipped;
+    const itemsToUnequip = [];
+
+    if (equipped.clothing) itemsToUnequip.push(equipped.clothing.itemId);
+    if (equipped.expression) itemsToUnequip.push(equipped.expression.itemId);
+    if (equipped.effect) itemsToUnequip.push(equipped.effect.itemId);
+    if (equipped.decoration) itemsToUnequip.push(equipped.decoration.itemId);
+
+    try {
+      for (const itemId of itemsToUnequip) {
+        await unequipMutation.mutateAsync({ characterId: currentCharacter.characterId, itemId });
+      }
+      console.log('모든 아이템 해제 완료, 새 아이템 착용 시작');
+      equipMutation.mutate({ characterId: currentCharacter.characterId, itemId: pendingItemId });
+      setShowClothingConflictModal(false);
+      setPendingItemId(null);
+    } catch (error) {
+      console.error('아이템 해제 실패:', error);
+      alert('아이템 해제에 실패했습니다.');
+      setShowClothingConflictModal(false);
+      setPendingItemId(null);
+    }
+  };
+
   return (
     <div className="flex flex-col h-screen bg-white overflow-hidden">
       <DropdownHeader
@@ -506,6 +541,16 @@ const ClosetPage = () => {
           navigate('/character');
         }}
         isPending={selectCharacterMutation.isPending}
+      />
+
+      <ClothingConflictModal
+        show={showClothingConflictModal}
+        onClose={() => {
+          setShowClothingConflictModal(false);
+          setPendingItemId(null);
+        }}
+        onConfirm={confirmClothingConflict}
+        type={conflictType}
       />
       </div>
     </div>
