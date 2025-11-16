@@ -8,6 +8,7 @@ export interface ShopItem {
   price: number;
   unlockLevel: number;
   owned: boolean;
+  availableCharacterTypes?: string[];
 }
 
 export interface PurchasedItem {
@@ -66,6 +67,7 @@ export interface MyItem {
   category: ItemCategory;
   imageUrl: string;
   equipped: boolean;
+  availableCharacterTypes?: string[];
 }
 
 export interface MyItemsResponse {
