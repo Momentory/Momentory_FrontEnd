@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { checkEmail, sendEmail, checkEmailVerified, signup } from "../../api/auth";
+import { checkEmail, sendEmail, checkEmailVerified } from "../../api/auth";
 
 export default function CreateAccountPage() {
   const navigate = useNavigate();
 
   /* ---------------------------- 상태 ---------------------------- */
   const [name, setName] = useState("");
-  const [nickname, setNickname] = useState("");
+  const [nickname] = useState("");
   const [phone, setPhone] = useState("");
 
   const [gender, setGender] = useState<"MALE" | "FEMALE">("MALE");
@@ -70,14 +70,14 @@ export default function CreateAccountPage() {
 
   /* --------------------------- 이메일 인증 --------------------------- */
 
-  //  인증 메일 발송
+  // 인증 메일 발송
   const handleSendEmail = async () => {
     if (!email) return alert("이메일을 입력해주세요.");
 
     try {
       const checkRes: any = await checkEmail(email);
 
-      if (checkRes?.result === "중복 있음" || checkRes?.result === "중복임") {
+      if (checkRes?.result === "중복 있음") {
         alert("이미 가입된 이메일입니다.");
         return;
       }
@@ -108,57 +108,47 @@ export default function CreateAccountPage() {
     }
   };
 
-  /* ----------------------------- 회원가입 요청 ----------------------------- */
-  const handleSubmit = async (e: React.FormEvent) => {
+  /* ----------------------------- 프로필 생성 페이지로 이동 ----------------------------- */
+  const handleNext = (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!agree) return alert("약관에 동의해야 합니다.");
     if (!emailVerified) return alert("이메일 인증을 완료해주세요.");
     if (!isPasswordValid) return alert("비밀번호 형식이 잘못되었습니다.");
     if (!isPasswordMatch) return alert("비밀번호가 일치하지 않습니다.");
-    if (!nickname.trim()) return alert("닉네임을 입력해주세요.");
 
     const birthDate = `${birthYear}-${birthMonth}-${birthDay}`;
 
-    try {
-      await signup({
-        email,
-        password,
-        nickName:nickname,     
-        name,
-        phone,
-        gender,
-        birthDate,
-        agreeTerms: true,
-        imageUrl: "",
-        imageName: "",
-        bio: "",
-        externalLink: "",
-        characterType: "CAT"
-      });
+    const allAccountData = {
+      name,
+      nickname,
+      phone,
+      email,
+      password,
+      gender,
+      birthDate,
+    };
 
-      alert("회원가입이 완료되었습니다!");
-      navigate("/create-profile");
-    } catch (err) {
-      console.error("회원가입 오류:", err);
-      alert("회원가입 실패");
-    }
+    navigate("/create-profile", { state: allAccountData });
   };
 
   /* ----------------------------- UI ----------------------------- */
   return (
-    <div className="flex flex-col items-center min-h-screen bg-white px-[28px] pt-[120px]">
-      {/* 헤더 */}
-      <div className="relative w-full mb-8">
+    <div className="w-[390px] h-[844px] mx-auto bg-white overflow-y-auto flex flex-col">
+
+      {/* ===== 상단 헤더 ===== */}
+      <div className="w-full px-[20px] pt-[25px] pb-[10px]">
         <img
           src="/images/109618.png"
-          className="absolute top-[-80px] left-[15px] w-[35px] h-[35px] cursor-pointer"
+          className="w-[28px] h-[28px] cursor-pointer mb-10"
           onClick={() => navigate(-1)}
         />
-        <h1 className="text-[24px] font-semibold ml-5">회원가입</h1>
+        <h1 className="text-[24px] font-semibold mb-5">회원가입</h1>
       </div>
 
-      <form onSubmit={handleSubmit} className="flex flex-col w-[332px] space-y-4">
+      {/* 폼 */}
+      <form onSubmit={handleNext} className="flex flex-col w-[332px] mx-auto space-y-4 pb-[40px]">
+
         {/* 이름 */}
         <div>
           <label className="text-[15px] font-semibold mb-1 block">이름</label>
@@ -166,17 +156,6 @@ export default function CreateAccountPage() {
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full h-[50px] rounded-2xl border px-4"
-          />
-        </div>
-
-        {/* 닉네임 */}
-        <div>
-          <label className="text-[15px] font-semibold mb-1 block">닉네임</label>
-          <input
-            type="text"
-            value={nickname}
-            onChange={(e) => setNickname(e.target.value)}
             className="w-full h-[50px] rounded-2xl border px-4"
           />
         </div>
@@ -200,18 +179,14 @@ export default function CreateAccountPage() {
             <button
               type="button"
               onClick={() => setGender("MALE")}
-              className={`px-4 py-2 rounded-2xl border ${
-                gender === "MALE" ? "bg-[#FF7070] text-white" : "bg-gray-100"
-              }`}
+              className={`px-4 py-2 rounded-2xl border ${gender === "MALE" ? "bg-[#FF7070] text-white" : "bg-gray-100"}`}
             >
               남성
             </button>
             <button
               type="button"
               onClick={() => setGender("FEMALE")}
-              className={`px-4 py-2 rounded-2xl border ${
-                gender === "FEMALE" ? "bg-[#FF7070] text-white" : "bg-gray-100"
-              }`}
+              className={`px-4 py-2 rounded-2xl border ${gender === "FEMALE" ? "bg-[#FF7070] text-white" : "bg-gray-100"}`}
             >
               여성
             </button>
@@ -220,22 +195,22 @@ export default function CreateAccountPage() {
 
         {/* 생년월일 */}
         <div>
-          <label className="text-[17px] font-semibold mb-1 block">생년월일</label>
-          <div className="flex space-x-5">
-            <select value={birthYear} onChange={(e) => setBirthYear(e.target.value)} className="border rounded-2xl px-6 py-2">
+          <label className="text-[15px] font-semibold mb-1 block">생년월일</label>
+          <div className="flex space-x-2">
+            <select value={birthYear} onChange={(e) => setBirthYear(e.target.value)} className="flex-1 border rounded-2xl px-2 py-2 text-sm">
               <option>2000</option>
               <option>2001</option>
               <option>2002</option>
               <option>2003</option>
             </select>
 
-            <select value={birthMonth} onChange={(e) => setBirthMonth(e.target.value)} className="border rounded-2xl px-6 py-2">
+            <select value={birthMonth} onChange={(e) => setBirthMonth(e.target.value)} className="flex-1 border rounded-2xl px-2 py-2 text-sm">
               {[...Array(12)].map((_, i) => (
                 <option key={i}>{String(i + 1).padStart(2, "0")}</option>
               ))}
             </select>
 
-            <select value={birthDay} onChange={(e) => setBirthDay(e.target.value)} className="border rounded-2xl px-6 py-2">
+            <select value={birthDay} onChange={(e) => setBirthDay(e.target.value)} className="flex-1 border rounded-2xl px-2 py-2 text-sm">
               {[...Array(31)].map((_, i) => (
                 <option key={i}>{String(i + 1).padStart(2, "0")}</option>
               ))}
@@ -259,7 +234,7 @@ export default function CreateAccountPage() {
               <button
                 type="button"
                 onClick={handleSendEmail}
-                className="w-[90px] h-[50px] rounded-2xl text-white bg-[#FF7070]"
+                className="w-[80px] h-[50px] rounded-2xl text-white bg-[#FF7070] text-sm font-semibold flex-shrink-0"
               >
                 발송
               </button>
@@ -267,7 +242,7 @@ export default function CreateAccountPage() {
               <button
                 type="button"
                 onClick={handleCheckVerified}
-                className={`w-[90px] h-[50px] rounded-2xl text-white ${
+                className={`w-[80px] h-[50px] rounded-2xl text-white text-sm font-semibold flex-shrink-0 ${
                   emailVerified ? "bg-green-400" : "bg-gray-400"
                 }`}
               >
@@ -288,7 +263,7 @@ export default function CreateAccountPage() {
           />
 
           {password && (
-            <p className={`text-sm mt-1 ${isPasswordValid ? "text-green-500" : "text-red-500"}`}>
+            <p className={`text-xs mt-1 ${isPasswordValid ? "text-green-500" : "text-red-500"}`}>
               {passwordMessage}
             </p>
           )}
@@ -298,23 +273,23 @@ export default function CreateAccountPage() {
             placeholder="비밀번호 확인"
             value={passwordConfirm}
             onChange={handlePasswordConfirm}
-            className="w-full h-[50px] border rounded-2xl px-4 mt-2"
+            className="w-full h-[50px] border rounded-2xl px-4 mt-3"
           />
 
           {passwordConfirm && (
-            <p className={`text-sm mt-1 ${isPasswordMatch ? "text-green-500" : "text-red-500"}`}>
+            <p className={`text-xs mt-1 ${isPasswordMatch ? "text-green-500" : "text-red-500"}`}>
               {confirmMessage}
             </p>
           )}
         </div>
 
         {/* 약관 */}
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-2 pt-2">
           <input
             type="checkbox"
             checked={agree}
             onChange={(e) => setAgree(e.target.checked)}
-            className="w-4 h-4 accent-[#FF7070]"
+            className="w-4 h-4 accent-[#FF7070] flex-shrink-0"
           />
           <label className="text-sm">
             약관에 동의합니다{" "}
@@ -324,11 +299,11 @@ export default function CreateAccountPage() {
           </label>
         </div>
 
-        {/* 제출 */}
+        {/* 제출 버튼 */}
         <button
           disabled={!agree}
           type="submit"
-          className={`w-full h-[60px] rounded-2xl text-white text-lg font-semibold mt-4 ${
+          className={`w-full h-[60px] rounded-2xl text-white text-lg font-semibold mt-6 ${
             agree ? "bg-[#FF7070]" : "bg-gray-300"
           }`}
         >

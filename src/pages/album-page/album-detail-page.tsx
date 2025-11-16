@@ -23,8 +23,34 @@ const AlbumDetailPage = () => {
         const shareUrl = response.result.shareUrl;
 
         // 클립보드에 복사
-        await navigator.clipboard.writeText(shareUrl);
-        alert('공유 링크가 복사되었습니다!\n친구에게 링크를 공유해보세요.');
+        try {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            await navigator.clipboard.writeText(shareUrl);
+            alert('공유 링크가 복사되었습니다!\n친구에게 링크를 공유해보세요.');
+          } else {
+            const textArea = document.createElement('textarea');
+            textArea.value = shareUrl;
+            textArea.style.position = 'fixed';
+            textArea.style.left = '-999999px';
+            textArea.style.top = '-999999px';
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+
+            const successful = document.execCommand('copy');
+            document.body.removeChild(textArea);
+
+            if (successful) {
+              alert('공유 링크가 복사되었습니다!\n친구에게 링크를 공유해보세요.');
+            } else {
+              alert(`공유 링크가 생성되었습니다:\n${shareUrl}`);
+            }
+          }
+        } catch (clipboardErr) {
+          console.error('클립보드 복사 실패:', clipboardErr);
+          // 클립보드 복사 실패 시 링크를 직접 표시
+          alert(`공유 링크가 생성되었습니다:\n${shareUrl}`);
+        }
       } else {
         alert('공유 링크 생성에 실패했습니다.');
       }

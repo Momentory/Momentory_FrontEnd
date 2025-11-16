@@ -143,8 +143,8 @@ export default function CommunityMyPage() {
     activeTab === "list"
       ? myPosts
       : activeTab === "scrap"
-      ? scrapPosts
-      : likedPosts;
+        ? scrapPosts
+        : likedPosts;
 
   /* -------------------------------- 상세 페이지 이동 함수------------------------------------- */
   const goToDetail = (postId: number) => {
@@ -221,9 +221,8 @@ export default function CommunityMyPage() {
           <img
             src={profile?.imageUrl || "/images/profile.png"}
             alt="프로필"
-            className={`w-[80px] h-[80px] rounded-full object-cover shadow-md border-white bg-white ${
-              profile?.isMe ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''
-            }`}
+            className={`w-[80px] h-[80px] rounded-full object-cover shadow-md border-white bg-white ${profile?.isMe ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''
+              }`}
             onClick={profile?.isMe ? handleProfileClick : undefined}
           />
           {profile?.isMe && (
@@ -232,7 +231,7 @@ export default function CommunityMyPage() {
               onClick={handleProfileClick}
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 5v14M5 12h14"/>
+                <path d="M12 5v14M5 12h14" />
               </svg>
             </div>
           )}
@@ -275,15 +274,24 @@ export default function CommunityMyPage() {
             </div>
           )}
 
-          {/* 팔로워/팔로잉 수 */}
           <div className="flex gap-4 mt-2">
-            <span className="text-[13px] text-gray-600">
+            {/* 팔로워 */}
+            <button
+              className="text-[13px] text-gray-600"
+              onClick={() => navigate(`/community${profile?.userId}/followers`)}
+            >
               팔로워 <span className="font-semibold">{profile?.followerCount || 0}</span>
-            </span>
-            <span className="text-[13px] text-gray-600">
+            </button>
+
+            {/* 팔로잉 */}
+            <button
+              className="text-[13px] text-gray-600"
+              onClick={() => navigate(`/community/${profile?.userId}/followings`)}
+            >
               팔로잉 <span className="font-semibold">{profile?.followingCount || 0}</span>
-            </span>
+            </button>
           </div>
+
         </div>
 
         {/* 아이콘 탭 */}
@@ -292,21 +300,21 @@ export default function CommunityMyPage() {
             onClick={() => setActiveTab("list")}
             className={`${activeTab === "list" ? "opacity-100" : "opacity-40"}`}
           >
-            <img src="/images/list.png" className="w-[25px] h-[25px]" />
+            <img src="/images/list.png" className="w-[19px] h-[19px]" />
           </button>
 
           <button
             onClick={() => setActiveTab("scrap")}
             className={`${activeTab === "scrap" ? "opacity-100" : "opacity-40"}`}
           >
-            <img src="/images/mark.png" className="w-[25px] h-[25px]" />
+            <img src="/images/mark.png" className="w-[27px] h-[27px]" />
           </button>
 
           <button
             onClick={() => setActiveTab("like")}
             className={`${activeTab === "like" ? "opacity-100" : "opacity-40"}`}
           >
-            <img src="/images/Heart.png" className="w-[25px] h-[25px]" />
+            <img src="/images/Heart.png" className="w-[27px] h-[27px]" />
           </button>
         </div>
       </div>

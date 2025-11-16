@@ -40,55 +40,58 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-white relative">
+    <div className="w-[390px] h-[844px] mx-auto bg-white relative flex flex-col overflow-hidden">
       {/* 뒤로가기 버튼 */}
       <img
         src="/images/109618.png"
         alt="뒤로가기"
-        className="absolute top-[25px] left-[25px] w-[30px] h-[30px] cursor-pointer"
+        className="absolute top-[25px] left-[25px] w-[30px] h-[30px] cursor-pointer z-10"
         onClick={() => navigate(-1)}
       />
 
       {/* 로그인 박스 */}
-      <h1 className="text-[45px] font-bold text-black mb-6">로그인</h1>
+      <div className="flex flex-col items-center justify-center flex-1 px-6">
+        <h1 className="text-[45px] font-bold text-black mb-6">로그인</h1>
 
-      <div className="w-full max-w-[360px] mx-auto">
-        <form onSubmit={handleSubmit} className="flex flex-col space-y-4">
-          <input
-            type="email"
-            placeholder="abc@naver.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full h-[80px] rounded-[25px] border border-gray-300 px-4 text-[22px] placeholder-gray-400"
-          />
-          <input
-            type="password"
-            placeholder="비밀번호"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full h-[80px] rounded-[25px] border border-gray-300 px-4 text-[22px] placeholder-gray-400"
-          />
+        <div className="w-full max-w-[360px]">
+          <form onSubmit={handleSubmit} className="flex flex-col space-y-4">
+            <input
+              type="email"
+              placeholder="abc@naver.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full h-[80px] rounded-[25px] border border-gray-300 px-4 text-[22px] placeholder-gray-400"
+            />
+            <input
+              type="password"
+              placeholder="비밀번호"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full h-[80px] rounded-[25px] border border-gray-300 px-4 text-[22px] placeholder-gray-400"
+            />
 
-          {/* 로그인 버튼 */}
-          <button
-            type="submit"
-            disabled={loading}
-            className={`w-full h-[70px] text-white text-[22px] font-semibold rounded-[25px] ${loading ? 'bg-gray-400' : 'bg-[#FF7070]'
+            {/* 로그인 버튼 */}
+            <button
+              type="submit"
+              disabled={loading}
+              className={`w-full h-[70px] text-white text-[22px] font-semibold rounded-[25px] ${
+                loading ? 'bg-gray-400' : 'bg-[#FF7070]'
               } transition active:scale-95`}
-          >
-            {loading ? '로그인중...' : '로그인'}
-          </button>
-        </form>
+            >
+              {loading ? '로그인중...' : '로그인'}
+            </button>
+          </form>
 
-        {/* 하단 링크 */}
-        <div className="mt-5 text-[16px] text-center text-gray-500">
-          <Link to="/find-id" className="hover:underline">
-            아이디 찾기
-          </Link>{' '}
-          |{' '}
-          <Link to="/find-password" className="hover:underline">
-            비밀번호 찾기
-          </Link>
+          {/* 하단 링크 */}
+          <div className="mt-5 text-[16px] text-center text-gray-500">
+            <Link to="/find-id" className="hover:underline">
+              아이디 찾기
+            </Link>{' '}
+            |{' '}
+            <Link to="/find-password" className="hover:underline">
+              비밀번호 찾기
+            </Link>
+          </div>
         </div>
       </div>
     </div>

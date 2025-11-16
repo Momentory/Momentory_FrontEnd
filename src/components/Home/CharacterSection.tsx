@@ -97,7 +97,6 @@ const CharacterSection = ({ userName }: CharacterSectionProps) => {
             <img
               src={clothingImageSrc}
               alt="character with clothing"
-              style={{ transform: 'scaleX(-1)' }}
               className="w-full h-full object-contain"
             />
           ) : nofaceImageSrc ? (
