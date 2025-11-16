@@ -8,7 +8,6 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import PublicLayout from './layouts/public-layout';
 import ProtectedLayout from './layouts/protected-layout';
 
-// 기본 페이지
 import CharacterPage from './pages/character-page';
 import HomePage from './pages/home-page';
 import TravelPage from './pages/travel-page';

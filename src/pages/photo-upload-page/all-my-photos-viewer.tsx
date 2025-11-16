@@ -126,10 +126,14 @@ export default function AllMyPhotosViewerPage() {
       <button
         type="button"
         onClick={() => navigate(-1)}
-        className="absolute left-8 top-12 z-50 flex h-10 w-10 items-center justify-center"
+        className="absolute left-8 top-12 z-50 flex h-9 w-9 items-center justify-center"
         aria-label="뒤로가기"
       >
-        <img src={BackIconSvg} alt="뒤로가기" className="h-10 w-10" />
+        <img
+          src={BackIconSvg}
+          alt="뒤로가기"
+          className="h-7 w-7 drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]"
+        />
       </button>
 
       <div

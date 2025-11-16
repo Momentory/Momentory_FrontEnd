@@ -1,6 +1,6 @@
 // 아이템 이름 -> 파일 이름 매핑
 export const clothingNameMap: Record<string, string> = {
-  '깃털모자': '축제',
+  '축제 모자': '축제',
   '디저트의상': '디저트',
   '마녀의상': '마녀',
   '사슴의상': '사슴',
@@ -17,6 +17,6 @@ export const effectNameMap: Record<string, string> = {
 
 export const expressionNameMap: Record<string, string> = {
   '감은눈': '감은눈',
-  '깜찍': '깜찍',
-  '초롱': '초롱눈',
+  '깜찍눈': '깜찍',
+  '초롱눈': '초롱눈',
 };
