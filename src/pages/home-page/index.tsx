@@ -81,8 +81,8 @@ export default function HomePage() {
   }, []);
 
   return (
-    <div className="w-full min-h-screen bg-white overflow-y-auto overflow-x-hidden relative pt-[60px]">
-      <div className="w-full bg-white flex justify-between items-center px-6 py-2 border-b border-gray-200 flex-shrink-0">
+    <div className="w-full min-h-screen bg-white overflow-y-auto overflow-x-hidden relative" style={{ paddingTop: 'calc(60px + env(safe-area-inset-top))' }}>
+      <div className="w-full bg-white flex justify-between items-center px-6 py-2 border-b border-gray-200 flex-shrink-0" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
         <p className="text-[14px] font-semibold text-gray-800">
           Level {level}
         </p>
