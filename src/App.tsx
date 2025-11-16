@@ -122,9 +122,9 @@ const protectedRoutes: RouteObject[] = [
       { path: 'community/region/:regionId', element: <CommunityRegionPage /> },
       { path: 'community/user/:userId', element: <UserProfilePage /> },
       { path: 'community/follow/:type', element: <FollowListPage /> },
-      { path: 'community/followings', element: <FollowingsPage /> },
-      { path: 'community/followers', element: <FollowersPage /> },
-      
+      { path: 'community/:userId/followings', element: <FollowingsPage /> },
+      { path: 'community/:userId/followers', element: <FollowersPage /> },
+
 
       { path: 'notifications', element: <NotificationListPage /> },
 

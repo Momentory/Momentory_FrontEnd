@@ -75,7 +75,7 @@ export default function UserProfilePage() {
         queryKey: ["communityUserProfile", numericUserId],
       });
     } catch (error) {
-      console.error(" 프로필 수정 실패:", error);
+      console.error("❌ 프로필 수정 실패:", error);
     }
   };
 
@@ -117,7 +117,7 @@ export default function UserProfilePage() {
             <img
               src={
                 !userProfile?.imageUrl ||
-                userProfile.imageUrl === "string"
+                  userProfile.imageUrl === "string"
                   ? "/images/profile.png"
                   : userProfile.imageUrl
               }
@@ -141,8 +141,7 @@ export default function UserProfilePage() {
                 <button
                   onClick={() => followMutation.mutate()}
                   className={`text-white text-[13px] px-4 py-[5px] rounded-full font-medium shadow-md 
-                    ${
-                      userProfile?.isFollowing ? "bg-gray-400" : "bg-[#FF7070]"
+                    ${userProfile?.isFollowing ? "bg-gray-400" : "bg-[#FF7070]"
                     }
                   `}
                 >
@@ -176,22 +175,26 @@ export default function UserProfilePage() {
               </div>
             )}
 
-            {/* 팔로잉/팔로워 */}
             <div className="flex items-center gap-6 mt-3 text-gray-700">
-              <p className="text-[12px]">
-                <span className="font-semibold">
-                  {userProfile?.followingCount || 0}
-                </span>{" "}
+              {/* 팔로잉 */}
+              <button
+                onClick={() => navigate(`/community/${numericUserId}/followings`)}
+                className="text-[12px] active:opacity-60"
+              >
+                <span className="font-semibold">{userProfile?.followingCount || 0}</span>{" "}
                 팔로잉
-              </p>
+              </button>
 
-              <p className="text-[12px]">
-                <span className="font-semibold">
-                  {userProfile?.followerCount || 0}
-                </span>{" "}
+              {/* 팔로워 */}
+              <button
+                onClick={() => navigate(`/community/${numericUserId}/followers`)}
+                className="text-[12px] active:opacity-60"
+              >
+                <span className="font-semibold">{userProfile?.followerCount || 0}</span>{" "}
                 팔로워
-              </p>
+              </button>
             </div>
+
           </div>
 
           {/* 탭 */}

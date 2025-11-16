@@ -103,7 +103,7 @@ export default function CommunityMyPage() {
 
       console.warn('프로필 사진 변경 기능은 프로필 수정 모달을 이용해주세요.');
     } catch (error) {
-      console.error('❌ 프로필 사진 변경 실패:', error);
+      console.error(' 프로필 사진 변경 실패:', error);
       alert('프로필 사진 변경에 실패했습니다.');
     }
   };
@@ -132,9 +132,9 @@ export default function CommunityMyPage() {
       const updatedProfile = await getCommunityUserProfile();
       setProfile(updatedProfile);
 
-      console.log('✅ 프로필 수정 완료');
+      console.log(' 프로필 수정 완료');
     } catch (error) {
-      console.error('❌ 프로필 수정 실패:', error);
+      console.error(' 프로필 수정 실패:', error);
       throw error;
     }
   };
