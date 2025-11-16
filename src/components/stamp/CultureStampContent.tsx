@@ -8,7 +8,7 @@ import 광명동굴 from '../../assets/stamp/광명동굴.png';
 import 한강유채꽃 from '../../assets/stamp/구리시한강유채꽃.png';
 import 물의정원 from '../../assets/stamp/남양주시물의정원.png';
 import 동두천계곡 from '../../assets/stamp/동두천계곡.png';
-import 만화박물관 from '../../assets/stamp/한국만화박물관.png';
+import 만화박물관 from '../../assets/stamp/부천만화박물관.png';
 import 남한선성 from '../../assets/stamp/성남남한산성.png';
 import 수원화성 from '../../assets/stamp/수원화성.png';
 import 안산누에섬 from '../../assets/stamp/안산누에섬.png';
