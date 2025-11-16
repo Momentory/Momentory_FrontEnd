@@ -1,22 +1,44 @@
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
+import { useEffect } from "react";
 
 export default function LoginScreen() {
+  const [searchParams] = useSearchParams();
+  const error = searchParams.get("error");
+
+  useEffect(() => {
+    if (error) {
+      console.error("=== 카카오 로그인 에러 발생 ===");
+      console.error("에러 코드:", error);
+      console.error("전체 URL:", window.location.href);
+
+      // 에러 메시지 매핑
+      const errorMessages: Record<string, string> = {
+        "no_token": "인증 토큰을 받지 못했습니다.",
+        "no_user_id": "사용자 정보를 받지 못했습니다.",
+        "callback_error": "로그인 처리 중 오류가 발생했습니다.",
+      };
+
+      const message = errorMessages[error] || "카카오 로그인에 실패했습니다. 백엔드 로그를 확인해주세요.";
+      alert(message);
+    }
+  }, [error]);
+
   const handleKakaoLogin = () => {
     console.log("=== 카카오 로그인 시작 ===");
     console.log("현재 위치:", window.location.href);
     console.log("백엔드 OAuth URL로 리다이렉트합니다...");
-    
+
     // localStorage 초기화 (이전 로그인 정보 제거)
     localStorage.removeItem("accessToken");
     localStorage.removeItem("userId");
     localStorage.removeItem("nickname");
     localStorage.removeItem("profileImage");
-    
+
     console.log("localStorage 초기화 완료");
-    
+
     const backendOAuthUrl = "https://www.momentory.store/oauth2/authorization/kakao";
     console.log("이동할 URL:", backendOAuthUrl);
-    
+
     window.location.href = backendOAuthUrl;
   };
 
