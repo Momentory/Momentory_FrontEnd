@@ -103,7 +103,7 @@ export default function CommunityMyPage() {
 
       console.warn('프로필 사진 변경 기능은 프로필 수정 모달을 이용해주세요.');
     } catch (error) {
-      console.error(' 프로필 사진 변경 실패:', error);
+      console.error('❌ 프로필 사진 변경 실패:', error);
       alert('프로필 사진 변경에 실패했습니다.');
     }
   };
@@ -132,9 +132,9 @@ export default function CommunityMyPage() {
       const updatedProfile = await getCommunityUserProfile();
       setProfile(updatedProfile);
 
-      console.log(' 프로필 수정 완료');
+      console.log('✅ 프로필 수정 완료');
     } catch (error) {
-      console.error(' 프로필 수정 실패:', error);
+      console.error('❌ 프로필 수정 실패:', error);
       throw error;
     }
   };
@@ -143,8 +143,8 @@ export default function CommunityMyPage() {
     activeTab === "list"
       ? myPosts
       : activeTab === "scrap"
-      ? scrapPosts
-      : likedPosts;
+        ? scrapPosts
+        : likedPosts;
 
   /* -------------------------------- 상세 페이지 이동 함수------------------------------------- */
   const goToDetail = (postId: number) => {
@@ -221,9 +221,8 @@ export default function CommunityMyPage() {
           <img
             src={profile?.imageUrl || "/images/profile.png"}
             alt="프로필"
-            className={`w-[80px] h-[80px] rounded-full object-cover shadow-md border-white bg-white ${
-              profile?.isMe ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''
-            }`}
+            className={`w-[80px] h-[80px] rounded-full object-cover shadow-md border-white bg-white ${profile?.isMe ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''
+              }`}
             onClick={profile?.isMe ? handleProfileClick : undefined}
           />
           {profile?.isMe && (
@@ -232,7 +231,7 @@ export default function CommunityMyPage() {
               onClick={handleProfileClick}
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 5v14M5 12h14"/>
+                <path d="M12 5v14M5 12h14" />
               </svg>
             </div>
           )}
@@ -275,15 +274,24 @@ export default function CommunityMyPage() {
             </div>
           )}
 
-          {/* 팔로워/팔로잉 수 */}
           <div className="flex gap-4 mt-2">
-            <span className="text-[13px] text-gray-600">
+            {/* 팔로워 */}
+            <button
+              className="text-[13px] text-gray-600"
+              onClick={() => navigate(`/community${profile?.userId}/followers`)}
+            >
               팔로워 <span className="font-semibold">{profile?.followerCount || 0}</span>
-            </span>
-            <span className="text-[13px] text-gray-600">
+            </button>
+
+            {/* 팔로잉 */}
+            <button
+              className="text-[13px] text-gray-600"
+              onClick={() => navigate(`/community/${profile?.userId}/followings`)}
+            >
               팔로잉 <span className="font-semibold">{profile?.followingCount || 0}</span>
-            </span>
+            </button>
           </div>
+
         </div>
 
         {/* 아이콘 탭 */}
