@@ -67,7 +67,7 @@ export default function PhotoEditPage() {
   } | null>(null);
   const [isCropDragging, setIsCropDragging] = useState(false);
   const [isCropResizing, setIsCropResizing] = useState<
-    'nw' | 'ne' | 'sw' | 'se' | null
+    'nw' | 'ne' | 'sw' | 'se' | 'n' | 's' | 'e' | 'w' | null
   >(null);
   const [cropDragStart, setCropDragStart] = useState<{
     x: number;
@@ -243,10 +243,15 @@ export default function PhotoEditPage() {
             const container = imageContainerRef.current;
             const containerWidth = container.offsetWidth;
             const containerHeight = container.offsetHeight;
-            const defaultSize = Math.min(containerWidth, containerHeight) * 0.8;
+            const margin = 16;
+            const defaultSize = Math.min(
+              Math.min(containerWidth, containerHeight) * 0.6,
+              containerWidth - margin * 2,
+              containerHeight - margin * 2
+            );
             setCropArea({
-              x: (containerWidth - defaultSize) / 2,
-              y: (containerHeight - defaultSize) / 2,
+              x: Math.max(margin, (containerWidth - defaultSize) / 2),
+              y: Math.max(margin, (containerHeight - defaultSize) / 2),
               width: defaultSize,
               height: defaultSize,
             });
@@ -273,7 +278,10 @@ export default function PhotoEditPage() {
   );
 
   const handleCropMouseDown = useCallback(
-    (e: React.MouseEvent, type: 'move' | 'nw' | 'ne' | 'sw' | 'se') => {
+    (
+      e: React.MouseEvent,
+      type: 'move' | 'nw' | 'ne' | 'sw' | 'se' | 'n' | 's' | 'e' | 'w'
+    ) => {
       if (activeTransformMode !== 'crop' || !cropArea) return;
       e.preventDefault();
       e.stopPropagation();
@@ -288,6 +296,50 @@ export default function PhotoEditPage() {
         setCropDragStart({
           x: e.clientX,
           y: e.clientY,
+        });
+      }
+    },
+    [activeTransformMode, cropArea]
+  );
+
+  // Touch equivalents
+  const handleImageTouchStart = useCallback(
+    (e: React.TouchEvent) => {
+      if (activeTransformMode === 'move') {
+        if (!e.touches || e.touches.length === 0) return;
+        const t = e.touches[0];
+        e.preventDefault();
+        setIsDragging(true);
+        dragStartRef.current = {
+          x: t.clientX - position.x,
+          y: t.clientY - position.y,
+        };
+      }
+    },
+    [activeTransformMode, position]
+  );
+
+  const handleCropTouchStart = useCallback(
+    (
+      e: React.TouchEvent,
+      type: 'move' | 'nw' | 'ne' | 'sw' | 'se' | 'n' | 's' | 'e' | 'w'
+    ) => {
+      if (activeTransformMode !== 'crop' || !cropArea) return;
+      if (!e.touches || e.touches.length === 0) return;
+      const t = e.touches[0];
+      e.preventDefault();
+      e.stopPropagation();
+      if (type === 'move') {
+        setIsCropDragging(true);
+        setCropDragStart({
+          x: t.clientX - cropArea.x,
+          y: t.clientY - cropArea.y,
+        });
+      } else {
+        setIsCropResizing(type);
+        setCropDragStart({
+          x: t.clientX,
+          y: t.clientY,
         });
       }
     },
@@ -331,49 +383,88 @@ export default function PhotoEditPage() {
           const deltaX = e.clientX - cropDragStart.x;
           const deltaY = e.clientY - cropDragStart.y;
           const newCropArea = { ...cropArea };
+          const minSize = 28;
 
           if (isCropResizing === 'se') {
             newCropArea.width = Math.min(
               container.offsetWidth - cropArea.x,
-              Math.max(50, cropArea.width + deltaX)
+              Math.max(minSize, cropArea.width + deltaX)
             );
             newCropArea.height = Math.min(
               container.offsetHeight - cropArea.y,
-              Math.max(50, cropArea.height + deltaY)
+              Math.max(minSize, cropArea.height + deltaY)
             );
           } else if (isCropResizing === 'sw') {
-            const newWidth = Math.max(50, cropArea.width - deltaX);
-            const newX = cropArea.x + (cropArea.width - newWidth);
-            if (newX >= 0) {
-              newCropArea.x = newX;
-              newCropArea.width = newWidth;
+            let newWidth = Math.max(minSize, cropArea.width - deltaX);
+            let newX = cropArea.x + (cropArea.width - newWidth);
+            if (newX < 0) {
+              newX = 0;
+              newWidth = cropArea.x + cropArea.width;
             }
+            newCropArea.x = newX;
+            newCropArea.width = Math.min(newWidth, container.offsetWidth);
             newCropArea.height = Math.min(
               container.offsetHeight - cropArea.y,
-              Math.max(50, cropArea.height + deltaY)
+              Math.max(minSize, cropArea.height + deltaY)
             );
           } else if (isCropResizing === 'ne') {
             newCropArea.width = Math.min(
               container.offsetWidth - cropArea.x,
-              Math.max(50, cropArea.width + deltaX)
+              Math.max(minSize, cropArea.width + deltaX)
             );
-            const newHeight = Math.max(50, cropArea.height - deltaY);
-            const newY = cropArea.y + (cropArea.height - newHeight);
-            if (newY >= 0) {
-              newCropArea.y = newY;
-              newCropArea.height = newHeight;
+            let newHeight = Math.max(minSize, cropArea.height - deltaY);
+            let newY = cropArea.y + (cropArea.height - newHeight);
+            if (newY < 0) {
+              newY = 0;
+              newHeight = cropArea.y + cropArea.height;
             }
+            newCropArea.y = newY;
+            newCropArea.height = Math.min(newHeight, container.offsetHeight);
           } else if (isCropResizing === 'nw') {
-            const newWidth = Math.max(50, cropArea.width - deltaX);
-            const newX = cropArea.x + (cropArea.width - newWidth);
-            const newHeight = Math.max(50, cropArea.height - deltaY);
-            const newY = cropArea.y + (cropArea.height - newHeight);
-            if (newX >= 0 && newY >= 0) {
-              newCropArea.x = newX;
-              newCropArea.y = newY;
-              newCropArea.width = newWidth;
-              newCropArea.height = newHeight;
+            let newWidth = Math.max(minSize, cropArea.width - deltaX);
+            let newX = cropArea.x + (cropArea.width - newWidth);
+            if (newX < 0) {
+              newX = 0;
+              newWidth = cropArea.x + cropArea.width;
             }
+            let newHeight = Math.max(minSize, cropArea.height - deltaY);
+            let newY = cropArea.y + (cropArea.height - newHeight);
+            if (newY < 0) {
+              newY = 0;
+              newHeight = cropArea.y + cropArea.height;
+            }
+            newCropArea.x = newX;
+            newCropArea.y = newY;
+            newCropArea.width = Math.min(newWidth, container.offsetWidth);
+            newCropArea.height = Math.min(newHeight, container.offsetHeight);
+          } else if (isCropResizing === 'e') {
+            newCropArea.width = Math.min(
+              container.offsetWidth - cropArea.x,
+              Math.max(minSize, cropArea.width + deltaX)
+            );
+          } else if (isCropResizing === 'w') {
+            let newWidth = Math.max(minSize, cropArea.width - deltaX);
+            let newX = cropArea.x + (cropArea.width - newWidth);
+            if (newX < 0) {
+              newX = 0;
+              newWidth = cropArea.x + cropArea.width;
+            }
+            newCropArea.x = newX;
+            newCropArea.width = Math.min(newWidth, container.offsetWidth);
+          } else if (isCropResizing === 's') {
+            newCropArea.height = Math.min(
+              container.offsetHeight - cropArea.y,
+              Math.max(minSize, cropArea.height + deltaY)
+            );
+          } else if (isCropResizing === 'n') {
+            let newHeight = Math.max(minSize, cropArea.height - deltaY);
+            let newY = cropArea.y + (cropArea.height - newHeight);
+            if (newY < 0) {
+              newY = 0;
+              newHeight = cropArea.y + cropArea.height;
+            }
+            newCropArea.y = newY;
+            newCropArea.height = Math.min(newHeight, container.offsetHeight);
           }
 
           setCropArea(newCropArea);
@@ -400,16 +491,171 @@ export default function PhotoEditPage() {
     setCropDragStart(null);
   }, []);
 
+  const handleImageTouchMove = useCallback(
+    (e: TouchEvent) => {
+      if (!e.touches || e.touches.length === 0) return;
+      const t = e.touches[0];
+      if (activeTransformMode === 'move') {
+        if (!isDragging || !dragStartRef.current) return;
+        e.preventDefault();
+        setPosition({
+          x: t.clientX - dragStartRef.current.x,
+          y: t.clientY - dragStartRef.current.y,
+        });
+      } else if (activeTransformMode === 'crop') {
+        if (!imageContainerRef.current || !cropArea) return;
+        const container = imageContainerRef.current;
+        const containerRect = container.getBoundingClientRect();
+        e.preventDefault();
+
+        if (isCropDragging && cropDragStart) {
+          const newX = t.clientX - containerRect.left - cropDragStart.x;
+          const newY = t.clientY - containerRect.top - cropDragStart.y;
+          setCropArea({
+            ...cropArea,
+            x: Math.max(
+              0,
+              Math.min(newX, container.offsetWidth - cropArea.width)
+            ),
+            y: Math.max(
+              0,
+              Math.min(newY, container.offsetHeight - cropArea.height)
+            ),
+          });
+        } else if (isCropResizing && cropDragStart) {
+          const deltaX = t.clientX - cropDragStart.x;
+          const deltaY = t.clientY - cropDragStart.y;
+          const newCropArea = { ...cropArea };
+          const minSize = 28;
+
+          if (isCropResizing === 'se') {
+            newCropArea.width = Math.min(
+              container.offsetWidth - cropArea.x,
+              Math.max(minSize, cropArea.width + deltaX)
+            );
+            newCropArea.height = Math.min(
+              container.offsetHeight - cropArea.y,
+              Math.max(minSize, cropArea.height + deltaY)
+            );
+          } else if (isCropResizing === 'sw') {
+            let newWidth = Math.max(minSize, cropArea.width - deltaX);
+            let newX = cropArea.x + (cropArea.width - newWidth);
+            if (newX < 0) {
+              newX = 0;
+              newWidth = cropArea.x + cropArea.width;
+            }
+            newCropArea.x = newX;
+            newCropArea.width = Math.min(newWidth, container.offsetWidth);
+            newCropArea.height = Math.min(
+              container.offsetHeight - cropArea.y,
+              Math.max(minSize, cropArea.height + deltaY)
+            );
+          } else if (isCropResizing === 'ne') {
+            newCropArea.width = Math.min(
+              container.offsetWidth - cropArea.x,
+              Math.max(minSize, cropArea.width + deltaX)
+            );
+            let newHeight = Math.max(minSize, cropArea.height - deltaY);
+            let newY = cropArea.y + (cropArea.height - newHeight);
+            if (newY < 0) {
+              newY = 0;
+              newHeight = cropArea.y + cropArea.height;
+            }
+            newCropArea.y = newY;
+            newCropArea.height = Math.min(newHeight, container.offsetHeight);
+          } else if (isCropResizing === 'nw') {
+            let newWidth = Math.max(minSize, cropArea.width - deltaX);
+            let newX = cropArea.x + (cropArea.width - newWidth);
+            if (newX < 0) {
+              newX = 0;
+              newWidth = cropArea.x + cropArea.width;
+            }
+            let newHeight = Math.max(minSize, cropArea.height - deltaY);
+            let newY = cropArea.y + (cropArea.height - newHeight);
+            if (newY < 0) {
+              newY = 0;
+              newHeight = cropArea.y + cropArea.height;
+            }
+            newCropArea.x = newX;
+            newCropArea.y = newY;
+            newCropArea.width = Math.min(newWidth, container.offsetWidth);
+            newCropArea.height = Math.min(newHeight, container.offsetHeight);
+          } else if (isCropResizing === 'e') {
+            newCropArea.width = Math.min(
+              container.offsetWidth - cropArea.x,
+              Math.max(minSize, cropArea.width + deltaX)
+            );
+          } else if (isCropResizing === 'w') {
+            let newWidth = Math.max(minSize, cropArea.width - deltaX);
+            let newX = cropArea.x + (cropArea.width - newWidth);
+            if (newX < 0) {
+              newX = 0;
+              newWidth = cropArea.x + cropArea.width;
+            }
+            newCropArea.x = newX;
+            newCropArea.width = Math.min(newWidth, container.offsetWidth);
+          } else if (isCropResizing === 's') {
+            newCropArea.height = Math.min(
+              container.offsetHeight - cropArea.y,
+              Math.max(minSize, cropArea.height + deltaY)
+            );
+          } else if (isCropResizing === 'n') {
+            let newHeight = Math.max(minSize, cropArea.height - deltaY);
+            let newY = cropArea.y + (cropArea.height - newHeight);
+            if (newY < 0) {
+              newY = 0;
+              newHeight = cropArea.y + cropArea.height;
+            }
+            newCropArea.y = newY;
+            newCropArea.height = Math.min(newHeight, container.offsetHeight);
+          }
+
+          setCropArea(newCropArea);
+          setCropDragStart({ x: t.clientX, y: t.clientY });
+        }
+      }
+    },
+    [
+      isDragging,
+      isCropDragging,
+      isCropResizing,
+      activeTransformMode,
+      cropArea,
+      cropDragStart,
+      position,
+    ]
+  );
+
+  const handleImageTouchEnd = useCallback(() => {
+    setIsDragging(false);
+    setIsCropDragging(false);
+    setIsCropResizing(null);
+    dragStartRef.current = null;
+    setCropDragStart(null);
+  }, []);
+
   useEffect(() => {
     if (activeTransformMode === 'move' || activeTransformMode === 'crop') {
       window.addEventListener('mousemove', handleImageMouseMove);
       window.addEventListener('mouseup', handleImageMouseUp);
+      window.addEventListener('touchmove', handleImageTouchMove, {
+        passive: false,
+      });
+      window.addEventListener('touchend', handleImageTouchEnd);
       return () => {
         window.removeEventListener('mousemove', handleImageMouseMove);
         window.removeEventListener('mouseup', handleImageMouseUp);
+        window.removeEventListener('touchmove', handleImageTouchMove as any);
+        window.removeEventListener('touchend', handleImageTouchEnd as any);
       };
     }
-  }, [activeTransformMode, handleImageMouseMove, handleImageMouseUp]);
+  }, [
+    activeTransformMode,
+    handleImageMouseMove,
+    handleImageMouseUp,
+    handleImageTouchMove,
+    handleImageTouchEnd,
+  ]);
 
   return (
     <div className="flex flex-col min-h-screen bg-white">
@@ -445,8 +691,10 @@ export default function PhotoEditPage() {
                   filter: getFilterStyle(),
                   transform: `rotate(${rotation}deg) translate(${position.x}px, ${position.y}px)`,
                   objectFit: 'cover',
+                  touchAction: activeTransformMode ? ('none' as any) : 'auto',
                 }}
                 onMouseDown={handleImageMouseDown}
+                onTouchStart={handleImageTouchStart}
                 draggable={false}
               />
 
@@ -479,12 +727,17 @@ export default function PhotoEditPage() {
                       height: `${cropArea.height}px`,
                     }}
                     onMouseDown={(e) => handleCropMouseDown(e, 'move')}
+                    onTouchStart={(e) => handleCropTouchStart(e, 'move')}
                   >
                     <div
                       className="absolute -top-1 -left-1 w-4 h-4 bg-white border border-gray-400 cursor-nwse-resize"
                       onMouseDown={(e) => {
                         e.stopPropagation();
                         handleCropMouseDown(e, 'nw');
+                      }}
+                      onTouchStart={(e) => {
+                        e.stopPropagation();
+                        handleCropTouchStart(e, 'nw');
                       }}
                     />
                     <div
@@ -493,6 +746,10 @@ export default function PhotoEditPage() {
                         e.stopPropagation();
                         handleCropMouseDown(e, 'ne');
                       }}
+                      onTouchStart={(e) => {
+                        e.stopPropagation();
+                        handleCropTouchStart(e, 'ne');
+                      }}
                     />
                     <div
                       className="absolute -bottom-1 -left-1 w-4 h-4 bg-white border border-gray-400 cursor-nesw-resize"
@@ -500,12 +757,115 @@ export default function PhotoEditPage() {
                         e.stopPropagation();
                         handleCropMouseDown(e, 'sw');
                       }}
+                      onTouchStart={(e) => {
+                        e.stopPropagation();
+                        handleCropTouchStart(e, 'sw');
+                      }}
                     />
                     <div
                       className="absolute -bottom-1 -right-1 w-4 h-4 bg-white border border-gray-400 cursor-nwse-resize"
                       onMouseDown={(e) => {
                         e.stopPropagation();
                         handleCropMouseDown(e, 'se');
+                      }}
+                      onTouchStart={(e) => {
+                        e.stopPropagation();
+                        handleCropTouchStart(e, 'se');
+                      }}
+                    />
+                    {/* 사이드 핸들 */}
+                    <div
+                      className="absolute -top-1 left-1/2 -translate-x-1/2 w-4 h-4 bg-white border border-gray-400 cursor-n-resize"
+                      onMouseDown={(e) => {
+                        e.stopPropagation();
+                        handleCropMouseDown(e, 'n');
+                      }}
+                      onTouchStart={(e) => {
+                        e.stopPropagation();
+                        handleCropTouchStart(e, 'n');
+                      }}
+                    />
+                    <div
+                      className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-4 h-4 bg-white border border-gray-400 cursor-s-resize"
+                      onMouseDown={(e) => {
+                        e.stopPropagation();
+                        handleCropMouseDown(e, 's');
+                      }}
+                      onTouchStart={(e) => {
+                        e.stopPropagation();
+                        handleCropTouchStart(e, 's');
+                      }}
+                    />
+                    <div
+                      className="absolute top-1/2 -left-1 -translate-y-1/2 w-4 h-4 bg-white border border-gray-400 cursor-w-resize"
+                      onMouseDown={(e) => {
+                        e.stopPropagation();
+                        handleCropMouseDown(e, 'w');
+                      }}
+                      onTouchStart={(e) => {
+                        e.stopPropagation();
+                        handleCropTouchStart(e, 'w');
+                      }}
+                    />
+                    <div
+                      className="absolute top-1/2 -right-1 -translate-y-1/2 w-4 h-4 bg-white border border-gray-400 cursor-e-resize"
+                      onMouseDown={(e) => {
+                        e.stopPropagation();
+                        handleCropMouseDown(e, 'e');
+                      }}
+                      onTouchStart={(e) => {
+                        e.stopPropagation();
+                        handleCropTouchStart(e, 'e');
+                      }}
+                    />
+
+                    {/* 가장자리 전체를 드래그로 리사이즈할 수 있는 히트존 */}
+                    <div
+                      className="absolute top-0 left-0 right-0 h-3 cursor-n-resize"
+                      style={{ transform: 'translateY(-6px)' }}
+                      onMouseDown={(e) => {
+                        e.stopPropagation();
+                        handleCropMouseDown(e, 'n');
+                      }}
+                      onTouchStart={(e) => {
+                        e.stopPropagation();
+                        handleCropTouchStart(e, 'n');
+                      }}
+                    />
+                    <div
+                      className="absolute bottom-0 left-0 right-0 h-3 cursor-s-resize"
+                      style={{ transform: 'translateY(6px)' }}
+                      onMouseDown={(e) => {
+                        e.stopPropagation();
+                        handleCropMouseDown(e, 's');
+                      }}
+                      onTouchStart={(e) => {
+                        e.stopPropagation();
+                        handleCropTouchStart(e, 's');
+                      }}
+                    />
+                    <div
+                      className="absolute top-0 bottom-0 left-0 w-3 cursor-w-resize"
+                      style={{ transform: 'translateX(-6px)' }}
+                      onMouseDown={(e) => {
+                        e.stopPropagation();
+                        handleCropMouseDown(e, 'w');
+                      }}
+                      onTouchStart={(e) => {
+                        e.stopPropagation();
+                        handleCropTouchStart(e, 'w');
+                      }}
+                    />
+                    <div
+                      className="absolute top-0 bottom-0 right-0 w-3 cursor-e-resize"
+                      style={{ transform: 'translateX(6px)' }}
+                      onMouseDown={(e) => {
+                        e.stopPropagation();
+                        handleCropMouseDown(e, 'e');
+                      }}
+                      onTouchStart={(e) => {
+                        e.stopPropagation();
+                        handleCropTouchStart(e, 'e');
                       }}
                     />
                   </div>

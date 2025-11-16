@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import map from '../../assets/gyeonggi-map.svg';
 import { gpsToMapPosition, extractCityName } from '../../utils/mapCoordinates';
+import RegionColorLayer from '../map/RegionColorLayer';
 
 interface MapMarkerSectionProps {
   markerColor: string;
@@ -8,6 +9,7 @@ interface MapMarkerSectionProps {
     address: string;
     lat: number;
     lng: number;
+    cityName?: string;
   } | null;
   onMarkerClick: () => void;
 }
@@ -26,19 +28,22 @@ export default function MapMarkerSection({
   );
 
   const [mapPosition, setMapPosition] = useState(defaultPosition);
-  const [_cityName, setCityName] = useState<string | null>(null);
+  const [cityName, setCityName] = useState<string | null>(null);
 
   useEffect(() => {
     if (!markerLocation) {
-      // GPS 정보가 없으면 기본 위치 사용
+      // GPS 정보가 없으면 기본 위치와 기본 도시(남양주시) 사용
       setMapPosition(defaultPosition);
+      setCityName('남양주시');
       return;
     }
     // GPS 정보가 있으면 실제 GPS 좌표로 위치 계산
     const position = gpsToMapPosition(markerLocation.lat, markerLocation.lng);
     setMapPosition(position);
 
-    const city = extractCityName(markerLocation.address);
+    // 주소에서 시/군 추출하거나, 부모에서 전달된 cityName 사용
+    const city =
+      extractCityName(markerLocation.address) || markerLocation.cityName || null;
     setCityName(city);
   }, [markerLocation, defaultPosition]);
 
@@ -84,6 +89,11 @@ export default function MapMarkerSection({
             alt="지도"
             className="absolute inset-0 w-full h-full object-contain"
           />
+
+          {/* 선택된 지역 색상 오버레이 */}
+          {cityName && (
+            <RegionColorLayer colorMap={{ [cityName]: markerColor }} />
+          )}
 
           <div
             className="absolute cursor-pointer z-[5] drop-shadow-lg transition-all duration-200"
