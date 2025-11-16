@@ -24,8 +24,11 @@ export interface CommunityPost {
   commentCount: number;
   createdAt?: string;
   updatedAt?: string;
-  scrapStatus?: boolean;
+  isLiked?: boolean;      // 백엔드 응답 필드명
+  isScrapped?: boolean;   // 백엔드 응답 필드명
+  // 하위 호환성을 위한 별칭
   liked?: boolean;
+  scrapStatus?: boolean;
 }
 
 // /* ---------------------- 서버 응답 타입 (전체 조회용) ---------------------- */
@@ -57,6 +60,9 @@ export const getCommunityPosts = async (): Promise<CommunityPost[]> => {
       imageUrl: p.imageUrl === 'string' ? null : p.imageUrl,
       userProfileImageUrl:
         p.userProfileImageUrl === 'string' ? null : p.userProfileImageUrl,
+      // 백엔드 응답 필드를 컴포넌트가 사용하는 필드명으로 매핑
+      liked: p.isLiked ?? p.liked ?? false,
+      scrapStatus: p.isScrapped ?? p.scrapStatus ?? false,
     }));
   } catch (err) {
     console.error('전체 게시글 조회 실패:', err);
@@ -77,6 +83,9 @@ export const getCommunityPostDetail = async (postId: number) => {
       imageUrl: data.imageUrl === 'string' ? null : data.imageUrl,
       userProfileImageUrl:
         data.userProfileImageUrl === 'string' ? null : data.userProfileImageUrl,
+      // 백엔드 응답 필드를 컴포넌트가 사용하는 필드명으로 매핑
+      liked: data.isLiked ?? data.liked ?? false,
+      scrapStatus: data.isScrapped ?? data.scrapStatus ?? false,
     };
   } catch (err) {
     console.error(`게시글 상세 조회 실패(postId=${postId})`, err);
@@ -172,7 +181,7 @@ export const toggleLike = async (postId: number) => {
 
 export const toggleScrap = async (postId: number) => {
   try {
-    const res = await api.post(`/api/community/posts/${postId}/scrap`);
+    const res = await api.post(`/api/community/posts/posts/${postId}/scrap`);
     return res.data;
   } catch (err) {
     console.error('스크랩 실패:', err);
@@ -184,7 +193,14 @@ export const toggleScrap = async (postId: number) => {
 export const getPostsByRegion = async (regionId: number) => {
   try {
     const res = await api.get(`/api/community/posts/region/${regionId}`);
-    return res.data?.result?.posts ?? [];
+    const posts = res.data?.result?.posts ?? [];
+
+    return posts.map((p: any) => ({
+      ...p,
+      // 백엔드 응답 필드를 컴포넌트가 사용하는 필드명으로 매핑
+      liked: p.isLiked ?? p.liked ?? false,
+      scrapStatus: p.isScrapped ?? p.scrapStatus ?? false,
+    }));
   } catch (err) {
     console.error('지역별 게시글 조회 실패:', err);
     throw err;
@@ -514,7 +530,14 @@ export const searchPostsByKeyword = async (keyword: string) => {
   const res = await api.get(`/api/community/posts/search`, {
     params: { keyword },
   });
-  return res.data.result.posts;
+  const posts = res.data.result.posts;
+
+  return posts.map((p: any) => ({
+    ...p,
+    // 백엔드 응답 필드를 컴포넌트가 사용하는 필드명으로 매핑
+    liked: p.isLiked ?? p.liked ?? false,
+    scrapStatus: p.isScrapped ?? p.scrapStatus ?? false,
+  }));
 };
 
 /* ----------------------------- 태그 검색 (단일/다중) ----------------------------- */
@@ -522,12 +545,26 @@ export const searchPostsByTags = async (tags: string[]) => {
   const res = await api.get(`/api/community/posts/search`, {
     params: { tags }, // 배열 그대로
   });
-  return res.data.result.posts;
+  const posts = res.data.result.posts;
+
+  return posts.map((p: any) => ({
+    ...p,
+    // 백엔드 응답 필드를 컴포넌트가 사용하는 필드명으로 매핑
+    liked: p.isLiked ?? p.liked ?? false,
+    scrapStatus: p.isScrapped ?? p.scrapStatus ?? false,
+  }));
 };
 
 /* ----------------------------- 단일 태그 검색 ----------------------------- */
 export const searchPostsBySingleTag = async (tag: string) => {
   const res = await api.get(`/api/community/posts/tag/${tag}`);
-  return res.data.result.posts || [];
+  const posts = res.data.result.posts || [];
+
+  return posts.map((p: any) => ({
+    ...p,
+    // 백엔드 응답 필드를 컴포넌트가 사용하는 필드명으로 매핑
+    liked: p.isLiked ?? p.liked ?? false,
+    scrapStatus: p.isScrapped ?? p.scrapStatus ?? false,
+  }));
 };
 

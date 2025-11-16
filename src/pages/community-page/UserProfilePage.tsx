@@ -132,36 +132,39 @@ export default function UserProfilePage() {
 
           {/* 프로필 */}
           <div className="w-full max-w-[480px] px-[15px] mt-[-35px] relative z-10">
-            {/* 우측 상단 버튼 (수정 또는 팔로우) */}
-            {userProfile?.isMe ? (
-              <button
-                onClick={() => setIsEditModalOpen(true)}
-                className="absolute top-0 right-[15px] p-2 bg-white hover:bg-gray-50 rounded-full transition-colors shadow-md"
-                aria-label="프로필 수정"
-              >
-                <Pencil size={18} className="text-gray-700" />
-              </button>
-            ) : (
-              <button
-                onClick={() => followMutation.mutate()}
-                className={`absolute top-0 right-[15px] text-white text-[13px] px-4 py-[5px] rounded-full font-medium shadow-md ${userProfile?.isFollowing
-                    ? "bg-gray-400"
-                    : "bg-[#FF7070]"
-                  }`}
-              >
-                {userProfile?.isFollowing ? "팔로잉" : "팔로우"}
-              </button>
-            )}
+            {/* 프로필 이미지와 버튼 */}
+            <div className="flex items-center gap-2">
+              <img
+                src={
+                  !userProfile?.imageUrl ||
+                    userProfile.imageUrl === "string"
+                    ? "/images/profile.png"
+                    : userProfile.imageUrl
+                }
+                className="w-[80px] h-[80px] rounded-full bg-white object-cover shadow-md"
+              />
 
-            <img
-              src={
-                !userProfile?.imageUrl ||
-                  userProfile.imageUrl === "string"
-                  ? "/images/profile.png"
-                  : userProfile.imageUrl
-              }
-              className="w-[80px] h-[80px] rounded-full bg-white object-cover shadow-md"
-            />
+              {/* 수정 또는 팔로우 버튼 */}
+              {userProfile?.isMe ? (
+                <button
+                  onClick={() => setIsEditModalOpen(true)}
+                  className="p-2 bg-white hover:bg-gray-50 rounded-full transition-colors shadow-md mt-6"
+                  aria-label="프로필 수정"
+                >
+                  <Pencil size={18} className="text-gray-700" />
+                </button>
+              ) : (
+                <button
+                  onClick={() => followMutation.mutate()}
+                  className={`text-white text-[13px] px-4 py-[5px] rounded-full font-medium shadow-md mt-6 ${userProfile?.isFollowing
+                      ? "bg-gray-400"
+                      : "bg-[#FF7070]"
+                    }`}
+                >
+                  {userProfile?.isFollowing ? "팔로잉" : "팔로우"}
+                </button>
+              )}
+            </div>
 
             <div className="mt-[10px]">
               <h2 className="text-[17px] font-semibold text-gray-800">

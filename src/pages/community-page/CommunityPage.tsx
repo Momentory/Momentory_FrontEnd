@@ -91,6 +91,8 @@ export default function CommunityPage() {
           tags: p.tags ?? [],
           likeCount: p.likeCount,
           commentCount: p.commentCount,
+          liked: p.liked ?? false,
+          scrapStatus: p.scrapStatus ?? false,
           time: "방금 전",
         }));
 
@@ -149,6 +151,7 @@ export default function CommunityPage() {
         post.postId === updated.postId
           ? {
             ...post,
+            liked: updated.liked ?? post.liked,
             likeCount: updated.likeCount ?? post.likeCount,
             scrapStatus: updated.scrapStatus ?? post.scrapStatus,
           }
