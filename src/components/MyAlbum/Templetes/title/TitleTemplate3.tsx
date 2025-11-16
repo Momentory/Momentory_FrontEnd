@@ -15,13 +15,19 @@ const TitleTemplate3: React.FC<TemplateProps> = ({ data, updateData, onEmptyArea
   return (
     <div className="w-full max-w-[480px] aspect-[9/16] mx-auto font-[inter] flex flex-col justify-end p-8 gap-10 bg-white">
       <div onClick={handleEmptyClick}>
-        <input
-          value={data.title || ''}
-          onChange={(e) => updateData({ title: e.target.value })}
-          onClick={(e) => e.stopPropagation()}
-          className="w-full text-3xl font-bold bg-transparent outline-none"
-          placeholder="제목을 입력하세요"
-        />
+        <div className="relative w-full">
+          <input
+            value={data.title || ''}
+            onChange={(e) => updateData({ title: e.target.value })}
+            onClick={(e) => e.stopPropagation()}
+            className="w-full text-3xl font-bold bg-transparent outline-none"
+          />
+          {!data.title && (
+            <div className="absolute inset-0 text-3xl font-bold text-gray-400 pointer-events-none" data-html2canvas-ignore="true">
+              제목을 입력하세요
+            </div>
+          )}
+        </div>
       </div>
       <div className="relative w-full aspect-3/4 bg-[#D8D8D8] overflow-hidden">
         {data.image && <img src={data.image} alt="preview" crossOrigin="anonymous" className="w-full h-full object-cover" />}

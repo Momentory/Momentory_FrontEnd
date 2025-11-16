@@ -193,6 +193,9 @@ const EditAlbumPage = () => {
         scale: 1,
         useCORS: true,
         allowTaint: true,
+        ignoreElements: (element) => {
+          return element.hasAttribute('data-html2canvas-ignore');
+        },
       });
 
       const dataUrl = canvas.toDataURL('image/jpeg', 0.6);
@@ -344,6 +347,9 @@ const EditAlbumPage = () => {
         scale: 2,
         useCORS: true,
         allowTaint: true,
+        ignoreElements: (element) => {
+          return element.hasAttribute('data-html2canvas-ignore');
+        },
       });
 
       const blob = await new Promise<Blob>((resolve, reject) => {

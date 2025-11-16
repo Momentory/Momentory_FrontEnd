@@ -29,19 +29,31 @@ const PageTemplate3: React.FC<TemplateProps> = ({ data, updateData, onImageClick
           </div>
         </div>
         <div className="flex-1 flex flex-col justify-center bg-white">
-          <input
-            value={data.subTitle2 || ''}
-            onChange={(e) => updateData({ subTitle2: e.target.value })}
-            className="w-full text-sm font-semibold bg-transparent outline-none px-5 mb-1"
-            placeholder="Title"
-          />
-          <textarea
-            value={data.bodyText2 || ''}
-            onChange={(e) => updateData({ bodyText2: e.target.value })}
-            className="w-full text-sm text-black bg-transparent outline-none resize-none px-5"
-            placeholder="추가 텍스트"
-            rows={4}
-          />
+          <div className="relative w-full px-5 mb-1">
+            <input
+              value={data.subTitle2 || ''}
+              onChange={(e) => updateData({ subTitle2: e.target.value })}
+              className="w-full text-sm font-semibold bg-transparent outline-none"
+            />
+            {!data.subTitle2 && (
+              <div className="absolute inset-0 px-5 text-sm font-semibold text-gray-400 pointer-events-none" data-html2canvas-ignore="true">
+                Title
+              </div>
+            )}
+          </div>
+          <div className="relative w-full px-5">
+            <textarea
+              value={data.bodyText2 || ''}
+              onChange={(e) => updateData({ bodyText2: e.target.value })}
+              className="w-full text-sm text-black bg-transparent outline-none resize-none"
+              rows={4}
+            />
+            {!data.bodyText2 && (
+              <div className="absolute inset-0 px-5 text-sm text-gray-400 pointer-events-none" data-html2canvas-ignore="true">
+                추가 텍스트
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

@@ -20,13 +20,19 @@ const TitleTemplate1: React.FC<TemplateProps> = ({ data, updateData, onEmptyArea
   return (
     <div className="w-full max-w-[480px] aspect-[9/16] mx-auto font-[inter] flex flex-col relative">
       <div className="h-1/2 flex flex-col justify-center p-4" onClick={handleEmptyClick}>
-        <input
-          value={data.title || ''}
-          onChange={(e) => updateData({ title: e.target.value })}
-          onClick={(e) => e.stopPropagation()}
-          className="w-full text-3xl font-bold text-center bg-transparent outline-none"
-          placeholder="제목을 입력하세요"
-        />
+        <div className="relative w-full">
+          <input
+            value={data.title || ''}
+            onChange={(e) => updateData({ title: e.target.value })}
+            onClick={(e) => e.stopPropagation()}
+            className="w-full text-3xl font-bold text-center bg-transparent outline-none"
+          />
+          {!data.title && (
+            <div className="absolute inset-0 flex items-center justify-center text-3xl font-bold text-gray-400 pointer-events-none" data-html2canvas-ignore="true">
+              제목을 입력하세요
+            </div>
+          )}
+        </div>
         <div className="mt-2 w-full text-sm text-black text-right">
           {year}.{month}.{day}
         </div>

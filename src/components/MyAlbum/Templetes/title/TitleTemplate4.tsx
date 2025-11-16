@@ -34,21 +34,33 @@ const TitleTemplate4: React.FC<TemplateProps> = ({ data, updateData, onEmptyArea
           {day}
         </div>
         <div>
-          <input
-            value={data.title || ''}
-            onChange={(e) => updateData({ title: e.target.value })}
-            onClick={(e) => e.stopPropagation()}
-            className="w-full text-3xl font-bold bg-transparent outline-none mb-4"
-            placeholder="제목"
-          />
-          <textarea
-            value={data.subTitle || ''}
-            onChange={(e) => updateData({ subTitle: e.target.value })}
-            onClick={(e) => e.stopPropagation()}
-            className="w-full text-sm font-medium text-black bg-transparent outline-none resize-none"
-            placeholder="간단한 문구를 입력하세요"
-            rows={4}
-          />
+          <div className="relative w-full mb-4">
+            <input
+              value={data.title || ''}
+              onChange={(e) => updateData({ title: e.target.value })}
+              onClick={(e) => e.stopPropagation()}
+              className="w-full text-3xl font-bold bg-transparent outline-none"
+            />
+            {!data.title && (
+              <div className="absolute inset-0 text-3xl font-bold text-gray-400 pointer-events-none" data-html2canvas-ignore="true">
+                제목
+              </div>
+            )}
+          </div>
+          <div className="relative w-full">
+            <textarea
+              value={data.subTitle || ''}
+              onChange={(e) => updateData({ subTitle: e.target.value })}
+              onClick={(e) => e.stopPropagation()}
+              className="w-full text-sm font-medium text-black bg-transparent outline-none resize-none"
+              rows={4}
+            />
+            {!data.subTitle && (
+              <div className="absolute inset-0 text-sm font-medium text-gray-400 pointer-events-none" data-html2canvas-ignore="true">
+                간단한 문구를 입력하세요
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
