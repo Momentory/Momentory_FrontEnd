@@ -36,11 +36,8 @@ export default function QuestionPage() {
 
   const { keyword, particle, remainingText } = parseQuestion(question);
   const rawSpotName = location.state?.nearbyPlace || keyword;
-  const {
-    canonicalName: culturalSpotName,
-    stampDisplayName,
-    isSupported: isSupportedSpot,
-  } = mapCulturalSpotName(rawSpotName);
+  const { canonicalName: culturalSpotName, stampDisplayName } =
+    mapCulturalSpotName(rawSpotName);
 
   const baseState = (location.state ?? {}) as Record<string, unknown>;
 
