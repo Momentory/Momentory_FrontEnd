@@ -1,14 +1,16 @@
-// src/pages/community-page/FollowingsPage.tsx
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { getFollowings } from "../../api/community";
+import { getFollowingsByUserId } from "../../api/community";
 
 export default function FollowingsPage() {
   const navigate = useNavigate();
+  const { userId } = useParams();
+  const numericUserId = Number(userId);
 
   const { data: followings = [], isLoading } = useQuery({
-    queryKey: ["followings"],
-    queryFn: getFollowings,
+    queryKey: ["followings", numericUserId],
+    queryFn: () => getFollowingsByUserId(numericUserId),
+    enabled: !!numericUserId,
   });
 
   if (isLoading)
@@ -20,17 +22,16 @@ export default function FollowingsPage() {
 
   return (
     <div className="w-full min-h-screen bg-[#F9FAFB] mt-[60px]">
-      {/* 상단 뒤로가기 헤더 */}
+
+      {/* 상단 헤더 */}
       <header className="relative bg-white h-[55px] border-b border-gray-200 flex items-center justify-center">
-        <button
-          onClick={() => navigate(-1)}
-          className="absolute left-5 flex items-center"
-        >
+        <button onClick={() => navigate(-1)} className="absolute left-5">
           <img src="/images/109618.png" className="w-[20px] h-[20px]" />
         </button>
         <h1 className="text-[18px] font-semibold">팔로잉</h1>
       </header>
 
+      {/* 목록 */}
       <div className="p-4">
         {followings.length === 0 ? (
           <p className="text-center mt-20 text-gray-500">

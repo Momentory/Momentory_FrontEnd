@@ -29,6 +29,7 @@ export default function CreateAccountPage() {
 
   const [agree, setAgree] = useState(false);
 
+
   /* ---------------------- 비밀번호 검증 ---------------------- */
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -129,7 +130,7 @@ export default function CreateAccountPage() {
       birthDate,
     };
 
-    navigate("/create-profile", { state: allAccountData });
+    navigate("/create", { state: allAccountData });
   };
 
   /* ----------------------------- UI ----------------------------- */

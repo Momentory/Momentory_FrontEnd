@@ -1,26 +1,33 @@
-// src/pages/community-page/FollowersPage.tsx
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { getFollowers } from "../../api/community";
+import { getFollowersByUserId } from "../../api/community";
 
 export default function FollowersPage() {
   const navigate = useNavigate();
+  const { userId } = useParams();
+  const numericUserId = Number(userId);
 
+  /* -------------------------------- API 호출 -------------------------------- */
   const { data: followers = [], isLoading } = useQuery({
-    queryKey: ["followers"],
-    queryFn: getFollowers,
+    queryKey: ["followers", numericUserId],
+    queryFn: () => getFollowersByUserId(numericUserId),
+    enabled: !!numericUserId,
   });
 
-  if (isLoading)
+  /* -------------------------------- 로딩 -------------------------------- */
+  if (isLoading) {
     return (
       <div className="flex h-screen items-center justify-center">
         로딩 중...
       </div>
     );
+  }
 
+  /* -------------------------------- 렌더링 -------------------------------- */
   return (
     <div className="w-full min-h-screen bg-[#F9FAFB] mt-[60px]">
-      {/* 🔥 공통 헤더 아래 고정되는 뒤로가기 바 */}
+
+      {/* 상단 헤더 */}
       <header className="relative bg-white h-[55px] border-b border-gray-200 flex items-center justify-center">
         <button
           onClick={() => navigate(-1)}
@@ -28,15 +35,14 @@ export default function FollowersPage() {
         >
           <img src="/images/109618.png" className="w-[20px] h-[20px]" />
         </button>
-
         <h1 className="text-[18px] font-semibold">팔로워</h1>
       </header>
 
-      {/* 🔥 목록 */}
+      {/* 목록 */}
       <div className="p-4">
         {followers.length === 0 ? (
           <p className="text-center mt-20 text-gray-500">
-            나를 팔로우한 사용자가 없습니다.
+            팔로워가 없습니다.
           </p>
         ) : (
           followers.map((user: any) => (

@@ -6,6 +6,7 @@ import { tokenStore } from '../lib/token';
 // 로그인 응답 타입
 interface LoginResponse {
   result: {
+     id: number;   
     accessToken: string;
     refreshToken: string;
   };
@@ -46,14 +47,17 @@ export const signup = (payload: SignupPayload) => {
   });
 };
 
-// 로그인
 export const login = async (payload: { email: string; password: string }) => {
   try {
     const { data }: { data: LoginResponse } = await api.post('/api/auth/login', payload);
-    const { accessToken, refreshToken } = data.result;
+    const { id, accessToken, refreshToken } = data.result;
 
+    // 토큰 저장
     tokenStore.set({ accessToken, refreshToken });
     api.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
+
+    // 🔥 userId 저장 (정답)
+    localStorage.setItem("userId", String(id));
 
     return data;
   } catch (error) {
@@ -61,6 +65,7 @@ export const login = async (payload: { email: string; password: string }) => {
     throw error;
   }
 };
+
 
 // 로그아웃
 export const logout = async () => {

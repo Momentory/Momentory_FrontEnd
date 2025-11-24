@@ -393,25 +393,47 @@ export const toggleFollowUser = async (userId: number) => {
 };
 
 /* ----------------------------- 내 팔로워 목록 조회 ------------------------------ */
-/* GET /api/community/followers/me */
+/* ✔ 내 팔로워 목록 조회 */
 export const getFollowers = async () => {
   try {
     const res = await api.get(`/api/community/followers/me`);
     return res.data?.result ?? [];
   } catch (err) {
-    console.error('팔로워 조회 실패:', err);
+    console.error('내 팔로워 조회 실패:', err);
     return [];
   }
 };
 
 /* ------------------------------  내 팔로잉 목록 조회 ------------------------------ */
-/* GET /api/community/followings/me */
+/* ✔ 내 팔로잉 목록 조회 */
 export const getFollowings = async () => {
   try {
     const res = await api.get(`/api/community/followings/me`);
     return res.data?.result ?? [];
   } catch (err) {
-    console.error('팔로잉 조회 실패:', err);
+    console.error('내 팔로잉 조회 실패:', err);
+    return [];
+  }
+};
+
+/* ✔ 특정 유저 팔로워 목록 조회 */
+export const getFollowersByUserId = async (userId: number) => {
+  try {
+    const res = await api.get(`/api/community/users/${userId}/followers`);
+    return res.data?.result ?? [];
+  } catch (err) {
+    console.error(`특정 유저 팔로워 조회 실패 (userId=${userId}):`, err);
+    return [];
+  }
+};
+
+/* ✔ 특정 유저 팔로잉 목록 조회 */
+export const getFollowingsByUserId = async (userId: number) => {
+  try {
+    const res = await api.get(`/api/community/users/${userId}/followings`);
+    return res.data?.result ?? [];
+  } catch (err) {
+    console.error(`특정 유저 팔로잉 조회 실패 (userId=${userId}):`, err);
     return [];
   }
 };

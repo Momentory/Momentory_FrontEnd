@@ -1,7 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Check } from 'lucide-react';
-import { extractRegionName, getStampImagePath, getCulturalStampImagePath } from '../../utils/stampUtils';
+import {
+  extractRegionName,
+  getStampImagePath,
+  getCulturalStampImagePath,
+} from '../../utils/stampUtils';
 import PointIcon from '../../assets/icons/pointIcon.svg?react';
 
 export default function StampAcquisitionPage() {
@@ -11,13 +15,15 @@ export default function StampAcquisitionPage() {
 
   const stampType = location.state?.stampType ?? null;
   // stampName (문화 스탬프)와 regionName (지역 스탬프) 우선순위 처리
-  const rawStampName = location.state?.stampName || location.state?.regionName || '하남시';
+  const rawStampName =
+    location.state?.stampName || location.state?.regionName || '하남시';
   const culturalStampName = location.state?.stampName; // 문화 스탬프 원본 이름
   const regionName = extractRegionName(rawStampName); // 지역명 추출 (표시용)
   const points = location.state?.points || 50;
 
   // 스탬프 타입에 따라 이미지 경로 결정
-  const stampImagePath = location.state?.stampImagePath ||
+  const stampImagePath =
+    location.state?.stampImagePath ||
     (stampType === 'cultural'
       ? getCulturalStampImagePath(culturalStampName || regionName) // 문화 스탬프는 원본 이름 사용
       : getStampImagePath(regionName));
@@ -40,7 +46,10 @@ export default function StampAcquisitionPage() {
     const nearbySpots = location.state?.nearbySpots;
 
     console.log('[StampAcquisition] handleClick - photoId:', photoId);
-    console.log('[StampAcquisition] handleClick - location.state:', location.state);
+    console.log(
+      '[StampAcquisition] handleClick - location.state:',
+      location.state
+    );
 
     if (stampType === 'cultural') {
       // 문화 스탬프는 추천 여행지 페이지로 이동
@@ -107,22 +116,22 @@ export default function StampAcquisitionPage() {
           </div>
 
           <div
-            className="text-center cursor-default mb-30"
+            className="text-center cursor-default mb-[150px]"
             onClick={handleContentClick}
           >
-            <p className="text-2xl font-semibold text-[#FF7070] mb-3 cursor-default">
+            <p className="text-[30px] font-bold text-[#C52222] mb-2 cursor-default">
               {stampType === 'cultural'
                 ? location.state?.stampName || regionName
                 : regionName}
             </p>
-            <p className="text-lg font-bold text-[#000000] mb-4 cursor-default">
+            <p className="text-[23px] font-bold text-[#000000] mb-2 cursor-default">
               {stampType === 'cultural'
                 ? '문화 스탬프 획득'
                 : '지역 스탬프 획득'}
             </p>
             <div className="flex items-center justify-center gap-2 cursor-default">
               <PointIcon className="w-6 h-6" />
-              <span className="text-xl font-bold text-gray-800">
+              <span className="text-xl font-bold text-[#636363]">
                 + {points}
               </span>
             </div>

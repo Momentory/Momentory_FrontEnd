@@ -86,7 +86,7 @@ export default function QuestionPage() {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-white px-6">
       <div className="w-full max-w-sm">
-        <h2 className="text-[29px] font-semibold text-left mb-15">
+        <h2 className="text-[29px] font-extrabold text-left mb-[80px]">
           <div>
             <span className="text-[#E43D3D]">{keyword}</span>
             {particle && <span className="text-[#444444]">{particle}</span>}

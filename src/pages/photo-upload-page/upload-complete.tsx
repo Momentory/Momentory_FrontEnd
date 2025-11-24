@@ -26,6 +26,16 @@ export default function PhotoUploadCompletePage() {
   const [showShareChannels, setShowShareChannels] = useState(false);
   const [showRouletteModal, setShowRouletteModal] = useState(false);
 
+  const getObjectParticle = (word: string): '을' | '를' => {
+    if (!word) return '를';
+    const lastChar = word[word.length - 1];
+    const code = lastChar.charCodeAt(0);
+    // 한글 음절 범위: AC00(44032) ~ D7A3(55203)
+    if (code < 0xac00 || code > 0xd7a3) return '를';
+    const hasJong = (code - 0xac00) % 28 !== 0;
+    return hasJong ? '을' : '를';
+  };
+
   useEffect(() => {
     const rouletteGranted = location.state?.rouletteRewardGranted;
     const nearbyPlaceName = location.state?.nearbyPlace;
@@ -310,7 +320,7 @@ export default function PhotoUploadCompletePage() {
     navigate('/question', {
       state: {
         ...location.state,
-        question: `${nearbyPlace}를 방문하셨나요?`,
+        question: `${nearbyPlace}${getObjectParticle(nearbyPlace || '')} 방문하셨나요?`,
         questionImage: uploadedImage,
         selectedImage: uploadedImage,
         imageUrl: uploadedImage,
@@ -378,7 +388,7 @@ export default function PhotoUploadCompletePage() {
       )}
       {showNearbyPlaceModal && nearbyPlace && (
         <Modal title="근처 문화 관광지 발견!" onClose={handleCloseModal}>
-          <p className="text-center text-[#4C4C4C] mb-8 text-lg font-bold">
+          <p className="text-center text-[#4C4C4C] mb-8 text-lg font-bold break-keep">
             혹시{' '}
             <span className="text-[#B66262] font-semibold">
               [{nearbyPlace}]

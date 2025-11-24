@@ -1,73 +1,64 @@
-# React + TypeScript + Vite
+# Momentory Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+> 추억을 순간순간 기록하고 공유하는 위치 기반 사진 SNS 플랫폼
 
-Currently, two official plugins are available:
+🔗[momentory](https://momentoryy.vercel.app)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🖼️ 프로젝트 소개
 
-## React Compiler
+Momentory는 사진을 통해 추억을 기록하고, 지역 기반 스탬프를 수집하며, 캐릭터를 성장시키는 소셜 플랫폼입니다.
+사용자는 여행지에서 찍은 사진을 업로드하고, 지역 스탬프와 문화 스탬프를 수집하며, 포인트를 획득하여 캐릭터를 꾸밀 수 있습니다.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 🛠️ 기술 스택
 
-## Expanding the ESLint configuration
+- **React 19** + **TypeScript** + **Vite**
+- **Zustand** - 전역 상태 관리
+- **TanStack Query** - 서버 상태 관리
+- **React Router DOM** - 라우팅
+- **Tailwind CSS** - 스타일링
+- **Axios** - API 요청
+- **STOMP.js** + **SockJS** - 실시간 통신
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### 📍설치 및 실행
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+```bash
+# 의존성 설치
+pnpm install
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+# 개발 서버 실행
+pnpm run dev
+```
+## 📁 프로젝트 구조
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```
+src/
+├── api/              # API 요청 함수
+├── assets/           # 정적 리소스 (이미지, 폰트 등)
+├── components/       # 재사용 가능한 컴포넌트
+├── config/           # 설정 파일
+├── hooks/            # 커스텀 React 훅
+├── layouts/          # 레이아웃 컴포넌트
+├── lib/              # 외부 라이브러리 설정
+├── pages/            # 페이지 컴포넌트
+│   ├── album-page/
+│   ├── Auth/
+│   ├── character-page/
+│   ├── community-page/
+│   ├── home-page/
+│   ├── map-page/
+│   ├── notification-page/
+│   ├── photo-edit-page/
+│   ├── photo-upload-page/
+│   ├── profile-page/
+│   ├── roulette-page/
+│   ├── settings-page/
+│   ├── share-page/
+│   ├── shop-page/
+│   ├── stamp-page/
+│   └── travel-page/
+├── routes/           # 라우팅 설정
+├── stores/           # Zustand 상태 관리
+├── types/            # TypeScript 타입 정의
+└── utils/            # 유틸리티 함수
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
