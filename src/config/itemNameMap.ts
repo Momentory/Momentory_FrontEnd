@@ -6,6 +6,7 @@ export const clothingNameMap: Record<string, string> = {
   '사슴의상': '사슴',
   '악기의상': '악기',
   '유령의상': '유령',
+  '가톨릭대': '가톨릭대',
 };
 
 export const effectNameMap: Record<string, string> = {
