@@ -120,7 +120,7 @@ const protectedRoutes: RouteObject[] = [
       { path: 'community/:id', element: <CommunityDetailPage /> },
       { path: 'community/write', element: <CommunityWritePage /> },
       { path: "/community/edit/:postId", element: <CommunityWritePage /> },
-      { path: 'community/mypage', element: <CommunityMyPage /> },
+      { path: 'community/:userId/mypage', element: <CommunityMyPage /> },
       { path: 'community/search', element: <CommunitySearchPage /> },
       { path: 'community/region/:regionId', element: <CommunityRegionPage /> },
       { path: 'community/user/:userId', element: <UserProfilePage /> },

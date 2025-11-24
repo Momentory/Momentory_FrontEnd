@@ -1,6 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { checkNickname } from '../../api/auth';
 
 export default function CreateProfilePage() {
   const navigate = useNavigate();
@@ -9,42 +8,11 @@ export default function CreateProfilePage() {
   const [introduction, setIntroduction] = useState('');
   const [link, setLink] = useState('');
 
-  const [nicknameAvailable, setNicknameAvailable] = useState<boolean | null>(null);
-  const [checkingNickname, setCheckingNickname] = useState(false);
-
   const maxIntroLength = 100;
 
-
-  /* ------------------- 닉네임 자동 확인 ------------------- */
-  useEffect(() => {
-    if (!nickname.trim()) {
-      setNicknameAvailable(null);
-      return;
-    }
-
-    const timeout = setTimeout(async () => {
-      setCheckingNickname(true);
-
-      try {
-        const res = await checkNickname(nickname);
-        setNicknameAvailable(res.available);
-      } catch (error) {
-        console.warn("닉네임 확인 실패 → 이미 사용 중으로 처리");
-        setNicknameAvailable(false);  
-      }
-
-      setCheckingNickname(false);
-    }, 500);
-
-    return () => clearTimeout(timeout);
-  }, [nickname]);
-
-
-
   /* ------------------------ 저장 ------------------------ */
-  const handleSubmit = async () => {
+  const handleSubmit = () => {
     if (!nickname.trim()) return alert('닉네임을 입력해주세요.');
-    if (checkingNickname) return alert('닉네임 확인 중입니다.');
 
     const profilePayload = {
       nickname,
@@ -57,7 +25,6 @@ export default function CreateProfilePage() {
     alert("프로필 저장 완료!");
     navigate("/select");
   };
-
 
   return (
     <div className="flex flex-col items-center justify-start min-h-screen bg-white px-[31px] pt-[118px] relative">
@@ -116,26 +83,6 @@ export default function CreateProfilePage() {
             className="absolute left-3 top-4 w-[18px] h-[18px] opacity-60"
           />
         </div>
-
-        {/* 닉네임 중복 메시지 */}
-        {nickname.trim() !== "" && checkingNickname && (
-          <p className="text-gray-400 text-[13px] mt-1 animate-pulse">
-            닉네임 확인 중...
-          </p>
-        )}
-
-        {nickname.trim() !== "" && !checkingNickname && nicknameAvailable === true && (
-          <p className="text-green-500 text-[13px] mt-1">
-            사용 가능한 닉네임입니다
-          </p>
-        )}
-
-        {nickname.trim() !== "" && !checkingNickname && nicknameAvailable === false && (
-          <p className="text-red-500 text-[13px] mt-1">
-            이미 사용 중인 닉네임입니다
-          </p>
-        )}
-
       </div>
 
       {/* 자기소개 */}
@@ -145,7 +92,9 @@ export default function CreateProfilePage() {
           <textarea
             placeholder="자기 소개를 입력해주세요."
             value={introduction}
-            onChange={(e) => setIntroduction(e.target.value.slice(0, maxIntroLength))}
+            onChange={(e) =>
+              setIntroduction(e.target.value.slice(0, maxIntroLength))
+            }
             className="w-full h-[90px] rounded-2xl border px-10 py-2 text-[15px] resize-none"
           />
           <img
@@ -178,12 +127,11 @@ export default function CreateProfilePage() {
 
       {/* 저장 버튼 */}
       <button
-        disabled={nickname.trim() === "" || checkingNickname}
+        disabled={nickname.trim() === ""}
         onClick={handleSubmit}
-        className={`w-[329px] h-[60px] text-white text-[18px] font-semibold rounded-2xl mt-8 ${nickname.trim() !== "" && !checkingNickname
-            ? "bg-[#FF7070]"
-            : "bg-gray-300 cursor-not-allowed"
-          }`}
+        className={`w-[329px] h-[60px] text-white text-[18px] font-semibold rounded-2xl mt-8 ${
+          nickname.trim() !== "" ? "bg-[#FF7070]" : "bg-gray-300"
+        }`}
       >
         프로필 저장
       </button>
