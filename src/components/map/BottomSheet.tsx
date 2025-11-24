@@ -6,6 +6,8 @@ import type { MapPhoto } from '../../types/map';
 import {
   useMyRegionPhotos,
   usePublicRegionPhotos,
+  useMyAllPhotos,
+  usePublicAllPhotos,
 } from '../../hooks/map/useMap';
 
 interface BottomSheetProps {
@@ -45,16 +47,43 @@ export default function BottomSheet({
     isError: isPublicError,
   } = usePublicRegionPhotos(isPublic ? regionName || null : null);
 
+  const {
+    data: myAllPhotos,
+    isLoading: isLoadingMyAll,
+    isError: isMyAllError,
+  } = useMyAllPhotos(!isPublic && !regionName);
+
+  const {
+    data: publicAllPhotos,
+    isLoading: isLoadingPublicAll,
+    isError: isPublicAllError,
+  } = usePublicAllPhotos(isPublic && !regionName);
+
   const regionPhotos = useMemo(() => {
     const data = isPublic ? publicRegionPhotos : myRegionPhotos;
     return data ?? [];
   }, [isPublic, publicRegionPhotos, myRegionPhotos]);
 
-  const isLoading = isPublic ? isLoadingPublic : isLoadingMy;
-  const isError = isPublic ? isPublicError : isMyError;
+  const allPhotos = useMemo(() => {
+    const data = isPublic ? publicAllPhotos : myAllPhotos;
+    return data ?? [];
+  }, [isPublic, publicAllPhotos, myAllPhotos]);
+
+  const showRegionView = !!regionName;
+
+  const isLoadingRegion = isPublic ? isLoadingPublic : isLoadingMy;
+  const isErrorRegion = isPublic ? isPublicError : isMyError;
+  const isLoadingAll = isPublic ? isLoadingPublicAll : isLoadingMyAll;
+  const isErrorAll = isPublic ? isPublicAllError : isMyAllError;
+
+  const displayedPhotos = showRegionView ? regionPhotos : allPhotos;
+  const isLoading = showRegionView ? isLoadingRegion : isLoadingAll;
+  const isError = showRegionView ? isErrorRegion : isErrorAll;
 
   const formattedDate = useMemo(() => {
-    const source = recentPhoto ?? regionPhotos[0];
+    const source = showRegionView
+      ? (recentPhoto ?? displayedPhotos[0])
+      : displayedPhotos[0];
     if (!source?.createdAt) return null;
     const date = new Date(source.createdAt);
     if (Number.isNaN(date.getTime())) return null;
@@ -66,17 +95,17 @@ export default function BottomSheet({
         day: '2-digit',
       })
       .replace(/\.\s?/g, '.');
-  }, [recentPhoto, regionPhotos]);
+  }, [recentPhoto, displayedPhotos, showRegionView]);
 
   const thumbnails = useMemo(() => {
-    if (regionPhotos.length >= 6) {
-      return regionPhotos.slice(0, 5);
+    if (displayedPhotos.length >= 6) {
+      return displayedPhotos.slice(0, 5);
     }
-    return regionPhotos;
-  }, [regionPhotos]);
+    return displayedPhotos;
+  }, [displayedPhotos]);
 
-  const remainingCount = Math.max(regionPhotos.length - 5, 0);
-  const shouldShowViewAll = regionPhotos.length >= 6;
+  const remainingCount = Math.max(displayedPhotos.length - 5, 0);
+  const shouldShowViewAll = displayedPhotos.length >= 6;
 
   const dragHandleRef = useRef<HTMLDivElement>(null);
 
@@ -150,37 +179,27 @@ export default function BottomSheet({
   };
 
   const handleNavigateList = useCallback(() => {
-    if (!regionName) return;
     navigate('/all-my-photos', {
-      state: { isPublic, regionName },
+      state: { isPublic, regionName: showRegionView ? regionName : null },
     });
-  }, [navigate, isPublic, regionName]);
+  }, [navigate, isPublic, regionName, showRegionView]);
 
   const handlePhotoClick = useCallback(
     (e: React.MouseEvent, index: number) => {
       e.stopPropagation();
-      if (!regionName || regionPhotos.length === 0) return;
-
+      if (displayedPhotos.length === 0) return;
       navigate('/all-my-photos', {
         state: {
           isPublic,
-          regionName,
+          regionName: showRegionView ? regionName : null,
           initialPhotoIndex: index, // 선택된 사진 인덱스 전달
         },
       });
     },
-    [navigate, isPublic, regionName, regionPhotos]
+    [navigate, isPublic, regionName, displayedPhotos, showRegionView]
   );
 
   const renderContent = () => {
-    if (!regionName) {
-      return (
-        <div className="flex h-[180px] items-center justify-center text-sm text-[#A3A3A3]">
-          지도의 마커를 선택해 지역 사진을 확인해보세요.
-        </div>
-      );
-    }
-
     if (isLoading) {
       return (
         <div className="grid grid-cols-3 gap-2">
@@ -202,12 +221,16 @@ export default function BottomSheet({
       );
     }
 
-    if (regionPhotos.length === 0) {
+    if (displayedPhotos.length === 0) {
       return (
         <div className="flex h-[180px] items-center justify-center text-sm text-[#A3A3A3]">
-          {isPublic
-            ? '아직 공개된 사진이 없어요.'
-            : '이 지역에 업로드한 사진이 없어요.'}
+          {showRegionView
+            ? isPublic
+              ? '아직 공개된 사진이 없어요.'
+              : '이 지역에 업로드한 사진이 없어요.'
+            : isPublic
+              ? '공개된 사진이 없어요.'
+              : '아직 업로드한 사진이 없어요.'}
         </div>
       );
     }
@@ -223,7 +246,10 @@ export default function BottomSheet({
           >
             <img
               src={photo.imageUrl}
-              alt={photo.address || `${regionName} 사진`}
+              alt={
+                photo.address ||
+                (regionName ? `${regionName} 사진` : '전체 사진')
+              }
               className="absolute inset-0 h-full w-full object-cover transition-transform duration-200 group-hover:scale-105"
               onError={(e) => {
                 e.currentTarget.src =
@@ -274,19 +300,29 @@ export default function BottomSheet({
 
         <div className="p-6 pb-14">
           <h2 className="mb-1 text-[25px] font-bold">
-            {regionName ? `경기도 ${regionName}` : '지역을 선택해주세요'}
+            {regionName ? `경기도 ${regionName}` : '경기도 전체'}
           </h2>
           <p className="mb-8 text-sm text-[#A3A3A3]">
             {formattedDate
-              ? `최근 방문 ${formattedDate}`
-              : '최근 방문 기록이 없어요.'}
+              ? showRegionView
+                ? `최근 방문 ${formattedDate}`
+                : `최근 업로드 ${formattedDate}`
+              : showRegionView
+                ? '최근 방문 기록이 없어요.'
+                : '최근 업로드 기록이 없어요.'}
           </p>
 
           <div className="mb-3 flex items-center justify-between">
             <h3 className="text-[18px] font-semibold">
-              {isPublic ? '공개된 전체 사진' : '나의 사진'}
+              {showRegionView
+                ? isPublic
+                  ? '공개된 전체 사진'
+                  : '나의 사진'
+                : isPublic
+                  ? '공개된 전체 사진'
+                  : '내가 올린 전체 사진'}
             </h3>
-            {regionPhotos.length > 0 && (
+            {displayedPhotos.length > 0 && (
               <button
                 type="button"
                 className="flex items-center hover:opacity-80 transition-opacity"

@@ -12,6 +12,13 @@ import Modal from '../../components/common/Modal';
 import { getImageBlob, downloadBlob } from '../../utils/image';
 import { getKakao } from '../../utils/kakao';
 import { toS3WebsiteUrl } from '../../utils/s3';
+import { mapCulturalSpotName } from '../../utils/stampUtils';
+
+const getSupportedNearbyPlace = (place?: string | null) => {
+  if (!place) return null;
+  const { stampDisplayName, isSupported } = mapCulturalSpotName(place);
+  return isSupported ? stampDisplayName : null;
+};
 
 export default function PhotoUploadCompletePage() {
   const location = useLocation();
@@ -49,9 +56,10 @@ export default function PhotoUploadCompletePage() {
     }
 
     // 룰렛이 없고 문화 스탬프가 있으면 2초 후 문화 스탬프 모달 띄우기
-    if (nearbyPlaceName) {
+    const supportedPlace = getSupportedNearbyPlace(nearbyPlaceName);
+    if (supportedPlace) {
       const timer = setTimeout(() => {
-        setNearbyPlace(nearbyPlaceName);
+        setNearbyPlace(supportedPlace);
         setShowNearbyPlaceModal(true);
       }, 2000);
       return () => clearTimeout(timer);
@@ -317,6 +325,12 @@ export default function PhotoUploadCompletePage() {
 
   const handleNearbyPlaceYes = () => {
     setShowNearbyPlaceModal(false);
+    const { canonicalName } = mapCulturalSpotName(nearbyPlace ?? '');
+    if (!canonicalName) {
+      setShowNearbyPlaceModal(false);
+      return;
+    }
+
     navigate('/question', {
       state: {
         ...location.state,
@@ -324,6 +338,7 @@ export default function PhotoUploadCompletePage() {
         questionImage: uploadedImage,
         selectedImage: uploadedImage,
         imageUrl: uploadedImage,
+        nearbyPlace: canonicalName,
       },
     });
   };
@@ -339,10 +354,11 @@ export default function PhotoUploadCompletePage() {
   const handleRouletteClose = () => {
     setShowRouletteModal(false);
     const nearbyPlaceName = location.state?.nearbyPlace;
-    if (nearbyPlaceName) {
+    const supportedPlace = getSupportedNearbyPlace(nearbyPlaceName);
+    if (supportedPlace) {
       // 룰렛을 닫은 후 2초 후에 문화 스탬프 모달 띄우기
       setTimeout(() => {
-        setNearbyPlace(nearbyPlaceName);
+        setNearbyPlace(supportedPlace);
         setShowNearbyPlaceModal(true);
       }, 2000);
     }

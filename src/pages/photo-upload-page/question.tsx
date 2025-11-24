@@ -36,17 +36,16 @@ export default function QuestionPage() {
 
   const { keyword, particle, remainingText } = parseQuestion(question);
   const rawSpotName = location.state?.nearbyPlace || keyword;
-  const {
-    canonicalName: culturalSpotName,
-    stampDisplayName,
-    isSupported: isSupportedSpot,
-  } = mapCulturalSpotName(rawSpotName);
+  const { canonicalName: culturalSpotName, stampDisplayName } =
+    mapCulturalSpotName(rawSpotName);
+
+  const baseState = (location.state ?? {}) as Record<string, unknown>;
 
   const { mutate: issueCulturalStamp, isPending } = useCulturalStamp({
     onSuccess: (response) => {
       navigate('/authentication', {
         state: {
-          ...location.state,
+          ...baseState,
           question,
           questionImage,
           culturalStampResult: response.result,
@@ -62,17 +61,7 @@ export default function QuestionPage() {
 
   const handleYes = () => {
     if (!culturalSpotName || isPending) {
-      return;
-    }
-
-    if (!isSupportedSpot) {
-      alert('문화 스탬프 지급 대상이 아닌 장소입니다.');
-      navigate('/photo-upload-complete', {
-        replace: true,
-        state: {
-          ...location.state,
-        },
-      });
+      alert('인증할 장소 정보를 찾지 못했어요. 다시 시도해주세요.');
       return;
     }
 
@@ -109,7 +98,7 @@ export default function QuestionPage() {
         <div className="space-y-3">
           <button
             onClick={handleYes}
-            disabled={isPending || !isSupportedSpot}
+            disabled={isPending}
             className="w-full py-4 px-6 rounded-[25px] bg-[#FF7070] text-white font-semibold text-lg hover:bg-[#ff6060] transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
           >
             네, 방문했어요
