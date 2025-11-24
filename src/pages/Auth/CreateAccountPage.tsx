@@ -5,6 +5,7 @@ import {
   sendEmail,
   checkEmailVerified,
   signup,
+  login,
 } from "../../api/auth";
 
 export default function CreateAccountPage() {
@@ -180,7 +181,7 @@ export default function CreateAccountPage() {
     const payload = {
       email,
       password,
-      nickName: nickname || name, 
+      nickName: nickname || name,
       name,
       phone,
       gender,
@@ -193,6 +194,7 @@ export default function CreateAccountPage() {
       await signup(payload);
 
       alert("회원가입이 완료되었습니다!");
+      await login({ email, password });
 
       localStorage.removeItem("signup_form");
 
