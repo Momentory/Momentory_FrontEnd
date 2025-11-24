@@ -5,7 +5,7 @@ import Bg from '../../assets/accessories/bgImg.svg';
 import PointIcon from '../../assets/icons/pointIcon.svg';
 import type { ShopItem } from '../../types/shop';
 import EventCard from '../../components/Shop/EventCard';
-import { getShopEvents, purchaseItem } from '../../api/shop';
+import { getShopItems, purchaseItem } from '../../api/shop';
 
 const EventPage = () => {
   const [point, setPoint] = useState(1500);
@@ -22,8 +22,9 @@ const EventPage = () => {
   const fetchEventItems = async () => {
     try {
       setIsLoading(true);
-      const items = await getShopEvents();
-      setEventItems(items || []);
+      const items = await getShopItems('CLOTHING');
+      const catholicItem = items?.filter(item => item.name === '가톨릭대') || [];
+      setEventItems(catholicItem);
     } catch (error) {
       console.error('이벤트 아이템 불러오기 실패:', error);
       setEventItems([]);
