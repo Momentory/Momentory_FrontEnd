@@ -210,7 +210,7 @@ export default function CommunityPage() {
             <img src="/images/Edit.png" className="w-[22px]" />
           </button>
 
-          <button onClick={() => navigate("/community/mypage")}>
+          <button onClick={() => navigate(`/community/${localStorage.getItem("userId")}/mypage`)}>
             <img src="/images/User.png" className="w-[22px]" />
           </button>
 
