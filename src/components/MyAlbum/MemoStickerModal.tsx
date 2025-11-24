@@ -37,6 +37,40 @@ import 하남 from '../../assets/stamp/하남.png';
 import 화성 from '../../assets/stamp/화성.png';
 import 남한산성 from '../../assets/stamp/남한산성.svg';
 
+import 고양킨텍스 from '../../assets/stamp/고양킨텍스.png';
+import 서울대공원 from '../../assets/stamp/과천서울대공원.png';
+import 광명동굴 from '../../assets/stamp/광명동굴.png';
+import 한강유채꽃 from '../../assets/stamp/구리시한강유채꽃.png';
+import 물의정원 from '../../assets/stamp/남양주시물의정원.png';
+import 동두천계곡 from '../../assets/stamp/동두천계곡.png';
+import 만화박물관 from '../../assets/stamp/부천만화박물관.png';
+import 남한선성 from '../../assets/stamp/성남남한산성.png';
+import 수원화성 from '../../assets/stamp/수원화성.png';
+import 안산누에섬 from '../../assets/stamp/안산누에섬.png';
+import 안양천 from '../../assets/stamp/안양천.png';
+import 오산독산성 from '../../assets/stamp/오산독산성.png';
+import 평택항 from '../../assets/stamp/평택항.png';
+import 행복로 from '../../assets/stamp/행복로.png';
+
+const CULTURE_IMAGE_MAP: Record<string, string> = {
+  '고양킨텍스': 고양킨텍스,
+  '서울대공원': 서울대공원,
+  '광명동굴': 광명동굴,
+  '한강유채꽃': 한강유채꽃,
+  '물의정원': 물의정원,
+  '동두천계곡': 동두천계곡,
+  '만화박물관': 만화박물관,
+  '부천만화박물관': 만화박물관,
+  '남한산성': 남한선성,
+  '남한선성': 남한선성,
+  '수원화성': 수원화성,
+  '안산누에섬': 안산누에섬,
+  '안양천': 안양천,
+  '오산독산성': 오산독산성,
+  '평택항': 평택항,
+  '행복로': 행복로,
+};
+
 const REGION_IMAGE_MAP: Record<string, string> = {
   '광주': 광주, '광주시': 광주,
   '김포': 김포, '김포시': 김포,
@@ -139,9 +173,14 @@ const MemoStickerModal: React.FC<MemoStickerModalProps> = ({ isOpen, onClose, on
   const stickerSlots = Array.from({ length: totalSlots }, (_, index) => {
     if (index < stamps.length) {
       const stamp = stamps[index];
-      const stampImage = stamp.type === 'REGIONAL'
-        ? REGION_IMAGE_MAP[stamp.region] || 남한산성
-        : 남한산성;
+      let stampImage = 남한산성;
+
+      if (stamp.type === 'REGIONAL') {
+        stampImage = REGION_IMAGE_MAP[stamp.region] || 남한산성;
+      } else if (stamp.type === 'CULTURAL' && stamp.spotName) {
+        stampImage = CULTURE_IMAGE_MAP[stamp.spotName] || 남한산성;
+      }
+
       return { type: 'sticker' as const, stamp, stampImage };
     }
     return { type: 'locked' as const };
