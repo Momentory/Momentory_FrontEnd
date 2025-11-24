@@ -33,22 +33,24 @@ export default function CommunitySearchPage() {
       if (searchType === "title") {
         if (!keyword.trim()) {
           setFilteredPosts([]);
+          setLoading(false);
           return;
         }
 
-        const results = await searchPostsByKeyword(keyword);
+        const results = await searchPostsByKeyword(keyword.trim());
         setFilteredPosts(results);
+        setLoading(false);
         return;
       }
 
-      /* **태그 검색 (단일 태그 API 사용) */
+      /* 태그 검색: keyword는 무시 */
       if (selectedTags.length === 0) {
         setFilteredPosts([]);
+        setLoading(false);
         return;
       }
 
-      const firstTag = selectedTags[0];
-      const results = await searchPostsBySingleTag(firstTag);
+      const results = await searchPostsBySingleTag(selectedTags[0]);
       setFilteredPosts(results);
 
     } catch (err) {
@@ -62,26 +64,31 @@ export default function CommunitySearchPage() {
   const toggleTag = async (tag: string) => {
     let updated: string[];
 
+    // 백엔드 단일 태그만 지원 → 하나만 선택되도록
     if (selectedTags.includes(tag)) {
-      updated = selectedTags.filter((t) => t !== tag);
+      updated = [];
     } else {
-      updated = [...selectedTags, tag];
+      updated = [tag];
     }
 
     setSelectedTags(updated);
 
+    // 태그 검색 모드일 때 즉시 검색
     if (searchType === "tag") {
       if (updated.length === 0) {
         setFilteredPosts([]);
         return;
       }
 
-      /* 태그 클릭 시 자동 검색 (첫 번째 태그만 사용) */
       setLoading(true);
-      const firstTag = updated[0];
-      const results = await searchPostsBySingleTag(firstTag);
-      setFilteredPosts(results);
-      setLoading(false);
+      try {
+        const results = await searchPostsBySingleTag(updated[0]);
+        setFilteredPosts(results);
+      } catch (err) {
+        console.error("태그 검색 실패:", err);
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -116,22 +123,31 @@ export default function CommunitySearchPage() {
       <div className="flex justify-center px-5 py-4 bg-white border-gray-200">
         <div className="flex bg-[#F9FAFB] rounded-full p-[3px] shadow-inner">
           <button
-            onClick={() => setSearchType("title")}
-            className={`flex items-center justify-center gap-2 px-12 py-[8px] text-[11px] rounded-full ${searchType === "title"
-              ? "bg-[#FFE5E5] text-[#333333]"
-              : "bg-white text-[#666666]"
-              }`}
+            onClick={() => {
+              setSearchType("title");
+              setFilteredPosts([]);
+            }}
+            className={`flex items-center justify-center gap-2 px-12 py-[8px] text-[11px] rounded-full ${
+              searchType === "title"
+                ? "bg-[#FFE5E5] text-[#333333]"
+                : "bg-white text-[#666666]"
+            }`}
           >
             <Search size={12} />
             제목/내용 검색
           </button>
 
           <button
-            onClick={() => setSearchType("tag")}
-            className={`flex items-center justify-center gap-2 px-12 py-[8px] text-[11px] rounded-full ${searchType === "tag"
-              ? "bg-[#FFE5E5] text-[#333333]"
-              : "bg-white text-[#666666]"
-              }`}
+            onClick={() => {
+              setSearchType("tag");
+              setKeyword(""); // 태그 모드에서는 keyword 초기화
+              setFilteredPosts([]);
+            }}
+            className={`flex items-center justify-center gap-2 px-12 py-[8px] text-[11px] rounded-full ${
+              searchType === "tag"
+                ? "bg-[#FFE5E5] text-[#333333]"
+                : "bg-white text-[#666666]"
+            }`}
           >
             <Tag size={12} />
             태그 검색
@@ -143,6 +159,7 @@ export default function CommunitySearchPage() {
       <div className="px-5 mt-1">
         <div className="flex items-center bg-white border border-gray-300 rounded-md px-4 py-2 shadow-sm">
           <Search className="w-5 h-5 text-gray-400" />
+
           <input
             type="text"
             placeholder={
@@ -163,7 +180,7 @@ export default function CommunitySearchPage() {
         {searchType === "tag" && (
           <>
             <p className="text-[14px] text-gray-500 mb-3">
-              태그를 클릭하여 필터링하세요 (여러 개 선택 가능)
+              태그를 클릭하여 필터링하세요
             </p>
 
             <div className="grid grid-cols-5 gap-3">
@@ -172,9 +189,10 @@ export default function CommunitySearchPage() {
                   key={tag}
                   onClick={() => toggleTag(tag)}
                   className={`h-[40px] rounded-2xl text-[14px] flex items-center justify-center
-              ${selectedTags.includes(tag)
-                      ? "bg-[#FF7070] text-white"
-                      : "bg-white border border-gray-300 text-gray-600"
+                    ${
+                      selectedTags.includes(tag)
+                        ? "bg-[#FF7070] text-white"
+                        : "bg-white border border-gray-300 text-gray-600"
                     }`}
                 >
                   {tag}

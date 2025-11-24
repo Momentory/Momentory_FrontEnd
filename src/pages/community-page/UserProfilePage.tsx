@@ -168,18 +168,19 @@ export default function UserProfilePage() {
             {/* 팔로잉/팔로워 */}
             <div className="flex items-center gap-6 mt-3 text-gray-700">
               <button
-                onClick={() => navigate(`/community/${numericUserId}/followings`)}
+                onClick={() => navigate(`/community/followings`)}
                 className="text-[12px] active:opacity-60"
               >
                 <span className="font-semibold">{userProfile?.followingCount || 0}</span> 팔로잉
               </button>
 
               <button
-                onClick={() => navigate(`/community/${numericUserId}/followers`)}
+                onClick={() => navigate(`/community/followers`)}
                 className="text-[12px] active:opacity-60"
               >
                 <span className="font-semibold">{userProfile?.followerCount || 0}</span> 팔로워
               </button>
+
             </div>
           </div>
           {/* 탭 */}

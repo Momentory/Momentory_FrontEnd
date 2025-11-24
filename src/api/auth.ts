@@ -6,23 +6,23 @@ import { tokenStore } from '../lib/token';
 // 로그인 응답 타입
 interface LoginResponse {
   result: {
-     id: number;   
+    id: number;
     accessToken: string;
     refreshToken: string;
   };
 }
 
-// 회원가입 Payload 
+// 회원가입 Payload
 export interface SignupPayload {
   email: string;
   password: string;
-  nickName: string;          // ← Swagger 기준: nickname
+  nickName: string;   // ★ 백엔드 스펙: nickName
   name: string;
   phone: string;
   gender: 'MALE' | 'FEMALE';
   birthDate: string;
   agreeTerms: boolean;
-  characterType: string;     // "CAT" 등 백엔드 enum
+  characterType: string; // "CAT" 등 enum
 
   // 선택 필드
   imageName?: string;
@@ -47,17 +47,25 @@ export const signup = (payload: SignupPayload) => {
   });
 };
 
+// 로그인
 export const login = async (payload: { email: string; password: string }) => {
   try {
-    const { data }: { data: LoginResponse } = await api.post('/api/auth/login', payload);
+    const { data }: { data: LoginResponse } = await api.post(
+      '/api/auth/login',
+      payload
+    );
     const { id, accessToken, refreshToken } = data.result;
 
-    // 토큰 저장
+    // 토큰 저장 (tokenStore)
     tokenStore.set({ accessToken, refreshToken });
+
+    // Axios 기본 Authorization 설정
     api.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
 
-    // 🔥 userId 저장 (정답)
-    localStorage.setItem("userId", String(id));
+    // localStorage에도 저장
+    localStorage.setItem('accessToken', accessToken);
+    localStorage.setItem('refreshToken', refreshToken);
+    localStorage.setItem('userId', String(id));
 
     return data;
   } catch (error) {
@@ -65,7 +73,6 @@ export const login = async (payload: { email: string; password: string }) => {
     throw error;
   }
 };
-
 
 // 로그아웃
 export const logout = async () => {
@@ -76,41 +83,59 @@ export const logout = async () => {
   } finally {
     tokenStore.clear();
     delete api.defaults.headers.common['Authorization'];
+
+    // localStorage에서도 삭제
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('userId');
   }
 };
 
 // 토큰 재발급
 export const reissue = async () => {
   try {
-    const { data }: { data: LoginResponse } = await api.post('/api/auth/reissue', {
-      refreshToken: tokenStore.getRefresh(),
-    });
+    const { data }: { data: LoginResponse } = await api.post(
+      '/api/auth/reissue',
+      {
+        refreshToken: tokenStore.getRefresh(),
+      }
+    );
 
     tokenStore.set({
       accessToken: data.result.accessToken,
       refreshToken: data.result.refreshToken,
     });
 
-    api.defaults.headers.common['Authorization'] = `Bearer ${data.result.accessToken}`;
+    api.defaults.headers.common['Authorization'] =
+      `Bearer ${data.result.accessToken}`;
+
+    // localStorage 토큰도 갱신
+    localStorage.setItem('accessToken', data.result.accessToken);
+    localStorage.setItem('refreshToken', data.result.refreshToken);
 
     return data.result;
   } catch (error) {
     console.error('토큰 재발급 실패:', error);
     tokenStore.clear();
+
+    // localStorage 토큰 삭제
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('userId');
+
     throw error;
   }
 };
 
 /* ----------------------------- 이메일 / 닉네임 / 인증 관련 ----------------------------- */
 
-//이메일 전송
+// 이메일 전송
 export const sendEmail = async (email: string) => {
+  // 백엔드가 text/plain + body = email 문자열로 받고 있었다면 그대로 유지
   return api.post('/api/auth/send-email', email, {
-    headers: { "Content-Type": "text/plain" },
+    headers: { 'Content-Type': 'text/plain' },
   });
 };
-
-
 
 // 이메일 중복 체크
 export const checkEmail = async (email: string) => {
@@ -122,19 +147,23 @@ export const checkEmail = async (email: string) => {
 // 이메일 인증 여부 확인
 export const checkEmailVerified = async (email: string) => {
   const encoded = encodeURIComponent(email);
-  const { data } = await api.get(`/api/auth/check-email-verified?email=${encoded}`);
+  const { data } = await api.get(
+    `/api/auth/check-email-verified?email=${encoded}`
+  );
   return data;
 };
 
-// 닉네임 중복 체크 
-export const checkNickname = async (nickname: string): Promise<CheckResult> => {
+// 닉네임 중복 체크
+export const checkNickname = async (
+  nickname: string
+): Promise<CheckResult> => {
   try {
     const res = await api.get('/api/auth/check-nickname', {
       params: { nickname },
     });
 
     // 숫자 1 또는 "1" 이면 사용 가능
-    if (typeof res.data === "number" || typeof res.data === "string") {
+    if (typeof res.data === 'number' || typeof res.data === 'string') {
       return { available: Number(res.data) === 1 };
     }
 
@@ -144,14 +173,11 @@ export const checkNickname = async (nickname: string): Promise<CheckResult> => {
     }
 
     return { available: true };
-
   } catch (error) {
-    console.warn("닉네임 중복 API 없음 → 그냥 사용 가능으로 처리");
-    return { available: true };  // ← 여기 핵심!
+    console.warn('닉네임 중복 API 없음 → 사용 가능 처리');
+    return { available: true };
   }
 };
-
-
 
 /* ----------------------------- 비밀번호 ----------------------------- */
 
@@ -169,8 +195,10 @@ export const validatePassword = async (password: string) => {
 };
 
 // 비밀번호 변경
-export const changePassword = (payload: { email: string; newPassword: string }) =>
-  api.patch('/api/auth/change-password', payload);
+export const changePassword = (payload: {
+  email: string;
+  newPassword: string;
+}) => api.patch('/api/auth/change-password', payload);
 
 /* ----------------------------- 카카오 프로필 ----------------------------- */
 

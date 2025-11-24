@@ -274,23 +274,25 @@ export default function CommunityMyPage() {
             </div>
           )}
 
-          <div className="flex gap-4 mt-2">
-            {/* 팔로워 */}
-            <button
-              className="text-[13px] text-gray-600"
-              onClick={() => navigate(`/community/${profile?.userId}/followers`)}
-            >
-              팔로워 <span className="font-semibold">{profile?.followerCount || 0}</span>
-            </button>
+          {/* 팔로잉 / 팔로워 버튼 → 내 페이지에서만 표시 */}
+          {profile?.isMe && (
+            <div className="flex gap-4 mt-2">
+              <button
+                className="text-[13px] text-gray-600"
+                onClick={() => navigate(`/community/${profile?.userId}/followings`)}
+              >
+                팔로잉 <span className="font-semibold">{profile?.followingCount || 0}</span>
+              </button>
 
-            {/* 팔로잉 */}
-            <button
-              className="text-[13px] text-gray-600"
-              onClick={() => navigate(`/community/${profile?.userId}/followings`)}
-            >
-              팔로잉 <span className="font-semibold">{profile?.followingCount || 0}</span>
-            </button>
-          </div>
+              <button
+                className="text-[13px] text-gray-600"
+                onClick={() => navigate(`/community/${profile?.userId}/followers`)}
+              >
+                팔로워 <span className="font-semibold">{profile?.followerCount || 0}</span>
+              </button>
+            </div>
+          )}
+
 
         </div>
 
