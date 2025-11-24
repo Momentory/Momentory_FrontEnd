@@ -50,6 +50,21 @@ export const getMyRegionPhotos = async (
   }
 };
 
+// 내 지도 - 전체 지역 사진 모음
+export const getMyAllPhotos = async (): Promise<MapPhoto[]> => {
+  const regionPhotoMap = await getMyMapLatestPhotos();
+  const regionNames = Object.keys(regionPhotoMap);
+  if (regionNames.length === 0) {
+    return [];
+  }
+
+  const allPhotosArrays = await Promise.all(
+    regionNames.map((regionName) => getMyRegionPhotos(regionName))
+  );
+
+  return allPhotosArrays.flat();
+};
+
 // 전체 지도 - 모든 지역 최신 공개 사진 조회
 export const getPublicMapLatestPhotos = async (): Promise<RegionPhotoMap> => {
   try {
@@ -60,6 +75,21 @@ export const getPublicMapLatestPhotos = async (): Promise<RegionPhotoMap> => {
     console.error('전체 지도 최신 공개 사진 조회 실패', error);
     throw error;
   }
+};
+
+// 전체 지도 - 전체 지역 공개 사진 모음
+export const getPublicAllPhotos = async (): Promise<MapPhoto[]> => {
+  const regionPhotoMap = await getPublicMapLatestPhotos();
+  const regionNames = Object.keys(regionPhotoMap);
+  if (regionNames.length === 0) {
+    return [];
+  }
+
+  const allPhotosArrays = await Promise.all(
+    regionNames.map((regionName) => getPublicRegionPhotos(regionName))
+  );
+
+  return allPhotosArrays.flat();
 };
 
 // 전체 지도 - 지역별 공개 사진 전체 조회

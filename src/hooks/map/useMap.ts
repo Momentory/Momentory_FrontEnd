@@ -5,6 +5,8 @@ import {
   getMyRegionPhotos,
   getPublicMapLatestPhotos,
   getPublicRegionPhotos,
+  getMyAllPhotos,
+  getPublicAllPhotos,
 } from '../../api/map';
 
 // Query Key Factory: 키를 한곳에서 관리하여 오타 방지 및 일관성 유지
@@ -13,9 +15,11 @@ export const MAP_KEYS = {
   my: () => [...MAP_KEYS.all, 'my'] as const,
   myColors: () => [...MAP_KEYS.my(), 'colors'] as const,
   myLatest: () => [...MAP_KEYS.my(), 'latest'] as const,
+  myAllPhotos: () => [...MAP_KEYS.my(), 'allPhotos'] as const,
   myDetail: (region: string) => [...MAP_KEYS.my(), 'detail', region] as const,
   public: () => [...MAP_KEYS.all, 'public'] as const,
   publicLatest: () => [...MAP_KEYS.public(), 'latest'] as const,
+  publicAllPhotos: () => [...MAP_KEYS.public(), 'allPhotos'] as const,
   publicDetail: (region: string) =>
     [...MAP_KEYS.public(), 'detail', region] as const,
 };
@@ -72,5 +76,27 @@ export const usePublicRegionPhotos = (regionName: string | null) => {
     queryKey: MAP_KEYS.publicDetail(regionName ?? ''),
     queryFn: () => getPublicRegionPhotos(regionName!),
     enabled: !!regionName, // regionName이 있을 때만 쿼리 실행
+  });
+};
+
+/**
+ * [내 지도] 모든 지역 사진 조회 훅
+ */
+export const useMyAllPhotos = (enabled = true) => {
+  return useQuery({
+    queryKey: MAP_KEYS.myAllPhotos(),
+    queryFn: getMyAllPhotos,
+    enabled,
+  });
+};
+
+/**
+ * [전체 지도] 모든 지역 공개 사진 조회 훅
+ */
+export const usePublicAllPhotos = (enabled = true) => {
+  return useQuery({
+    queryKey: MAP_KEYS.publicAllPhotos(),
+    queryFn: getPublicAllPhotos,
+    enabled,
   });
 };

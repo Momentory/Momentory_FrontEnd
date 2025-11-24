@@ -1,12 +1,12 @@
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import DropdownHeader from '../../components/common/DropdownHeader';
 import CloseIcon from '../../assets/icons/closeIcon.svg?react';
 import {
-  getMyMapLatestPhotos,
   getMyRegionPhotos,
-  getPublicMapLatestPhotos,
   getPublicRegionPhotos,
+  getMyAllPhotos,
+  getPublicAllPhotos,
 } from '../../api/map';
 import type { MapPhoto } from '../../types/map';
 
@@ -14,6 +14,7 @@ export default function RegionPhotosPage() {
   const location = useLocation();
   const navigate = useNavigate();
   const isPublic = location.state?.isPublic || false;
+  const regionName: string | null = location.state?.regionName ?? null;
 
   const [photos, setPhotos] = useState<MapPhoto[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -25,52 +26,40 @@ export default function RegionPhotosPage() {
         setIsLoading(true);
         setIsError(false);
 
-        // 1. 모든 지역의 최신 사진 맵 가져오기 (지역 목록 확인용)
-        console.log(
-          `[all-my-photos] ${isPublic ? '공개' : '내'} 사진 가져오기 시작`
-        );
-        const regionPhotoMap = isPublic
-          ? await getPublicMapLatestPhotos()
-          : await getMyMapLatestPhotos();
-
-        console.log('[all-my-photos] 지역 목록:', Object.keys(regionPhotoMap));
-
-        // 2. 각 지역의 모든 사진 가져오기
-        const regionNames = Object.keys(regionPhotoMap);
-        if (regionNames.length === 0) {
-          console.log('[all-my-photos] 지역이 없음');
-          setPhotos([]);
-          setIsLoading(false);
+        if (regionName) {
+          console.log(
+            `[all-my-photos] ${regionName} 지역 ${
+              isPublic ? '공개' : '내'
+            } 사진 가져오기 시작`
+          );
+          const regionPhotos = isPublic
+            ? await getPublicRegionPhotos(regionName)
+            : await getMyRegionPhotos(regionName);
+          const sortedRegionPhotos = regionPhotos.sort((a, b) => {
+            const dateA = new Date(a.createdAt).getTime();
+            const dateB = new Date(b.createdAt).getTime();
+            return dateB - dateA;
+          });
+          setPhotos(sortedRegionPhotos);
           return;
         }
 
-        const allPhotosPromises = regionNames.map((regionName) =>
-          isPublic
-            ? getPublicRegionPhotos(regionName)
-            : getMyRegionPhotos(regionName)
-        );
-
-        const allPhotosArrays = await Promise.all(allPhotosPromises);
-        const allPhotos = allPhotosArrays.flat();
-
         console.log(
-          `[all-my-photos] 총 ${allPhotos.length}개의 ${isPublic ? '공개' : '내'} 사진 가져옴`
+          `[all-my-photos] ${isPublic ? '공개' : '내'} 전체 사진 가져오기 시작`
         );
+        const allPhotos = isPublic
+          ? await getPublicAllPhotos()
+          : await getMyAllPhotos();
+        if (allPhotos.length === 0) {
+          setPhotos([]);
+          return;
+        }
 
-        // 최신순으로 정렬 (createdAt 기준)
         const sortedPhotos = allPhotos.sort((a, b) => {
           const dateA = new Date(a.createdAt).getTime();
           const dateB = new Date(b.createdAt).getTime();
           return dateB - dateA;
         });
-
-        console.log(
-          '[all-my-photos] 정렬 완료, 최종 사진 수:',
-          sortedPhotos.length
-        );
-        if (sortedPhotos.length > 0) {
-          console.log('[all-my-photos] 첫 번째 사진:', sortedPhotos[0]);
-        }
 
         setPhotos(sortedPhotos);
       } catch (error) {
@@ -82,9 +71,14 @@ export default function RegionPhotosPage() {
     };
 
     fetchAllPhotos();
-  }, [isPublic]);
+  }, [isPublic, regionName]);
 
-  const headerTitle = isPublic ? '공개 중인 전체 사진' : '내가 올린 전체 사진';
+  const headerTitle = useMemo(() => {
+    if (regionName) {
+      return `경기도 ${regionName} 전체 사진`;
+    }
+    return isPublic ? '공개 중인 전체 사진' : '내가 올린 전체 사진';
+  }, [regionName, isPublic]);
 
   return (
     <div className="flex flex-col h-screen max-w-[480px] mx-auto bg-white overflow-hidden">
@@ -114,7 +108,12 @@ export default function RegionPhotosPage() {
                   type="button"
                   onClick={() =>
                     navigate('/all-my-photos/viewer', {
-                      state: { photos, startIndex: index, isPublic },
+                      state: {
+                        photos,
+                        startIndex: index,
+                        isPublic,
+                        regionName,
+                      },
                     })
                   }
                   className="bg-white p-3 shadow-[0_6px_16px_rgba(0,0,0,0.05)]"
